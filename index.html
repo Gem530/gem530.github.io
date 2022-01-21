@@ -5,8 +5,67 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gem-Blog</title>
+
+  <link rel="icon" href="./img/favicon.ico">
+  <script src="./vue.js"></script>
 </head>
 <body>
   <h1>Gem-Blog</h1>
+  <a href="https://github.com/Gem530/gem530.github.io">GitHub仓库地址</a>
+  <div id="app">
+    <div class="list">
+      <div class="item" v-for="(item, index) in list" :key="index">
+        <div class="item-name">
+          <a :href="'https://'+item.url">{{item.name}}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    new Vue({
+      el: '#app',
+      data () {
+        return {
+          list: [
+            {
+              name: '图片裁剪',
+              url: 'gem530.github.io/imgClip.html'
+            },
+            {
+              name: '无限列表-虚拟节点',
+              url: 'gem530.github.io/list.html'
+            },
+            {
+              name: '网站调用摄像头',
+              url: 'gem530.github.io/photo.html'
+            },
+            {
+              name: '海报',
+              url: 'gem530.github.io/poster.html'
+            },
+            {
+              name: 'html生成canvas',
+              url: 'gem530.github.io/htmlTocanvas.html'
+            },
+            {
+              name: '刮刮乐',
+              url: 'gem530.github.io/guaguale.html'
+            },
+            {
+              name: 'canvas旋转',
+              url: 'gem530.github.io/canvasRotate.html'
+            },
+            {
+              name: 'canvas毛玻璃-高斯模糊',
+              url: 'gem530.github.io/canvasBlur.html'
+            },
+          ] // 超长的显示数据
+        }
+      },
+      mounted () {
+      },
+      methods: {}
+    })
+  </script>
 </body>
 </html>

@@ -1,0 +1,48 @@
+@import '../../../style/common.scss';
+
+.check-box-sign {
+  position: relative;
+  width: 100%;
+  min-height: 130px;
+  border: 1px solid #b6b6b6;
+  background-color: #FFFFFF;
+  overflow: hidden;
+  // @include flex(center, center);
+
+  .check-sign-tip {
+    position: absolute;
+    // top: 50%;
+    // left: 50%;
+    // transform: translate(-50%, -50%);
+    // z-index: -1;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    // background: #FFFFFF;
+    @include flex();
+  }
+
+  .check-sign-bottom {
+    border-top: 1px solid #999999;
+    padding: 5px;
+  }
+}
+
+.check-sign-choose {
+  @include flex(space-between);
+  padding: 5px;
+
+  .check-color-item,
+  .check-width-item {
+    width: 30px;
+    height: 30px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    @include flex();
+  }
+
+  .check-width-item {
+    border: 1px solid #999999;
+  }
+}

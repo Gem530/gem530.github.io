@@ -25,6 +25,7 @@
 // } from '@/api/commonApi'
 // import { Toast } from 'vant'
 // import { getAccountIcon } from '@/utils/banks'
+import { convertBase64UrlToBlob } from '@/utils/compressImage'
 import { Component, Vue, Prop, Ref } from 'vue-property-decorator'
 // import { toImage, compressImg } from '@/utils/compressImage'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -44,6 +45,8 @@ export default class QrcodePhoto extends Vue {
   heightD = 0
   clientWidthD = 0
   clientHeightD = 0
+  photoW = 0 // 摄像头分辨率宽度
+  photoH = 0 // 摄像头分辨率高度
 
   photoFlag = true
 
@@ -122,20 +125,33 @@ export default class QrcodePhoto extends Vue {
           }
           that.$nextTick(() => {
             that.video.addEventListener('canplay', () => {
-              // 获取视频的真实分辨率
-              // console.log(e, that.video.videoWidth, that.video.videoHeight)
-              if (that.width) {
-                // 如果有传值，就使用接受的值为显示宽度
-                that.widthD = that.width
-              } else {
-                that.widthD = that.video.videoWidth
-              }
-              if (that.height) {
-                // 如果有传值，就使用接受的值为显示高度
-                that.heightD = that.height
-              } else {
-                that.heightD = that.video.videoHeight
-              }
+              // 获取视频的真实分辨率 480 640
+              console.log(that.video.videoWidth, that.video.videoHeight)
+              that.photoW = that.video.videoWidth
+              that.photoH = that.video.videoHeight
+              // that.widthD = that.video.videoWidth
+              // that.heightD = that.video.videoHeight
+              // if (that.$isPc) {
+              //   that.widthD = that.video.videoWidth
+              //   that.heightD = that.video.videoHeight
+              // } else {
+              //   that.widthD = that.video.videoHeight
+              //   that.heightD = that.video.videoWidth
+              //   // that.heightD = that.video.videoWidth
+              //   // 移动端宽高对换
+              // }
+              // if (that.width) {
+              //   // 如果有传值，就使用接受的值为显示宽度
+              //   that.widthD = that.width
+              // } else {
+              //   that.widthD = that.video.videoWidth
+              // }
+              // if (that.height) {
+              //   // 如果有传值，就使用接受的值为显示高度
+              //   that.heightD = that.height
+              // } else {
+              //   that.heightD = that.video.videoHeight
+              // }
             })
           })
         })
@@ -148,47 +164,71 @@ export default class QrcodePhoto extends Vue {
 
   // 拍照
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  getPhoto (callback: any): void {
+  async getPhoto (callback: any): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const that = this
     const video = this.video
     // const canvas = this.canvas
     const canvas = document.createElement('canvas') as any
     const ctx = canvas.getContext('2d')
-    canvas.width = that.widthD
-    canvas.height = that.heightD
-    ctx.drawImage(video, 0, 0, that.widthD, that.heightD)
-    const dataURL = canvas.toDataURL('image/jpeg')
+    // let tempW = 0
+    // let tempH = 0
+    if (that.$isPc) {
+      canvas.width = that.widthD
+      canvas.height = that.heightD
+    } else {
+      // 移动端宽高对换
+      // canvas.width = that.heightD
+      // canvas.height = (canvas.width * that.heightD) / that.widthD
+      // tempW = that.heightD
+      // tempH = (canvas.width * that.heightD) / that.widthD
+      canvas.width = that.widthD * 2
+      canvas.height = that.heightD * 2
+      // canvas.width = that.photoW
+      // canvas.height = that.heightD
+    }
+    ctx.drawImage(video, 0, 0, that.photoW, that.photoW * (that.heightD / that.widthD), 0, 0, canvas.width, canvas.height)
+    console.log(that.photoW, that.photoW * (that.heightD / that.widthD), that.widthD, that.heightD)
+    const dataURL = canvas.toDataURL('image/jpeg', 1)
     that.imgURL = dataURL
-    that.cutImageUrl(function (item: any) {
-      callback && callback(item)
-    })
+    // const a = document.createElement('a') // 创建a标签
+    // a.download = '裁剪-PHOTO' // 文件名
+    // a.href = dataURL // 下载的文件地址
+    // a.click() // 点击下载
+    const blob = await convertBase64UrlToBlob(dataURL)
+    callback && callback(blob)
+    // that.cutImageUrl(function (item: any) {
+    //   callback && callback(item)
+    // })
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  cutImageUrl (callback: any): void {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const that = this
-    const canvas = document.createElement('canvas') as any
-    const ctx = canvas.getContext('2d')
-    canvas.width = that.widthD
-    canvas.height = that.heightD
-    const img = new Image()
-    img.src = that.imgURL
-    img.crossOrigin = 'anonymous'
-    img.onload = function () {
-      ctx.drawImage(img, 0, 0, that.widthD, that.heightD, 0, 0, that.widthD, that.heightD)
-      // const dataURL = canvas.toDataURL('image/jpeg')
-      // that.imgNewURL = dataURL
-      // callback && callback(that.imgNewURL)
-      canvas.toBlob(function (blob: any) {
-        // const formData = new FormData()
-        // formData.append('file', blob || '')
-        // formData.append('image_type', 'discern_vin')
-        callback && callback(blob)
-      }, 'image/png')
-    }
-  }
+  // // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  // cutImageUrl (callback: any): void {
+  //   // eslint-disable-next-line @typescript-eslint/no-this-alias
+  //   const that = this
+  //   const canvas = document.createElement('canvas') as any
+  //   const ctx = canvas.getContext('2d')
+  //   canvas.width = that.widthD
+  //   canvas.height = that.heightD
+  //   const img = new Image()
+  //   img.src = that.imgURL
+  //   img.crossOrigin = 'anonymous'
+  //   img.onload = async function () {
+  //     const tempHeight = that.heightInit ? that.heightInit : that.heightD
+  //     ctx.drawImage(img, 0, 0, that.widthD, tempHeight, 0, 0, that.widthD, tempHeight)
+  //     const tempFile = canvas.toDataURL('image/jpeg', 0.13)
+  //     // that.imgNewURL = dataURL
+  //     // callback && callback(that.imgNewURL)
+  //     const blob = await convertBase64UrlToBlob(tempFile)
+  //     callback && callback(blob)
+  //     // canvas.toBlob(function (blob: any) {
+  //     //   // const formData = new FormData()
+  //     //   // formData.append('file', blob || '')
+  //     //   // formData.append('image_type', 'discern_vin')
+  //     //   callback && callback(blob)
+  //     // }, 'image/jpg')
+  //   }
+  // }
 
   // 返回上一页
   goBack (): void {
@@ -204,7 +244,7 @@ export default class QrcodePhoto extends Vue {
 
   .video-contain {
     // border: 1px solid #f00;
-    object-fit: cover;
+    // object-fit: cover;
     object-position: 0 0;
   }
 }
