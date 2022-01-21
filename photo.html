@@ -149,6 +149,12 @@
                     console.log(that.$refs.video.videoWidth, that.$refs.video.videoHeight)
                     that.photoW = that.$refs.video.videoWidth
                     that.photoH = that.$refs.video.videoHeight
+                    if (that.heightD > that.photoH) {
+                      that.heightD = that.photoH
+                    }
+                    if (that.widthD > that.photoW) {
+                      that.widthD = that.photoW
+                    }
                     // that.widthD = that.video.videoWidth
                     // that.heightD = that.video.videoHeight
                     // if (that.$isPc) {

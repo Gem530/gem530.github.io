@@ -129,6 +129,12 @@ export default class QrcodePhoto extends Vue {
               console.log(that.video.videoWidth, that.video.videoHeight)
               that.photoW = that.video.videoWidth
               that.photoH = that.video.videoHeight
+              if (that.heightD > that.photoH) {
+                that.heightD = that.photoH
+              }
+              if (that.widthD > that.photoW) {
+                that.widthD = that.photoW
+              }
               // that.widthD = that.video.videoWidth
               // that.heightD = that.video.videoHeight
               // if (that.$isPc) {
