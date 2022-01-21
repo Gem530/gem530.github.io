@@ -73,6 +73,7 @@
                     //按下后拖拽
                     can.onmousemove  = function( e ){   //拖动时一直执行下面
                         e = e || window.event;  //兼容低版本IE浏览器
+                        e.preventDefault()
                         ctx.beginPath();    //拖动时开始画线
                         ctx.moveTo(x,y); //起始点   
                         ctx.lineTo(e.pageX - can.offsetLeft,e.pageY - can.offsetTop); //移动的过程
@@ -114,6 +115,7 @@
                     //按下后拖拽
                     can.ontouchmove  = function( e ){   //拖动时一直执行下面
                         e = e || window.event;  //兼容低版本IE浏览器
+                        e.preventDefault()
                         ctx.beginPath();    //拖动时开始画线
                         ctx.moveTo(x,y); //起始点   
                         ctx.lineTo(e.touches[0].pageX - can.offsetLeft,e.touches[0].pageY - can.offsetTop); //移动的过程
