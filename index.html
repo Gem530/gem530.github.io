@@ -8,6 +8,11 @@
 
   <link rel="icon" href="./img/favicon.ico">
   <script src="./vue.js"></script>
+  <script type="text/javascript" src="https://cdn.bootcss.com/vConsole/3.3.0/vconsole.min.js"></script></script>
+  <script>
+    // 开发环境且是移动端才打开 vconsole
+    const vConsole = new VConsole()
+  </script>
 </head>
 <body>
   <h1>Gem-Blog</h1>
@@ -34,6 +39,10 @@
             {
               name: '无限列表-虚拟节点',
               url: 'gem530.github.io/list.html'
+            },
+            {
+              name: '上拉加载-下拉刷新组件',
+              url: 'gem530.github.io/refersh.html'
             },
             {
               name: '网站调用摄像头',

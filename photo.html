@@ -9,39 +9,37 @@
   <style>
     .photo-overflow {
       border: 1px solid gray;
+      overflow: hidden;
     }
     
     .video-contain {
-      border: 1px solid #f00;
-      object-fit: cover;
       object-position: 0 0;
-      left: 0;
     }
   </style>
   <script src="./vue.js"></script>
+  <script type="text/javascript" src="https://cdn.bootcss.com/vConsole/3.3.0/vconsole.min.js"></script></script>
+  <script>
+    // 开发环境且是移动端才打开 vconsole
+    const vConsole = new VConsole()
+  </script>
 </head>
 <body>
   <div id="app">
-    <div>err:{{error}}</div>
-    <div class="photo-overflow" :style="`width: ${widthD}px;height: ${heightD}px;`">
+    <div class="photo-overflow" :style="`width: ${clientWidthD}px;height: ${heightD}px;`" v-show="photoFlag">
       <video
         class="video-contain"
         ref="video"
         id="video"
-        :width="widthD"
-        :height="heightD"
-        autoplay
-      ></video>
-      <!-- <img
-        class="video-contain"
-        ref="video"
-        id="video"
-        src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fbpic.588ku.com%2Felement_origin_min_pic%2F16%2F10%2F29%2F2ac8e99273bc079e40a8dc079ca11b1f.jpg&refer=http%3A%2F%2Fbpic.588ku.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1637389812&t=02c65a6ed86d4cacf7b8335c66778970"
         :width="clientWidthD"
-        :height="clientHeightD"
-      /> -->
+        autoplay
+        playsinline
+        webkit-playsinline="true"
+        muted
+      ></video>
     </div>
-    <canvas ref="canvas" :width="widthD" :height="heightD" style="display: none;"></canvas>
+    <div class="error" :style="`width: ${clientWidthD}px;height: ${heightD}px;`" v-show="!photoFlag">
+      您的浏览器不支持取景框<br/>如未弹出授权框，请点击右上角刷新页面
+    </div>
     <button @click="getPhoto">拍照</button>
 
     <img :src="imgURL" alt="">
@@ -51,14 +49,25 @@
     new Vue({
       el: '#app',
       data: {
+        flag : true, // true 移动端
+        width: 0,
+        height: 0,
         imgURL: '',
-        widthD: 300,
-        heightD: 200,
+        imgNewURL: '',
+        widthD: 0,
+        heightD: 0,
         clientWidthD: 0,
         clientHeightD: 0,
-        error: '1'
+        photoW: 0, // 摄像头分辨率宽度
+        photoH: 0, // 摄像头分辨率高度
+        photoFlag: true
       },
       created() {
+        if (navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i)) {
+            this.flag = true
+        } else {
+            this.flag = false
+        }
         this.initPhoto()
       },
       mounted () {
@@ -71,11 +80,28 @@
           this.$nextTick(() => {
             that.clientWidthD = document.body.clientWidth
             that.clientHeightD = document.body.clientHeight
+
+            if (that.width) {
+              // 如果有传值，就使用接受的值为显示宽度
+              that.widthD = that.width
+            } else {
+              that.widthD = that.clientWidthD
+            }
+            if (that.height) {
+              // 如果有传值，就使用接受的值为显示高度
+              that.heightD = that.height
+            } else {
+              that.heightD = that.clientHeightD
+            }
+
+            console.log(that.height, that.widthD, that.clientWidthD, that.heightD, that.clientHeightD)
+
             const navigators = navigator
             // 老的浏览器可能根本没有实现 mediaDevices，所以我们可以先设置一个空的对象
             if (navigators.mediaDevices === undefined) {
               navigators.mediaDevices = {}
             }
+
             // 一些浏览器部分支持 mediaDevices。我们不能直接给对象设置 getUserMedia
             // 因为这样可能会覆盖已有的属性。这里我们只会在没有getUserMedia属性的时候添加它。
             if (navigators.mediaDevices.getUserMedia === undefined) {
@@ -92,25 +118,17 @@
                 })
               }
             }
+
             navigators.mediaDevices.getUserMedia({
               audio: false,
               video: {
+                // width: that.widthD,
+                // height: that.heightD,
                 facingMode: 'environment'
-                // 放在app里面需要下面配置一下
-                // 'permissions': {
-                //   'audio-capture': {
-                //     'description': 'Required to capture audio using getUserMedia()'
-                //   },
-                //   'video-capture': {
-                //     'description': 'Required to capture video using getUserMedia()'
-                //   }
-                // }
               }
-              // width: this.widthD,
-              // height: this.heightD,
             })
               .then(function (stream) {
-                console.log(stream, 'stream', that.widthD, that.heightD, that.clientWidthD, that.clientHeightD)
+                // console.log(stream, 'stream', that.widthD, that.heightD, that.clientWidthD, that.clientHeightD)
                 const video = that.$refs.video
                 // 旧的浏览器可能没有srcObject
                 if ('srcObject' in video) {
@@ -119,13 +137,44 @@
                   // 防止在新的浏览器里使用它，应为它已经不再支持了
                   video.src = window.URL.createObjectURL(stream)
                 }
-                // video.onloadedmetadata = function () {
-                //   video.play()
-                // }
+                video.onloadedmetadata = function () {
+                  video.play()
+                }
+                that.$nextTick(() => {
+                  that.$refs.video.addEventListener('canplay', () => {
+                    // 获取视频的真实分辨率 480 640
+                    console.log(that.video.videoWidth, that.video.videoHeight)
+                    that.photoW = that.video.videoWidth
+                    that.photoH = that.video.videoHeight
+                    // that.widthD = that.video.videoWidth
+                    // that.heightD = that.video.videoHeight
+                    // if (that.$isPc) {
+                    //   that.widthD = that.video.videoWidth
+                    //   that.heightD = that.video.videoHeight
+                    // } else {
+                    //   that.widthD = that.video.videoHeight
+                    //   that.heightD = that.video.videoWidth
+                    //   // that.heightD = that.video.videoWidth
+                    //   // 移动端宽高对换
+                    // }
+                    // if (that.width) {
+                    //   // 如果有传值，就使用接受的值为显示宽度
+                    //   that.widthD = that.width
+                    // } else {
+                    //   that.widthD = that.video.videoWidth
+                    // }
+                    // if (that.height) {
+                    //   // 如果有传值，就使用接受的值为显示高度
+                    //   that.heightD = that.height
+                    // } else {
+                    //   that.heightD = that.video.videoHeight
+                    // }
+                  })
+                })
               })
               .catch(function (err) {
-                console.log(err.name + ': ' + err.message)
-                that.error = err.name +': ' + err.message
+                that.photoFlag = false
+                console.log(err.name + ': ' + err.message, err)
               })
           })
         },
@@ -133,44 +182,39 @@
         getPhoto () {
           // eslint-disable-next-line @typescript-eslint/no-this-alias
           const that = this
-          const video = that.$refs.video
-          const canvas = that.$refs.canvas
+          const video = this.$refs.video
+          // const canvas = this.canvas
+          const canvas = document.createElement('canvas')
           const ctx = canvas.getContext('2d')
-          canvas.width = this.widthD
-          canvas.height = this.heightD
-          video.crossOrigin = 'anonymous'
-          ctx.drawImage(video, 0, 0, this.widthD, this.heightD, 0, 0, this.widthD, this.heightD)
-          // ctx.drawImage(video, 0, 0, this.widthD, this.heightD, 0, 0, this.widthD, this.heightD)
-          // drawImage(img,sx,sy,swidth,sheight,x,y,width,height) : 剪切图像，并在画布上
-          // sx 开始剪切的图片上的x位置
-          // sy 开始剪切的图片上的y位置
-          // swidth 被剪切的宽度
-          // sheight 被剪切的高度
-          // x 在画布上放置图像的x位置
-          // y 在画布上放置图像的y位置
-          // width 要使用的图像宽度
-          // height 要使用的图像高度
-          const dataURL = canvas.toDataURL('image/jpeg')
+          // let tempW = 0
+          // let tempH = 0
+          if (!that.flag) {
+            canvas.width = that.widthD
+            canvas.height = that.heightD
+          } else {
+            // 移动端宽高对换
+            // canvas.width = that.heightD
+            // canvas.height = (canvas.width * that.heightD) / that.widthD
+            // tempW = that.heightD
+            // tempH = (canvas.width * that.heightD) / that.widthD
+            canvas.width = that.widthD * 2
+            canvas.height = that.heightD * 2
+            // canvas.width = that.photoW
+            // canvas.height = that.heightD
+          }
+          ctx.drawImage(video, 0, 0, that.photoW, that.photoW * (that.heightD / that.widthD), 0, 0, canvas.width, canvas.height)
+          console.log(that.photoW, that.photoW * (that.heightD / that.widthD), that.widthD, that.heightD)
+          const dataURL = canvas.toDataURL('image/jpeg', 1)
           that.imgURL = dataURL
-          console.log(11)
-          // const img = new Image()
-          // img.src = 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fbpic.588ku.com%2Felement_origin_min_pic%2F16%2F10%2F29%2F2ac8e99273bc079e40a8dc079ca11b1f.jpg&refer=http%3A%2F%2Fbpic.588ku.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1637389812&t=02c65a6ed86d4cacf7b8335c66778970'
-          // img.crossOrigin = 'anonymous'
-          // img.onload = function () {
-          //   ctx.drawImage(img, 0, 0, that.widthD, that.heightD, 0, 0, that.widthD, that.heightD)
-          //   // drawImage(img,sx,sy,swidth,sheight,x,y,width,height) : 剪切图像，并在画布上
-          //   // sx 开始剪切的图片上的x位置
-          //   // sy 开始剪切的图片上的y位置
-          //   // swidth 被剪切的宽度
-          //   // sheight 被剪切的高度
-          //   // x 在画布上放置图像的x位置
-          //   // y 在画布上放置图像的y位置
-          //   // width 要使用的图像宽度
-          //   // height 要使用的图像高度
-          //   const dataURL = canvas.toDataURL('image/jpeg')
-          //   that.imgURL = dataURL
-          //   console.log(11)
-          // }
+          // const a = document.createElement('a') // 创建a标签
+          // a.download = '裁剪-PHOTO' // 文件名
+          // a.href = dataURL // 下载的文件地址
+          // a.click() // 点击下载
+          // const blob = await convertBase64UrlToBlob(dataURL)
+          // callback && callback(blob)
+          // that.cutImageUrl(function (item: any) {
+          //   callback && callback(item)
+          // })
         }
       }
     })

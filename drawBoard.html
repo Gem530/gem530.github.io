@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>签字板</title>
+
+  <link rel="icon" href="./img/favicon.ico">
+  <script src="./vue.js"></script>
+  <script type="text/javascript" src="https://cdn.bootcss.com/vConsole/3.3.0/vconsole.min.js"></script></script>
+  <script>
+    // 开发环境且是移动端才打开 vconsole
+    const vConsole = new VConsole()
+  </script>
+  <style>
+    .check-box-sign {
+      position: relative;
+      width: 100%;
+      min-height: 130px;
+      border: 1px solid #b6b6b6;
+      background-color: #FFFFFF;
+      overflow: hidden;
+    }
+
+    .check-sign-tip {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      /* @include flex(); */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .check-sign-bottom {
+      border-top: 1px solid #999999;
+      padding: 5px;
+    }
+
+    .check-sign-choose {
+      /* @include flex(space-between); */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px;
+    }
+    .check-color-item,
+    .check-width-item {
+      width: 30px;
+      height: 30px;
+      box-sizing: border-box;
+      border-radius: 4px;
+      /* @include flex(); */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .check-width-item {
+      border: 1px solid #999999;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    
+    <div class="check-box-sign" ref="checkMasterSignNode">
+      <div class="check-sign-tip" v-show="tempMasterFlag" @click="tempMasterFlag = false">点击此处签署</div>
+      <img :src="imgNew" style="width: 100%; height: 100%;" v-if="tempMasterFlag && imgNew">
+      <canvas
+        ref="checkMasterSign"
+        v-else
+        @touchend="touchEndSign"
+        @touchmove="touchMoveSign"
+        @touchstart="touchStartSign"
+        @mouseup="touchEndSign"
+        @mousemove="touchMoveSign"
+        @mousedown="touchStartSign">
+      </canvas>
+
+      <div class="check-sign-bottom" v-show="!tempMasterFlag">
+        <button @click="selectColorWidth('color')">颜色</button>
+        <button @click="selectColorWidth('width')">粗细</button>
+        <button @click="clearCanvas">清除</button>
+        <button @click="sureCanvasToImg">确认提交</button>
+      </div>
+
+      <div class="check-sign-choose" v-show="masterColorFlag">
+        <div class="check-color-item"
+          :key="index"
+          :style="`background: ${item}`"
+          v-for="(item, index) in colorList"
+          @click="chooseColorWidth('color', item)">
+        </div>
+      </div>
+
+      <div class="check-sign-choose" v-show="masterWidthFlag">
+        <div class="check-width-item"
+          :key="item.id"
+          v-for="item in widthList"
+          @click="chooseColorWidth('width', item.id)">
+          {{item.name}}
+        </div>
+      </div>
+    </div>
+
+    <img :src="imgNew" alt="">
+
+  </div>
+  <script>
+    new Vue({
+      el: '#app',
+      data () {
+        return {
+          imgNew: '',
+          mouseFlag: false, // true鼠标或手指移动即画图 false不画图
+          tempTechFlag: true,
+          tempMasterPath: [{
+            x: 0,
+            y: 0
+          }], // 存储手指移动位置 车主、施工中心签名 位置数组
+          tempMasterFlag: true,
+          colorList: ['#000', '#f00', '#0f0', '#00f'], // 画板颜色列表
+          widthList: [{
+            id: 3,
+            name: '细'
+          }, {
+            id: 5,
+            name: '中'
+          }, {
+            id: 7,
+            name: '粗'
+          }], // 画板粗细列表
+          canvasColor: '#000', // 画板颜色
+          canvasWidth: 3, // 画笔粗细
+          masterColorFlag: false, // true 选择检车主画板color 面板显示
+          masterWidthFlag: false, // true 选择检车主画板width 面板显示
+        }
+      },
+      mounted () {
+        const w = this.$refs.checkMasterSignNode.clientWidth
+        const h = this.$refs.checkMasterSignNode.clientHeight
+        this.$refs.checkMasterSign.setAttribute('width', w)
+        this.$refs.checkMasterSign.setAttribute('height', h)
+      },
+      methods: {
+        // 选择显示 画板颜色/粗细
+        selectColorWidth (type1) {
+          if (type1 === 'color') {
+            this.masterColorFlag = !this.masterColorFlag
+            this.masterWidthFlag = false
+          } else {
+            this.masterWidthFlag = !this.masterWidthFlag
+            this.masterColorFlag = false
+          }
+        },
+        // 选择画板颜色/粗细
+        // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+        chooseColorWidth (type, item) {
+          if (type === 'color') {
+            this.canvasColor = item
+          } else {
+            this.canvasWidth = Number(item)
+          }
+          console.log(type, item)
+          this.hideColorWidth()
+        },
+        // 隐藏 颜色、粗细 框
+        hideColorWidth () {
+          this.masterWidthFlag = false
+          this.masterColorFlag = false
+        },
+        // 确认签名，形成图片上传
+        sureCanvasToImg () {
+          const w = this.$refs.checkMasterSignNode.clientWidth
+          const h = this.$refs.checkMasterSignNode.clientHeight
+          // this.hideColorWidth()
+          const tempCanvas = this.$refs.checkMasterSign
+
+          let canvas = document.createElement("canvas")
+          let ctx = canvas.getContext('2d')
+          canvas.width = w
+          canvas.height = h
+          ctx.drawImage(tempCanvas, 0, 0, w, h);
+          const tempURL = canvas.toDataURL('image/png', 1) // 第二个参数是图片质量0-1，默认是0.92
+          this.imgNew = tempURL
+
+          // // eslint-disable-next-line @typescript-eslint/no-this-alias
+          // const that = this
+          // canvas.toBlob(function (blob) {
+          //   const formData = new FormData()
+          //   formData.append('file', blob || '')
+          //   // formData.append('image_type', 'discern_vin')
+          //   uploadFileApi(formData).then((res) => {
+          //     // console.log(res)
+          //     that.tempMasterFlag = true
+          //     that.imgNew = res.data.ossUrl
+          //     that.$emit('uploadCanvasImg', res)
+          //   }).catch(err => that.$dialog.alert({
+          //     title: '提示',
+          //     message: `上传图片失败: ${err.message}`
+          //   }))
+          // }, 'image/png')
+        },
+        // 根据pc或者移动端 返回x，y坐标
+        returnXY (event) {
+          // return new Promise((resolve, reject))
+          // 鼠标按下时的x/y坐标
+          let e = { pageX: 0, pageY: 0 }
+          if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+            e = { pageX: event.touches[0].pageX, pageY: event.touches[0].pageY }
+          } else {
+            e = { pageX: event.pageX, pageY: event.pageY }
+          }
+          return e
+        },
+        // 签名板事件
+        // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+        touchStartSign (event) {
+          let e = this.returnXY(event)
+          const point = {
+            x: e.pageX,
+            y: e.pageY
+          }
+
+          // 选择检验师 或者 车主签名板
+          this.tempMasterPath.push(point)
+          this.mouseFlag = true
+        },
+        // 签名板事件
+        // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+        touchMoveSign (event) {
+          if (!this.mouseFlag) return
+          event.preventDefault() // 阻止手指滑动时 页面滚动
+          let e = this.returnXY(event)
+          // 选择检验师 或者 车主签名板
+          const canvas = this.$refs.checkMasterSign
+          const canvasNode = this.$refs.checkMasterSignNode
+          const ctx = canvas.getContext('2d')
+          const point = {
+            x: e.pageX,
+            y: e.pageY
+          }
+
+          this.tempMasterPath.push(point)
+
+          const oldXY = this.tempMasterPath[this.tempMasterPath.length - 2]
+          const left = canvasNode.offsetLeft
+          const top = canvasNode.offsetTop
+          // console.log(oldXY.x, oldXY.y, left, top)
+
+          // 实现签名
+          ctx.beginPath()
+          ctx.moveTo(oldXY.x - left, oldXY.y - top)
+          ctx.strokeStyle = this.canvasColor // 选择画笔颜色
+          ctx.lineWidth = this.canvasWidth // 选择画笔粗细
+          ctx.lineTo(point.x - left, point.y - top)
+          ctx.stroke()
+        },
+        // 签名板事件
+        touchEndSign () {
+          this.mouseFlag = false
+          console.log('手指离开canvas画板')
+        },
+        // 清除canvas画板
+        clearCanvas () {
+          const canvas = this.$refs.checkMasterSign
+          const ctx = canvas.getContext('2d')
+          ctx.clearRect(0, 0, 1000, 1000)
+          this.tempMasterPath = []
+          this.tempMasterFlag = true
+          this.hideColorWidth()
+        }
+      }
+    })
+  </script>
+</body>
+</html>

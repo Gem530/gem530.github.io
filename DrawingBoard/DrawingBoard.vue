@@ -9,7 +9,10 @@
         v-else
         @touchend="touchEndSign"
         @touchmove="touchMoveSign"
-        @touchstart="touchStartSign">
+        @touchstart="touchStartSign"
+        @mouseup="touchEndSign"
+        @mousemove="touchMoveSign"
+        @mousedown="touchStartSign">
       </canvas>
 
       <div class="check-sign-bottom" v-show="!tempMasterFlag">
@@ -58,6 +61,7 @@ export default class CheckOrder extends Vue {
   imgNew = ''
 
   tempTechFlag = true;
+  mouseFlag = false // true鼠标或手指移动即画图 false不画图
 
   tempMasterPath = [{
     x: 0,
@@ -155,29 +159,46 @@ export default class CheckOrder extends Vue {
     }, 'image/png')
   }
 
-  // 签名板事件
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  touchStartSign (e: any): void {
-    const point = {
-      x: e.touches[0].pageX,
-      y: e.touches[0].pageY
+  // 根据pc或者移动端 返回x，y坐标
+  returnXY (event) {
+    // return new Promise((resolve, reject))
+    // 鼠标按下时的x/y坐标
+    let e = { pageX: 0, pageY: 0 }
+    if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+      e = { pageX: event.touches[0].pageX, pageY: event.touches[0].pageY }
+    } else {
+      e = { pageX: event.pageX, pageY: event.pageY }
     }
-
-    // 选择检验师 或者 车主签名板
-    this.tempMasterPath.push(point)
+    return e
   }
 
   // 签名板事件
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  touchMoveSign (e: any): void {
-    e.preventDefault() // 阻止手指滑动时 页面滚动
+  touchStartSign (event: any): void {
+    let e = this.returnXY(event)
+    const point = {
+      x: e.pageX,
+      y: e.pageY
+    }
+
+    // 选择检验师 或者 车主签名板
+    this.tempMasterPath.push(point)
+    this.mouseFlag = true
+  }
+
+  // 签名板事件
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  touchMoveSign (event: any): void {
+    if (!this.mouseFlag) return
+    event.preventDefault() // 阻止手指滑动时 页面滚动
+    let e = this.returnXY(event)
     // 选择检验师 或者 车主签名板
     const canvas = this.$refs.checkMasterSign as HTMLCanvasElement
     const canvasNode = this.$refs.checkMasterSignNode as HTMLCanvasElement
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
     const point = {
-      x: e.touches[0].pageX,
-      y: e.touches[0].pageY
+      x: e.pageX,
+      y: e.pageY
     }
 
     this.tempMasterPath.push(point)
@@ -198,6 +219,7 @@ export default class CheckOrder extends Vue {
 
   // 签名板事件
   touchEndSign (): void {
+    this.mouseFlag = false
     console.log('手指离开canvas画板')
   }
 
