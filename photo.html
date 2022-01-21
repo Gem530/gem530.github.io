@@ -7,6 +7,9 @@
   <title>摄像头</title>
   <link rel="icon" href="./img/favicon.ico">
   <style>
+    body {
+      min-height: 100vh;
+    }
     .photo-overflow {
       border: 1px solid gray;
       overflow: hidden;
@@ -143,9 +146,9 @@
                 that.$nextTick(() => {
                   that.$refs.video.addEventListener('canplay', () => {
                     // 获取视频的真实分辨率 480 640
-                    console.log(that.video.videoWidth, that.video.videoHeight)
-                    that.photoW = that.video.videoWidth
-                    that.photoH = that.video.videoHeight
+                    console.log(that.$refs.video.videoWidth, that.$refs.video.videoHeight)
+                    that.photoW = that.$refs.video.videoWidth
+                    that.photoH = that.$refs.video.videoHeight
                     // that.widthD = that.video.videoWidth
                     // that.heightD = that.video.videoHeight
                     // if (that.$isPc) {
