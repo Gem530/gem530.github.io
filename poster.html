@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>海报组件</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    #app {
+      width: 100%;
+      height: 400px;
+    }
+    .canvas-box {
+      width: 400px;
+      height: 710px;
+      border: 1px solid #dddddd;
+    }
+  </style>
+  <script src="./vue.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="canvas-box" ref="canvasParent">
+      <canvas id="mycanvas" ref="myCanvas"></canvas>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        width: 0, // canvas宽度
+        height: 0, // canvas高度
+      },
+      created() {
+      },
+      mounted () {
+        this.width = this.$refs.canvasParent.clientWidth // 获取包裹canvas的外层盒子宽度
+        this.height = this.$refs.canvasParent.clientHeight // 获取包裹canvas的外层盒子高度
+        // 设置canvas的宽高，不能使用css控制canvas宽高  使用css控制canvas宽高，会导致canvas绘制的内容变形
+        // 必须使用标签上的width和height来修改canvas宽高，这是canvas自带的参数
+        this.$refs.myCanvas.setAttribute('width', this.width)
+        this.$refs.myCanvas.setAttribute('height', this.height)
+
+        this.$nextTick(() => {
+          this.draw()
+        })
+      },
+      methods: {
+        draw () {
+          const that = this
+          const canvas = this.$refs.myCanvas
+          const ctx = canvas.getContext('2d')
+
+          // 导入底图
+          const baseImg = new Image()
+          baseImg.crossorigin = 'Anonymous'
+          baseImg.src = './img/u=118500493,3886661582&fm=26&fmt=auto&gp=0.jpg'
+          // 导入头像
+          const avatorImg = new Image()
+          avatorImg.crossorigin = 'Anonymous'
+          avatorImg.src = './img/lADPD26eNnXBjezNAuPNAuM_739_739.jpg'
+
+          // 绘制底图
+          this.drawImage(ctx, './img/u=1819817697,2457372120&fm=26&fmt=auto&gp=0.jpg', 0, 0, this.width, this.height).then(() => {
+            // 绘制文字 由于图片需要等待加载完毕才能绘制，导致文字会被遮挡。所以使用promise，文字放在那张图片的上层，就在哪个方法的then里绘制文字
+            this.drawText(ctx, '绘制文字', 100, 640)
+          })
+          // 绘制头像
+          this.drawImage(ctx, './img/lADPD26eNnXBjezNAuPNAuM_739_739.jpg', 10, 630, 70, 70)
+        },
+        // 绘制图片封装
+        drawImage (ctx, dom, x, y, width, height) {
+          return new Promise((resolve, reject) => {
+            // 导入图片
+            const img = new Image()
+            img.crossorigin = 'Anonymous'
+            img.src = dom
+            img.onload = () => {
+              // 图片加载完 开始绘制图片
+              ctx.beginPath()
+              ctx.drawImage(img, x, y, width, height)
+              resolve()
+            }
+            img.onerror = () => {
+              reject()
+            }
+          })
+        },
+        // 绘制文字封装
+        drawText (ctx, dom, x, y) {
+          // 绘制文字
+          ctx.beginPath()
+          ctx.fillStyle = '#fff'
+          ctx.zIndex = '999'
+          ctx.fillText(dom, x, y)
+        }
+      }
+    })
+  </script>
+</body>
+</html>

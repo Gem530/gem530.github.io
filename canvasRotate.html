@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>canvas旋转</title>
+
+  <style>
+    #myCanvas {
+      transition: all 3s linear;
+      animation: rotate 2s infinite linear;
+    }
+
+    @keyframes rotate {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="myCanvas" width="300" height="300"></canvas>
+  <script>
+    const can = document.querySelector('#myCanvas');
+    var ctx = can.getContext('2d');
+    
+    // 导入底图
+    const baseImg = new Image()
+    baseImg.crossorigin = 'Anonymous'
+    baseImg.src = './img/u=118500493,3886661582&fm=26&fmt=auto&gp=0.jpg'
+
+    baseImg.onload = function () {
+      ctx.drawImage(baseImg, 0, 0, 300, 300)
+    }
+  </script>
+</body>
+</html>

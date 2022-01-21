@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zn">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIV转为Canvas</title>
+  <style>
+    .temp {
+      width: 100px;
+      height: 200px;
+      background: red;
+    }
+    .temp-child {
+      background: gray;
+    }
+    .list {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .test-img {
+      width: 100%;
+      height: 50px;
+      background: url(https://sponsor-static.segmentfault.com/606b64da01d7dae92bf699e433d0805b.jpg);
+      background-size: 100% 100%;
+    }
+  </style>
+  <script src="./vue.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="temp" ref="temp">
+      <span>123</span>
+      <span class="dom">123</span>
+      <div class="temp-child dom">快点哈</div>
+      <div class="list">
+        <div class="list-item" v-for="(item, index) in list" :key="index">{{item}}</div>
+      </div>
+      <!-- 暂时不支持表单 -->
+      <!-- <input type="text" placeholder="11111"> -->
+      <!-- 暂时不支持截取的div中包含img或者背景图 -->
+      <!-- <img class="test-img" src="https://sponsor-static.segmentfault.com/606b64da01d7dae92bf699e433d0805b.jpg" alt="">
+      <div class="test-img"></div> -->
+    </div>
+    <button @click="toCanvas">toCanvas</button>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        styleList: [],
+        list: ['item1', 'item2', 'item3', 'item4']
+      },
+      created() {
+      },
+      mounted () {
+      },
+      methods: {
+        toCanvas () {
+          // 转化svg
+          // this.divToSvg()
+          this.recursionDom('.temp')
+          const styleObj = this.getDomCssStyle('.temp')
+          this.divToSvg('.temp', styleObj)
+        },
+        // 递归元素及子元素
+        recursionDom (className) {
+          // console.log('className', className)
+          const dom = document.querySelector(''+className+'')
+          // 获取到元素的css
+          const styleObj = this.getDomCssStyle(className)
+          // 第一个数组元素是空，所以不取第一位
+          let classList = className.split('.').slice(1,)
+          // 把类名转化为标签中的类名展示：即 (.item.dom) => (item dom)
+          let classTxt = ''
+          classList.forEach((item, index) => {
+            classTxt += index < (classList.length - 1) ? (item + ' ') : item
+          })
+          this.styleList.push([classTxt, styleObj]) // 把类名以及css存储下来
+          this.styleList.sort().reverse() // 进行排序并翻转，需要先替换类名长的，再替换类名短的，因为会有相同的类名，所以先替换长的类名，就不会影响其他的类名替换
+          if (dom.children.length) {
+            // 如果元素有子元素，则递归获取类名
+            for (let i = 0; i < dom.children.length; i++) {
+              // console.log(dom.children[i].tagName, dom.children[i].className)
+              let classTxt = ''
+              if (dom.children[i].className) {
+                // 只获取类名
+                let txt = dom.children[i].className.split(' ')
+                // console.log(txt)
+                txt.forEach((item) => {
+                  classTxt += ('.' + item)
+                })
+                // console.log(classTxt)
+                this.recursionDom(classTxt)
+              }
+              // 没有类名，暂时不递归获取元素
+              //  else {
+              //   classTxt = dom.children[i].tagName.toLocaleLowerCase() // 字母小写
+              // }
+              // console.log(classTxt)
+              // this.recursionDom(classTxt)
+            }
+          }
+        },
+        // 获取元素上的常用css属性
+        getDomCssStyle (className) {
+          const styleObj = window.getComputedStyle(document.querySelector(''+className+''))
+          const styleTxt = `
+            ${styleObj.position != 'static' ? 'position: '+styleObj.position+';' : ''}
+            ${styleObj.top != 'auto' ? 'top: '+styleObj.top+';' : ''}
+            ${styleObj.left != 'auto' ? 'left: '+styleObj.left+';' : ''}
+            ${styleObj.right != 'auto' ? 'right: '+styleObj.right+';' : ''}
+            ${styleObj.bottom != 'auto' ? 'bottom: '+styleObj.bottom+';' : ''}
+            ${styleObj.display != 'block' ? 'display: '+styleObj.display+';' : ''}
+            ${styleObj.justifyContent != 'normal' ? 'justify-content: '+styleObj.justifyContent+';' : ''}
+            ${styleObj.alignItems != 'normal' ? 'align-items: '+styleObj.alignItems+';' : ''}
+            ${styleObj.alignContent != 'normal' ? 'align-content: '+styleObj.alignContent+';' : ''}
+            ${styleObj.flexWrap != 'normal' ? 'flex-wrap: '+styleObj.flexWrap+';' : ''}
+            ${styleObj.width != 'auto' ? 'width: '+styleObj.width+';' : ''}
+            ${styleObj.height != 'auto' ? 'height: '+styleObj.height+';' : ''}
+            ${styleObj.background != 'rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box' ? 'background: '+styleObj.background+';' : ''}
+            ${styleObj.padding != '0px' ? 'padding: '+styleObj.padding+';' : ''}
+            ${styleObj.border != '0px none rgb(0, 0, 0)' ? 'border: '+styleObj.border+';' : ''}
+            ${styleObj.margin != '0px' ? 'margin: '+styleObj.margin+';' : ''}
+            ${styleObj.font != '16px "Microsoft YaHei"' ? 'font: '+styleObj.font+';' : ''}
+            ${styleObj.color != 'rgb(0, 0, 0)' ? 'color: '+styleObj.color+';' : ''}
+            ${styleObj.textAlign != 'start' ? 'text-align: '+styleObj.textAlign+';' : ''}
+            ${styleObj.lineHeight != 'normal' ? 'line-height: '+styleObj.lineHeight+';' : ''}
+            ${styleObj.zIndex != 'auto' ? 'z-index: '+styleObj.zIndex+';' : ''}
+            ${styleObj.opacity != '1' ? 'opacity: '+styleObj.opacity+';' : ''}
+            ${styleObj.boxSize ? 'box-size: '+styleObj.boxSize+';' : ''}`;
+          // console.log(styleTxt)
+          return styleTxt
+        },
+        // 转化svg
+        divToSvg (className, styleObj) {
+          // const tempDom = this.$refs.temp
+          const tempDoms = document.querySelector(''+className+'')
+          let tempDom = tempDoms.innerHTML // 获取截取元素的内容
+          const tagName = tempDoms.tagName.toLocaleLowerCase() // 字母小写 截取元素的标签类型：如div
+          const width = window.getComputedStyle(tempDoms).width // 截取元素的宽
+          const height = window.getComputedStyle(tempDoms).height // 截取元素的高
+          // 利用保存的元素列表css，把类名给替换
+          this.styleList.forEach((item) => {
+            const txt = item[0]
+            // item[0] 元素类名
+            // item[1] 元素的css
+            tempDom = tempDom.replace(txt, item[1])
+          })
+          // 类名替换为css后，把class替换为style，就可以显示样式了
+          tempDom = tempDom.replace(/class/g, 'style')
+          // 因为使用了模板字符串，所以把换行去除
+          tempDom = tempDom.replace(/[\r\n]/g, '')
+          // 因为使用了模板字符串，所以把 长空格 去除
+          tempDom = tempDom.replace(/            /g, '')
+          // 暂时不支持图片
+          // tempDom = tempDom.replace(/img /g, 'image ')
+          // tempDom = tempDom.replace(/src=/g, 'href=')
+          const svg = "data:image/svg+xml," +
+            "<svg xmlns='http://www.w3.org/2000/svg' width='"+width+"' height='"+height+"'>" +
+            "<foreignObject width='100%' height='100%'>" +
+            "<"+tagName+" xmlns='http://www.w3.org/1999/xhtml' style='" + styleObj + "'>" +
+            tempDom +
+            "</"+tagName+">" +
+            "</foreignObject>" +
+            "</svg>";
+          let img = new Image();
+          img.src = svg;
+          console.log(img)
+          document.body.appendChild(img);
+        }
+      }
+    })
+  </script>
+</body>
+</html>

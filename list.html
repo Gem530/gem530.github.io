@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>无限列表-虚拟节点</title>
+  <script src="./vue.js"></script>
+
+  <style>
+    .list-wrap {
+      position: relative;
+      overflow-y: scroll;
+      width: 200px;
+      margin: 100px auto;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+    }
+    .list {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .list div {
+      border: 1px solid blue;
+      line-height: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="list-wrap" ref="listWrap" @scroll="scroll">
+      <div class="scroll-bar" ref="scrollBar"></div>
+      <div class="list" ref="list">
+        <div v-for="val in showList" :style="`height: ${heightRound()}px;`">{{val}}</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          list: [], // 超长的显示数据
+          itemHeight: 30, // 每一列的高度
+          showNum: 10, // 显示几条数据
+          start: 0, // 滚动过程显示的开始索引
+          end: 10 // 滚动过程显示的结束索引
+        }
+      },
+      computed: {
+        // 显示的数组，用计算属性计算
+        showList() {
+          return this.list.slice(this.start, this.end)
+        }
+      },
+      mounted () {
+        // 构造一个超长列表
+        for (let i = 0; i < 10; i++) {
+          this.list.push('列表' + i)
+        }
+        // 计算滚动容器高度
+        this.$refs.listWrap.style.height = this.itemHeight * this.showNum + 'px'
+        this.$refs.scrollBar.style.height = this.itemHeight * this.list.length + 'px'
+      },
+      methods: {
+        heightRound () {
+          return Math.floor(Math.random() * (60 - 30 + 1) + 30)
+        },
+        scroll () {
+          const dom = this.$refs.listWrap
+          if (dom.scrollHeight - dom.scrollTop <= dom.clientHeight) {
+            this.init()
+          }
+          // 获取滚动高度
+          let scrollTop = this.$refs.listWrap.scrollTop
+          // 开始的数组索引
+          this.start = Math.round(scrollTop / this.itemHeight)
+          this.end = this.start + this.showNum
+          // 绝对定位对相对定位的偏移量
+          this.$refs.list.style.top = this.start * this.itemHeight + 'px'
+        },
+        init () {
+          const num = this.list.length
+          const list = []
+          for (let i = num; i < num + 10; i++) {
+            list.push('列表' + i)
+          }
+          this.list = [...this.list, ...list]
+          // 计算滚动容器高度
+          this.$refs.listWrap.style.height = this.itemHeight * this.showNum + 'px'
+          this.$refs.scrollBar.style.height = this.itemHeight * this.list.length + 'px'
+        }
+      }
+    })
+  </script>
+</body>
+</html>

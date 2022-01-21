@@ -1,0 +1,448 @@
+<!--
+ * @description: 报价单生成pdf页面
+ * @author: Star Shi
+ * @Date: 2020-12-3 11:00:06
+--> 
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <title>施工单</title>
+	<style>
+		*{
+			margin:0px;
+			padding:0px;
+            font-family: "宋体";
+		}
+		ul {
+			list-style: none;
+		}
+
+		.table{
+			width:100%;
+			border-collapse:collapse;
+		}
+		
+		.table .tr{
+			width:100%;
+		}
+	
+		.table td,
+		.table th{
+			padding:5px 8px;
+		}
+        .space {
+            height:130px;
+            width:100%;
+        }
+        .clear::after{
+            content: "";
+            display: block;
+            clear: both;
+        }
+
+		.main-container{
+			width:100%;
+			min-height:100%;
+			padding:20px;
+			box-sizing:border-box;
+		}
+		.top-container{
+		 overflow:hidden
+		}
+
+		.top-container .left-box{
+			float: left;
+            font-weight: bold;
+		}
+
+		.top-container .right-box{
+			float: right;
+		}
+
+		.top-container .left-box,
+		.top-container .right-box{
+			width:25%;
+            height:10%
+		}
+
+        .top-container .right-box .bole-icon {
+            margin-top: -50px;
+            width: 200px;
+            height: 200px;
+        }
+
+		.top-container .middle-box{
+            position: relative;
+			margin: 0 25%;
+			width:50%;
+            height:80px;
+			text-align: center;
+			font-size:18px;
+		}
+
+        .space_first {
+            height:20px;
+            width:100%;
+        }
+
+        .top-container .middle-box::before{
+            content: "";
+            margin-top: -30px;
+            height: 100%;
+            vertical-align: middle;
+        }
+
+        .middle-title{
+            font-size:20px;
+            position: relative;
+
+            vertical-align: middle;
+            font-weight: bold;
+        }
+
+		.right-box{
+			text-align:right;
+		}
+
+		.right-box .bole-icon{
+			width:10%;
+			height:20%;
+		}
+
+		.head-title{
+			width:100%;
+			text-align:center;
+			font-size:16px;
+			padding:25px 0 10px;
+
+		}
+
+		.car-info-table{
+			width:100%;
+			border-collapse:collapse;
+			border-bottom:1px solid #000000;
+			border-right:1px solid #000000;
+		}
+
+		.car-info-table tr td,
+		.car-info-table tr th{
+			padding:5px 8px;
+			border-top:1px solid #000000;
+			border-left:1px solid #000000;
+		}
+
+		.car-info-table .label{
+			text-align:left;
+			width:100px;
+		}
+
+		.car-info-table .content{
+			text-align:center;
+			min-width: 20%;
+		}
+
+		.car-info-table th,
+		.item-table th{
+			font-weight:400;
+			border-top:1px solid #000000;
+			border-bottom:1px solid #000000;
+		}
+
+		.item-table  .item-name{
+			padding-left: 28px;
+		}
+
+		.item-table td{
+			padding:3px 8px;
+		}
+
+		.suggestion-box{
+			padding:20px 8px;
+		}
+
+		.suggestion-item-list li{
+			padding: 3px 10px
+		}
+
+		.service-master{
+			position: relative;
+			text-align: right;
+			padding: 20px;
+			width: 100%;
+			box-sizing:border-box;
+		}
+
+		.service-master span{
+			padding-right: 10px;
+		}
+
+		.service-master::after{
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			content: " ";
+			width: 100%;
+			height: 1px;
+			padding: 0;
+			background: #000000;
+		}
+
+		.check-desc{
+			padding: 20px 0;
+			vertical-align: top;
+		}
+
+		.desc-label{
+			float: left;
+			width: 50px;
+		}
+
+		.desc-content{
+			margin-left: 50px;
+		}
+
+		.check-desc div{
+
+		}
+
+		.signature {
+			text-align: right;
+		}
+
+		.signature{
+			margin-right: 200px;
+		}
+
+		.contact-container{
+			padding-top: 50px;
+		}
+
+		.contact-container .contact-info{
+			padding: 3px 0;
+		}
+
+		.w-20{
+			width:35%;
+		}
+
+		.w-33{
+            height:32px;
+			width:33.33333%;
+		}
+
+		.center{
+			text-align: center;
+		}
+
+		.left{
+				text-align: left;
+		}
+
+        .head-left{
+            position: relative;
+        }
+        .car-title{
+
+            text-align: center;
+            width: 200px;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+        }
+        .order-targ {
+            font-size: 20px;
+            font-weight: bold;
+        }
+	</style>
+</head>
+<body>
+<section class="main-container">
+	<!-- 标题 -->
+	<section class="top-container">
+         <span class="order-targ">{{ order_tags }}</span>
+        {% ifequal 1 is_log %}
+            <div class="right-box"><img class="bole-icon" src="{{ image_url }}"/></div>
+        {% endifequal %}
+		<div class="middle-box">
+            <div class="middle-title">{{ company_name }}</div>
+			<div class="middle-title">维修施工单</div>
+		</div>
+	</section>
+
+	<!-- 车辆信息 -->
+	<section class="car-info-container">
+		<div class="head-left">
+             <span>工单号:{{ order_id }}</span>
+            <span class="car-title">车辆信息</span>
+        </div>
+		<table  class="table car-info-table">
+		 <tr>
+		  <td class="label">车主姓名</td>
+		  <td class="content">{{ owner }}</td>
+		  <td class="label">送修人</td>
+		  <td class="content">{{ contact_user }}</td>
+		  <td class="label">送修人电话</td>
+		  <td class="content">{{ contact_phone }}</td>
+		 </tr>
+		 <tr>
+		  <td class="label">车牌号</td>
+		  <td class="content">{{ license_plate }}</td>
+		    <td class="label">车架号</td>
+		  <td class="content">{{ v_code }}</td>
+		    <td class="label">发动机号</td>
+		  <td class="content">{{ engine_number }}</td>
+		 </tr>
+		 <tr>
+		  <td class="label">车型</td>
+		  <td class="content">{{ model }}</td>
+		   <td class="label">里程数</td>
+		  <td class="content">{{ mileage }} KM</td>
+		   <td class="label">颜色</td>
+		  <td class="content">{{ color }}</td>
+		 </tr>
+		 <tr>
+		  <td class="label">首次到店</td>
+		  <td class="content">{{ first_visit }}</td>
+		   <td class="label">旧件带走</td>
+		  <td class="content">{{ core_removal }}</td>
+		   <td class="label">是否洗车</td>
+		  <td class="content">{{ car_wash }}</td>
+		 </tr>
+		 <tr>
+		  <td class="label">注册日期</td>
+		  <td class="content">{{ registration_data }}</td>
+		   <td class="label">进厂日期</td>
+		  <td class="content">{{ approach_datetime }}</td>
+		   <td class="label">预计交车</td>
+		  <td class="content">{{ entering_data }}</td>
+		 </tr>
+         <tr>
+		    <td class="label">维修备注</td>
+		    <td class="content" colspan="2" >{{ memo }}</td>
+		    <td class="label">备注(用户可见)</td>
+		    <td class="content" colspan="2" >{{ memo_customer }}</td>
+		 </tr>
+		</table>
+	</section>
+
+	<!-- 维修项目 -->
+	<section class="item-container">
+		<div class="head-title"> 维修项目 </div>
+		<table  class="table item-table">
+			<tr>
+				<th class="w-20" >项目名称</th>
+				<th>类别</th>
+{#				<th>工种</th>#}
+				<th>工时/数量</th>
+				<th>工时费</th>
+                <th>项目券预存抵扣</th>
+				<th>未收</th>
+				<th>折扣</th>
+			</tr>
+            {% for item in data %}
+                <tr>
+                    <td>{{ forloop.counter }}-{{ item.project }}</td>
+                </tr>
+                {% for project in item.small_projects %}
+                    <tr>
+                        <td class="w-20 item-name">{{ project.name }}</td>
+                        <td class="center">{{ project.kind }}</td>
+                        <td class="center">{{ project.hours_or_number }}</td>
+                        <td class="center">{{ project.cost }}</td>
+                        <td class="center">{{ project.pre_deposit_deduction }}</td>
+                        <td class="center">{{ project.pay }}</td>
+                        <td class="center">{{ project.discount }}</td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+{#			<tr>#}
+{#				<td class="w-20 item-name">2000-项目二项目二项目二项目二</td>#}
+{#				<td class="center">机电</td>#}
+{#				<td class="center">人工</td>#}
+{#				<td class="center">1</td>#}
+{#				<td class="center">100.00</td>#}
+{#				<td class="center">100.00</td>#}
+{#				<td class="center">3%</td>#}
+{#			</tr>#}
+		</table>
+{#		<div class="suggestion-box">#}
+{#			<div class="suggestion-title">建议项目:</div>#}
+{#			<ul class="suggestion-item-list">#}
+{#				<li>1000-项目二项目二项目二项目二</li>#}
+{#				<li>2000-项目二项目二项目二项目二</li>#}
+{#				<li>3000-项目二项目二项目二项目二</li>#}
+{#			</ul>#}
+{#		</div>#}
+        <div class="space_first"></div>
+        <div ><span>建议项目:</span></div>
+        <div class="space"></div>
+		<div class="service-master"><span>服务顾问:</span>{{ consultant }}</div>
+	</section>
+	<!-- 车辆质检确认 -->
+	<section class="check-conatiner">
+		<div class="head-title"> 车辆质检确认 </div>
+		<table  class="table car-info-table">
+			<tr>
+				<th>工种</th>
+				<th>是/否合格</th>
+				<th>质检人签字</th>
+			</tr>
+			<tr>
+			 <td class="label w-33">机电质检</td>
+			 <td class="content w-33"></td>
+			 <td class="content w-33"></td>
+			</tr>
+            <tr>
+			 <td class="label w-33">钣金质检</td>
+			 <td class="content w-33"></td>
+			 <td class="content w-33"></td>
+			</tr>
+            <tr>
+			 <td class="label w-33">喷漆质检</td>
+			 <td class="content w-33"></td>
+			 <td class="content w-33"></td>
+			</tr>
+             <tr>
+			 <td class="label w-33">美容质检</td>
+			 <td class="content w-33"></td>
+			 <td class="content w-33"></td>
+			</tr>
+			<tr>
+			 <td class="label w-33">总质检</td>
+			 <td class="content w-33"></td>
+			 <td class="content w-33"></td>
+			</tr>
+		</table>
+		<div class="check-desc">
+			<div class="desc-label">说明：</div><div class="desc-content">您的签名表示您同意以上的维修项目，请保留发票以及结算单，备件保修时需要出具发票及结算单或复印件，请携带好随身物品，贵重物品请妥善保管。</div>
+		</div>
+
+		<div class="signature">
+			<span>客户签字：</span>
+		</div>
+	</section>
+
+	<!-- 联系地址 -->
+	<section class="contact-container"> 
+		<div class="contact-info">
+			<span>地址：</span>
+			<span>{{ address }}</span>
+		</div>
+		<div class="contact-info">
+			<span>电话：</span>
+			<span>{{ shop_call }}</span>
+		</div>
+	</section>
+
+</section>
+</body>
+<script>
+
+</script>
+</html>

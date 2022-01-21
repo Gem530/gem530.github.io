@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>下拉刷新，上拉加载</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    #app {
+      width: 100%;
+      height: 400px;
+    }
+    .pull,
+    .refersh {
+      width: 100%;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .refersh {
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .box {
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+    }
+  </style>
+  <script src="./vue.js"></script> 
+  <script src="./refersh.js"></script> 
+</head>
+<body>
+  <div id="app">
+    <div
+      ref="box"
+      class="box"
+      v-if="isMobile"
+      v-loadmore:50="loadmore"
+      @touchend.stop="touchend"
+      @touchmove.stop="touchmove"
+      @touchstart.stop="touchstart"
+    >
+      <div :style="`height: ${referHeight}px;`" class="refersh">
+        {{referFlag === 1 ? '松开手指即可刷新' : referFlag === 2 ? '正在加载中...' : '刷新成功'}}
+      </div>
+      <div v-for="(item, index) in list" :key="index">{{item}}</div>
+      <div class="pull">{{pullFlag === 1 ? '没有更多了' : '加载中...'}}</div>
+    </div>
+    <div
+      v-else
+      ref="box"
+      class="box"
+      v-loadmore:50="loadmore"
+      @mouseup.stop="touchend"
+      @mousemove.stop="touchmove"
+      @mousedown.stop="touchstart"
+    >
+      <div :style="`height: ${referHeight}px;`" class="refersh">
+        {{referFlag === 1 ? '松开手指即可刷新' : referFlag === 2 ? '正在加载中...' : '刷新成功'}}
+      </div>
+      <div v-for="(item, index) in list" :key="index">{{item}}</div>
+      <div class="pull">{{pullFlag === 1 ? '没有更多了' : '加载中...'}}</div>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      directives: {
+        loadmore: {
+          bind (el, binding) {
+            const SELECTWRAP_DOM = el
+            // console.log(binding)
+            SELECTWRAP_DOM.addEventListener('scroll', function () {
+              const CONDITION = this.scrollHeight - this.scrollTop - Number(binding.arg) <= this.clientHeight
+              // const CONDITION = this.scrollHeight - this.scrollTop <= this.clientHeight
+              // console.log(CONDITION)
+              if (CONDITION) {
+                binding.value()
+              }
+            })
+          }
+        }
+      },
+      data: {
+        moveY: 0, // 下拉刷新文字div高度 同时也是下拉高度
+        startY: 0, // 鼠标按下起始点
+        pullFlag: 0, // 上拉加载 0加载中... 1没有更多了
+        bottomPx: 30, // 距离底部多少px，进行上拉加载
+        referFlag: 0, // 下拉刷新 0未下拉  1手指下拉中  2手指移开，执行接口等。。  3加载成功
+        referHeight: 0, // 下拉刷新文字div高度
+        isMobile: true, // 是否未移动端
+        trueFlag: false, // 是否按下鼠标
+        isLoading: true, // 是否触发下拉加载
+        list: [1,2,3,5,1,2,3,5,1,2,3]
+      },
+      created() {
+        if ((navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i))) {
+          // alert('移动端')
+          this.isMobile = true
+        } else {
+          // alert('pc端')
+          this.isMobile = false
+        }
+      },
+      mounted () {
+        this.checkHeight()
+      },
+      methods: {
+        // 检查是否填满高度
+        checkHeight () {
+          const dom = this.$refs.box
+          const CONDITION = dom.scrollHeight - dom.scrollTop <= dom.clientHeight
+          // console.log(dom.scrollHeight - dom.scrollTop, dom.clientHeight, dom.scrollHeight - dom.scrollTop <= dom.clientHeight, 'checkHeight')
+          if (CONDITION) {
+            this.loadmore(() => {
+              this.$nextTick(() => {
+                this.checkHeight()
+              })
+            })
+          }
+        },
+        // 鼠标按下
+        touchstart (e) {
+          e = e || window.event
+          // console.log('手指接触屏幕')
+          this.startY = this.isMobile ? e.touches[0].pageY : e.pageY
+          this.trueFlag = true
+        },
+        // 鼠标移动
+        touchmove (e) {
+          e = e || window.event
+          // console.log('手指移动屏幕')
+          const num = this.$refs.box.scrollTop
+          if (num < 1 && this.trueFlag) {
+            // 只有在顶部时，才执行
+            this.moveY = (this.isMobile ? e.touches[0].pageY : e.pageY) - this.startY
+            if (this.moveY > 0) {
+              // 只有值为整数，才是下拉，才执行
+              e.preventDefault()
+              this.referFlag = 1
+              if (this.moveY > 80) {
+                // 设置下拉最大值
+                this.referHeight = 80
+              }
+            }
+          }
+        },
+        // 鼠标弹起
+        touchend () {
+          this.trueFlag = false
+          if (this.moveY > 0) {
+            this.referFlag = 2
+            setTimeout(() => {
+              this.referFlag = 3
+              this.referHeight = 0
+            }, 1000)
+          }
+        },
+        // 下拉加载
+        loadmore (callBack) {
+          if (this.isLoading) {
+            this.isLoading = false
+            console.log('上拉加载')
+            if (this.list.length > 100) {
+              this.pullFlag = 1
+            } else {
+              setTimeout(() => {
+                this.list = this.list.concat([1,2,3,5,1,2,3,5,1,2,3,5,1,2,3,5])
+                console.log('调用接口', this.list)
+                this.isLoading = true
+                callBack && callBack()
+              }, 1000)
+            }
+          }
+        }
+      }
+    })
+  </script>
+</body>
+</html>

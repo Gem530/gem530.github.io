@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>three 学习 - 第8章 纹理贴图 canvas画布、视频作为纹理贴图</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+  </style>
+  <!-- 引入three.js -->
+  <script src="./three.js"></script>
+  <!-- 引入three 插件 OrbitContols.js -->
+  <script src="./OrbitContols.js"></script>
+</head>
+<body>
+  <script>
+    // 封装threejs图片转为纹理贴图
+    function loadImg (imgUrl) {
+      return new Promise((resolve, reject) => {
+        new THREE.TextureLoader().load(imgUrl, function (texture) {
+          // console.log('111', texture);
+          resolve(texture)
+        })
+      })
+    }
+    // 封装canvas画布
+    function drawCanvas () {
+      return new Promise((resolve, reject) => {
+        let canvas = document.createElement('canvas');
+        canvas.width = 500;
+        canvas.height = 200;
+        let ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffff00';
+        ctx.fillRect(0, 0, 500, 200);
+        ctx.beginPath();
+        ctx.translate(250, 100);
+        ctx.fillStyle = '#ff0000';
+        ctx.font = 'bolder 50px 宋体';
+        ctx.textBaseline = 'middle'; // 文本与fillText定义的纵坐标
+        ctx.textAlign = 'center'; // 文本居中（以fillText定义的横坐标）
+        ctx.fillText('哈哈哈哈哈哈哈', 0, 0);
+        resolve(canvas);
+      })
+    }
+    window.onload = async function () {
+      // 创建场景
+      let scene = new THREE.Scene();
+
+      // 纹理对象Texture阵列、偏移、旋转
+      // let geometry = new THREE.PlaneGeometry(100, 100);
+      // let geometry = new THREE.BoxGeometry(100, 100, 100);
+
+      // // canvas作为纹理贴图
+      // const canvas = await drawCanvas();
+      // // canvas画布对象作为CanavsTexture的参数值重建一个纹理对象
+      // // canvas画布可以理解未一张图片
+      // let texture = new THREE.CanvasTexture(canvas);
+      // let material = new THREE.MeshBasicMaterial({
+      //   map: texture,
+      //   side: THREE.DoubleSide
+      // });
+      // let mesh = new THREE.Mesh(geometry, material);
+      // scene.add(mesh);
+
+      // // 凹凸贴图bumpMap和法线贴图.normalMap  缺少素材，暂不能理解
+      // let texture = await loadImg('../img/55.jpg');
+      // let material = new THREE.MeshPhongMaterial({
+      //   // map: texture,
+      //   color: 0xff0000,
+      //   normalMap: texture, // 发现贴图
+      //   normalScale: new THREE.Vector2(2, 2), // 设置深浅程度，默认值（1，1）
+      //   side: THREE.DoubleSide
+      // });
+      // let mesh = new THREE.Mesh(geometry, material);
+      // scene.add(mesh);
+
+      // // 光照贴图添加阴影  缺少素材，暂不能理解
+      // // 创建一个平面几何体作为投影面
+      // let planeGeometry = new THREE.PlaneGeometry(300, 200);
+      // planeGeometry.faceVertexUvs[1] = planeGeometry.faceVertexUvs[0];
+      // let textureLight = await loadImg('../img/55.jpg');
+      // let planeMaterial = new THREE.MeshLambertMaterial({
+      //   color: 0x999999,
+      //   lightMap: textureLight, // 设置光照贴图
+      //   // lightMapIntensity: 0.5 // 烘培光照的强度，默认1
+      // });
+      // let planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+      // scene.add(planeMesh);
+
+      // // 高光贴图  缺少素材，暂不能理解
+      // var texture = textureLoader.load('earth_diffuse.png');
+      // // 加载高光贴图
+      // var textureSpecular = textureLoader.load('earth_specular.png');
+      // var material = new THREE.MeshPhongMaterial({
+      //   // specular: 0xff0000,//高光部分的颜色
+      //   shininess: 30,//高光部分的亮度，默认30
+      //   map: texture,// 普通纹理贴图
+      //   specularMap: textureSpecular, //高光贴图
+      // }); //材质对象Material
+
+      // // 环境贴图  缺少素材，暂不能理解
+      // var geometry = new THREE.BoxGeometry(100, 100, 100); //立方体
+      // var loader = new THREE.CubeTextureLoader();
+      // // 所有贴图在同一目录下，可以使用该方法设置共用路径
+      // loader.setPath('环境贴图/');
+      // // 立方体纹理加载器返回立方体纹理对象CubeTexture
+      // var CubeTexture = loader.load(['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg']);
+      // //材质对象Material
+      // var material = new THREE.MeshPhongMaterial({
+      //   //网格模型设置颜色，网格模型颜色和环境贴图会进行融合计算
+      //   // color:0xff0000,
+      //   envMap: CubeTexture, //设置环境贴图
+      //   // 环境贴图反射率   控制环境贴图对被渲染三维模型影响程度
+      //   // reflectivity: 0.1,
+      // });
+      // console.log(CubeTexture.image);
+      // var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
+      // scene.add(mesh); //网格模型添加到场景中
+
+      // 数据纹理对象DataTexture 程序生成一张图片的RGB值
+      // let geometry = new THREE.PlaneGeometry(128, 128); // 矩形平面
+      let geometry = new THREE.BoxGeometry(128, 128, 128);
+      // 创建纹理对象的像素数据
+      let widths = 32; // 纹理宽度
+      let heights = 32; // 纹理高度
+      let size = widths * heights; // 像素大小
+      // RGB
+      // let data = new Uint8Array(size * 3); // size * 3：像素在缓冲区占用空间
+      // for (let i = 0; i < size * 3; i+= 3) {
+      //   // 随机设置RGB分量的值
+      //   data [i] = 255 * Math.random();
+      //   data [i + 1] = 255 * Math.random();
+      //   data [i + 2] = 255 * Math.random();
+      // }
+      // // 创建数据纹理对象 RGB格式： THREE.RGBFormat
+      // let texture = new THREE.DataTexture(data, widths, heights, THREE.RGBFormat);
+      // RGBA
+      let data = new Uint8Array(size * 4); // size * 4：像素在缓冲区占用空间
+      for (let i = 0; i < size * 4; i+= 4) {
+        // 随机设置RGB分量的值
+        data [i] = 255 * Math.random();
+        data [i + 1] = 255 * Math.random();
+        data [i + 2] = 255 * Math.random();
+        data [i + 23] = 255 * 0.9;
+      }
+      // 创建数据纹理对象 RGBA格式： THREE.RGBFormat
+      let texture = new THREE.DataTexture(data, widths, heights, THREE.RGBAFormat);
+      texture.needsUpdate = true; // 纹理更新
+      let material = new THREE.MeshPhongMaterial({
+        map: texture,
+        transparent: true, // 允许透明度设置
+        side: THREE.DoubleSide
+      });
+      let mesh = new THREE.Mesh(geometry, material);
+      scene.add(mesh);
+
+      // 点光源
+      let point = new THREE.PointLight(0xffffff);
+      point.position.set(100, 100, 300);
+      scene.add(point);
+      // 环境光
+      let ambient = new THREE.AmbientLight(0x444444);
+      scene.add(ambient); // 环境光添加到场景中
+
+      // 相机设置
+      let width = window.innerWidth;
+      let height = window.innerHeight;
+      let k = width / height; // 窗口比
+      let s = 200; // 三维场景显示范围控制系数，系数越大，显示的范围越大
+      // 创建相机对象
+      /*
+        OrthographicCamera( left, right, top, bottom, near, far )
+        left  渲染空间的左边界
+        right  渲染空间的右边界
+        top  渲染空间的上边界
+        bottom  渲染空间的下边界
+        near  near属性表示的是从距离相机多远的位置开始渲染，一般情况会设置一个很小的值。 默认值0.1
+        far  far属性表示的是距离相机多远的位置截止渲染，如果设置的值偏小小，会有部分场景看不到。 默认值1000
+      */
+      let camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 1, 1000);
+      window.onresize = function () {
+        /*
+          窗口变化自适应
+        */
+        // 重置渲染器输出画布canvas尺寸
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        // 重置相机投影的相关参数
+        k = window.innerWidth / window.innerHeight;
+        camera.left = -s * k;
+        camera.right = s * k;
+        camera.top = s;
+        camera.bottom = -s;
+        // 渲染器执行render方法的时候会读取相机对象的投影矩阵属性projectionMatrix
+        // 但是不会每渲染一帧，就通过相机的属性计算投影矩阵(节约计算资源)
+        // 如果相机的一些属性发生了变化，需要执行updateProjectionMatrix ()方法更新相机的投影矩阵
+        camera.updateProjectionMatrix();
+      }
+      /*
+        透视投影相机设置
+        PerspectiveCamera( fov, aspect, near, far )
+        fov  fov表示视场，所谓视场就是能够看到的角度范围，人的眼睛大约能够看到180度的视场，视角大小设置要根据具体应用，一般游戏会设置60~90度
+        aspect  aspect表示渲染窗口的长宽比，如果一个网页上只有一个全屏的canvas画布且画布上只有一个窗口，那么aspect的值就是网页窗口客户区的宽高比
+        near  near属性表示的是从距离相机多远的位置开始渲染，一般情况会设置一个很小的值。
+        far  far属性表示的是距离相机多远的位置截止渲染，如果设置的值偏小，会有部分场景看不到
+      */
+      // let camera = new THREE.PerspectiveCamera(120, width / height, 0.1, 1000);
+      // window.onresize = function () {
+      //   /*
+      //     窗口变化自适应
+      //   */
+      //   // 重置渲染器输出画布canvas尺寸
+      //   renderer.setSize(window.innerWidth, window.innerHeight);
+      //   // 全屏情况下：设置观察范围长宽比aspect为窗口宽高比
+      //   camera.aspect = window.innerWidth / window.innerHeight;
+      //   // 渲染器执行render方法的时候会读取相机对象的投影矩阵属性projectionMatrix
+      //   // 但是不会每渲染一帧，就通过相机的属性计算投影矩阵(节约计算资源)
+      //   // 如果相机的一些属性发生了变化，需要执行updateProjectionMatrix ()方法更新相机的投影矩阵
+      //   camera.updateProjectionMatrix();
+      // }
+      camera.position.set(100, 100, 100); // 设置相机位置
+      camera.lookAt(scene.position); // 设置相机方向（指向的场景对象）
+
+      /* 
+        辅助三维坐标系AxisHelper  新版本名称AxesHelper
+      */
+      // 辅助坐标系  参数250表示坐标系大小，可以根据场景大小去设置  会显示xyz三条坐标线
+      let axesHelper = new THREE.AxesHelper(250);
+      scene.add(axesHelper);
+
+      // 创建渲染器
+      let renderer = new THREE.WebGLRenderer();
+      renderer.setSize(width, height); // 设置渲染器宽高
+      renderer.setClearColor(0x00ffff); // 设置渲染器底色
+      document.body.appendChild(renderer.domElement); // 添加到页面中
+      function render () {
+        renderer.render(scene, camera);
+        // // 纹理动画
+        // requestAnimationFrame(render);
+        // // 使用加减法可以设置不同的运动方向
+        // // 设置纹理偏移
+        // texture.offset.x -= 0.06;
+      }
+      render();
+      let controls = new THREE.OrbitControls(camera, renderer.domElement); // 创建控件对象
+      controls.addEventListener('change', render); // 监听鼠标、键盘事件
+    }
+  </script>
+</body>
+</html>

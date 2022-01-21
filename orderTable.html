@@ -1,0 +1,1035 @@
+<!DOCTYPE html><!--[if IE]>  <html class="ie"> <![endif]-->
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>检验单</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			font-size: 14px;
+			font-family: "宋体";
+			box-sizing: border-box;
+		}
+		body {
+			overflow-x: hidden;
+		}
+		.padding-top5 {
+			padding-top: 5px;
+		}
+		.container {
+			width: 100%;
+			padding: 40px 0 0;
+		}
+		.head-box {
+			width: 110%;
+		}
+		.head-title {
+			position: relative;
+		}
+		.head-title-left,
+		.head-title-center {
+			font-size: 30px;
+		}
+		.head-title-center {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			text-align: center;
+			color: #ff0000;
+		}
+		.head-sub-title {
+			font-size: 20px;
+		}
+		.head-form {
+			display: flex;
+			/* flex-wrap: wrap; */
+			font-size: 16px;
+			width: 100%;
+		}
+		.head-label {
+			padding-left: 5px;
+		}
+		.head-input {
+			width: 165px;
+			/* height: 16px; */
+			border-bottom: 1px solid #333333;
+		}
+		.head-item-other {
+			display: flex;
+			width: 80%;
+		}
+		.head-item-input {
+			flex: 1;
+			border-bottom: 1px solid #333333;
+		}
+		.table-box {
+			width: 100%;
+			padding-top: 10px;
+			overflow: hidden;
+		}
+		.table-left-box,.table-right-box {
+			width: 49%;
+			overflow: hidden;
+		}
+		.table-left-box {
+			float: left;
+		}
+		.table-right-box {
+			float: right;
+		}
+		.table-left,.table-right {
+			margin-top: 20px;
+			border: 1px solid #333333;
+		}
+		.table-head {
+			position: relative;
+			display: flex;
+			justify-content: center;
+			align-items: flex-start;
+			width: 100%;
+			height: 20px;
+			/* background: #cccccc; */
+			font-weight: 600;
+		}
+		.table-head::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 0;
+			border-bottom: 20px solid #cccccc;
+			z-index: -1;
+		}
+		.table-head-item {
+			flex: 1;
+			display: flex;
+			justify-content: flex-start;
+			align-items: flex-start;
+			padding-left: 45px;
+		}
+		.table-head-item span {
+			margin-left: 20px;
+		}
+		.table-item {
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
+			height: 19px;
+			padding: 0 5px;
+		}
+		.table-item-one {
+			width: 85px;
+			padding-right: 20px;
+		}
+		.table-item-two {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			width: 155px;
+			padding-right: 20px;
+		}
+		.table-text {
+			flex: 1;
+		}
+		.table-item-tag {
+			display: flex;
+			min-width: 60px;
+			justify-content: space-between;
+			align-items: center;
+		}
+		.table-tag-react {
+			width: 25px;
+			height: 10px;
+			border: 1px solid #333333;
+		}
+		.table-item-width {
+			display: flex;
+			width: 50%;
+		}
+		.table-item-width-input {
+			width: 55px;
+			border-bottom: 1px solid #333333;
+			margin-right: 10px;
+		}
+		.table-item-line {
+			/* margin-top: -1px; */
+			border-bottom: 1px solid #333333;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="head-box">
+			<div class="head-title">
+				<span class="head-title-left">特斯拉授权钣喷中心-</span>
+				<span class="head-title-center">深圳智车云科技有限公司</span>
+			</div>
+			<div class="head-sub-title">钣喷质量过程/最终检验单</div>
+			<div class="head-form padding-top5">
+				<span class="head-label" style="padding-left: 0;">工单号：</span><span class="head-input"></span>
+				<span class="head-label">VIN码：</span><span class="head-input"></span>
+				<span class="head-label">车牌号：</span><span class="head-input"></span>
+				<span class="head-label">服务顾问：</span><span class="head-input"></span>
+			</div>
+			<div class="head-form padding-top5">
+				<span class="head-label">车型：</span><span class="head-input">比亚迪 比亚迪F0 2011款 尚酷版悦酷型</span>
+				<span class="head-label">颜色：</span><span class="head-input">黑色</span>
+				<span class="head-label">进厂时间：</span><span class="head-input"></span>
+				<span class="head-label">预计交车时间：</span><span class="head-input"></span>
+			</div>
+			<div class="head-item padding-top5">损伤位置：前保（）左前叶（）右前叶（）左前门（）右前门（）左后门（）右后门（）左裙边（）右裙边（）左后叶（）右后叶（）后保（）	</div>
+			<div class="head-item-other padding-top5">
+				其它<div class="head-item-input"></div>
+			</div>
+		</div>
+
+		<div class="table-box">
+			<div class="table-left-box">
+				<div class="table-left">
+					<div class="table-head">钣金拆解修复</div>
+					<div class="table-item">
+						<div class="table-text">关闭远程访问</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">车辆三件套完整，接车前进行环车检查并核对工项</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">在维修作业前进行断电</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">更换玻璃时粘接面涂抹底涂</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">结构维修切割位置是否正确</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">维修过程中对未修复区域进行安全遮蔽防护</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">经钣金修复后表面平整且与正常面比较没有凹凸</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">焊接部位的焊点正常，无裂缝、无孔洞、无夹渣</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">完全去除修理表面的整形拉痕、锈迹、污渍</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">维修后车身线条平顺对齐</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">羽状边坡面均匀</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">涉及做底、喷涂相关的附件已拆除</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">车辆拆下附件和受损的配件按要求存放</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">对车身和新件进行密封处理</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">对多余的粘接剂和密封胶进行清除</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">钣金维修项目已经按照工单要求完成</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-item-width">开工时间：</div>
+						<div class="table-item-width">完工时间：</div>
+					</div>
+					<div class="table-item">
+						<div class="table-item-width">钣金技师：</div>
+						<div class="table-item-width">互检技师：</div>
+					</div>
+				</div>
+				<div class="table-left">
+					<div class="table-head">喷漆前处理</div>
+					<div class="table-item">
+						<div class="table-text">制作羽状边</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">原子灰平整，筋线合理，无凹凸，无沙眼</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">无明显的砂纸磨痕</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">合理遮蔽车辆</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">原子灰表面和旧涂膜连接处衔接平顺自然</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">中涂底漆有足够的填充，无流挂</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">中涂及旧漆膜打磨彻底且无过度打磨</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">保持维修部位相邻板件的清洁</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-item-width">开工时间：</div>
+						<div class="table-item-width">完工时间：</div>
+					</div>
+					<div class="table-item">
+						<div class="table-item-width">中涂技师：</div>
+						<div class="table-item-width">互检技师：</div>
+					</div>
+				</div>
+				<div class="table-left">
+					<div class="table-head">喷涂面漆</div>
+					<div class="table-item">
+						<div class="table-text">合理遮蔽，无污染其他部位</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">色漆色彩均已完全遮盖</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">漆面达到无流挂，缩孔，光泽度饱满</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">喷涂板件与未喷涂板件颜色一致</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">烘烤后无失光，气泡，溶剂泡</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">烘烤干燥 __________分钟（由喷漆技师填写干燥时间）</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-item-width">开工时间：</div>
+						<div class="table-item-width">完工时间：</div>
+					</div>
+					<div class="table-item">
+						<div class="table-item-width">喷漆技师：</div>
+						<div class="table-item-width">互检技师：</div>
+					</div>
+				</div>
+				<div class="table-left">
+					<div class="table-head">钣金装配</div>
+					<div class="table-item">
+						<div class="table-text">安装外饰件,无松动,歪斜,漏装等现象</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">各部件之间缝隙应在标准范围内并均匀对称</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">维修部件的装配没有和其他部件干涉</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">车辆电子元件功能正常（灯光,喇叭,摄像头等）</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">车内清洁干净，车内客户物品已复位</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">部件的功能检查（车门开启,雷达,门锁,玻璃升降）</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">安装后的外观整洁，漆面无碰伤</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">施工完成后需要进行淋水试验（玻璃,门,后叶子板）</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">车辆进行路试（风噪,异响,辅助驾驶功能）</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">所有维修项目都按照工单完成</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-item-width">开工时间：</div>
+						<div class="table-item-width">完工时间：</div>
+					</div>
+					<div class="table-item">
+						<div class="table-item-width">钣金技师：</div>
+						<div class="table-item-width">互检技师：</div>
+					</div>
+				</div>
+			</div>
+			<div class="table-right-box">
+				<div class="table-right">
+					<div class="table-head">抛光清洁</div>
+					<div class="table-item">
+						<div class="table-text">抛光后不遗留尘点，橘纹，流挂，浅缩孔，抛光痕</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">纹理、光泽和相邻板件相比较过度自然</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">漆料没有附着在未修补部位或零件表面</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">驳口无断层，无其他喷漆不良情况出现</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">清理蜡痕和遮蔽材料，彻底洗车清洁</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">所有维修项目都按照工单完成</div>
+						<div class="table-item-tag table-item-one">
+							<div class="table-tag-react"></div>
+							<div class="table-tag-txt">自检</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-item-width">开工时间：</div>
+						<div class="table-item-width">完工时间：</div>
+					</div>
+					<div class="table-item">
+						<div class="table-item-width">抛光技师：</div>
+						<div class="table-item-width">互检技师：</div>
+					</div>
+				</div>
+				<div class="table-right">
+					<div class="table-head">总检</div>
+					<div class="table-item">
+						<div class="table-text">核对工单项目是否完工</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">单据完整填写并签字</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">无漏油漏水现象</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">内饰清洁无遗漏工具和配件</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">仪表和屏幕无故障报警</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">四门两盖开启关闭功能正常</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">全车灯光工作正常（车内,车外）</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">四门玻璃升降正常</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">空调制冷制热正常</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">喇叭（高低音）</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">车内音箱工作正常</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">雨刮和喷水工作正常</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">停车辅助雷达工作正常</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">钥匙遥控功能正常</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">车身缝隙均匀对称</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">修复表面应平整，筋线齐平</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">车身颜色一致无色差，表面无飞漆</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">维修区域周边部件无油漆污染,无蜡粉</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">油漆面无尘点,无流挂,无砂眼,无砂纸痕</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">油漆面无尘点,无流挂,无砂眼,无砂纸痕</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">轮胎螺丝是否紧固</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">12V电池是否紧固</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">加注玻璃水</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">检查所有物理按键是否工作正常</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">车辆路试无异常</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-item-width">其他：</div>
+					</div>
+					<div class="table-item-line"></div>
+					<div class="table-item"></div>
+				</div>
+				<div class="table-right">
+					<div class="table-head">
+						<div class="table-head-item">
+							<span>胎压</span>
+							<span>胎纹</span>
+						</div>
+						<div class="table-head-item">
+							<span>胎压</span>
+							<span>胎纹</span>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-item-width">
+							<span>左前：</span>
+							<span class="table-item-width-input"></span>
+							<span class="table-item-width-input"></span>
+						</div>
+						<div class="table-item-width">
+							<span>右前：</span>
+							<span class="table-item-width-input"></span>
+							<span class="table-item-width-input"></span>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-item-width">
+							<span>左后：</span>
+							<span class="table-item-width-input"></span>
+							<span class="table-item-width-input"></span>
+						</div>
+						<div class="table-item-width">
+							<span>右后：</span>
+							<span class="table-item-width-input"></span>
+							<span class="table-item-width-input"></span>
+						</div>
+					</div>
+					<div class="table-item-line"></div>
+					<div class="table-item">
+						<div class="table-text">固件是否完成升级？</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">是否存在返修问题？</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">是否按时交车？</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-text">如出现延时是否提前告知客户？</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item-line"></div>
+					<div class="table-item">
+						<div class="table-text">出厂前电量剩余里程：</div>
+					</div>
+					<div class="table-item">
+						<span>最终确认出厂时间：</span>
+						<span>年</span>
+						<span>月</span>
+						<span>日</span>
+						<span>时</span>
+					</div>
+					<div class="table-item">
+						<div class="table-item-width">总检签字：</div>
+						<div class="table-item-width">停车位置：</div>
+					</div>
+					<div class="table-item"></div>
+					<div class="table-item">
+						<div class="table-text">SA确认交车前远程访问功能已恢复</div>
+						<div class="table-item-two">
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">是</div>
+							</div>
+							<div class="table-item-tag">
+								<div class="table-tag-react"></div>
+								<div class="table-tag-txt">否</div>
+							</div>
+						</div>
+					</div>
+					<div class="table-item">
+						<div class="table-item-width">服务顾问签字：</div>
+						<div class="table-item-width">日期：</div>
+					</div>
+					<div class="table-item"></div>
+					<div class="table-item">
+						<div class="table-item-width">备注：</div>
+					</div>
+					<div class="table-item"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

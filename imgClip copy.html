@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zn">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片裁剪</title>
+  <script src="./vue.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      -moz-user-select: none;
+      -khtml-user-select: none;
+      user-select: none;
+      box-sizing: border-box;
+    }
+    .content-box {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      padding: 20px 10px;
+    }
+    /* 裁剪区域css */
+    .clip-img {
+      border: 1px solid #000000;
+    }
+    .box-img {
+      position: relative;
+      overflow: hidden;
+      /* border: 1px solid #000000; */
+      /* margin: 70px 70px 0; */
+    }
+    .imgRef {
+      width: 100%;
+      height: 100%;
+    }
+    .shade-gray {
+      position: absolute !important;
+      background: #000000;
+      opacity: 0.3;
+    }
+    .clip-box {
+      position: absolute;
+      cursor: move;
+    }
+    .top-shade {
+      top: 0px;
+      left: 0px;
+      right: 0px;
+    }
+    .left-shade {
+      left:0px;
+    }
+    .right-shade {
+      right:0px;
+    }
+    .bottom-shade {
+      left:0px;
+      right:0px;
+      bottom:0px;
+    }
+    .point-gray {
+      background: #00ffff;
+      opacity: 0.7;
+    }
+    .top-point {
+      position: absolute;
+      cursor: s-resize;
+    }
+    .top-left-point {
+      position: absolute;
+      cursor: se-resize;
+    }
+    .top-right-point {
+      position: absolute;
+      cursor: ne-resize;
+    }
+    .left-point {
+      position: absolute;
+      cursor: w-resize;
+    }
+    .right-point {
+      position: absolute;
+      cursor: w-resize;
+    }
+    .bottom-point {
+      position: absolute;
+      cursor: s-resize;
+    }
+    .bottom-left-point {
+      position: absolute;
+      cursor: ne-resize;
+    }
+    .bottom-right-point {
+      position: absolute;
+      cursor: se-resize;
+    }
+    /* 操作按钮css */
+    .make-box {
+      flex: 1;
+      min-height: 300px;
+      padding: 20px 20px 0;
+    }
+    .make-box-item {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      flex-wrap: wrap;
+      padding-bottom: 10px;
+    }
+    .make-box-item button,
+    .make-box-item .upload-button {
+      background: #337ab7;
+      padding: 7px 15px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+      border: none;
+      font-size: 16px;
+      color: #ffffff;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    /* 裁剪图片预览css */
+    .clip-preview-img {
+      position: relative;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      border: 1px solid #000000;
+    }
+    .preview-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="content-box">
+      <!-- 裁剪图片区域 -->
+      <div class="clip-img" :style="`width: ${domWidth + 2}px;height: ${domHeight + 2}px;`">
+        <!-- 预览图片区域  父盒子 -->
+        <div ref="boxImg" class="box-img" :style="`width: ${domWidth}px;height: ${domHeight}px;`">
+          <canvas ref="canvas" :width="domWidth" :height="domHeight"></canvas>
+          <!--  style="display: none;" -->
+          <!-- 图片 -->
+          <!-- <img ref="imgRef" class="imgRef" :src="imgURL" :style="`transform: rotate(${rotate}deg)${FlipFlagX ? ' rotateY(180deg)' : ''} scale(${scale});`"> -->
+          <!-- 裁剪框 -->
+          <div
+            class="clip-box"
+            :style="`top:${clipTop}px;left:${clipLeft}px;width:${clipBoxWidth}px;height:${clipBoxHeight}px;`"
+            @mousedown="moveStart('clipBox', $event)"
+            @touchstart="moveStart('clipBox', $event)"
+          >
+            <!-- --------- 移动锚点 ---------- -->
+            <!-- 上锚点 -->
+            <div
+              class="top-point point-gray"
+              :style="`top: 0px;left: ${clipBoxWidth / 2 - 5}px;width: ${pointWidth}px;height: ${pointHeight}px;`"
+              @mousedown.stop="moveStart('top', $event)"
+              @touchstart.stop="moveStart('top', $event)"
+            ></div>
+            <!-- 上左锚点 -->
+            <div
+              class="top-left-point point-gray"
+              :style="`top: 0px;left: 0px;width: ${pointWidth}px;height: ${pointHeight}px;`"
+              @mousedown.stop="moveStart('topleft', $event)"
+              @touchstart.stop="moveStart('topleft', $event)"
+            ></div>
+            <!-- 上右锚点 -->
+            <div
+              class="top-right-point point-gray"
+              :style="`top: 0px;right: 0px;width: ${pointWidth}px;height: ${pointHeight}px;`"
+              @mousedown.stop="moveStart('topright', $event)"
+              @touchstart.stop="moveStart('topright', $event)"
+            ></div>
+            <!-- 左锚点 -->
+            <div
+              class="left-point point-gray"
+              :style="`top: ${clipBoxHeight / 2 - 5}px;left: 0px;width: ${pointWidth}px;height: ${pointHeight}px;`"
+              @mousedown.stop="moveStart('left', $event)"
+              @touchstart.stop="moveStart('left', $event)"
+            ></div>
+            <!-- 右锚点 -->
+            <div
+              class="right-point point-gray"
+              :style="`top: ${clipBoxHeight / 2 - 5}px;right: 0px;width: ${pointWidth}px;height: ${pointHeight}px;`"
+              @mousedown.stop="moveStart('right', $event)"
+              @touchstart.stop="moveStart('right', $event)"
+            ></div>
+            <!-- 下锚点 -->
+            <div
+              class="bottom-point point-gray"
+              :style="`bottom: 0px;left: ${clipBoxWidth / 2 - 5}px;width: ${pointWidth}px;height: ${pointHeight}px;`"
+              @mousedown.stop="moveStart('bottom', $event)"
+              @touchstart.stop="moveStart('bottom', $event)"
+            ></div>
+            <!-- 下左锚点 -->
+            <div
+              class="bottom-left-point point-gray"
+              :style="`bottom: 0px;left: 0px;width: ${pointWidth}px;height: ${pointHeight}px;`"
+              @mousedown.stop="moveStart('bottomleft', $event)"
+              @touchstart.stop="moveStart('bottomleft', $event)"
+            ></div>
+            <!-- 下右锚点 -->
+            <div
+              class="bottom-right-point point-gray"
+              :style="`bottom: 0px;right: 0px;width: ${pointWidth}px;height: ${pointHeight}px;`"
+              @mousedown.stop="moveStart('bottomright', $event)"
+              @touchstart.stop="moveStart('bottomright', $event)"
+            ></div>
+          </div>
+          <!-- ---------- 阴影 --------- -->
+          <!-- 上阴影 -->
+          <div class="top-shade shade-gray" :style="`bottom: ${domHeight - clipTop}px;`"></div>
+          <!-- 左阴影 -->
+          <div class="left-shade shade-gray" :style="`top:${clipTop}px;right:${domWidth - clipLeft}px;bottom:${domHeight - (clipTop + clipBoxHeight)}px;`"></div>
+          <!-- 右阴影 -->
+          <div class="right-shade shade-gray" :style="`top:${clipTop}px;left:${clipLeft + clipBoxWidth}px;bottom:${domHeight - (clipTop + clipBoxHeight)}px;`"></div>
+          <!-- 下阴影 -->
+          <div class="bottom-shade shade-gray" :style="`top:${clipTop + clipBoxHeight}px;`"></div>
+        </div>
+      </div>
+      <!-- 操作区域 -->
+      <div class="make-box">
+        <div class="make-box-item">
+          <!-- <button @click="download">上传</button> -->
+          <input type="file" class="upload-button" id="order-file" @change="orderFileChange">
+          <button @click="clipHandle">裁剪</button>
+          <button @click="download">下载</button>
+        </div>
+        <div class="make-box-item">
+          <button @click="scale += 0.1;clipHandle()">放大</button>
+          <button @click="scale -= 0.1;clipHandle()">缩小</button>
+          <button @click="rotate -= 1;clipHandle()">向左旋转</button>
+          <button @click="rotate += 1;clipHandle()">向右旋转</button>
+          <button @click="FlipFlagX = !FlipFlagX;clipHandle()">左右翻转</button>
+          <button @click="FlipFlagY = !FlipFlagY;clipHandle()">上下翻转</button>
+        </div>
+        <div class="make-box-item">
+          <button @click="clipLeft -= 1;stopOverClipBox();clipHandle()">左移</button>
+          <button @click="clipLeft += 1;stopOverClipBox();clipHandle()">右移</button>
+          <button @click="clipTop -= 1;stopOverClipBox();clipHandle()">上移</button>
+          <button @click="clipTop += 1;stopOverClipBox();clipHandle()">下移</button>
+        </div>
+        <div class="make-box-item">
+          <button @click="k = '';clipHandle()">自定义宽高</button>
+          <button @click="k = '16:9';stopOverClipBox();clipHandle()">16:9</button>
+          <button @click="k = '4:3';stopOverClipBox();clipHandle()">4:3</button>
+          <button @click="k = '1:1';stopOverClipBox();clipHandle()">1:1</button>
+          <button @click="k = '2:3';stopOverClipBox();clipHandle()">2:3</button>
+        </div>
+        <div class="make-box-item">
+          <div class="input-label">裁剪宽度(px)：</div>
+          <input type="number" :value="clipBoxWidth" @blur="setClipBoxWidthOrHeight('width', $event)">
+        </div>
+        <div class="make-box-item">
+          <div class="input-label">裁剪高度(px)：</div>
+          <input type="number" :value="clipBoxHeight" @blur="setClipBoxWidthOrHeight('height', $event)">
+        </div>
+        <div class="preview-info">
+          {{clipBoxWidth}} x {{clipBoxHeight}}像素， 旋转{{rotate}}度
+        </div>
+      </div>
+      <!-- 裁剪图片预览 -->
+      <div class="clip-preview-img" :style="`width: ${domWidth + 2}px;height: ${domHeight + 2}px;`">
+        <div class="preview-text">预览区域</div>
+        <img :src="tempImg">
+        <canvas ref="tempCanvas"></canvas>
+      </div>
+    </div>
+  </div>
+  <script>
+    // 还可以加上鼠标滚轮放大缩小图片，按钮移动图片，表单直接修改宽高，需要把限制抽出来，在各个地方加上
+    new Vue({
+      el: '#app',
+      data: {
+        domFlag: false, // 隐藏元素
+        isMobile: false, // 判断是否为移动端 true移动端 false非移动端
+        tempImg: '',
+        imgURL: './img/22.jpg',
+        initWidth: 300, // 初始预览图片宽度
+        initHeight: 550, // 初始预览图片高度
+        domWidth: 0, // 最终得到的预览图片宽度
+        domHeight: 0, // 最终得到的预览图片高度
+        clipTop: 160, // 裁剪框的上顶点
+        clipLeft: 100, // 裁剪框的左顶点
+        clipBoxWidth: 150, // 裁剪框宽度
+        clipBoxHeight: 180, // 裁剪框高度
+        // clipRight: 10, // 裁剪框的右顶点
+        // clipBottom: 10, // 裁剪框的下顶点
+        movePoint: '', // 目前移动的锚点
+        // moveFlag: false, // false表示不可以移动  true表示可以移动锚点  好像无用了
+        tempWidth: 0, // 存储临时裁剪框宽度
+        tempHeight: 0, // 存储临时裁剪框高度
+        tempLeft: 0, // 存储裁剪框临时左顶点
+        tempTop: 0, // 存储裁剪框临时上顶点
+        pointWidth: 10, // 锚点宽度
+        pointHeight: 10, // 锚点高度
+        firstX: 0, // 鼠标按下时的x坐标
+        firstY: 0, // 鼠标按下时的y坐标
+        rotate: 0, // 旋转角度
+        FlipFlagX: false, // 图片左右镜像翻转
+        FlipFlagY: false, // 图片上下镜像翻转
+        scale: 1, // 图片缩放
+        k: '2:3', // 宽高比
+      },
+      watch: {
+        clipBoxWidth (val) {
+          // 裁剪框宽度取整
+          this.clipBoxWidth = Math.floor(val)
+          console.log('clipBoxWidth', val)
+        },
+        clipBoxHeight (val) {
+          // 裁剪框高度取整
+          this.clipBoxHeight = Math.floor(val)
+          console.log('clipBoxHeight', val)
+        }
+      },
+      created() {
+        // 判断是移动端还是pc端
+        if(/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+          this.isMobile = true
+        } else {
+          this.isMobile = false
+        }
+        this.initDomWH()
+        if (this.isMobile) {
+          document.addEventListener('touchend', this.moveEnd)
+        } else {
+          document.addEventListener('mouseup', this.moveEnd)
+        }
+      },
+      mounted () {
+      },
+      destroyed () {
+        document.removeEventListener('mouseup', this.moveEnd)
+      },
+      methods: {
+        // 初始化元素宽高
+        initDomWH () {
+          const self = this;
+          this.$nextTick(async () => {
+            let imgDom = new Image()
+            imgDom.src = self.imgURL
+            // 加载图片
+            let img = await this.imgload(imgDom)
+            // console.log(img, img.path[0].width, img.path[0].height)
+            // 获取图片的宽高
+            const widthImg = img.path[0].width
+            const heightImg = img.path[0].height
+            // self.domWidth = widthImg
+            // self.domHeight = heightImg
+            let domW = 0
+            let domH = 0
+            // 给dom元素赋值宽高
+            if (widthImg > self.initWidth) {
+              // 如果图片宽度大于初始宽度 取初始宽度
+              domW = self.initWidth
+              // 计算图片高度
+              domH = domW * heightImg / widthImg
+              if (domH > self.initHeight) {
+                // 计算后的图片高度还大于初始高度 取初始高度
+                domH = self.initHeight
+                // 计算出图片宽度
+                domW = domH * widthImg / heightImg
+              }
+            } else if (heightImg > self.initHeight) {
+              // 计算后的图片高度还大于初始高度 取初始高度
+              domH = self.initHeight
+              // 计算出图片宽度
+              domW = domH * widthImg / heightImg
+            }
+            self.domWidth = Math.round(domW)
+            self.domHeight = Math.round(domH)
+            // 如果裁剪框超出了预览图片盒子，阻止溢出
+            this.stopOverClipBox()
+
+            this.clipHandle()
+          })
+        },
+        imgload (img) {
+          return new Promise((resolve, reject) => {
+            img.onload = (data) => {
+              resolve(data)
+            }
+            img.onerror = () => {
+              reject()
+            }
+          })
+        },
+        // 上传
+        orderFileChange () {
+          const file = document.querySelector('#order-file')
+          const fileList = file.files
+          this.imgURL = window.URL.createObjectURL(file.files[0])
+          this.initDomWH()
+          this.clipHandle()
+          console.log(file, fileList)
+        },
+        // 下载
+        download () {
+          const tempCanvas = this.$refs.tempCanvas
+          const tempURL = tempCanvas.toDataURL('image/png')
+          let a = document.createElement('a') // 创建a标签
+          a.download = 'photo' // 文件名
+          a.href = tempURL // 下载的文件地址
+          a.click() // 点击下载
+        },
+        // 裁剪图片
+        async clipHandle () {
+          const self = this
+          const tempCanvas = this.$refs.tempCanvas
+          const tempCtx = tempCanvas.getContext('2d')
+          
+          const canvas = this.$refs.canvas
+          const ctx = canvas.getContext('2d')
+          const top = this.clipTop // 裁剪框的上顶点
+          const left = this.clipLeft // 裁剪框的左顶点
+          const width = this.clipBoxWidth // 裁剪框宽度
+          const height = this.clipBoxHeight // 裁剪框高度
+          // let img = this.$refs.imgRef // 使用这种方法,第二次点击裁剪,不会再裁剪图片,因为不会执行onload方法
+          let img = new Image()
+          img.src = this.imgURL
+          img.crossOrigin = 'anonymous'
+          await this.imgload(img)
+          
+          // 这时的图片还是大小不一样,会导致裁剪的图片位置不一致,所以使用canvas先把图片绘制到预览图片大小的canvas上,再转化为图片,这时的图片大小就和预览图片大小一致,这时裁剪的图片就会和裁剪框的图片一致
+          // 使用canvas把导入都图片大小绘制成预览图片盒子的大小
+          // 先把图片转化为canvas，再进行裁剪
+          canvas.width = self.domWidth
+          canvas.height = self.domHeight
+          // 为了把旋转点移动中心 旋转、缩放等等，好像都需要设置，不然以0,0为起点缩放，旋转
+          ctx.translate(this.domWidth/2, this.domHeight/2)
+          // (canvas图片旋转角度 = css旋转角度(30deg) * Math.PI / 180) = css旋转角度(30deg)
+          ctx.rotate(this.rotate * Math.PI / 180)
+          ctx.scale(this.scale, this.scale)
+          ctx.translate(-this.domWidth/2, -this.domHeight/2)
+          // 图片左右镜像翻转
+          if (this.FlipFlagX) {
+            ctx.translate(this.domWidth, 0)
+            ctx.scale(-1, 1)
+            // console.log(1)
+          }
+          // 图片上下镜像翻转
+          if (this.FlipFlagY) {
+            ctx.translate(0, this.domHeight)
+            ctx.scale(1, -1)
+            // console.log(1)
+          }
+          ctx.drawImage(img, 0, 0, self.domWidth, self.domHeight)
+
+          // 使用canvas预览裁剪效果
+          // 裁剪图片
+          tempCanvas.width = width
+          tempCanvas.height = height
+          tempCtx.drawImage(canvas, left, top, width, height, 0, 0, width, height)
+          // // 使用img预览裁剪效果
+          // // canvas转化为图片
+          // const dataURL = canvas.toDataURL('image/jpeg')
+          // // canvas.toDataURL('image/jpeg') 与 canvas.toDataURL('image/png') 区别
+          // // jpeg: 使用img预览时，转化base64更快；但是转化的图片，溢出部分为黑色，黑色目前没有找到转换方法
+          // // png: 使用img预览时，转化base64比较慢，img预览图片会严重延迟；但是转化的图片，溢出部分为透明色，可以使用下面的方法转换
+          // let tempDom = new Image()
+          // tempDom.src = dataURL
+          // await this.imgload(tempDom)
+          // canvas.width = width
+          // canvas.height = height
+          // ctx.drawImage(tempDom, left, top, width, height, 0, 0, width, height)
+          // let imageData = ctx.getImageData(0, 0, 300, 300)
+          // for (let i = 0; i < imageData.data.length; i+=4) {
+          //   // 当该像素是透明的，则设置成白色
+          //   if (imageData.data[i + 3] === 0) {
+          //     imageData.data[i] = 255;
+          //     imageData.data[i + 1] = 255;
+          //     imageData.data[i + 2] = 255;
+          //     imageData.data[i + 3] = 255;
+          //   }
+          // }
+          // ctx.putImageData(imageData, 0, 0)
+          // const tempURL = canvas.toDataURL('image/jpeg')
+          // self.tempImg = tempURL
+          // // canvas blob 这时的blob可以用于上传图片,相当于file
+          // canvas.toBlob(function (blob) {
+          //   console.log(blob)
+          // }, 'image/jpeg')
+
+          // drawImage(img,sx,sy,swidth,sheight,x,y,width,height) : 剪切图像，并在画布上
+          // sx 开始剪切的图片上的x位置
+          // sy 开始剪切的图片上的y位置
+          // swidth 被剪切的宽度
+          // sheight 被剪切的高度
+          // x 在画布上放置图像的x位置
+          // y 在画布上放置图像的y位置
+          // width 要使用的图像宽度
+          // height 要使用的图像高度
+        },
+        // 根据pc或者移动端 返回x，y坐标
+        returnXY (event) {
+          // return new Promise((resolve, reject))
+          // 鼠标按下时的x/y坐标
+          let e = { pageX: 0, pageY: 0 }
+          if (this.isMobile) {
+            document.addEventListener('touchend', this.moveEnd)
+            e = { pageX: event.touches[0].pageX, pageY: event.touches[0].pageY }
+          } else {
+            e = { pageX: event.pageX, pageY: event.pageY }
+          }
+          return e
+        },
+        // 鼠标按下
+        moveStart (point, event) {
+          // this.moveFlag = true
+          this.movePoint = point
+          // 根据pc或者移动端 返回x，y坐标
+          let e = this.returnXY(event)
+          this.firstX = Math.round(e.pageX - this.$refs.boxImg.offsetLeft - this.pointWidth / 2)
+          this.firstY = Math.round(e.pageY - this.$refs.boxImg.offsetTop - this.pointHeight / 2)
+          // 鼠标按下时的裁剪框宽高
+          this.tempWidth = this.clipBoxWidth // 存储临时裁剪框宽度
+          this.tempHeight = this.clipBoxHeight // 存储临时裁剪框高度
+          this.tempLeft = this.clipLeft // 存储裁剪框临时左顶点
+          this.tempTop = this.clipTop // 存储裁剪框临时上顶点
+          if (this.isMobile) {
+            document.addEventListener('touchmove', this.moveTo, { passive: false }) // { passive: false } 谷歌浏览器需要加上这个，不然使用event.preventDefault()会报错，讲解链接：https://blog.csdn.net/lijingshan34/article/details/88350456
+          } else {
+            document.addEventListener('mousemove', this.moveTo)
+          }
+        },
+        // 鼠标移动
+        moveTo (event) {
+          event.preventDefault() // 阻止手指滑动时 页面滚动
+          // if (this.moveFlag) {
+          // this.movePoint = point
+          // console.log(event)
+
+          // 根据pc或者移动端 返回x，y坐标
+          let e = this.returnXY(event)
+
+          // // 裁剪框宽高不能少于锚点的宽高一共有三个锚点,所以*3
+          // const pointWidth = Math.round(this.pointWidth * 3)
+          // const pointHeight = Math.round(this.pointHeight * 3)
+          // if (this.clipBoxWidth < pointWidth) {
+          //   // this.clipLeft -= 1
+          //   this.clipBoxWidth = pointWidth
+          //   this.moveFlag = false
+          //   return
+          // }
+          // if (this.clipBoxHeight < pointHeight) {
+          //   // this.clipTop -= 1
+          //   this.clipBoxHeight = pointHeight
+          //   this.moveFlag = false
+          //   return
+          // }
+          
+          if (this.movePoint === 'clipBox') {
+            // 移动裁剪框盒子
+            this.clipLeft = Math.round(e.pageX - this.$refs.boxImg.offsetLeft - (this.clipBoxWidth / 2))
+            this.clipTop = Math.round(e.pageY - this.$refs.boxImg.offsetTop - (this.clipBoxHeight / 2))
+          } else {
+            // 移动锚点,增减裁剪框宽高
+            // 定义移动的鼠标x/y坐标
+            let left = Math.round(e.pageX - this.$refs.boxImg.offsetLeft - this.pointWidth / 2)
+            let top = Math.round(e.pageY - this.$refs.boxImg.offsetTop - this.pointHeight / 2)
+            // 到达左边框时,不再执行
+            if (left < 0) left = 0
+            // 到达上边框时,不再执行
+            if (top < 0) top = 0
+
+            // 控制宽高增减,如果是移动左和上锚点还需要移动左顶点和上顶点
+            let tempWidth = 0
+            let tempHeight = 0
+            if (this.movePoint.indexOf('left') !== -1) {
+              this.clipLeft = left
+              tempWidth = this.firstX - left + this.tempWidth
+              this.clipBoxWidth = Math.round(tempWidth)
+            }
+            if (this.movePoint.indexOf('top') !== -1) {
+              this.clipTop = top
+              tempHeight = this.firstY - top + this.tempHeight
+              this.clipBoxHeight = Math.round(tempHeight)
+            }
+            if (this.movePoint.indexOf('right') !== -1) {
+              tempWidth = left - this.firstX + this.tempWidth
+              this.clipBoxWidth = Math.round(tempWidth)
+            }
+            if (this.movePoint.indexOf('bottom') !== -1) {
+              tempHeight = top - this.firstY + this.tempHeight
+              this.clipBoxHeight = Math.round(tempHeight)
+            }
+
+            // 正常的正向移动就走上面模块的逻辑，如：左移就执行if (this.movePoint.indexOf('left') !== -1)中的逻辑代码
+            // 允许控制右锚点移到左锚点左边，其他方向同理
+            // 如果右锚点移到左锚点左边，即改变左锚点的clipLeft顶点，让左锚点左移（原来的tempLeft + 目前的裁剪框盒子宽度clipBoxHeight），其他方向同理
+            // 上右和下左两个方向需单独处理
+            // 上右方向：左移，下移
+            // 下左方向：右移，上移
+            // 左移（原来的tempLeft - 目前的裁剪框盒子宽度clipBoxWidth）
+            // 下移（原来的tempTop + 目前的裁剪框盒子宽度tempHeight）
+            // 右移（原来的tempLeft + 目前的裁剪框盒子宽度tempWidth）
+            // 上移（原来的tempTop - 目前的裁剪框盒子宽度clipBoxHeight）
+            let leftTemp = 0
+            let topTemp = 0
+            if (this.movePoint === 'topright') {
+              leftTemp = this.tempLeft - Math.abs(this.clipBoxWidth)
+              topTemp = this.tempTop + Math.abs(this.tempHeight)
+            } else if (this.movePoint === 'bottomleft') {
+              leftTemp = this.tempLeft + Math.abs(this.tempWidth)
+              topTemp = this.tempTop - Math.abs(this.clipBoxHeight)
+            } else {
+              if (this.movePoint.indexOf('bottom') !== -1 || this.movePoint.indexOf('right') !== -1) {
+                leftTemp = this.tempLeft - Math.abs(this.clipBoxWidth)
+                topTemp = this.tempTop - Math.abs(this.clipBoxHeight)
+              }
+              if (this.movePoint.indexOf('top') !== -1 || this.movePoint.indexOf('left') !== -1) {
+                leftTemp = this.tempLeft + Math.abs(this.tempWidth)
+                topTemp = this.tempTop + Math.abs(this.tempHeight)
+              }
+            }
+            if (this.clipBoxWidth < 0) {
+              this.clipLeft = leftTemp
+              this.clipBoxWidth = Math.abs(this.clipBoxWidth)
+              // console.log('width', this.clipLeft, this.clipBoxWidth, this.clipBoxHeight)
+            }
+            if (this.clipBoxHeight < 0) {
+              this.clipTop = topTemp
+              this.clipBoxHeight = Math.abs(this.clipBoxHeight)
+              // console.log('height', this.clipLeft, this.clipBoxWidth, this.clipBoxHeight)
+            }
+
+            // 到达右边框时,裁剪框宽度不再增加
+            if (this.clipBoxWidth + this.clipLeft >= this.domWidth) {
+              this.clipBoxWidth = Math.round(this.domWidth - this.clipLeft)
+            }
+            // 到达下边框时,裁剪框高度不再增加
+            if (this.clipBoxHeight + this.clipTop >= this.domHeight) {
+              this.clipBoxHeight = Math.round(this.domHeight - this.clipTop)
+            }
+          }
+
+          // 宽高比，如果设置了宽高比，则在移动的时候以宽高比自适应增减裁剪框面积
+          // this.kStopOverClipBox()
+
+          // 用于限制裁剪框不会移出预览图片盒子
+          this.stopOverClipBox()
+
+          // 裁剪图片
+          this.clipHandle()
+          // }
+        },
+        // 鼠标弹起
+        moveEnd () {
+          if (this.isMobile) {
+            document.removeEventListener('touchmove', this.moveTo)
+          } else {
+            document.removeEventListener('mousemove', this.moveTo)
+          }
+        },
+        // 用于限制裁剪框不会移出预览图片盒子
+        stopOverClipBox () {
+          // 当裁剪框的上左坐标<=0，裁剪框不再往上左移动，即都等于0
+          if (this.clipLeft <= 0) {
+            this.clipLeft = 0
+          }
+          if (this.clipTop <= 0) {
+            this.clipTop = 0
+          }
+          // 当裁剪框的 裁剪框宽高>预览图片盒子宽高，重新计算裁剪框宽高
+          if (this.clipBoxWidth > this.domWidth) {
+            this.clipLeft = 0
+            this.clipBoxWidth = this.domWidth
+          }
+          if (this.clipBoxHeight > this.domHeight) {
+            this.clipTop = 0
+            this.clipBoxHeight = this.domHeight
+          }
+          // 当裁剪框的上左坐标+裁剪框宽高>预览图片盒子宽高，重新计算上左顶点坐标
+          if ((this.clipLeft + this.clipBoxWidth) > this.domWidth) {
+            this.clipLeft = this.domWidth - this.clipBoxWidth
+          }
+          if ((this.clipTop + this.clipBoxHeight) > this.domHeight) {
+            this.clipTop = this.domHeight - this.clipBoxHeight
+          }
+          // 如果有设置宽高比，则在拖动锚点时，宽高按比列移动，并且进行宽高限制，防止裁剪框宽高超出预览图片区
+          if (this.k) {
+            const [w, h] = this.k.split(':')
+            this.clipBoxHeight = this.clipBoxWidth * (Number(h) / Number(w))
+            this.clipBoxWidth = this.clipBoxHeight * (Number(w) / Number(h))
+            this.limitWidth()
+            this.limitHeight()
+          }
+        },
+        // // 用于限制设置了宽高比后，裁剪框不会超出预览图片盒子
+        // kStopOverClipBox () {
+        //   // 宽高比，如果设置了宽高比，则在移动的时候以宽高比自适应增减裁剪框面积
+        //   if (this.k) {
+        //     const [w, h] = this.k.split(':')
+        //     // console.log(k.split(':'))
+        //     if (this.movePoint.indexOf('left') !== -1 || this.movePoint.indexOf('right') !== -1) {
+        //       this.clipBoxHeight = this.clipBoxWidth * (Number(h) / Number(w))
+        //     }
+        //     if (this.movePoint.indexOf('top') !== -1 || this.movePoint.indexOf('bottom') !== -1) {
+        //       this.clipBoxWidth = this.clipBoxHeight * (Number(w) / Number(h))
+        //       this.limitWidth()
+        //       this.limitHeight()
+        //     }
+        //   }
+        // },
+        // 裁剪框宽度限制
+        limitWidth () {
+          if (this.clipBoxWidth + this.clipLeft > this.domWidth) {
+            this.clipBoxWidth = this.domWidth - this.clipLeft
+            if (this.k) {
+              const [w, h] = this.k.split(':')
+              this.clipBoxHeight = this.clipBoxWidth * (Number(h) / Number(w))
+            }
+          }
+        },
+        // 裁剪框高度限制
+        limitHeight () {
+          if (this.clipBoxHeight + this.clipTop > this.domHeight) {
+            this.clipBoxHeight = this.domHeight - this.clipTop
+            if (this.k) {
+              const [w, h] = this.k.split(':')
+              this.clipBoxWidth = this.clipBoxHeight * (Number(w) / Number(h))
+            }
+          }
+        },
+        // 使用表单设置宽高
+        setClipBoxWidthOrHeight (type, e) {
+          // console.log(type, e.target.value, this.clipBoxHeight, this.clipBoxWidth)
+          if (type === 'width') {
+            this.clipBoxWidth = Number(e.target.value)
+            this.limitWidth()
+          }
+          if (type === 'height') {
+            this.clipBoxHeight = Number(e.target.value)
+            this.limitHeight()
+          }
+        }
+      }
+    })
+  </script>
+</body>
+</html>

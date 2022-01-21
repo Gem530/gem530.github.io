@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>three 学习 - 第一章</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+  </style>
+  <!-- 引入three.js -->
+  <script src="./three.js"></script>
+  <!-- 引入three 插件 OrbitContols.js -->
+  <script src="./OrbitContols.js"></script>
+</head>
+<body>
+  <script>
+    window.onload = function () {
+      console.log('开始', THREE)
+      /* 
+        创建场景对象
+      */
+      let scene = new THREE.Scene();
+      /* 
+        创建网络模型
+      */
+      let geometry = new THREE.BoxGeometry(100, 150, 150); // 创建一个立方体几何对象Geometry
+      let material = new THREE.MeshLambertMaterial({ color: 0x00ffff, wireframe: true }) // 材质对象Material
+      let mesh = new THREE.Mesh(geometry, material); // 网格模型对象Mesh
+      scene.add(mesh); // 网格模型添加到场景中
+      // let geometry1 = new THREE.SphereGeometry(80, 100, 100); // 创建一个球体几何对象
+      // // let material1 = new THREE.MeshLambertMaterial({
+      // //   color: 0x00ffff // 材质颜色，比如蓝色0x00ffff
+      // //   // opacity: 0.7, // 透明度设置，0表示完全透明，1表示完全不透明
+      // //   // transparent: true // 是否开启透明，默认false
+      // //   // wireframe: true // 将几何图形渲染为线框。 默认值为false
+      // // }) // 材质对象Material
+      // let material1 = new THREE.MeshPhongMaterial({
+      //   color: 0x00ffff,
+      //   specular: 0x4488ee,
+      //   shininess: 12
+      // }) // 材质对象Material 添加高光效果
+      // let mesh1 = new THREE.Mesh(geometry1, material1); // 网格模型对象Mesh
+      // mesh1.position.set(120, 0, 0);
+      // scene.add(mesh1); // 网格模型添加到场景中
+      /* 
+        辅助三维坐标系AxisHelper  新版本名称AxesHelper
+       */
+      // // 辅助坐标系  参数250表示坐标系大小，可以根据场景大小去设置  会显示xyz三条坐标线
+      // let axesHelper = new THREE.AxesHelper(250);
+      // scene.add(axesHelper);
+      /* 
+        光源设置
+      */
+      // 点光源
+      let point = new THREE.PointLight(0xffffff);
+      point.position.set(400, 200, 300); // 点光源位置
+      scene.add(point); // 点光源添加到场景中
+      /* 
+        环境光
+      */
+      let ambient = new THREE.AmbientLight(0x444444);
+      scene.add(ambient); // 环境光添加到场景中
+      /* 
+        相机设置
+      */
+      let width = window.innerWidth; // 窗口宽度
+      let height = window.innerHeight; // 窗口高度
+      // let width = 1000; // 窗口宽度
+      // let height = 700; // 窗口高度
+      let k = width / height; // 窗口宽高比
+      let s = 200; // 三维场景显示范围控制系数，系数越大，显示的范围越大
+      // 创建相机对象
+      let camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 1, 1000);
+      camera.position.set(200, 300, 200); // 设置相机位置
+      camera.lookAt(scene.position); // 设置相机方向（指向的场景对象）
+      /* 
+        创建渲染器对象
+      */
+      let renderer = new THREE.WebGLRenderer();
+      renderer.setSize(width, height); // 设置渲染区域尺寸
+      renderer.setClearColor(0xb9d3ff, 1); // 设置背景颜色
+      document.body.appendChild(renderer.domElement); // body元素中插入canvas对象
+      // 执行渲染操作 指定场景、相机作为参数
+      // let T0 = new Date(); // 上次时间
+      function render () {
+        // let T1 = new Date(); // 本次事件
+        // let t = T1 - T0; // 时间差
+        // T0 = T1; // 把本次时间赋值给上次时间
+        // requestAnimationFrame(render);
+        renderer.render(scene, camera); // 执行渲染操作
+        // mesh.rotateZ(0.001 * t); // 旋转角速度0.001弧度每毫秒
+      }
+      render();
+      let controls = new THREE.OrbitControls(camera, renderer.domElement); // 创建控件对象
+      controls.addEventListener('change', render); // 监听鼠标、键盘事件
+    }
+  </script>
+</body>
+</html>

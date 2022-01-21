@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>threejs 学习 - 第12章 骨骼动画、变形动画  骨骼动画原理</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+  </style>
+  <!-- 引入three.js -->
+  <script src="./three.js"></script>
+  <!-- 引入three 插件 OrbitContols.js -->
+  <script src="./OrbitContols.js"></script>
+</head>
+<body>
+  <script>
+    window.onload = function () {
+      let scene = new THREE.Scene();
+
+
+/**
+ * 创建骨骼网格模型SkinnedMesh
+ */
+// 创建一个圆柱几何体，高度120，顶点坐标y分量范围[-60,60]
+var geometry = new THREE.CylinderGeometry(5, 10, 120, 50, 300);
+geometry.translate(0, 60, 0); //平移后，y分量范围[0,120]
+console.log("name", geometry.vertices); //控制台查看顶点坐标
+//
+/**
+ * 设置几何体对象Geometry的蒙皮索引skinIndices、权重skinWeights属性
+ * 实现一个模拟腿部骨骼运动的效果
+ */
+//遍历几何体顶点，为每一个顶点设置蒙皮索引、权重属性
+//根据y来分段，0~60一段、60~100一段、100~120一段
+for (var i = 0; i < geometry.vertices.length; i++) {
+  var vertex = geometry.vertices[i]; //第i个顶点
+  if (vertex.y <= 60) {
+    // 设置每个顶点蒙皮索引属性  受根关节Bone1影响
+    geometry.skinIndices.push(new THREE.Vector4(0, 0, 0, 0));
+    // 设置每个顶点蒙皮权重属性
+    // 影响该顶点关节Bone1对应权重是1-vertex.y/60
+    geometry.skinWeights.push(new THREE.Vector4(1 - vertex.y / 60, 0, 0, 0));
+  } else if (60 < vertex.y && vertex.y <= 60 + 40) {
+    // Vector4(1, 0, 0, 0)表示对应顶点受关节Bone2影响
+    geometry.skinIndices.push(new THREE.Vector4(1, 0, 0, 0));
+    // 影响该顶点关节Bone2对应权重是1-(vertex.y-60)/40
+    geometry.skinWeights.push(new THREE.Vector4(1 - (vertex.y - 60) / 40, 0, 0, 0));
+  } else if (60 + 40 < vertex.y && vertex.y <= 60 + 40 + 20) {
+    // Vector4(2, 0, 0, 0)表示对应顶点受关节Bone3影响
+    geometry.skinIndices.push(new THREE.Vector4(2, 0, 0, 0));
+    // 影响该顶点关节Bone3对应权重是1-(vertex.y-100)/20
+    geometry.skinWeights.push(new THREE.Vector4(1 - (vertex.y - 100) / 20, 0, 0, 0));
+  }
+}
+// 材质对象
+var material = new THREE.MeshPhongMaterial({
+  skinning: true, //允许蒙皮动画
+  // wireframe:true,
+});
+// 创建骨骼网格模型
+var SkinnedMesh = new THREE.SkinnedMesh(geometry, material);
+SkinnedMesh.position.set(50, 120, 50); //设置网格模型位置
+SkinnedMesh.rotateX(Math.PI); //旋转网格模型
+scene.add(SkinnedMesh); //网格模型添加到场景中
+
+/**
+ * 骨骼系统
+ */
+var Bone1 = new THREE.Bone(); //关节1，用来作为根关节
+var Bone2 = new THREE.Bone(); //关节2
+var Bone3 = new THREE.Bone(); //关节3
+// 设置关节父子关系   多个骨头关节构成一个树结构
+Bone1.add(Bone2);
+Bone2.add(Bone3);
+// 设置关节之间的相对位置
+//根关节Bone1默认位置是(0,0,0)
+Bone2.position.y = 60; //Bone2相对父对象Bone1位置
+Bone3.position.y = 40; //Bone3相对父对象Bone2位置
+
+// 所有Bone对象插入到Skeleton中，全部设置为.bones属性的元素
+var skeleton = new THREE.Skeleton([Bone1, Bone2, Bone3]); //创建骨骼系统
+// console.log(skeleton.bones);
+// 返回所有关节的世界坐标
+// skeleton.bones.forEach(elem => {
+//   console.log(elem.getWorldPosition(new THREE.Vector3()));
+// });
+//骨骼关联网格模型
+SkinnedMesh.add(Bone1); //根骨头关节添加到网格模型
+SkinnedMesh.bind(skeleton); //网格模型绑定到骨骼系统
+console.log(SkinnedMesh);
+/**
+ * 骨骼辅助显示
+ */
+var skeletonHelper = new THREE.SkeletonHelper(SkinnedMesh);
+scene.add(skeletonHelper);
+
+// 转动关节带动骨骼网格模型出现弯曲效果  好像腿弯曲一样
+skeleton.bones[1].rotation.x = 0.5;
+skeleton.bones[2].rotation.x = 0.5;
+
+
+      
+      // 点光源
+      let point = new THREE.PointLight(0xffffff);
+      point.position.set(200, 300, 200);
+      scene.add(point);
+      // 环境光源
+      let ambient = new THREE.AmbientLight(0x444444);
+      scene.add(ambient);
+
+      // 相机设置
+      let width = window.innerWidth;
+      let height = window.innerHeight;
+      let k = width / height; // 窗口比
+      let s = 200; // 值越大，显示的越多
+      // 创建相机对象
+      let camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 1, 1000);
+      camera.position.set(200, 300, 200);
+      camera.lookAt(scene.position);
+      /* 
+        辅助三维坐标系AxisHelper  新版本名称AxesHelper
+      */
+      // 辅助坐标系  参数250表示坐标系大小，可以根据场景大小去设置  会显示xyz三条坐标线
+      let axesHelper = new THREE.AxesHelper(250);
+      scene.add(axesHelper);
+
+      // 创建渲染器
+      let renderer = new THREE.WebGLRenderer();
+      renderer.setSize(width, height);
+      renderer.setClearColor(0x00ffff);
+      document.body.appendChild(renderer.domElement); // 添加到页面中
+
+      // // 创建一个时钟对象Clock
+      // let clock = new THREE.Clock();
+      // function render () {
+      //   renderer.render(scene, camera);
+      // }
+      // render();
+      // // let controls = new THREE.OrbitControls(camera, renderer.domElement); // 创建控件对象
+      // // controls.addEventListener('change', render); // 监听鼠标、键盘事件
+
+var n = 0;
+var T = 50;
+var step = 0.01;
+// 渲染函数
+function render() {
+  renderer.render(scene, camera);
+  requestAnimationFrame(render);
+  n += 1;
+  if (n < T) {
+    // 改变骨关节角度
+    skeleton.bones[0].rotation.x = skeleton.bones[0].rotation.x - step;
+    skeleton.bones[1].rotation.x = skeleton.bones[1].rotation.x + step;
+    skeleton.bones[2].rotation.x = skeleton.bones[2].rotation.x + 2 * step;
+  }
+  if (n < 2 * T && n > T) {
+    skeleton.bones[0].rotation.x = skeleton.bones[0].rotation.x + step;
+    skeleton.bones[1].rotation.x = skeleton.bones[1].rotation.x - step;
+    skeleton.bones[2].rotation.x = skeleton.bones[2].rotation.x - 2 * step;
+  }
+  if (n === 2 * T) {
+    n = 0;
+  }
+}
+render();
+    }
+  </script>
+</body>
+</html>
