@@ -50,8 +50,8 @@
             justify-content: center;
             align-content: center;
 
-            width: 600px;
-            height: 600px;
+            /* width: 600px;
+            height: 600px; */
             /* // 网络资源图片，低版本ios测试机出现图片一闪一闪的问题，直接改成本地的了 */
             /* 无效，应使用canvas画布来实现 */
             /* background-image: url('./img/lucky_bg.png');
@@ -179,8 +179,6 @@
         :height="luckyW / 750 * 10 * 16"
         :class="['wheel-bg-canvas', isShowPrz && 'demo_css']"
         :style="{
-            width: `${ luckyW / 750 * 10 }rem` || '',
-            height: `${ luckyH / 750 * 10 }rem` || '',
             transform: rotate_angle,
             transition: rotate_transition
         }"
@@ -240,9 +238,9 @@
               baseImg.src = './img/lucky_bg.png'
 
               baseImg.onload = () => {
-                console.log(this.luckyW)
+                console.log(this.luckyW, can.width, can.height)
                 console.log(this.luckyW / 750 * 10 * 16)
-                ctx.drawImage(baseImg, 0, 0, this.luckyW / 750 * 10 * 16, this.luckyH / 750 * 10 * 16)
+                ctx.drawImage(baseImg, 0, 0, can.width, can.height)
               }
             },
             methods: {
