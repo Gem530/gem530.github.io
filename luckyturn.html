@@ -244,6 +244,7 @@
                 this.imgHeight = baseImg.height
                 can.width = this.imgWidth
                 can.height = this.imgHeight
+                // canvas的width和height要与图片width和height相等，是为了图片不模糊，但是canvas的style里的width和height可以不同
                 console.log(this.luckyW, can.width, can.height, baseImg.width, baseImg.height)
                 console.log(this.luckyW / 750 * 10 * 16)
                 ctx.drawImage(baseImg, 0, 0, 666, 665)
