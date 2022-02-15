@@ -13,7 +13,13 @@
       ></video>
     </div>
     <div class="error" :style="`width: ${clientWidthD}px;height: ${heightD}px;`" v-show="!photoFlag">
-      您的浏览器不支持取景框<br/>如未弹出授权框，请点击右上角刷新页面
+      <span>您的浏览器不支持取景框</span>
+      <span>如未弹出授权框，请点击右上角刷新页面</span>
+      <!-- 新增 -->
+      <el-button>
+        调用手机摄像头
+        <input type="file" id="ground-push-image" @change="fileChange" accept="image/*" capture="camera">
+      </el-button>
     </div>
   </div>
 </template>
@@ -25,7 +31,7 @@
 // } from '@/api/commonApi'
 // import { Toast } from 'vant'
 // import { getAccountIcon } from '@/utils/banks'
-import { convertBase64UrlToBlob } from '@/utils/compressImage'
+import { toImage, compressImgQuality, convertBase64UrlToBlob } from '@/utils/compressImage'
 import { Component, Vue, Prop, Ref } from 'vue-property-decorator'
 // import { toImage, compressImg } from '@/utils/compressImage'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -129,12 +135,6 @@ export default class QrcodePhoto extends Vue {
               console.log(that.video.videoWidth, that.video.videoHeight)
               that.photoW = that.video.videoWidth
               that.photoH = that.video.videoHeight
-              if (that.heightD > that.photoH) {
-                that.heightD = that.photoH
-              }
-              if (that.widthD > that.photoW) {
-                that.widthD = that.photoW
-              }
               // that.widthD = that.video.videoWidth
               // that.heightD = that.video.videoHeight
               // if (that.$isPc) {
@@ -160,13 +160,29 @@ export default class QrcodePhoto extends Vue {
               // }
             })
           })
+          // localStorage.setItem('photoLocal', 'true')
         })
         .catch(function (err: any) {
           that.photoFlag = false
           console.log(err.name + ': ' + err.message, err)
+          // 新增
+          // console.log(localStorage.getItem('photoLocal'))
+          // if (!localStorage.getItem('photoLocal') || localStorage.getItem('photoLocal') === 'true') {
+          //   window.location.reload()
+          //   localStorage.setItem('photoLocal', 'false')
+          // }
         })
     })
   }
+  // 新增
+  // destroyed (): void {
+  //   localStorage.removeItem('photoLocal')
+  //   console.log('destroyed-photo')
+  // }
+  // deactivated (): void {
+  //   localStorage.removeItem('photoLocal')
+  //   console.log('deactivated-photo')
+  // }
 
   // 拍照
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -202,6 +218,7 @@ export default class QrcodePhoto extends Vue {
     // a.href = dataURL // 下载的文件地址
     // a.click() // 点击下载
     const blob = await convertBase64UrlToBlob(dataURL)
+    this.$emit('getPhotoBlob', blob)
     callback && callback(blob)
     // that.cutImageUrl(function (item: any) {
     //   callback && callback(item)
@@ -240,6 +257,19 @@ export default class QrcodePhoto extends Vue {
   goBack (): void {
     this.$router.go(-1)
   }
+
+  // 调用手机摄像头 新增
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async fileChange (): Promise<void> {
+    const inputFile: any = document.getElementById('ground-push-image')
+
+    const fileList = inputFile.files[0]
+
+    const img = await toImage(fileList)
+    const blob = await compressImgQuality(img)
+    console.log(blob)
+    this.$emit('getPhotoBlob', blob)
+  }
 }
 </script>
 
@@ -259,7 +289,22 @@ export default class QrcodePhoto extends Vue {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
   color: #ffffff;
   text-align: center;
+}
+
+// 新增
+.el-button {
+  position: relative;
+
+  #ground-push-image {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+  }
 }
 </style>
