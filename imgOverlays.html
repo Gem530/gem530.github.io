@@ -11,7 +11,7 @@
   <script type="text/javascript" src="https://cdn.bootcss.com/vConsole/3.3.0/vconsole.min.js"></script></script>
   <script>
     // 开发环境且是移动端才打开 vconsole
-    const vConsole = new VConsole()
+    // const vConsole = new VConsole()
   </script>
   <style>
     * {
@@ -22,11 +22,11 @@
     .check-box-sign {
       position: relative;
       width: 100%;
-      min-height: 130px;
+      min-height: 100vh;
       border: 1px solid #b6b6b6;
       background-color: #FFFFFF;
       box-sizing: border-box;
-      /* overflow: hidden; */
+      overflow: hidden;
     }
 
     .check-sign-tip {
@@ -75,11 +75,19 @@
       box-sizing: border-box;
     }
 
+    .check-master-sign {
+      position: absolute;
+      top: 73px;
+      left: 0;
+      z-index: 1;
+    }
+
     .check-master-sign-front {
       /* display: none; */
       position: absolute;
-      top: 0;
+      top: 73px;
       left: 0;
+      z-index: 3;
     }
   </style>
 </head>
@@ -89,29 +97,11 @@
     <div
       class="check-box-sign"
       ref="checkMasterSignNode">
-      <canvas
-        ref="checkMasterSign">
-        <!-- @touchend="touchEndSign"
-        @touchmove="touchMoveSign"
-        @touchstart="touchStartSign"
-        @mouseup="touchEndSign"
-        @mousemove="touchMoveSign"
-        @mousedown="touchStartSign" -->
-      </canvas>
-      <canvas
-        class="check-master-sign-front"
-        ref="checkMasterSignFront"
-        @touchend="touchEndSign"
-        @touchmove="touchMoveSign"
-        @touchstart="touchStartSign"
-        @mouseup="touchEndSign"
-        @mousemove="touchMoveSign"
-        @mousedown="touchStartSign">
-      </canvas>
 
       <div class="check-sign-bottom">
         <button @click="scaleHandle('large')">放大</button>
         <button @click="scaleHandle('small')">缩小</button>
+        <button @click="moveFlag = !moveFlag">{{moveFlag ? '停止移动' : '移动'}}</button>
         <button @click="revoke">上一步</button>
         <button @click="clearCanvas">清除</button>
         <button @click="sureCanvasToImg">确认提交</button>
@@ -126,6 +116,29 @@
           {{item.name}}
         </div>
       </div>
+
+      <div :style="`height: ${initHeight}px;`"></div>
+
+      <canvas
+        class="check-master-sign"
+        ref="checkMasterSign">
+        <!-- @touchend="touchEndSign"
+        @touchmove="touchMoveSign"
+        @touchstart="touchStartSign"
+        @mouseup="touchEndSign"
+        @mousemove="touchMoveSign"
+        @mousedown="touchStartSign" -->
+      </canvas>
+      <canvas
+        class="check-master-sign-front"
+        ref="checkMasterSignFront"
+        @touchend="touchEndSign"
+        @touchmove="touchMoveSign"
+        @touchstart="touchStartSign">
+        <!-- @mouseup="touchEndSign"
+        @mousemove="touchMoveSign"
+        @mousedown="touchStartSign" -->
+      </canvas>
     </div>
 
     <img :src="imgNew" alt="">
@@ -188,6 +201,8 @@
           canvasFront: '', // canvas元素
           ctx: '',
           ctxFront: '',
+
+          moveFlag: false, // 移动图片
         }
       },
       watch: {
@@ -289,10 +304,18 @@
           // return new Promise((resolve, reject))
           // 鼠标按下时的x/y坐标
           let e = { pageX: 0, pageY: 0 }
+          const canvasNode = this.$refs.checkMasterSignFront
+          // console.log(canvasNode.offsetLeft, canvasNode.offsetTop)
           if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
-            e = { pageX: event.touches[0].pageX, pageY: event.touches[0].pageY }
+            e = {
+              pageX: event.touches[0].pageX - canvasNode.offsetLeft,
+              pageY: event.touches[0].pageY - canvasNode.offsetTop
+            }
           } else {
-            e = { pageX: event.pageX, pageY: event.pageY }
+            e = {
+              pageX: event.pageX - canvasNode.offsetLeft,
+              pageY: event.pageY - canvasNode.offsetTop
+            }
           }
           return e
         },
@@ -314,8 +337,6 @@
         // 签名板事件
         // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
         touchMoveSign (event) {
-          if (!this.mouseFlag) return
-          event.preventDefault() // 阻止手指滑动时 页面滚动
           let e = this.returnXY(event)
           // 选择检验师 或者 车主签名板
           // const canvas = this.$refs.checkMasterSign
@@ -327,7 +348,18 @@
           }
           this.moveX = point.x
           this.moveY = point.y
+          if (this.moveFlag) {
+            console.log(point.x, point.y)
+            this.$refs.checkMasterSign.style.top = point.y + 'px'
+            this.$refs.checkMasterSign.style.left = point.x + 'px'
+            this.$refs.checkMasterSignFront.style.top = point.y + 'px'
+            this.$refs.checkMasterSignFront.style.left = point.x + 'px'
+            return
+          }
+          if (!this.mouseFlag) return
+          event.preventDefault() // 阻止手指滑动时 页面滚动
           // console.log(this.startX, this.startY, point.x, point.y)
+          this.ctxFront.clearRect(0, 0, this.width, this.height)
           // 重新绘制底图
           // this.drawImg()
           this.ctxFront.rect(0, 0, this.width, this.height)
@@ -339,6 +371,7 @@
         },
         // 签名板事件
         async touchEndSign () {
+          if (this.moveFlag) return
           this.mouseFlag = false
           // console.log(this.startX, this.startY, this.moveX, this.moveY, this.moveX - this.startX, this.moveY - this.startY)
           let top = this.startX < this.moveX ? this.startX : this.moveX
