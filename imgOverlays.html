@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>签字板</title>
+
+  <link rel="icon" href="./img/favicon.ico">
+  <script src="./vue.js"></script>
+  <script type="text/javascript" src="https://cdn.bootcss.com/vConsole/3.3.0/vconsole.min.js"></script></script>
+  <script>
+    // 开发环境且是移动端才打开 vconsole
+    const vConsole = new VConsole()
+  </script>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    .check-box-sign {
+      position: relative;
+      width: 100%;
+      min-height: 130px;
+      border: 1px solid #b6b6b6;
+      background-color: #FFFFFF;
+      box-sizing: border-box;
+      /* overflow: hidden; */
+    }
+
+    .check-sign-tip {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      /* @include flex(); */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    .check-sign-bottom {
+      border-top: 1px solid #999999;
+      padding: 5px;
+      box-sizing: border-box;
+    }
+
+    .check-sign-choose {
+      /* @include flex(space-between); */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px;
+      box-sizing: border-box;
+    }
+    .check-color-item,
+    .check-width-item {
+      width: 50px;
+      height: 30px;
+      box-sizing: border-box;
+      border-radius: 4px;
+      color: #FFFFFF;
+      /* @include flex(); */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    .check-width-item {
+      border: 1px solid #999999;
+      box-sizing: border-box;
+    }
+
+    .check-master-sign-front {
+      /* display: none; */
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    
+    <div
+      class="check-box-sign"
+      ref="checkMasterSignNode">
+      <canvas
+        ref="checkMasterSign">
+        <!-- @touchend="touchEndSign"
+        @touchmove="touchMoveSign"
+        @touchstart="touchStartSign"
+        @mouseup="touchEndSign"
+        @mousemove="touchMoveSign"
+        @mousedown="touchStartSign" -->
+      </canvas>
+      <canvas
+        class="check-master-sign-front"
+        ref="checkMasterSignFront"
+        @touchend="touchEndSign"
+        @touchmove="touchMoveSign"
+        @touchstart="touchStartSign"
+        @mouseup="touchEndSign"
+        @mousemove="touchMoveSign"
+        @mousedown="touchStartSign">
+      </canvas>
+
+      <div class="check-sign-bottom">
+        <button @click="scaleHandle('large')">放大</button>
+        <button @click="scaleHandle('small')">缩小</button>
+        <button @click="revoke">上一步</button>
+        <button @click="clearCanvas">清除</button>
+        <button @click="sureCanvasToImg">确认提交</button>
+      </div>
+
+      <div class="check-sign-choose">
+        <div class="check-color-item"
+          :key="index"
+          :style="`background: ${item.color};border: ${canvasColor === item.color ? '2px solid #000000' : 'none'}`"
+          v-for="(item, index) in colorList"
+          @click="chooseColorWidth('color', item)">
+          {{item.name}}
+        </div>
+      </div>
+    </div>
+
+    <img :src="imgNew" alt="">
+
+  </div>
+  <script>
+    new Vue({
+      el: '#app',
+      data () {
+        return {
+          imgNew: '',
+          mouseFlag: false, // true鼠标或手指移动即画图 false不画图
+          tempTechFlag: true,
+          // tempMasterFlag: true,
+          colorList: [{
+            name: '天蓝',
+            color: '#00ffff'
+          }, {
+            name: '红',
+            color: '#ff0000'
+          }, {
+            name: '绿',
+            color: '#00ff00'
+          }, {
+            name: '蓝',
+            color: '#0000ff'
+          }], // 画板颜色列表
+          canvasColor: '#00ffff', // 画板颜色
+          canvasName: '天蓝',
+          canvasWidth: 3, // 画笔粗细
+
+          width: 0, // canvas宽
+          height: 0, // canvas高
+          initWidth: 0, // 图片加载完初始canvas宽，用于计算缩放比列
+          initHeight: 0, // 图片加载完初始canvas高，用于计算缩放比列
+
+          imgDom: '', // 图片img onload
+          baseImg: './img/33.jpg', // 基本图
+          currentImg: [], // 图片img onload
+
+          startX: 0, // 手指按下的x坐标
+          startY: 0, // 手指按下的y坐标
+          moveX: 0, // 手指移动的x坐标
+          moveY: 0, // 手指移动的y坐标
+
+          scale: 1, // 图片缩放
+
+          imgOverlaysList: [
+            // {
+            //   labelName: '天蓝',
+            //   top: 54.18886198547215,
+            //   left: 326.93946731234865,
+            //   width: 70.4455205811138,
+            //   height: 57.80145278450363,
+            //   scaleDom: 1.1072386058981234
+            // }
+          ], // 标注列表 { labelName: '天蓝', top: 10, left: 10, width: 100, height: 100 }
+
+          canvas: '', // canvas元素
+          canvasFront: '', // canvas元素
+          ctx: '',
+          ctxFront: '',
+        }
+      },
+      watch: {
+        scaleDom (val) {
+          console.log(val)
+        }
+      },
+      computed: {
+        scaleDom () {
+          return this.width / this.initWidth
+        }
+      },
+      mounted () {
+          this.canvasFront = this.$refs.checkMasterSignFront
+          this.ctxFront = this.canvasFront.getContext('2d')
+          this.canvas = this.$refs.checkMasterSign
+          this.ctx = this.canvas.getContext('2d')
+
+          this.imgDom = new Image()
+          this.imgDom.crossOrigin = "anonymous"
+          this.imgDom.src = './img/33.jpg'
+
+          this.imgDom.onload = () => {
+            const imgWidth = this.imgDom.width
+            const imgHeight = this.imgDom.height
+            const mobileWidth = this.$refs.checkMasterSignNode.clientWidth
+            
+            this.width = mobileWidth
+            this.initWidth = mobileWidth
+            this.height = Math.floor((imgHeight * mobileWidth) / imgWidth)
+            this.initHeight = Math.floor((imgHeight * mobileWidth) / imgWidth)
+            
+            this.canvasFront.width = this.width
+            this.canvasFront.height = this.height
+            this.canvas.width = this.width
+            this.canvas.height = this.height
+            // console.log(imgWidth, imgHeight, mobileWidth, this.width, this.height)
+            this.ctx.drawImage(this.imgDom, 0, 0, this.width, this.height)
+            this.currentImg.push(this.canvas.toDataURL())
+            // console.log(this.currentImg)
+            // this.drawImg()
+          }
+        // const w = this.$refs.checkMasterSignNode.clientWidth
+        // const h = this.$refs.checkMasterSignNode.clientHeight
+        // this.$refs.checkMasterSign.setAttribute('width', w)
+        // this.$refs.checkMasterSign.setAttribute('height', h)
+      },
+      methods: {
+        // 绘制底图
+        drawImg () {
+          // 清空canvas
+          this.ctxFront.clearRect(0, 0, this.canvasFront.width, this.canvasFront.height)
+          this.ctxFront.drawImage(this.imgDom, 0, 0, this.width, this.height)
+          // 重新绘制所有标注框
+          if (this.imgOverlaysList.length) {
+            this.imgOverlaysList.forEach((item) => {
+              this.ctxFront.beginPath()
+              // const scale = this.width / this.initWidth
+              // console.log(item.scaleDom, item.top * item.scaleDom, item.top / item.scaleDom, this.width, this.initWidth)
+              // const top = item.scaleDom > 1 ? item.top / item.scaleDom : item.top * item.scaleDom
+              // this.ctxFront.rect(item.top / item.scaleDom, item.left / item.scaleDom, item.width / item.scaleDom, item.height / item.scaleDom)
+              this.ctxFront.rect(item.top, item.left, item.width, item.height)
+              const color = this.colorList.filter((el) => { return el.name === item.labelName })[0].color
+              this.ctxFront.fillStyle = color
+              this.ctxFront.fill()
+              this.ctxFront.closePath()
+              // console.log(this.ctxFront, item, color)
+            })
+          }
+        },
+        // 选择画板颜色/粗细
+        // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+        chooseColorWidth (type, item) {
+          if (type === 'color') {
+            this.canvasColor = item.color
+            this.canvasName = item.name
+          } else {
+            this.canvasWidth = Number(item)
+          }
+          // console.log(type, item)
+        },
+        // 确认签名，形成图片上传
+        sureCanvasToImg () {
+          const w = this.$refs.checkMasterSignNode.clientWidth
+          const h = this.$refs.checkMasterSignNode.clientHeight
+          
+          const tempCanvas = this.$refs.checkMasterSign
+
+          // let canvas = document.createElement("canvas")
+          // let ctx = canvas.getContext('2d')
+          this.canvas.width = w
+          this.canvas.height = h
+          this.ctxFront.drawImage(tempCanvas, 0, 0, w, h);
+          const tempURL = this.canvas.toDataURL('image/png', 1) // 第二个参数是图片质量0-1，默认是0.92
+          this.imgNew = tempURL
+        },
+        // 根据pc或者移动端 返回x，y坐标
+        returnXY (event) {
+          // return new Promise((resolve, reject))
+          // 鼠标按下时的x/y坐标
+          let e = { pageX: 0, pageY: 0 }
+          if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+            e = { pageX: event.touches[0].pageX, pageY: event.touches[0].pageY }
+          } else {
+            e = { pageX: event.pageX, pageY: event.pageY }
+          }
+          return e
+        },
+        // 签名板事件
+        // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+        touchStartSign (event) {
+          let e = this.returnXY(event)
+          const point = {
+            x: e.pageX,
+            y: e.pageY
+          }
+
+          this.startX = point.x
+          this.startY = point.y
+
+          // 选择检验师 或者 车主签名板
+          this.mouseFlag = true
+        },
+        // 签名板事件
+        // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+        touchMoveSign (event) {
+          if (!this.mouseFlag) return
+          event.preventDefault() // 阻止手指滑动时 页面滚动
+          let e = this.returnXY(event)
+          // 选择检验师 或者 车主签名板
+          // const canvas = this.$refs.checkMasterSign
+          // const canvasNode = this.$refs.checkMasterSignNode
+          // const ctx = canvas.getContext('2d')
+          const point = {
+            x: e.pageX,
+            y: e.pageY
+          }
+          this.moveX = point.x
+          this.moveY = point.y
+          // console.log(this.startX, this.startY, point.x, point.y)
+          // 重新绘制底图
+          // this.drawImg()
+          this.ctxFront.rect(0, 0, this.width, this.height)
+          this.ctxFront.beginPath()
+          this.ctxFront.rect(this.startX, this.startY, this.moveX - this.startX, this.moveY - this.startY)
+          this.ctxFront.fillStyle = this.canvasColor
+          this.ctxFront.fill()
+          this.ctxFront.closePath()
+        },
+        // 签名板事件
+        async touchEndSign () {
+          this.mouseFlag = false
+          // console.log(this.startX, this.startY, this.moveX, this.moveY, this.moveX - this.startX, this.moveY - this.startY)
+          let top = this.startX < this.moveX ? this.startX : this.moveX
+          let left = this.startY < this.moveY ? this.startY : this.moveY
+          let width = Math.abs(this.moveX - this.startX)
+          let height = Math.abs(this.moveY - this.startY)
+
+          // 把矩形框绘制到底图canvas上
+          const img = await this.imgload(this.currentImg[this.currentImg.length - 1])
+          this.ctx.drawImage(img, 0, 0, this.width, this.height)
+          this.ctx.beginPath()
+          this.ctx.rect(top, left, width, height)
+          this.ctx.fillStyle = this.canvasColor
+          this.ctx.fill()
+          this.ctx.closePath()
+          this.currentImg.push(this.canvas.toDataURL())
+
+          this.imgOverlaysList.push({
+            labelName: this.canvasName,
+            // // // top: Number((top * this.scaleDom).toFixed(0)),
+            // // // left: Number((left * this.scaleDom).toFixed(0)),
+            // // // width: Number((width * this.scaleDom).toFixed(0)),
+            // // // height: Number((height * this.scaleDom).toFixed(0)),
+            // // top: top * this.scaleDom,
+            // // left: left * this.scaleDom,
+            // // width: width * this.scaleDom,
+            // // height: height * this.scaleDom,
+            // top: top,
+            // left: left,
+            // width: width,
+            // height: height,
+            top: top / this.scaleDom,
+            left: left / this.scaleDom,
+            width: width / this.scaleDom,
+            height: height / this.scaleDom,
+            scaleDom: this.scaleDom
+          })
+          // console.log(top, left, width, height, this.scaleDom)
+          console.log('手指离开canvas画板', this.imgOverlaysList[this.imgOverlaysList.length - 1])
+        },
+        // 撤回上一步
+        async revoke () {
+          // console.log(this.imgOverlaysList, this.currentImg)
+          if (this.imgOverlaysList && this.imgOverlaysList.length) {
+            this.imgOverlaysList.pop()
+          }
+          if (this.currentImg && this.currentImg.length > 1) {
+            this.currentImg.pop()
+            const img = await this.imgload(this.currentImg[this.currentImg.length - 1])
+            // console.log(this.currentImg, this.currentImg.length - 1, img)
+            this.ctxFront.clearRect(0, 0, this.width, this.height)
+            this.ctx.drawImage(img, 0, 0, this.width, this.height)
+            // document.body.appendChild(img)
+          }
+          // this.drawImg()
+        },
+        // 鼠标滚轮事件
+        async scaleHandle (type) {
+          // e.preventDefault()
+          // console.log(e.wheelDelta)
+          this.scale = 1 // 缩放是基于每次的大小缩放的，所以每次都先赋值为1
+          if (type === 'large') {
+            // 鼠标滚轮向前(即滚轮向手掌前方滚动)  放大
+            this.width = this.width + 10
+            this.height = Math.floor((this.initHeight * this.width) / this.initWidth)
+          }
+          if (type === 'small') {
+            // 鼠标滚轮向后(即滚轮向手掌掌心方向滚动)  缩小
+            if (this.initWidth >= this.width) return
+            this.width = this.width - 10
+            this.height = Math.floor((this.initHeight * this.width) / this.initWidth)
+          }
+          // console.log(this.scale, 1)
+          // // 为了把旋转点移动中心 旋转、缩放等等，好像都需要设置，不然以0,0为起点缩放，旋转
+          // this.ctx.translate(this.width/2, this.height/2)
+          // // (canvas图片旋转角度 = css旋转角度(30deg) * Math.PI / 180) = css旋转角度(30deg)
+          // this.ctx.scale(this.scale, this.scale)
+          // this.ctx.translate(-this.width/2, -this.height/2)
+          // this.width = Number((this.width * this.scale).toFixed(0))
+          // this.height = Number((this.height * this.scale).toFixed(0))
+          this.canvasFront.width = this.width
+          this.canvasFront.height = this.height
+          this.canvas.width = this.width
+          this.canvas.height = this.height
+
+          const img = await this.imgload(this.currentImg[this.currentImg.length - 1])
+          this.ctx.drawImage(img, 0, 0, this.width, this.height)
+          // this.drawImg()
+        },
+        imgload (imgs) {
+          const imgsUrl = imgs
+          return new Promise((resolve, reject) => {
+            let img = new Image()
+            img.crossOrigin = 'anonymous'
+            img.src = imgsUrl
+            img.onload = (data) => {
+              resolve(img)
+            }
+            img.onerror = () => {
+              reject()
+            }
+          })
+        },
+        // 清除canvas画板
+        async clearCanvas () {
+          // const canvas = this.$refs.checkMasterSign
+          // const ctx = canvas.getContext('2d')
+          this.ctxFront.clearRect(0, 0, this.width, this.height)
+          this.ctx.clearRect(0, 0, this.width, this.height)
+          const img = await this.imgload(this.baseImg)
+          this.ctx.drawImage(img, 0, 0, this.width, this.height)
+          this.currentImg.push(this.canvas.toDataURL())
+        }
+      }
+    })
+  </script>
+</body>
+</html>

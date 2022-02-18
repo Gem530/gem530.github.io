@@ -986,6 +986,7 @@
         },
         // 鼠标滚轮事件
         mousewheelHandle (e) {
+          e.preventDefault()
           // console.log(e.wheelDelta)
           if (e.wheelDelta > 0) {
             // 鼠标滚轮向前(即滚轮向手掌前方滚动)  放大
