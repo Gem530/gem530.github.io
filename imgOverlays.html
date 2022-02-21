@@ -102,6 +102,7 @@
         <button @click="scaleHandle('large')">放大</button>
         <button @click="scaleHandle('small')">缩小</button>
         <button @click="moveFlag = !moveFlag">{{moveFlag ? '停止移动' : '移动'}}</button>
+        <button @click="backPosition">复位</button>
         <button @click="revoke">上一步</button>
         <button @click="clearCanvas">清除</button>
         <button @click="sureCanvasToImg">确认提交</button>
@@ -305,18 +306,22 @@
           // 鼠标按下时的x/y坐标
           let e = { pageX: 0, pageY: 0 }
           const canvasNode = this.$refs.checkMasterSignFront
+          console.log(event.touches[0], canvasNode.offsetLeft, canvasNode.offsetTop)
           // console.log(canvasNode.offsetLeft, canvasNode.offsetTop)
           if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
             e = {
               pageX: event.touches[0].pageX - canvasNode.offsetLeft,
               pageY: event.touches[0].pageY - canvasNode.offsetTop
             }
+            console.log(11)
           } else {
             e = {
               pageX: event.pageX - canvasNode.offsetLeft,
               pageY: event.pageY - canvasNode.offsetTop
             }
+            console.log(22)
           }
+          console.log(e)
           return e
         },
         // 签名板事件
@@ -348,12 +353,14 @@
           }
           this.moveX = point.x
           this.moveY = point.y
+          const canvasNode = this.$refs.checkMasterSignFront
           if (this.moveFlag) {
-            console.log(point.x, point.y)
-            this.$refs.checkMasterSign.style.top = point.y + 'px'
-            this.$refs.checkMasterSign.style.left = point.x + 'px'
-            this.$refs.checkMasterSignFront.style.top = point.y + 'px'
-            this.$refs.checkMasterSignFront.style.left = point.x + 'px'
+            event.preventDefault()
+            // console.log(point.x, point.y)
+            this.$refs.checkMasterSign.style.top = event.touches[0].pageY - this.startY + 'px'
+            this.$refs.checkMasterSign.style.left = event.touches[0].pageX - this.startX + 'px'
+            this.$refs.checkMasterSignFront.style.top = event.touches[0].pageY - this.startY + 'px'
+            this.$refs.checkMasterSignFront.style.left = event.touches[0].pageX - this.startX + 'px'
             return
           }
           if (!this.mouseFlag) return
@@ -474,6 +481,15 @@
               reject()
             }
           })
+        },
+        // 复位
+        backPosition () {
+          const canvas = this.$refs.checkMasterSign
+          const canvasNode = this.$refs.checkMasterSignFront
+          canvas.style.top = '73px'
+          canvas.style.left = '0px'
+          canvasNode.style.top = '73px'
+          canvasNode.style.left = '0px'
         },
         // 清除canvas画板
         async clearCanvas () {
