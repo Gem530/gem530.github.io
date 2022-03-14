@@ -38,7 +38,11 @@
         <div class="error" :style="`width: ${clientWidthD}px;height: ${heightD}px;`" v-show="!photoFlag">
             您的浏览器不支持取景框<br/>如未弹出授权框，请点击右上角刷新页面
         </div>
-        <button @click="getPhoto">拍照</button>
+        <div style="display: inline-block;" @click="getPhoto">
+            <slot>
+                <button style="position: absolute;top: 0px;left: 0px;">拍照</button>
+            </slot>
+        </div>
 
         <img :src="imgURL" alt="">
 
