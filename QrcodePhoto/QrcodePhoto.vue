@@ -13,12 +13,11 @@
       ></video>
     </div>
     <div class="error" :style="`width: ${clientWidthD}px;height: ${heightD}px;`" v-show="!photoFlag">
-      <span>您的浏览器不支持取景框</span>
-      <span>如未弹出授权框，请点击右上角刷新页面</span>
-      <!-- 新增 -->
+      <span>未获取到取景框拍照权限</span>
+      <span>请点击右上角刷新后授权，或者</span>
       <el-button>
-        调用手机摄像头
-        <input type="file" id="ground-push-image" @change="fileChange" accept="image/*" capture="camera">
+        直接手机拍照
+        <input type="file" ref="qrcodeImageDom" id="ground-push-image" @change="fileChange" accept="image/*" capture="camera">
       </el-button>
     </div>
   </div>
@@ -42,6 +41,7 @@ import { Component, Vue, Prop, Ref } from 'vue-property-decorator'
 export default class QrcodePhoto extends Vue {
   @Ref() readonly video: any
   @Ref() readonly canvas: any
+  @Ref() readonly qrcodeImageDom: any
   @Prop() width!: number
   @Prop() height!: number
 
@@ -164,29 +164,24 @@ export default class QrcodePhoto extends Vue {
         })
         .catch(function (err: any) {
           that.photoFlag = false
-          console.log(err.name + ': ' + err.message, err)
-          // 新增
           // console.log(localStorage.getItem('photoLocal'))
           // if (!localStorage.getItem('photoLocal') || localStorage.getItem('photoLocal') === 'true') {
           //   window.location.reload()
           //   localStorage.setItem('photoLocal', 'false')
           // }
+          console.log(err.name + ': ' + err.message, err)
         })
     })
   }
-  // 新增
-  // destroyed (): void {
-  //   localStorage.removeItem('photoLocal')
-  //   console.log('destroyed-photo')
-  // }
-  // deactivated (): void {
-  //   localStorage.removeItem('photoLocal')
-  //   console.log('deactivated-photo')
-  // }
 
   // 拍照
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   async getPhoto (callback: any): Promise<void> {
+    if (!this.photoFlag) {
+      // this.fileChange()
+      this.qrcodeImageDom.click()
+      return
+    }
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const that = this
     const video = this.video
@@ -258,7 +253,7 @@ export default class QrcodePhoto extends Vue {
     this.$router.go(-1)
   }
 
-  // 调用手机摄像头 新增
+  // 调用手机摄像头
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   async fileChange (): Promise<void> {
     const inputFile: any = document.getElementById('ground-push-image')
@@ -294,7 +289,6 @@ export default class QrcodePhoto extends Vue {
   text-align: center;
 }
 
-// 新增
 .el-button {
   position: relative;
 

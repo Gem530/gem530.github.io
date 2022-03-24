@@ -36,7 +36,12 @@
             <video class="video-contain" ref="video" id="video" :width="clientWidthD" autoplay playsinline webkit-playsinline="true" muted></video>
         </div>
         <div class="error" :style="`width: ${clientWidthD}px;height: ${heightD}px;`" v-show="!photoFlag">
-            您的浏览器不支持取景框<br/>如未弹出授权框，请点击右上角刷新页面
+          <span>未获取到取景框拍照权限</span>
+          <span>请点击右上角刷新后授权，或者</span>
+          <button>
+            直接手机拍照
+            <input type="file" ref="qrcodeImageDom" id="ground-push-image" @change="fileChange" accept="image/*" capture="camera">
+          </button>
         </div>
         <div style="display: inline-block;" @click="getPhoto">
             <slot>
@@ -46,7 +51,7 @@
 
         <img :src="imgURL" alt="">
 
-        <input type="file" accept="image/*" capture="camera">
+        <!-- <input type="file" accept="image/*" capture="camera"> -->
     </div>
 
     <script>
@@ -189,6 +194,11 @@
                 },
                 // 拍照
                 getPhoto() {
+                    if (!this.photoFlag) {
+                      // this.fileChange()
+                      this.$refs.qrcodeImageDom.click()
+                      return
+                    }
                     // eslint-disable-next-line @typescript-eslint/no-this-alias
                     const that = this
                     const video = this.$refs.video
@@ -224,7 +234,21 @@
                         // that.cutImageUrl(function (item: any) {
                         //   callback && callback(item)
                         // })
-                }
+                },
+                
+
+              // 调用手机摄像头
+              // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+              async fileChange () {
+                const inputFile = document.getElementById('ground-push-image')
+
+                const fileList = inputFile.files[0]
+
+                const img = await toImage(fileList)
+                const blob = await compressImgQuality(img)
+                console.log(blob)
+                this.$emit('getPhotoBlob', blob)
+              }
             }
         })
     </script>
