@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>鼠标拖动文字转弯效果</title>
+<link rel="icon" href="./img/favicon.ico">
+<script src="./vue.js"></script>
+
+<script type="text/javascript" src="https://cdn.bootcss.com/vConsole/3.3.0/vconsole.min.js"></script>
+<script>
+  // 开发环境且是移动端才打开 vconsole
+  const vConsole = new VConsole()
+</script>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* .mycanvas {
+    border: 1px solid #000;
+  } */
+</style>
+ 
+</head>
+<body>
+  <div id="app">
+    <canvas
+      id="myCanvas"
+      ref="myCanvasRef"
+      @mousedown="start"
+      @mouseMove="move"
+      @mouseup="end"
+      @touchStart="start"
+      @touchMove="move"
+      @touchEnd="end"
+    ></canvas>
+  </div>
+
+  <script type="text/javascript">
+    new Vue({
+      el: '#app',
+      data () {
+        return {
+          canvas: null, // canvas实例
+          ctx: null, // 2d
+          width: document.body.clientWidth, // canvas宽
+          height: document.body.clientHeight, // canvas高
+          text: '富强、民主、文明、和谐、自由、平等、公正、法治、爱国、敬业、诚信、友善、', // 文字
+          textIndex: 0, // 文字下标
+          fontSize: 5, // 字体字号
+          isPc: true, // true PC端  false 移动端
+          downFlag: false, // 鼠标是否按下
+          point: {
+            pageX: 0,
+            pageY: 0
+          }
+        }
+      },
+      created () {
+        if (navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i)) {
+          this.isPc = false
+        } else {
+          this.isPc = true
+        }
+        // console.log(this.isPc)
+      },
+      mounted () {
+        this.init()
+      },
+      methods: {
+        init () {
+          this.canvas = this.$refs.myCanvasRef
+          this.ctx = this.canvas.getContext('2d')
+          this.canvas.width = this.width
+          this.canvas.height = this.height
+          // this.ctx.fillText(this.text,0,20)
+        },
+        returnXY (event) {
+          // return new Promise((resolve, reject))
+          // 鼠标按下时的x/y坐标
+          let e = { pageX: 0, pageY: 0 }
+          if (!this.isPc) {
+            // 移动端
+            e = { pageX: event.touches[0].pageX, pageY: event.touches[0].pageY }
+          } else {
+            e = { pageX: event.pageX, pageY: event.pageY }
+          }
+          return e
+        },
+        start (event) {
+          const e = this.returnXY(event)
+          // console.log('start', e)
+          this.downFlag = true
+          this.point = {
+            pageX: e.pageX,
+            pageY: e.pageY
+          }
+        },
+        move (event) {
+          if (!this.downFlag) return
+          const e = this.returnXY(event)
+          const ctx = this.ctx
+
+          const width = this.betweenLength(e, this.point) // 移动间距
+          const text = this.text[this.textIndex] // 当前文字
+          const fontSzie = this.fontSize + width / 2 // 文字大小
+          const textWidth = this.textWidth(fontSzie, text) // 当前文字的宽度
+  				var angle = Math.atan2(e.pageY - this.point.pageY, e.pageX - this.point.pageX) // 计算偏离角度
+
+          if (width > textWidth) {
+            // 文字绘制
+            ctx.font = fontSzie + "px Arial" // 文字大小以及字体
+            ctx.fillStyle = this.returnColor() // 文字颜色
+            ctx.save() // 保存当前图像状态的一份拷贝  可以保存canvas的原点和旋转角度
+            ctx.translate(this.point.pageX, this.point.pageY)
+            ctx.rotate(angle)
+            ctx.fillText(text, 0, 0)
+            ctx.restore() // restore() 方法从栈中弹出存储的图形状态并恢复 CanvasRenderingContext2D 对象的属性、剪切路径和变换矩阵的值  可以取出save保存的canvas的原点和旋转角度
+
+            this.textIndex = this.textIndex >= (this.text.length - 1) ? 0 : (this.textIndex + 1) // 文字下标更新
+            // console.log('move', width, textWidth, e)
+            this.point = { // 更新鼠标/手指位置
+              pageX: e.pageX,
+              pageY: e.pageY
+            }
+          }
+        },
+        end (event) {
+          const e = this.returnXY(event)
+          // console.log('end', e)
+          this.downFlag = false
+          this.textIndex = 0
+        },
+        returnColor () {
+          const r = this.twoBetween(0, 255)
+          const g = this.twoBetween(0, 255)
+          const b = this.twoBetween(0, 255)
+          return `rgb(${r},${g},${b})`
+        },
+        // 取两数之间的随机数
+        twoBetween (num1, num2) {
+          return Math.floor(Math.random() * (num2 - num1) + num1)
+        },
+        // 计算间距
+        betweenLength (p1, p2) {
+          return Math.sqrt(Math.pow(p2.pageX - p1.pageX, 2) + Math.pow(p2.pageY - p1.pageY, 2));
+        },
+        // 获取文字宽度
+        textWidth(fontSize, text) {
+          const ctx = this.ctx
+          ctx.font = fontSize + "px Arial";
+          if(ctx.fillText){
+            return ctx.measureText(text).width;
+          }else if(ctx.mozDrawText){
+            return ctx.mozMeasureText(text);
+          }
+        }
+      }
+    })
+  </script>
+
+</body>
+</html>

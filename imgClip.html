@@ -1001,7 +1001,7 @@
         // blurChange
         blurChange (type, e, num) {
           // String(num) 是为了防止num是0的情况
-          const val = String(num) ? Number(num) : Number(e.target.value)
+          const val = num ? Number(num) : Number(e.target.value)
           // console.log(val, type)
           if (type === 'scale') {
             // 监听并控制 放大与缩小倍数

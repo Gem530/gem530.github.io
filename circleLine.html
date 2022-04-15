@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>中心环绕</title>
+<link rel="icon" href="./img/favicon.ico">
+<script src="./vue.js"></script>
+
+<script type="text/javascript" src="https://cdn.bootcss.com/vConsole/3.3.0/vconsole.min.js"></script>
+<script>
+  // 开发环境且是移动端才打开 vconsole
+  const vConsole = new VConsole()
+</script>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #000000;
+  }
+
+  /* .mycanvas {
+    border: 1px solid #000;
+  } */
+</style>
+ 
+</head>
+<body>
+  <div id="app">
+    <canvas
+      id="myCanvas"
+      ref="myCanvasRef"
+      @mousemove="move"
+    ></canvas>
+  </div>
+
+  <script type="text/javascript">
+    new Vue({
+      el: '#app',
+      data () {
+        return {
+          canvas: null, // canvas实例
+          ctx: null, // 2d
+          width: document.body.clientWidth, // canvas宽
+          height: document.body.clientHeight, // canvas高
+          point: { // 中心点
+            x: 0,
+            y: 0
+          },
+          theta: 0, // 旋转角度
+          frameCount: 1, // 动画帧
+          pendingTasks: [], // 任务列表
+        }
+      },
+      mounted () {
+        this.init()
+        this.frame()
+      },
+      methods: {
+        init () {
+          this.canvas = this.$refs.myCanvasRef
+          this.ctx = this.canvas.getContext('2d')
+          this.canvas.width = this.width
+          this.canvas.height = this.height
+          // this.ctx.translate(this.width / 2, this.height/ 2)
+          this.point = {
+            x: this.width / 2,
+            y: this.height / 2
+          }
+          // this.ctx.fillText(this.text,0,20)
+        },
+        move (e) {
+          // this.point = {
+          //   x: e.pageX,
+          //   y: e.pageY
+          // }
+          console.log('鼠标移动')
+        },
+        frame () {
+          requestAnimationFrame(() => {
+            this.frameCount += 1
+            // if (this.frameCount % 30 === 0) this.gravity()
+            this.gravity()
+            this.frame()
+          })
+        },
+        gravity () {
+          const ctx = this.ctx
+          ctx.clearRect(0, 0, this.width, this.height)
+          // const distance = this.twoBetween(70, 90) // 控制圆离中心点的距离
+          // const end = {
+          //   x: this.point.x + Math.cos(this.theta) * distance,
+          //   y: this.point.y + Math.sin(this.theta) * distance
+          // }
+          const end = {
+            x: this.point.x + Math.cos(this.theta) * 70,
+            y: this.point.y + Math.sin(this.theta) * 70
+          }
+          this.theta += 0.05 // 控制每次角度变化
+          this.drawCircle(end)
+        },
+        drawCircle (end) {
+          const ctx = this.ctx
+
+          // 中心点
+          ctx.beginPath()
+          ctx.fillStyle = 'pink'
+          ctx.arc(this.point.x, this.point.y, 5, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.closePath()
+
+          ctx.beginPath()
+          ctx.fillStyle = 'pink'
+          // ctx.fillStyle = this.returnColor()
+          ctx.arc(end.x, end.y, 3, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.closePath()
+        },
+        returnColor () {
+          const r = this.twoBetween(0, 255)
+          const g = this.twoBetween(0, 255)
+          const b = this.twoBetween(0, 255)
+          return `rgb(${r},${g},${b})`
+        },
+        // 取两数之间的随机数
+        twoBetween (num1, num2) {
+          return Math.floor(Math.random() * (num2 - num1) + num1)
+        },
+      }
+    })
+  </script>
+
+</body>
+</html>
