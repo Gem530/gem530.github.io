@@ -8,9 +8,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.2.25"
+    "vue": "^3.2.25",
+    "vue-router": "^4.0.14",
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
+    "@types/node": "^17.0.24",
     "@vitejs/plugin-vue": "^2.2.0",
     "node-sass": "^7.0.1",
     "sass": "^1.49.9",
