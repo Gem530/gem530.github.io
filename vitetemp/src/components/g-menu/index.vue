@@ -11,15 +11,20 @@
         :style="paddingLeft(item[keys])"
         @click.stop="handleClick(item, i)">
         <span>{{item.title}}</span>
-        <span class="right" v-if="item.children">></span>
+        <span class="right" v-if="item.children">{{item.flag ? '+' : '-'}}</span>
       </div>
 
-      <div :class="{
-        'item-content': true,
-        'item-content-show': item.flag,
-        'item-content-hide': !item.flag
-      }"
-      v-if="item.children">
+      <!-- style里做折叠动画效果 -->
+      <!-- 这个效果用于动画效果根据高度来实现动画速度 transition: all ${(0.1 * list.length).toFixed(1)}s linear; -->
+      <div
+        :style="`
+          max-height: ${item.flag ? (list.length * 45).toFixed(0) : 0 }px;
+        `"
+        :class="{
+          'item-content': true,
+        }"
+        v-if="item.children">
+        <!-- 'item-content-hide': !item.flag -->
         <g-menu
           :keys="props.keys"
           :list="item.children"
@@ -132,17 +137,7 @@ $height: 45px;
 
   .item-content {
     overflow: hidden;
-    transition: all 0.3s linear;
-
-    transform-origin: top;
-  }
-  .item-content-show {
-    height: 100%;
-    transform: rotateX(0);
-  }
-  .item-content-hide {
-    height: 0;
-    transform: rotateX(-90deg);
+    transition: max-height 0.2s linear;
   }
 }
 </style>
