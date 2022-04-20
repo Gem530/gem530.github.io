@@ -7,9 +7,11 @@
 </template>
 
 <script lang="ts">
-export default { name: 'template' }
+export default { name: 'top' }
 </script>
 <script setup lang="ts">
+  import { computed } from 'vue'
+  import { useStore } from 'vuex'
   // https://zhuanlan.zhihu.com/p/481640259 解决给组件加name的方法
   // 因为使用auto-import插件，会自动导入onMounted等vue或vue-router的方法，所以不需要每次都导入
   // onMounted(() => {
@@ -18,8 +20,8 @@ export default { name: 'template' }
 
   const store = useStore()
   // computed
-  const navFlag = computed({
-    get: () => store.getters.base.navFlag
+  const navFlag = computed(() => {
+    return store.getters.base.navFlag
   })
 
   // 切换主题色

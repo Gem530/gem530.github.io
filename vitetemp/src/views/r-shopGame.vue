@@ -9,14 +9,14 @@
       list 奖品列表 目前只用了name，image { id: 0, name: '奖励11', image: 'https://img2.baidu.com/it/u=3719466279,99109861&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500', type: 1, number: 1 }
       luckResult 结束方法 返回所中奖的对象 { id: 0, name: '奖励11', image: 'https://img2.baidu.com/it/u=3719466279,99109861&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500', type: 1, number: 1 }
     -->
-    <shopGame
+    <shopGameDom
       :gift="state.gift"
       :list="state.list"
       :width="350"
       :height="350"
       :number="state.number"
       @luckResult="luckResult"
-    ></shopGame>
+    ></shopGameDom>
   </div>
 </template>
 
@@ -24,7 +24,8 @@
 export default { name: 'shopGame' }
 </script>
 <script setup lang="ts">
-  import shopGame from '@/components/shopGame/index.vue'
+  import shopGameDom from '@/components/shopGame/index.vue'
+  import { reactive, onMounted } from 'vue'
 
   const state = reactive({
     gift: 5,
@@ -40,7 +41,7 @@ export default { name: 'shopGame' }
   })
 
   // 抽奖结束方法
-  const luckResult = (data) => {
+  const luckResult = (data: any) => {
     console.log('结束', data)
     state.number -= 1
     state.gift = twoNumberBetween(0, 7)

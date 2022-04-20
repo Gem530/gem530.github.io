@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-export default { name: 'template' }
+export default { name: 'template1' }
 </script>
 <script setup lang="ts">
   // https://zhuanlan.zhihu.com/p/481640259 解决给组件加name的方法

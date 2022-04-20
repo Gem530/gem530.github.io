@@ -1,13 +1,16 @@
 <template>
   <div class="contanir theme">
-    <keep-alive>
-      <router-view></router-view>
-    </keep-alive>
+    <!-- keep-alive 用法 -->
+    <router-view v-slot="{ Component }">
+      <keep-alive>
+        <component :is="Component"/>
+      </keep-alive>
+    </router-view>
   </div>
 </template>
 
 <script lang="ts">
-export default { name: 'template' }
+export default { name: 'content' }
 </script>
 <script setup lang="ts">
   // https://zhuanlan.zhihu.com/p/481640259 解决给组件加name的方法
