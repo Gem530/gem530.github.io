@@ -25,7 +25,7 @@ export default { name: 'shopGame' }
 </script>
 <script setup lang="ts">
   import shopGameDom from '@/components/shopGame/index.vue'
-  import { reactive, onMounted } from 'vue'
+  import { reactive, onMounted, onActivated } from 'vue'
 
   const state = reactive({
     gift: 5,
@@ -35,9 +35,14 @@ export default { name: 'shopGame' }
 
   // 因为使用auto-import插件，会自动导入onMounted等vue或vue-router的方法，所以不需要每次都导入
   onMounted(() => {
-    // console.log('onMounted')
+    console.log('onMounted')
     state.gift = twoNumberBetween(0, 7)
     state.number = twoNumberBetween(0, 7)
+  })
+
+  // keepAlive生命周期
+  onActivated(() => {
+    console.log('activated')
   })
 
   // 抽奖结束方法

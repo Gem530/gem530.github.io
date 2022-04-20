@@ -35,9 +35,21 @@ $base-font-size: 750;
 }
 
 // 元素宽高
-@mixin wh($w, $h) {
-  width: $w;
-  height: $h;
+@mixin wh($w, $h, $varW: '', $varH: '') {
+  @if $varW == 'max' {
+    max-width: $w;
+  } @else if $varW == 'min' {
+    min-width: $w;
+  } @else {
+    width: $w;
+  }
+  @if $varH == 'max' {
+    max-height: $h;
+  } @else if $varH == 'min' {
+    min-height: $h;
+  } @else {
+    height: $h;
+  }
 }
 
 // 字体颜色

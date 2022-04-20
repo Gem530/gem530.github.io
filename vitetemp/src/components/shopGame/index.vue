@@ -45,6 +45,12 @@
       default: () => GIFT_LIST
     }
   })
+  // // withDefaults与defineProps搭配使用，withDefaults第二个参数是给defineProps的值给默认值
+  // withDefaults(defineProps<{
+  //   msg: string
+  // }>(), {
+  //   msg: 'Vue3 Message Title'
+  // })
   const emits = defineEmits(['luckResult'])
   const state = reactive({
     maxCount: 6, // 最多转动的格子次数，然后开始减速
@@ -65,10 +71,10 @@
     }
   }, { deep: true, immediate: true })
 
-  // 因为使用auto-import插件，会自动导入onMounted等vue或vue-router的方法，所以不需要每次都导入
-  onMounted(() => {
-    console.log('onMounted')
-  })
+  // // 因为使用auto-import插件，会自动导入onMounted等vue或vue-router的方法，所以不需要每次都导入
+  // onMounted(() => {
+  //   console.log('onMounted')
+  // })
 
   // 开始抽奖
   const startLuckDraw = () => {

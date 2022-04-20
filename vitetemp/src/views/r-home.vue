@@ -1,7 +1,7 @@
 <template>
   <div>
     home
-    <HelloWorld msg="hello world Vue3 Vite!"></HelloWorld>
+    <HelloWorld msg="hello world Vue3 Vite!" data-temp="111"></HelloWorld>
   </div>
 </template>
 

@@ -1,11 +1,11 @@
 <template>
-  <div class="component theme">
-    页面
+  <div class="contanir theme">
+    404页面
   </div>
 </template>
 
 <script lang="ts">
-export default { name: 'template' }
+export default { name: 'error' }
 </script>
 <script setup lang="ts">
   import { onMounted } from 'vue'
@@ -17,5 +17,8 @@ export default { name: 'template' }
 </script>
 
 <style lang="scss" scoped>
-
+.contanir {
+  font-size: 60px;
+  @include flex();
+}
 </style>
