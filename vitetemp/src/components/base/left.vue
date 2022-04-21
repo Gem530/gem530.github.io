@@ -34,8 +34,8 @@ export default { name: 'left' }
 </script>
 <script setup lang="ts">
   import { useStore } from 'vuex'
+  import { menu } from '@/router/config'
   import { useRoute, useRouter } from 'vue-router'
-  import { menu } from '@/router/config.ts'
   import { computed, watch, reactive, ref, onMounted, nextTick } from 'vue'
   import gMenu from '@/components/g-menu/index.vue'
   const store = useStore()
