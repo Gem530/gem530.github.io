@@ -72,6 +72,7 @@ export default { name: 'g-menu', inheritAttrs: false }
 
   console.log('--', attrs)
 
+  // 根据路由来高亮菜单栏
   watch(() => router.currentRoute.value, (val, old) => {
     // console.log(val, old)
     // if (old.fullPath === '/') {

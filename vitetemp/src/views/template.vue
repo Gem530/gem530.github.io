@@ -1,11 +1,11 @@
 <template>
-  <div class="component theme">
+  <div class="contanir component theme">
     页面
   </div>
 </template>
 
 <script lang="ts">
-export default { name: 'template' }
+export default { name: 'drawBoard' }
 </script>
 <script setup lang="ts">
   import { onMounted } from 'vue'
