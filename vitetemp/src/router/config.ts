@@ -6,30 +6,16 @@ export const menu = [
     key: '/home'
   },
   {
-    title: '一次菜单',
+    title: 'canvs',
     icon: '',
     meta: { keepAlive: true },
     key: 'one',
     children: [
       {
-        title: '画布-二级',
+        title: '签字板',
         icon: '',
         meta: { keepAlive: true },
-        key: 'two',
-        children: [
-          {
-            title: '画布',
-            icon: '',
-            meta: { keepAlive: true },
-            key: '/canvas'
-          },
-          {
-            title: '画布-0',
-            icon: '',
-            meta: { keepAlive: true },
-            key: '/canvas0'
-          }
-        ]
+        key: '/drawBoard'
       },
       {
         title: '临时文件',
@@ -50,5 +36,33 @@ export const menu = [
     icon: '',
     meta: { keepAlive: true },
     key: '/luckTurn'
+  },
+  {
+    title: '一级菜单',
+    icon: '',
+    meta: { keepAlive: true },
+    key: 'one',
+    children: [
+      {
+        title: '二级菜单',
+        icon: '',
+        meta: { keepAlive: true },
+        key: 'two',
+        children: [
+          {
+            title: '三级菜单1',
+            icon: '',
+            meta: { keepAlive: true },
+            key: '/three'
+          },
+          {
+            title: '三级菜单2',
+            icon: '',
+            meta: { keepAlive: true },
+            key: '/three'
+          },
+        ]
+      },
+    ]
   },
 ]
