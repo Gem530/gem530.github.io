@@ -1,7 +1,8 @@
 <template>
   <div>
     home
-    <HelloWorld msg="hello world Vue3 Vite!" data-temp="111"></HelloWorld>
+    {{tips}}
+    <Hello-world msg="hello world Vue3 Vite!" data-temp="111"></Hello-world>
   </div>
 </template>
 
@@ -9,7 +10,7 @@
 export default { name: 'home' }
 </script>
 <script setup lang="ts">
-  import { defineAsyncComponent } from 'vue'
+  import { provide, defineAsyncComponent } from 'vue'
   import loadDom from '@/components/load.vue'
   import errDom from '@/components/err.vue'
   // const HelloWorld = defineAsyncComponent(() => import('./components/HelloWorld.vue'))
@@ -21,4 +22,13 @@ export default { name: 'home' }
     errorComponent: errDom,
     loadingComponent: loadDom
   })
+
+  const tips = ref('tips-提示测试使用provide/inject')
+  const changeInject = () => {
+    tips.value = 'tips-值改变了'
+    console.log(111)
+  }
+
+  provide('tips', tips) // 直接给tips，孙组件就是响应式的，这里改变了，孙组件里的值也会改变； 如果是tips.value就不是响应式的
+  provide('changeInject', changeInject)
 </script>

@@ -67,7 +67,7 @@
     state.gift = val.gift
     state.number = val.number
     if (val.list && val.list.length) {
-      state.list = val.list
+      state.list = val.list as Array<any>
     }
   }, { deep: true, immediate: true })
 
@@ -91,7 +91,7 @@
     roll()
   }
 
-  let timer = null // 定时器
+  let timer: ReturnType<typeof setTimeout> // 定时器
   // 转动
   const roll = () => {
     timer = setTimeout(() => {

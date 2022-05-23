@@ -39,4 +39,17 @@ export default defineConfig({
     //   }
     // }
   },
+  // Vue3+Vite+TypeScript打包时报类型错误，dev启动不报错 删除"vue-tsc --noEmit && "只保留vite build
+  // 打包时，分包，可以在首次加载时更快打开页面
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return id.toString().split('node_modules/')[1].split('/')[0].toString()
+          }
+        }
+      }
+    }
+  }
 })

@@ -8,6 +8,7 @@
     ></canvas>
 
     <div class="btn-box">
+      <!-- 是否把底边栏的按钮移到侧边 btn-box-lefts -->
       <div class="btn-base">
         <div
           class="base-item"
@@ -57,7 +58,7 @@ export default { name: 'g-draw-board' }
    * :thickness="[{name:'细',value:'1'},{name:'粗',value:'5'}]" // 非必填 画笔粗细列表 格式[{ name: '', value: '' }]
    * @upload="getImageBase" // 签字板结果 返回一个参数 blob 暂时是返回base64，便于演示结果
    */
-  const props = withDefaults(defineProps<{
+  const props: any = withDefaults(defineProps<{
     width?: string, // 非必填 签字板宽度 默认100%
     height?: string, // 非必填 签字板高度 默认200px
     colors?: Array<{ name: string, value: string }>, // 非必填 画笔颜色列表 格式[{ name: '', value: '' }]
@@ -197,13 +198,13 @@ export default { name: 'g-draw-board' }
   const submitCanvas= () => {
     ctx.value.drawImage(myCanvas.value, 0, 0, myCanvas.value.width, myCanvas.value.height)
     const tempURL = myCanvas.value.toDataURL('image/png', 1) // 第二个参数是图片质量0-1，默认是0.92
-    myCanvas.value.toBlob(function (blob) {
+    myCanvas.value.toBlob(function (blob: any) {
       emits('upload', tempURL)
     }, 'image/png')
   }
 
   // 根据pc或是移动端来返回坐标
-  const returnXY = (event) => {
+  const returnXY = (event: any) => {
     // 鼠标按下时的x/y坐标
     let e = { pageX: 0, pageY: 0 }
     if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
@@ -215,13 +216,13 @@ export default { name: 'g-draw-board' }
   }
 
   // 按下鼠标或者手指
-  const start = (e) => {
+  const start = (e: any) => {
     state.moveFlag = true
     state.e = returnXY(e)
   }
 
   // 鼠标或者手指移动
-  const move = (e) => {
+  const move = (e: any) => {
     if (!state.moveFlag || state.flag) return
     // div.getBoundingClientRect().top 获取当前元素离屏幕顶部距离
     const top = box.value.getBoundingClientRect().top
@@ -264,6 +265,14 @@ export default { name: 'g-draw-board' }
     @include pcenter(100%, 0, 0, -100%);
     border-top: 1px solid $borderColor;
     z-index: 2;
+
+    &.btn-box-lefts {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: translate(30px, 0) rotate(90deg);
+      transform-origin: 0 0;
+    }
 
     .btn-base {
       @include wh(100%, 100%);

@@ -18,6 +18,24 @@ export const menu = [
         key: '/drawBoard'
       },
       {
+        title: '文字绘制',
+        icon: '',
+        meta: { keepAlive: true },
+        key: '/drawFont'
+      },
+      {
+        title: '梅花背景',
+        icon: '',
+        meta: { keepAlive: true },
+        key: '/plumTree'
+      },
+      {
+        title: '取景框',
+        icon: '',
+        meta: { keepAlive: true },
+        key: '/findFrame'
+      },
+      {
         title: '临时文件',
         icon: '',
         meta: { keepAlive: true },

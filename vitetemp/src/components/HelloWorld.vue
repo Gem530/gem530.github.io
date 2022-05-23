@@ -25,10 +25,12 @@
     Edit
     <code>components/HelloWorld.vue</code> to test hot module replacement.
   </p>
+  <tip-dom></tip-dom>
 </template>
 
 <script setup lang="ts">
   import { ref, useAttrs } from 'vue'
+  import tipDom from '@/components/inject.vue'
 
   // withDefaults与defineProps搭配使用，withDefaults第二个参数是给defineProps的值给默认值
   withDefaults(defineProps<{
