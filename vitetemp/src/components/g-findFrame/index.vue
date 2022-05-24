@@ -49,7 +49,7 @@
 export default { name: "g-find-frame" };
 </script>
 <script setup lang="ts">
-    import { onMounted, nextTick, defineEmits } from 'vue'
+    import { onMounted, nextTick, defineEmits, Ref } from 'vue'
 
     const emits = defineEmits(['getPhotoBlob'])
 
@@ -243,7 +243,7 @@ export default { name: "g-find-frame" };
     // 调用手机摄像头
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     const fileChange = async () => {
-        const inputFile: any = document.getElementById('ground-push-image')
+        const inputFile: HTMLInputElement|any = document.getElementById('ground-push-image')
 
         const fileList = inputFile.files[0]
 
@@ -259,7 +259,7 @@ export default { name: "g-find-frame" };
      * @description 将将文件处理成 Image 对象
      * @param file 文件对象
      */
-    const toImage = (file: any) => {
+    const toImage = (file: File) => {
         return new Promise((resolve, reject) => {
             const img = new Image() as any
             const reader = new FileReader()
@@ -285,26 +285,26 @@ export default { name: "g-find-frame" };
      * @param img 被压缩的img对象
      * @param quality 压缩的质量，值越小图片大小越小，例：quality=0.13，压缩后，6.4M的图片只有630kb
      */
-    const compressImgQuality = (img: any, quality = 0.13) => {
-    // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async (resolve, reject) => {
-        try {
-            const canvas = document.createElement('canvas')
-            const context = canvas.getContext('2d') as any
-            const { width, height } = img
-            canvas.width = width
-            canvas.height = height
-            context.clearRect(0, 0, width, height)
-            // 图片绘制
-            context.drawImage(img, 0, 0, width, height)
-            const tempFile = canvas.toDataURL('image/jpeg', quality)
-            const blob = await convertBase64UrlToBlob(tempFile)
-            // console.log(blob)
-            resolve(blob)
-        } catch (error) {
-            reject(error)
-        }
-    })
+    const compressImgQuality = (img: HTMLImageElement, quality = 0.13) => {
+        // eslint-disable-next-line no-async-promise-executor
+        return new Promise(async (resolve, reject) => {
+            try {
+                const canvas = document.createElement('canvas')
+                const context = canvas.getContext('2d') as any
+                const { width, height } = img
+                canvas.width = width
+                canvas.height = height
+                context.clearRect(0, 0, width, height)
+                // 图片绘制
+                context.drawImage(img, 0, 0, width, height)
+                const tempFile = canvas.toDataURL('image/jpeg', quality)
+                const blob = await convertBase64UrlToBlob(tempFile)
+                // console.log(blob)
+                resolve(blob)
+            } catch (error) {
+                reject(error)
+            }
+        })
     }
 
     /**

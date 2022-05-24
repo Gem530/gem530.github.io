@@ -198,17 +198,18 @@ export default { name: 'g-draw-board' }
   const submitCanvas= () => {
     ctx.value.drawImage(myCanvas.value, 0, 0, myCanvas.value.width, myCanvas.value.height)
     const tempURL = myCanvas.value.toDataURL('image/png', 1) // 第二个参数是图片质量0-1，默认是0.92
-    myCanvas.value.toBlob(function (blob: any) {
+    myCanvas.value.toBlob(function (blob: Blob) {
       emits('upload', tempURL)
     }, 'image/png')
   }
 
   // 根据pc或是移动端来返回坐标
-  const returnXY = (event: any) => {
+  const returnXY = (event: MouseEvent|any) => {
     // 鼠标按下时的x/y坐标
     let e = { pageX: 0, pageY: 0 }
     if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
-      e = { pageX: event.touches[0].pageX, pageY: event.touches[0].pageY }
+      const eventNew: TouchEvent = event
+      e = { pageX: eventNew.touches[0].pageX, pageY: eventNew.touches[0].pageY }
     } else {
       e = { pageX: event.pageX, pageY: event.pageY }
     }
@@ -216,13 +217,13 @@ export default { name: 'g-draw-board' }
   }
 
   // 按下鼠标或者手指
-  const start = (e: any) => {
+  const start = (e: MouseEvent|TouchEvent) => {
     state.moveFlag = true
     state.e = returnXY(e)
   }
 
   // 鼠标或者手指移动
-  const move = (e: any) => {
+  const move = (e: MouseEvent|TouchEvent) => {
     if (!state.moveFlag || state.flag) return
     // div.getBoundingClientRect().top 获取当前元素离屏幕顶部距离
     const top = box.value.getBoundingClientRect().top

@@ -54,19 +54,20 @@ export default { name: 'g-draw-font' }
         state.canvas.height = state.height
         // this.ctx.fillText(this.text,0,20)
     }
-    const returnXY = (event: any) => {
+    const returnXY = (event: MouseEvent|any) => {
         // return new Promise((resolve, reject))
         // 鼠标按下时的x/y坐标
         let e = { pageX: 0, pageY: 0 }
         if (!state.isPc) {
-        // 移动端
-            e = { pageX: event.touches[0].pageX, pageY: event.touches[0].pageY }
+            // 移动端
+            const eventNew: TouchEvent = event
+            e = { pageX: eventNew.touches[0].pageX, pageY: eventNew.touches[0].pageY }
         } else {
             e = { pageX: event.pageX, pageY: event.pageY }
         }
         return e
     }
-    const start = (event: any) => {
+    const start = (event: MouseEvent) => {
         const e = returnXY(event)
         // console.log('start', e)
         state.downFlag = true
@@ -75,7 +76,7 @@ export default { name: 'g-draw-font' }
             pageY: e.pageY
         }
     }
-    const move = (event: any) => {
+    const move = (event: MouseEvent) => {
         if (!state.downFlag) return
         const e = returnXY(event)
         const ctx = state.ctx as any
@@ -107,7 +108,7 @@ export default { name: 'g-draw-font' }
             }
         }
     }
-    const end = (event: any) => {
+    const end = (event: MouseEvent) => {
         const e = returnXY(event)
         // console.log('end', e)
         state.downFlag = false

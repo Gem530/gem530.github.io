@@ -21,11 +21,13 @@
         @click="changeRouter(item.key)"
       >{{item.title}}</div>
     </div> -->
-    <g-menu
-      :keys="keys"
-      :list="list"
-      @changeMenu="changeMenu"
-    ></g-menu>
+    <div class="nav-box">
+      <g-menu
+        :keys="keys"
+        :list="list"
+        @changeMenu="changeMenu"
+      ></g-menu>
+    </div>
   </div>
 </template>
 
@@ -104,6 +106,7 @@ export default { name: 'left' }
   position: fixed;
   top: 0;
   left: 0;
+  @include flex(flex-start, flex-start, column, no-wrap);
   @include wh($leftWidth, 100vh);
   border-right: 1px solid $borderColor;
   z-index: 3;
@@ -120,6 +123,13 @@ export default { name: 'left' }
     @include textcenter(50px, center);
     border-bottom: 1px solid $borderColor;
     cursor: pointer;
+  }
+
+  .nav-box {
+    width: 100%;
+    flex: 1;
+    overflow-y: auto;
+    @include overflowAutoHid();
   }
 }
 </style>

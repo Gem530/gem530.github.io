@@ -16,9 +16,10 @@
 
       <!-- style里做折叠动画效果 -->
       <!-- 这个效果用于动画效果根据高度来实现动画速度 transition: all ${(0.1 * list.length).toFixed(1)}s linear; -->
+      <!-- {{(list.length * 45).toFixed(0)}} -->
       <div
         :style="`
-          max-height: ${item.flag ? (list.length * 45).toFixed(0) : 0 }px;
+          max-height: ${item.flag ? (item.children.length * 45).toFixed(0) : 0 }px;
         `"
         :class="{
           'item-content': true,
@@ -120,9 +121,10 @@ $height: 45px;
     z-index: 10 - $i;
   }
 }
+
 .item-menu {
   position: relative;
-  overflow: hidden;
+  // overflow: hidden;
 
   .item-title {
     position: relative;
@@ -137,7 +139,7 @@ $height: 45px;
   }
 
   .item-content {
-    overflow: hidden;
+    // overflow: hidden;
     transition: max-height 0.2s linear;
   }
 }

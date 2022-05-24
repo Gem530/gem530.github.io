@@ -36,6 +36,30 @@ export const menu = [
         key: '/findFrame'
       },
       {
+        title: '刮刮乐',
+        icon: '',
+        meta: { keepAlive: true },
+        key: '/scrapeMusic'
+      },
+      {
+        title: '转盘抽奖',
+        icon: '',
+        meta: { keepAlive: true },
+        key: '/luckyTurn'
+      },
+      {
+        title: '海报',
+        icon: '',
+        meta: { keepAlive: true },
+        key: '/poster'
+      },
+      {
+        title: '高斯模糊',
+        icon: '',
+        meta: { keepAlive: true },
+        key: '/canvasBlur'
+      },
+      {
         title: '临时文件',
         icon: '',
         meta: { keepAlive: true },
@@ -50,10 +74,16 @@ export const menu = [
     key: '/shopGame'
   },
   {
-    title: '转盘',
+    title: '上拉下拉组件',
     icon: '',
     meta: { keepAlive: true },
-    key: '/luckTurn'
+    key: '/refersh'
+  },
+  {
+    title: '无限列表',
+    icon: '',
+    meta: { keepAlive: true },
+    key: '/wirlessList'
   },
   {
     title: '一级菜单',
