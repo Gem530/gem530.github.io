@@ -2,6 +2,7 @@
   <div class="contanir theme">
     签字板
     <!--
+      left="true" // 下方的按钮是否显示在左侧
       width="350px" // 非必填 签字板宽度 默认100%
       height="350px" // 非必填 签字板高度 默认200px
       background="#000" // 非必填 签字板背景色 默认#fff
@@ -13,6 +14,7 @@
     -->
     <g-draw-board
       ref="drawBoardRef"
+      :left="false"
       width="350px"
       height="350px"
       background="#000"

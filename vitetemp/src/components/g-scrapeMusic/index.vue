@@ -1,11 +1,11 @@
 <template>
+    <!-- 刮刮乐 -->
     <div class="component theme" ref="box">
         <img
             ref="oImg"
-            width="400"
-            style="position: absolute;top: 100px;left: 100px;"
-            src="https://d1.faiusr.com/4/AAEIABAEGAAgtZ-56QUoufyr5gQw9gE4kwM.png">
-        <input type="text" name="" ref="txt">
+            :src="props.url"
+            :style="`width: ${props.width};height: ${props.height};`">
+        <!-- <input type="text" name="" ref="txt"> -->
     </div>
 </template>
 
@@ -13,10 +13,22 @@
 export default { name: 'g-scrape-music' }
 </script>
 <script setup lang="ts">
-    import { onMounted, ref } from 'vue'
+    import { onMounted, ref, defineProps, defineEmits } from 'vue'
+    const emits = defineEmits(['getResult'])
     const box = ref()
-    const txt = ref()
+    // const txt = ref()
     const oImg = ref()
+    const props = withDefaults(defineProps<{
+        url?: string, // 底层图片
+        width?: string, // 图片宽度
+        height?: string, // 图片高度
+        maxArea?: number // 刮开多少，自动展示所有
+    }>(), {
+        url: '',
+        width: '300px',
+        height: '300px',
+        maxArea: 30
+    })
     let flag = ref(true)
     if (navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i)) {
         flag.value = true
@@ -150,13 +162,17 @@ export default { name: 'g-scrape-music' }
                 }
             }
             let f = n*100/(can.width*can.height)  //算出所刮的面积的占比；
-            txt.value.value = `刮开面积:${f.toFixed(2)}%`
+            // txt.value.value = `刮开面积:${f.toFixed(2)}%`
             //刮开面积的比例
-            if( f > 30 ){   //如果所刮的面积大于30%   则将canvas画布整体清除fillRect
+            if( f > props.maxArea ){   //如果所刮的面积大于30%   则将canvas画布整体清除fillRect
                 ctx.beginPath()
                 ctx.fillRect( 0,0,can.width , can.height )
-                txt.value.value = "刮开面积大于30%，全部显示"
+                // txt.value.value = "刮开面积大于30%，全部显示"
             }
+            emits('getResult', {
+                currentArea: f,
+                isSuccess: f > props.maxArea
+            })
         }
     }
 </script>

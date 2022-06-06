@@ -1,6 +1,14 @@
 <template>
     <div class="contanir theme">
-        <g-canvas-blur></g-canvas-blur>
+        <div style="width: 400px;height: 714px;">
+            <g-canvas-blur
+                :x='200'
+                :y='200'
+                url='https://gem530.github.io/img/33.jpg'
+                :width='200'
+                :height='200'
+            ></g-canvas-blur>
+        </div>
     </div>
 </template>
 

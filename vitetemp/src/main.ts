@@ -12,10 +12,9 @@ app.directive('loadmores', {
     // 当被绑定的元素挂载到 DOM 中时…… 
     mounted (el, binding) {
         const SELECTWRAP_DOM = el
-        console.log(el, binding)
         SELECTWRAP_DOM.addEventListener('scroll', function () {
             //  - Number(binding.arg)
-            const CONDITION = Math.floor(SELECTWRAP_DOM.scrollHeight) - Math.ceil(SELECTWRAP_DOM.scrollTop) <= SELECTWRAP_DOM.clientHeight
+            const CONDITION = Math.floor(SELECTWRAP_DOM.scrollHeight) - Math.ceil(SELECTWRAP_DOM.scrollTop) - 20 <= SELECTWRAP_DOM.clientHeight
             // const CONDITION = this.scrollHeight - this.scrollTop <= this.clientHeight
             // console.log('----', CONDITION, SELECTWRAP_DOM.scrollHeight, SELECTWRAP_DOM.scrollTop, SELECTWRAP_DOM.clientHeight)
             if (CONDITION) {

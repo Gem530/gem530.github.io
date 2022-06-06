@@ -1,32 +1,33 @@
 <template>
-  <div class="component theme"><!-- 九宫格抽奖机 -->
+  <div class="component theme">
+      <!-- 九宫格抽奖机 -->
       <!-- 转盘玩法组件 -->
       <!-- 
           栗子：
-              <lucky-turn :luckIndex="luckIndex" :isShowPrz="true" @endPlay="endPlay" ref="lucky"></lucky-turn>
+              <lucky-turn :luckyIndex="luckyIndex" :isShowPrz="true" @endPlay="endPlay" ref="lucky"></lucky-turn>
       -->
-      div  ios低版本会出现图片闪烁
+      <!-- div  ios低版本会出现图片闪烁
       <div
-          :class="['wheel-bg', state.isShowPrz && 'demo_css']"
+          :class="['wheel-bg', props.isShowPrz && 'demo_css']"
           :style="{
-              width: `${ state.luckyW / 750 * 10 }rem` || '',
-              height: `${ state.luckyH / 750 * 10 }rem` || '',
+              width: `${ props.luckyW / 750 * 10 }rem` || '',
+              height: `${ props.luckyH / 750 * 10 }rem` || '',
               transform: state.rotate_angle,
               transition: state.rotate_transition
           }"
       >
-          <div v-show="state.isShowPrz">
-              <!-- 转盘的每个格子 通常不需要，一般UI是直接画在背景图中了 -->
+          <div v-show="props.isShowPrz">
+              转盘的每个格子 通常不需要，一般UI是直接画在背景图中了
               <div :class="['prize_item', `prize_item_${+index+1}`]" v-for="(item,index) in state.prize_list" :key="index"></div>
           </div>
       </div>
-      canvas
+      canvas -->
       <canvas
         id="myCanvas"
-        :class="['wheel-bg-canvas', state.isShowPrz && 'demo_css']"
+        :class="['wheel-bg-canvas', props.isShowPrz && 'demo_css']"
         :style="{
-            width: `${ state.luckyW / 750 * 10 }rem` || '',
-            height: `${ state.luckyH / 750 * 10 }rem` || '',
+            width: `${ props.luckyW / 750 * 10 }rem` || '',
+            height: `${ props.luckyH / 750 * 10 }rem` || '',
             transform: state.rotate_angle,
             transition: state.rotate_transition
         }"
@@ -44,11 +45,24 @@
 export default { name: 'gLuckyTurn' }
 </script>
 <script setup lang="ts">
-    import { onMounted, defineEmits } from 'vue'
+    import { onMounted, defineEmits, defineProps } from 'vue'
     const emits = defineEmits(['endPlay'])
+    const props = withDefaults(defineProps<{
+        luckyW?: number,
+        luckyH?: number,
+        luckyImg?: string,
+        luckyIndex?: number, // 第一位从0开始计算
+        isShowPrz?: boolean
+    }>(), {
+        luckyW: 1500,
+        luckyH: 1500,
+        luckyImg: 'https://gem530.github.io/img/lucky_bg.png',
+        luckyIndex: 0, // 第一位从0开始计算
+        isShowPrz: false
+    })
     /**
      * 传入参数
-     * @param {Number} luckIndex    中奖下标 用来控制最终转盘停留的角度
+     * @param {Number} luckyIndex    中奖下标 用来控制最终转盘停留的角度
      * @param {Number} luckyW       转盘图片宽度
      * @param {Number} luckyH       转盘图片高度
      * @param {Number} luckyImg     转盘图片地址
@@ -56,12 +70,6 @@ export default { name: 'gLuckyTurn' }
      * @param {Function} endPlay    一轮抽奖后的回调函数
      */
     const state: any = reactive({
-        // props-----
-        luckIndex: 0, // 第一位从0开始计算
-        luckyW: 1500,
-        luckyH: 1500,
-        isShowPrz: false,
-        // props-----
         awardName: "", // 奖品名称
 
         imgWidth: 0,
@@ -88,7 +96,7 @@ export default { name: 'gLuckyTurn' }
         // 导入底图
         const baseImg: HTMLImageElement|any = new Image()
         baseImg.crossorigin = 'Anonymous'
-        baseImg.src = 'https://gem530.github.io/img/lucky_bg.png'
+        baseImg.src = props.luckyImg
 
         baseImg.onload = () => {
             state.imgWidth = baseImg.width
@@ -96,15 +104,15 @@ export default { name: 'gLuckyTurn' }
             can.width = state.imgWidth
             can.height = state.imgHeight
             // canvas的width和height要与图片width和height相等，是为了图片不模糊，但是canvas的style里的width和height可以不同
-            console.log(state.luckyW, can.width, can.height, baseImg.width, baseImg.height)
-            console.log(state.luckyW / 750 * 10 * 16)
+            // console.log(props.luckyW, can.width, can.height, baseImg.width, baseImg.height)
+            // console.log(props.luckyW / 750 * 10 * 16)
             ctx.drawImage(baseImg, 0, 0, 666, 665)
         }
     })
 
     // 父组件调用此方法开
     const rotate_handle = () => {
-        state.index = state.luckIndex
+        state.index = props.luckyIndex
         rotating()
     }
 
@@ -144,132 +152,135 @@ export default { name: 'gLuckyTurn' }
 
             state.click_flag = true
             emits("endPlay", state.click_flag)
-            console.log(state.click_flag)
         }, during_time * 1000 + 1500) // 延时，保证转盘转完
     }
 </script>
 
 <style lang="scss" scoped>
-.demo_css {
+.component {
     position: relative;
-    background-color: #e3e3e3;
-    border-radius: 50%;
-}
-.wheel-bg {
-    position: relative;
-    margin: 0 auto;
-    /* margin-top: 314px; */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-content: center;
+    .demo_css {
+        position: relative;
+        background-color: #e3e3e3;
+        border-radius: 50%;
+    }
+    .wheel-bg {
+        position: relative;
+        margin: 0 auto;
+        /* margin-top: 314px; */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-content: center;
 
-    width: 600px;
-    height: 600px;
-    /* // 网络资源图片，低版本ios测试机出现图片一闪一闪的问题，直接改成本地的了 */
-    /* 无效，应使用canvas画布来实现 */
-    background-image: url('https://gem530.github.io/img/lucky_bg.png');
-    background-size: contain;
-    background-position: 50% 50%;
-    overflow: hidden;
-}
-.wheel-bg-canvas {
-    position: relative;
-    margin: 0 auto;
-    /* margin-top: 314px; */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-content: center;
+        width: 600px;
+        height: 600px;
+        /* // 网络资源图片，低版本ios测试机出现图片一闪一闪的问题，直接改成本地的了 */
+        /* 无效，应使用canvas画布来实现 */
+        background-image: url('https://gem530.github.io/img/lucky_bg.png');
+        background-size: contain;
+        background-position: 50% 50%;
+        overflow: hidden;
+    }
+    .wheel-bg-canvas {
+        position: relative;
+        margin: 0 auto;
+        /* margin-top: 314px; */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-content: center;
 
-    /* width: 600px;
-    height: 600px; */
-    /* // 网络资源图片，低版本ios测试机出现图片一闪一闪的问题，直接改成本地的了 */
-    /* 无效，应使用canvas画布来实现 */
-    /* background-image: url('./img/lucky_bg.png');
-    background-size: contain;
-    background-position: 50% 50%; */
-    overflow: hidden;
-}
+        /* width: 600px;
+        height: 600px; */
+        /* // 网络资源图片，低版本ios测试机出现图片一闪一闪的问题，直接改成本地的了 */
+        /* 无效，应使用canvas画布来实现 */
+        /* background-image: url('./img/lucky_bg.png');
+        background-size: contain;
+        background-position: 50% 50%; */
+        overflow: hidden;
+    }
 
-.prize_item {
-    position: absolute;
-    z-index: 3;
-    width: 122px;
-    height: 243px;
-}
+    .prize_item {
+        position: absolute;
+        z-index: 3;
+        width: 122px;
+        height: 243px;
+    }
 
-.prize_item_1 {
-    top: 0;
-    right: 165px;
-    transform: rotate(20deg);
+    .prize_item_1 {
+        top: 0;
+        right: 165px;
+        transform: rotate(20deg);
 
-    background: cornflowerblue;
-}
-.prize_item_2 {
-    top: 98px;
-    right: 53px;
-    transform: rotate(67deg);
+        background: cornflowerblue;
+    }
+    .prize_item_2 {
+        top: 98px;
+        right: 53px;
+        transform: rotate(67deg);
 
-    background: lightcyan;
-}
-.prize_item_3 {
-    top: 232px;
-    right: 70px;
-    transform: rotate(-250deg);
+        background: lightcyan;
+    }
+    .prize_item_3 {
+        top: 232px;
+        right: 70px;
+        transform: rotate(-250deg);
 
-    background: lawngreen;
-}
-.prize_item_4 {
-    top: 334px;
-    right: 164px;
-    transform: rotate(-205deg);
+        background: lawngreen;
+    }
+    .prize_item_4 {
+        top: 334px;
+        right: 164px;
+        transform: rotate(-205deg);
 
-    background: lightgreen;
-}
-.prize_item_5 {
-    top: 328px;
-    left: 164px;
-    transform: rotate(-160deg);
+        background: lightgreen;
+    }
+    .prize_item_5 {
+        top: 328px;
+        left: 164px;
+        transform: rotate(-160deg);
 
-    background: lightcoral;
-}
-.prize_item_6 {
-    top: 232px;
-    left: 70px;
-    transform: rotate(-111deg);
+        background: lightcoral;
+    }
+    .prize_item_6 {
+        top: 232px;
+        left: 70px;
+        transform: rotate(-111deg);
 
-    background: darkmagenta;
-}
-.prize_item_7 {
-    top: 98px;
-    left: 53px;
-    transform: rotate(-69deg);
+        background: darkmagenta;
+    }
+    .prize_item_7 {
+        top: 98px;
+        left: 53px;
+        transform: rotate(-69deg);
 
-    background: lightpink;
-}
-.prize_item_8 {
-    top: 0;
-    left: 165px;
-    transform: rotate(-20deg);
+        background: lightpink;
+    }
+    .prize_item_8 {
+        top: 0;
+        left: 165px;
+        transform: rotate(-20deg);
 
-    background: lightgoldenrodyellow;
-}
+        background: lightgoldenrodyellow;
+    }
 
-.box-btn {
-    position: absolute;
-    top: 25%;
-    left: 50%;
-    transform: translate(-50%, 0);
-}
+    .box-btn {
+        // position: absolute;
+        // top: 25%;
+        // left: 50%;
+        // transform: translate(-50%, 0);
+        @include pcenter(50%, 50%, -50%, -50%);
+    }
 
-.box-btn .box-arrow {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translate(-50%, -100%);
-    width: 5px;
-    height: 25px;
-    background: #000000;
+    .box-btn .box-arrow {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translate(-50%, -100%);
+        width: 5px;
+        height: 25px;
+        background: #000000;
+    }
 }
 </style>

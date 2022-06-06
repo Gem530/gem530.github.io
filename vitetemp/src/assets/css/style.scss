@@ -59,7 +59,7 @@ $base-font-size: 750;
 }
 
 // 定位上下左右居中
-@mixin pcenter($top: 50%, $left: 50%, $translateX: -50%, $translateY: -50%) {
+@mixin pcenter($top: 50%, $left: 50%, $translateY: -50%, $translateX: -50%) {
   position: absolute;
   top: $top;
   left: $left;

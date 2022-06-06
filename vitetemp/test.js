@@ -122,20 +122,53 @@
 // console.log(isPalindrome(1000021))
 
 
-// 给你一个字符串 s 和一个字符规律 p，请你来实现一个支持 '.' 和 '*' 的正则表达式匹配。
-var isMatch = function(s, p) {
-    const num1 = p.indexOf('.')
-    const num2 = p.indexOf('*')
-    console.log(num1, num2)
-    if (num1 === -1 && num2 === -1) {
-        return s === p
-    } else if (num2 !== -1) {
-        let reg = new RegExp(`${p.substring(num2 - 1, num2)}*`)
-        console.log(reg, reg.test(s))
-        return reg.test(s)
+// // 给你一个字符串 s 和一个字符规律 p，请你来实现一个支持 '.' 和 '*' 的正则表达式匹配。
+// var isMatch = function(s, p) {
+//     const num1 = p.indexOf('.')
+//     const num2 = p.indexOf('*')
+//     console.log(num1, num2)
+//     if (num1 === -1 && num2 === -1) {
+//         return s === p
+//     } else if (num2 !== -1) {
+//         let reg = new RegExp(`${p.substring(num2 - 1, num2)}*`)
+//         console.log(reg, reg.test(s))
+//         return reg.test(s)
+//     }
+// };
+// console.log(isMatch('aa', 'a'))
+// console.log(isMatch('aa', 'aa'))
+// console.log(isMatch('aa', 'a*'))
+// console.log(isMatch('aa', '.*'))
+
+
+// // 给定一个整数数组 nums 和一个整数目标值 target，请你在该数组中找出 和为目标值 target  的那 两个 整数，并返回它们的数组下标。
+// var twoSum = function(nums, target) {
+//     for (let i = 0; i < nums.length; i++) {
+//         for (let j = i + 1; j < nums.length; j++) {
+//             if (nums[i] + nums[j] === target) {
+//                 return [i, j]
+//             }
+//         }
+//     }
+// }
+// console.log(twoSum([2, 7, 11, 15], 13))
+
+
+// 返回数组中最长的公共前缀
+function longestCommonPrefix(strs) {
+    let str = ''
+    let min = 200
+    for (let i = 0; i < strs.length; i++) {
+        min = strs[i].length < min ? strs[i].length : min
     }
-};
-console.log(isMatch('aa', 'a'))
-console.log(isMatch('aa', 'aa'))
-console.log(isMatch('aa', 'a*'))
-console.log(isMatch('aa', '.*'))
+    const temp = strs.find(item => { return item.length === min })
+    for (let j = temp.length; j >= 0; j--) {
+        str = temp.substring(0, j)
+        const len = strs.filter(item => { return item.substring(0, j).indexOf(str) !== -1 })
+        if (len.length === strs.length) {
+            return str
+        }
+    }
+    return str
+}
+console.log(longestCommonPrefix(["flower", "flow", "flight"]))

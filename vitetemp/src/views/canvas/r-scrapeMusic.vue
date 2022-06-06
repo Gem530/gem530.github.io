@@ -1,6 +1,12 @@
 <template>
   <div class="contanir theme">
-    <g-scrape-music></g-scrape-music>
+    <g-scrape-music
+      url="https://d1.faiusr.com/4/AAEIABAEGAAgtZ-56QUoufyr5gQw9gE4kwM.png"
+      width="300px"
+      height="400px"
+      :maxArea="20"
+      @getResult="getResult"
+    ></g-scrape-music>
   </div>
 </template>
 
@@ -15,6 +21,10 @@ export default { name: 'scrapeMusic' }
   onMounted(() => {
     console.log('onMounted')
   })
+
+  const getResult = (data: { currentArea: number, isSuccess: boolean }) => {
+    console.log('getResult', data)
+  }
 </script>
 
 <style lang="scss" scoped>

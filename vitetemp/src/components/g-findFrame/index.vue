@@ -1,8 +1,8 @@
 <template>
-  <div class="component theme">
+  <div class="component theme"
+      :style="`width: ${state.clientWidthD}px;height: ${state.heightD}px;`">
     <div
       class="photo-overflow"
-      :style="`width: ${state.clientWidthD}px;height: ${state.heightD}px;`"
       v-show="state.photoFlag"
     >
       <video
@@ -35,13 +35,11 @@
         />
       </button>
     </div>
-    <div style="display: inline-block" @click="getPhoto">
+    <div class="btn-photo" @click="getPhoto">
       <slot>
         <button style="position: absolute; top: 0px; left: 0px">拍照</button>
       </slot>
     </div>
-
-    <img :src="state.imgURL" alt="" />
   </div>
 </template>
 
@@ -49,17 +47,21 @@
 export default { name: "g-find-frame" };
 </script>
 <script setup lang="ts">
-    import { onMounted, nextTick, defineEmits, Ref } from 'vue'
+    import { onMounted, nextTick, defineEmits, defineProps } from 'vue'
 
     const emits = defineEmits(['getPhotoBlob'])
 
     const video: any = ref()
     const qrcodeImageDom: any = ref()
+    const props = withDefaults(defineProps<{
+        width?: number,
+        height?: number
+    }>(), {
+        width: 350,
+        height: 200
+    })
     const state: any = reactive({
         flag: true, // true 移动端
-        width: 0,
-        height: 0,
-        imgURL: '',
         imgNewURL: '',
         widthD: 0,
         heightD: 0,
@@ -91,23 +93,25 @@ export default { name: "g-find-frame" };
     // 初始化 摄像头
     const initPhoto = () => {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
-        state.clientWidthD = 500
-        state.clientHeightD = 500
+        state.clientWidthD = document.body.clientWidth
+        state.clientHeightD = document.body.clientHeight
 
-        if (state.width) {
+        if (props.width) {
             // 如果有传值，就使用接受的值为显示宽度
-            state.widthD = state.width
+            state.widthD = props.width
+            state.clientWidthD = props.width
         } else {
             state.widthD = state.clientWidthD
         }
-        if (state.height) {
+        if (props.height) {
             // 如果有传值，就使用接受的值为显示高度
-            state.heightD = state.height
+            state.heightD = props.height
+            state.clientHeightD = props.height
         } else {
             state.heightD = state.clientHeightD
         }
-
-        console.log(state.height, state.widthD, state.clientWidthD, state.heightD, state.clientHeightD)
+        // console.log('000000000', props.width, props.height)
+        // console.log(props.height, state.widthD, state.clientWidthD, state.heightD, state.clientHeightD)
 
         const navigators: any = navigator
         // 老的浏览器可能根本没有实现 mediaDevices，所以我们可以先设置一个空的对象
@@ -198,7 +202,7 @@ export default { name: "g-find-frame" };
     }
 
     // 拍照
-    const getPhoto = () => {
+    const getPhoto = async () => {
         if (!state.photoFlag) {
             // this.fileChange()
             qrcodeImageDom.value.click()
@@ -227,7 +231,11 @@ export default { name: "g-find-frame" };
         ctx.drawImage(video.value, 0, 0, state.photoW, state.photoW * (state.heightD / state.widthD), 0, 0, canvas.width, canvas.height)
         console.log(state.photoW, state.photoW * (state.heightD / state.widthD), state.widthD, state.heightD)
         const dataURL = canvas.toDataURL('image/jpeg', 1)
-        state.imgURL = dataURL
+        const blob = await convertBase64UrlToBlob(dataURL)
+        emits('getPhotoBlob', {
+            blob: blob,
+            baseUrl: dataURL
+        })
         // const a = document.createElement('a') // 创建a标签
         // a.download = '裁剪-PHOTO' // 文件名
         // a.href = dataURL // 下载的文件地址
@@ -248,10 +256,11 @@ export default { name: "g-find-frame" };
         const fileList = inputFile.files[0]
 
         const img: any = await toImage(fileList)
-        state.imgURL = img.src
         const blob = await compressImgQuality(img)
-        console.log(blob)
-        emits('getPhotoBlob', blob)
+        emits('getPhotoBlob', {
+            blob: blob,
+            baseUrl: img.src
+        })
     }
 
     /**
@@ -325,4 +334,33 @@ export default { name: "g-find-frame" };
 </script>
 
 <style lang="scss" scoped>
+.component {
+    position: relative;
+    overflow: hidden;
+
+    .btn-photo {
+        display: inline-block;
+        @include pcenter(100%, 50%, -100%, -50%);
+    }
+
+    .photo-overflow {
+        // border: 1px solid gray;
+        overflow: hidden;
+
+        .video-contain {
+            // border: 1px solid #f00;
+            // object-fit: cover;
+            object-position: 0 0;
+        }
+    }
+
+    .error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: #ffffff;
+    text-align: center;
+    }
+}
 </style>

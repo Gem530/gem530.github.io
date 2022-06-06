@@ -7,7 +7,7 @@
       ref="myCanvas"
     ></canvas>
 
-    <div class="btn-box">
+    <div class="btn-box" :class="props.left ? 'btn-box-lefts' : ''">
       <!-- 是否把底边栏的按钮移到侧边 btn-box-lefts -->
       <div class="btn-base">
         <div
@@ -59,6 +59,7 @@ export default { name: 'g-draw-board' }
    * @upload="getImageBase" // 签字板结果 返回一个参数 blob 暂时是返回base64，便于演示结果
    */
   const props: any = withDefaults(defineProps<{
+    left?: boolean, // 下方的按钮是否显示在左侧
     width?: string, // 非必填 签字板宽度 默认100%
     height?: string, // 非必填 签字板高度 默认200px
     colors?: Array<{ name: string, value: string }>, // 非必填 画笔颜色列表 格式[{ name: '', value: '' }]
@@ -67,6 +68,7 @@ export default { name: 'g-draw-board' }
     defaultColor?: string, // 非必填 默认画笔颜色
     defaultThickness?: string // 非必填 默认画笔粗细
   }>(), {
+    left: false,
     width: '100%',
     height: '200px',
     colors: () => [{
@@ -263,7 +265,7 @@ export default { name: 'g-draw-board' }
 
   .btn-box {
     @include wh(100%, 30px);
-    @include pcenter(100%, 0, 0, -100%);
+    @include pcenter(100%, 0, -100%, 0);
     border-top: 1px solid $borderColor;
     z-index: 2;
 
@@ -281,7 +283,7 @@ export default { name: 'g-draw-board' }
     }
 
     .btn-sub {
-      @include pcenter(0, 0, 0, -110%);
+      @include pcenter(0, 0, -110%, 0);
       @include wh(100%, 100%);
       @include flex(space-around);
     }

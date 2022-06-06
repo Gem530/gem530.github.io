@@ -17,15 +17,20 @@
 export default { name: 'g-draw-font' }
 </script>
 <script setup lang="ts">
-    import { onMounted } from 'vue'
+    import { onMounted, defineProps } from 'vue'
     const myCanvasRef = ref()
     const box = ref()
+    const props = withDefaults(defineProps<{
+        text?: string
+    }>(), {
+        text: '富强、民主、文明、和谐、自由、平等、公正、法治、爱国、敬业、诚信、友善、'
+    })
     const state: any = reactive({
         canvas: null, // canvas实例
         ctx: null, // 2d
         width: 0, // canvas宽
         height: 0, // canvas高
-        text: '富强、民主、文明、和谐、自由、平等、公正、法治、爱国、敬业、诚信、友善、', // 文字
+        text: '', // 文字
         textIndex: 0, // 文字下标
         fontSize: 5, // 字体字号
         isPc: true, // true PC端  false 移动端
@@ -85,7 +90,7 @@ export default { name: 'g-draw-font' }
         const left = box.value.getBoundingClientRect().left
 
         const width = betweenLength(e, state.point) // 移动间距
-        const text = state.text[state.textIndex] // 当前文字
+        const text = props.text[state.textIndex] // 当前文字
         const fontSzie = state.fontSize + width / 2 // 文字大小
         const textWidths = textWidth(fontSzie, text) // 当前文字的宽度
         var angle = Math.atan2(e.pageY - state.point.pageY, e.pageX - state.point.pageX) // 计算偏离角度
@@ -100,7 +105,7 @@ export default { name: 'g-draw-font' }
             ctx.fillText(text, 0, 0)
             ctx.restore() // restore() 方法从栈中弹出存储的图形状态并恢复 CanvasRenderingContext2D 对象的属性、剪切路径和变换矩阵的值  可以取出save保存的canvas的原点和旋转角度
 
-            state.textIndex = state.textIndex >= (state.text.length - 1) ? 0 : (state.textIndex + 1) // 文字下标更新
+            state.textIndex = state.textIndex >= (props.text.length - 1) ? 0 : (state.textIndex + 1) // 文字下标更新
             // console.log('move', width, textWidth, e)
             state.point = { // 更新鼠标/手指位置
                 pageX: e.pageX,

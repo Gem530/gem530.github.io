@@ -1,21 +1,34 @@
 <template>
     <div class="component theme" ref="box">
-        页面
     </div>
 </template>
 
 <script lang="ts">
-export default { name: 'drawBoard' }
+export default { name: 'gCanvasBlur' }
 </script>
 <script setup lang="ts">
-    import { onMounted } from 'vue'
+    import { onMounted, defineProps } from 'vue'
     const box = ref()
+
+    const props = withDefaults(defineProps<{
+        x?: number, // 模糊的起点x
+        y?: number, // 模糊的起点y
+        url?: string, // 图片url
+        width?: number, // 模糊的宽度
+        height?: number // 模糊的高度
+    }>(), {
+        x: 0,
+        y: 0,
+        url: 'https://gem530.github.io/img/33.jpg',
+        width: 200,
+        height: 200
+    })
     // https://zhuanlan.zhihu.com/p/481640259 解决给组件加name的方法
     // 因为使用auto-import插件，会自动导入onMounted等vue或vue-router的方法，所以不需要每次都导入
     onMounted(async () => {
        console.log('onMounted')
-        const img = await imgload('https://gem530.github.io/img/11.jpg')
-        initCanvas(img, 200, 200, 300, 100)
+        const img = await imgload(props.url)
+        initCanvas(img, props.x, props.y, props.width, props.height)
     })
 
     const imgload = (imgs: any) => {
@@ -38,10 +51,14 @@ export default { name: 'drawBoard' }
         // const canvas = document.querySelector('#mycanvas')
         const canvas: any = document.createElement('canvas')
         let ctx = canvas.getContext('2d')
-        canvas.width = img.width
-        canvas.height = img.height
+        // canvas.width = img.width
+        // canvas.height = img.height
+        const w = box.value.clientWidth
+        const h = box.value.clientHeight
+        canvas.width = w
+        canvas.height = h
         
-        ctx.drawImage(img, 0, 0, img.width, img.height)
+        ctx.drawImage(img, 0, 0, w, h)
         // 从画布获取一半的图像
         let data = ctx.getImageData(x, y, width, height)
         // 将图像数据进行高斯模糊，data.data是一个数组，每四个值代表一个像素点的rgba的值，data.width data.height分别代表高斯模糊的宽高
@@ -138,5 +155,8 @@ export default { name: 'drawBoard' }
 </script>
 
 <style lang="scss" scoped>
-
+.component {
+    width: 100%;
+    height: 100%;
+}
 </style>

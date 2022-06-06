@@ -76,7 +76,7 @@ export default { name: 'g-menu', inheritAttrs: false }
     item.flag = true
   })
 
-  console.log('--', attrs)
+  // console.log('--', attrs)
 
   // 根据路由来高亮菜单栏
   watch(() => router.currentRoute.value, (val, old) => {
@@ -104,10 +104,10 @@ export default { name: 'g-menu', inheritAttrs: false }
   // 点击菜单
   const handleClick = (item: Record<string, any>, i: number = 0) => {
     if (item.children) {
-      console.log('不是路由')
+      // console.log('不是路由')
       props.list[i].flag = !item.flag
-      console.log(props.list[i].flag)
-      console.log('----', item, props.level)
+      // console.log(props.list[i].flag)
+      // console.log('----', item, props.level)
       return
     }
     emits('changeMenu', item)

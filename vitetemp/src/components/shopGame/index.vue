@@ -156,25 +156,25 @@
       @include pcenter(0, 0, 0, 0);
     }
     &1 {
-      @include pcenter(0, 50%, -50%, 0);
+      @include pcenter(0, 50%, 0, -50%);
     }
     &2 {
-      @include pcenter(0, 100%, -100%, 0);
+      @include pcenter(0, 100%, 0, -100%);
     }
     &3 {
-      @include pcenter(50%, 100%, -100%, -50%);
+      @include pcenter(50%, 100%, -50%, -100%);
     }
     &4 {
       @include pcenter(100%, 100%, -100%, -100%);
     }
     &5 {
-      @include pcenter(100%, 50%, -50%, -100%);
+      @include pcenter(100%, 50%, -100%, -50%);
     }
     &6 {
-      @include pcenter(100%, 0, 0, -100%);
+      @include pcenter(100%, 0, -100%, 0);
     }
     &7 {
-      @include pcenter(50%, 0, 0, -50%);
+      @include pcenter(50%, 0, -50%, 0);
     }
   }
 }
