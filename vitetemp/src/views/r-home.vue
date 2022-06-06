@@ -32,7 +32,7 @@ export default { name: 'home' }
   const tips = ref('tips-提示测试使用provide/inject')
   const changeInject = () => {
     tips.value = 'tips-值改变了'
-    console.log(111)
+    // console.log(111)
   }
 
   const msg = ref('hello world Vue3 Vite!')

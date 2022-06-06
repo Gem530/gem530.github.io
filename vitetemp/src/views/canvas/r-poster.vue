@@ -24,6 +24,14 @@ export default { name: 'poster' }
                 height: 714
             },
             {
+                type: 'text',
+                url: '非人学院',
+                x: 120,
+                y: 140,
+                color: 'red', // 默认黑色
+                font: '40px Arial' // 需要字体大小以及字体名称 默认：16px Arial
+            },
+            {
                 type: 'image',
                 url: 'https://gem530.github.io/img/lADPD26eNnXBjezNAuPNAuM_739_739.jpg',
                 x: 10,
@@ -35,14 +43,16 @@ export default { name: 'poster' }
                 type: 'text',
                 url: '绘制文字',
                 x: 100,
-                y: 640
+                y: 640,
+                color: 'white',
+                font: '16px Arial'
             }
         ]
     })
     // https://zhuanlan.zhihu.com/p/481640259 解决给组件加name的方法
     // 因为使用auto-import插件，会自动导入onMounted等vue或vue-router的方法，所以不需要每次都导入
     onMounted(() => {
-        console.log('onMounted')
+        // console.log('onMounted')
     })
 </script>
 

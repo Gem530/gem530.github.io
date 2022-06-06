@@ -15,7 +15,7 @@
   // 全局方法
   const app = getCurrentInstance()?.appContext.config.globalProperties
 
-  console.log(app)
+//   console.log(app)
 </script>
 
 <style lang="scss">

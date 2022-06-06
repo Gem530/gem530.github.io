@@ -35,19 +35,19 @@ export default { name: 'shopGame' }
 
   // 因为使用auto-import插件，会自动导入onMounted等vue或vue-router的方法，所以不需要每次都导入
   onMounted(() => {
-    console.log('onMounted')
+    // console.log('onMounted')
     state.gift = twoNumberBetween(0, 7)
     state.number = twoNumberBetween(0, 7)
   })
 
   // keepAlive生命周期
   onActivated(() => {
-    console.log('activated')
+    // console.log('activated')
   })
 
   // 抽奖结束方法
   const luckResult = (data: any) => {
-    console.log('结束', data)
+    // console.log('结束', data)
     state.number -= 1
     state.gift = twoNumberBetween(0, 7)
   }

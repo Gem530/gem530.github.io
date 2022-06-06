@@ -12,14 +12,14 @@ export default {
   mutations: {
     // 获取set方法
     // 提交状态修改 不支持异步操作
-    setCarMutation (state: any, data: any) {
+    setBaseMutation (state: any, data: any) {
       Object.assign(state, data)
     }
   },
   actions: {
     // 和mutations类似 支持异步操作
-    setCarAction (ctx: any, data: any) {
-      ctx.commit('setCarMutation', data)
+    setBaseAction (ctx: any, data: any) {
+      ctx.commit('setBaseMutation', data)
     }
   },
   modules: {

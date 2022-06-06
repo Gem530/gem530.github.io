@@ -63,9 +63,10 @@ export default { name: 'left' }
   const navFlag = computed(() => {
     return store.getters.base.navFlag
   })
+
   // watch
   watch(() => store.getters.base, (val, old) => {
-    console.log(val, old, val.navFlag)
+    // console.log(val, old, val.navFlag)
     if (!val.navFlag) {
       changeLeftWidth('50px')
     } else {
@@ -76,12 +77,30 @@ export default { name: 'left' }
   // https://zhuanlan.zhihu.com/p/481640259 解决给组件加name的方法
   // 因为使用auto-import插件，会自动导入onMounted等vue或vue-router的方法，所以不需要每次都导入
   onMounted(() => {
-    console.log('onMounted')
+    // console.log('onMounted')
   })
 
   // 切换路由
-  const changeRouter = (data: string) => {
-    router.push(data)
+  const changeRouter = (data: Record<string, any>) => {
+    // console.log(data)
+    // router.push(data.key)
+    const num = Math.random()
+    store.commit('setCurrentRouter', {
+        name: data.title,
+        key: data.key,
+        type: 'query',
+        data: {
+            id: num
+        }
+    })
+    store.commit('addRouterList', {
+        name: data.title,
+        key: data.key,
+        type: 'query',
+        data: {
+            id: num
+        }
+    })
   }
   // 切换侧边栏宽度
   const changeLeftWidth = (width: string) => {
@@ -96,8 +115,8 @@ export default { name: 'left' }
 
   // 点击菜单栏
   const changeMenu = (item: Record<string, any>) => {
-    console.log(item.title, item)
-    changeRouter(item.key)
+    // console.log(item.title, item)
+    changeRouter(item)
   }
 </script>
 

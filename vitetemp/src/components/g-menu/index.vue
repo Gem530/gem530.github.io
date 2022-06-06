@@ -8,10 +8,13 @@
     >
       <div
         class="item-title"
-        :style="paddingLeft(item[keys])"
+        :style="paddingLeft(item[keys], navFlag)"
         @click.stop="handleClick(item, i)">
-        <span>{{item.title}}</span>
-        <span class="right" v-if="item.children">{{item.flag ? '+' : '-'}}</span>
+        <i class="iconfont item-icon" :class="item.icon"></i>
+        <span v-show="navFlag">{{item.title}}</span>
+        <span class="right" v-if="item.children && navFlag">
+          <i class="iconfont" :class="item.flag ? 'icon-arrow-down-filling' : 'icon-arrow-right-filling'"></i>
+        </span>
       </div>
 
       <!-- style里做折叠动画效果 -->
@@ -20,12 +23,12 @@
       <div
         :style="`
           max-height: ${item.flag ? (item.children.length * 45).toFixed(0) : 0 }px;
+          overflow: ${!item.flag && item.children ? 'hidden' : ''};
         `"
         :class="{
           'item-content': true,
         }"
         v-if="item.children">
-        <!-- 'item-content-hide': !item.flag -->
         <g-menu
           :keys="props.keys"
           :list="item.children"
@@ -45,9 +48,11 @@
 export default { name: 'g-menu', inheritAttrs: false }
 </script>
 <script setup lang="ts">
+  import { useStore } from 'vuex'
   import { useRoute, useRouter } from 'vue-router'
   import { defineEmits, useAttrs, ref, watch } from 'vue'
   const attrs = useAttrs()
+  const store = useStore()
   const router = useRouter()
   const emits = defineEmits(['changeMenu'])
   // withDefaults与defineProps搭配使用，withDefaults第二个参数是给defineProps的值给默认值
@@ -76,23 +81,21 @@ export default { name: 'g-menu', inheritAttrs: false }
     item.flag = true
   })
 
-  // console.log('--', attrs)
-
-  // 根据路由来高亮菜单栏
-  watch(() => router.currentRoute.value, (val, old) => {
-    // console.log(val, old)
-    // if (old.fullPath === '/') {
-    text.value = val.fullPath
-    // }
-  }, { deep: true })
+  // computed
+  const navFlag = computed(() => {
+    return store.getters.base.navFlag
+  })
+  const pathKey = computed(() => {
+      return store.getters.currentRouterGetter.key
+  })
   
   // 根据菜单等级来右移，显出层次感
-  const paddingLeft = (keys: string) => {
+  const paddingLeft = (keys: string, flag: boolean) => {
     // console.log(keys, text.value, '-')
     return `
-      padding-left: ${ props.level * 15 + 10 }px;
-      color: ${ keys === text.value ? props.activeColor : props.color };
-      background: ${ keys === text.value ? props.activeBKColor : props.bkColor };
+      padding-left: ${ flag ? (props.level * 15 + 10) : 15 }px;
+      color: ${ keys === pathKey.value ? props.activeColor : props.color };
+      background: ${ keys === pathKey.value ? props.activeBKColor : props.bkColor };
     `
   }
   // // https://zhuanlan.zhihu.com/p/481640259 解决给组件加name的方法
@@ -132,6 +135,10 @@ $height: 45px;
     @include flex(flex-start, center);
     border-bottom: 1px solid $borderColor;
     cursor: pointer;
+
+    .item-icon {
+      margin-right: 5px;
+    }
 
     .right {
       @include pcenter(50%, 95%);

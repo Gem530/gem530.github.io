@@ -1,5 +1,6 @@
 import { createStore } from 'vuex'
 import base from './modules/base'
+import layout from './modules/layout'
 // npm i vuex-persistedstate vuex持久化
 import createPersistedState from 'vuex-persistedstate'
 
@@ -19,7 +20,8 @@ export default createStore({
   },
   modules: {
     // store的子模块，内容就相当于是store的一个实例。调用方式和前面介绍的相似，只是要加上当前子模块名，如：store.a.getters.xxx()。
-    base
+    base,
+    layout
   },
   // 配置插件
   plugins: [
@@ -28,7 +30,7 @@ export default createStore({
       // 本地储存名
       key: 'vuex-storage',
       // 指定模块
-      paths: ['base']
+      paths: ['base', 'layout']
     })
   ]
 })

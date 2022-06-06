@@ -80,7 +80,7 @@ export default { name: "g-find-frame" };
         } else {
             state.flag = false
         }
-        console.log('onMounted')
+        // console.log('onMounted')
     })
 
     onActivated(() => {
@@ -160,7 +160,7 @@ export default { name: "g-find-frame" };
                 nextTick(() => {
                     video.value.addEventListener('canplay', () => {
                         // 获取视频的真实分辨率 480 640
-                        console.log(video.value.videoWidth, video.value.videoHeight)
+                        // console.log(video.value.videoWidth, video.value.videoHeight)
                         state.photoW = video.value.videoWidth
                         state.photoH = video.value.videoHeight
                         if (state.widthD > state.photoW) {
@@ -229,7 +229,7 @@ export default { name: "g-find-frame" };
             // canvas.height = that.heightD
         }
         ctx.drawImage(video.value, 0, 0, state.photoW, state.photoW * (state.heightD / state.widthD), 0, 0, canvas.width, canvas.height)
-        console.log(state.photoW, state.photoW * (state.heightD / state.widthD), state.widthD, state.heightD)
+        // console.log(state.photoW, state.photoW * (state.heightD / state.widthD), state.widthD, state.heightD)
         const dataURL = canvas.toDataURL('image/jpeg', 1)
         const blob = await convertBase64UrlToBlob(dataURL)
         emits('getPhotoBlob', {

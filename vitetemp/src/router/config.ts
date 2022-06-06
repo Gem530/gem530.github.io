@@ -1,61 +1,61 @@
 export const menu = [
   {
     title: '首页',
-    icon: '',
+    icon: 'icon-home',
     meta: { keepAlive: true },
     key: '/home'
   },
   {
-    title: 'canvs',
-    icon: '',
+    title: 'canvs画板',
+    icon: 'icon-layers',
     meta: { keepAlive: true },
-    key: 'one',
+    key: 'canvs',
     children: [
       {
         title: '签字板',
-        icon: '',
+        icon: 'icon-survey',
         meta: { keepAlive: true },
         key: '/drawBoard'
       },
       {
         title: '文字绘制',
-        icon: '',
+        icon: 'icon-edit',
         meta: { keepAlive: true },
         key: '/drawFont'
       },
       {
         title: '梅花背景',
-        icon: '',
+        icon: 'icon-pad',
         meta: { keepAlive: true },
         key: '/plumTree'
       },
       {
         title: '取景框',
-        icon: '',
+        icon: 'icon-camera',
         meta: { keepAlive: true },
         key: '/findFrame'
       },
       {
         title: '刮刮乐',
-        icon: '',
+        icon: 'icon-3column',
         meta: { keepAlive: true },
         key: '/scrapeMusic'
       },
       {
         title: '转盘抽奖',
-        icon: '',
+        icon: 'icon-loading',
         meta: { keepAlive: true },
         key: '/luckyTurn'
       },
       {
         title: '海报',
-        icon: '',
+        icon: 'icon-picture',
         meta: { keepAlive: true },
         key: '/poster'
       },
       {
         title: '高斯模糊',
-        icon: '',
+        icon: 'icon-picture',
         meta: { keepAlive: true },
         key: '/canvasBlur'
       },
@@ -69,19 +69,19 @@ export const menu = [
   },
   {
     title: '九宫格',
-    icon: '',
+    icon: 'icon-modular',
     meta: { keepAlive: true },
     key: '/shopGame'
   },
   {
     title: '上拉下拉组件',
-    icon: '',
+    icon: 'icon-adjust',
     meta: { keepAlive: true },
     key: '/refersh'
   },
   {
     title: '无限列表',
-    icon: '',
+    icon: 'icon-layers',
     meta: { keepAlive: true },
     key: '/wirlessList'
   },
@@ -101,13 +101,13 @@ export const menu = [
             title: '三级菜单1',
             icon: '',
             meta: { keepAlive: true },
-            key: '/three'
+            key: '/three1'
           },
           {
             title: '三级菜单2',
             icon: '',
             meta: { keepAlive: true },
-            key: '/three'
+            key: '/three2'
           },
         ]
       },

@@ -22,15 +22,15 @@ export default { name: "luckyTurn" };
   // https://zhuanlan.zhihu.com/p/481640259 解决给组件加name的方法
   // 因为使用auto-import插件，会自动导入onMounted等vue或vue-router的方法，所以不需要每次都导入
   onMounted(() => {
-    console.log("onMounted");
+    // console.log("onMounted");
     num.value = twoNumberBetween(0, 8)
-    console.log(num)
+    // console.log(num)
   });
 
   const endPlay = (data: boolean) => {
-    console.log("endPlay---", data);
+    // console.log("endPlay---", data);
     num.value = twoNumberBetween(0, 8)
-    console.log(num)
+    // console.log(num)
   };
 
   // 取两数之间的随机整数

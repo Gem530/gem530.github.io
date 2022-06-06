@@ -17,7 +17,7 @@
       :left="false"
       width="350px"
       height="350px"
-      background="#000"
+      background="#fff"
       default-color="pink"
       default-thickness="2"
       :colors="[{name:'黑',value:'#000'},{name:'粉',value:'pink'}]"
@@ -43,7 +43,7 @@ export default { name: 'drawBoard' }
   // https://zhuanlan.zhihu.com/p/481640259 解决给组件加name的方法
   // 因为使用auto-import插件，会自动导入onMounted等vue或vue-router的方法，所以不需要每次都导入
   onMounted(() => {
-    console.log('onMounted')
+    // console.log('onMounted')
   })
 
   // 签字板图片获取

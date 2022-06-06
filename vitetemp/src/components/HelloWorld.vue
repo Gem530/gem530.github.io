@@ -50,7 +50,7 @@
     emit('countAdd', 2)
 
     // console.log(pDom.value)
-    console.log(attrs.test, num)
+    // console.log(attrs.test, num)
   }
 </script>
 
