@@ -4,6 +4,7 @@
     <button @click="changeMsg">改变msg</button>
     {{tips}}
     <Hello-world :msg="msg" data-temp="111"></Hello-world>
+    <button @click="handleMessage">消息弹框组件调用</button>
   </div>
 </template>
 
@@ -15,6 +16,7 @@ export default { name: 'home' }
   import loadDom from '@/components/load.vue'
   import errDom from '@/components/err.vue'
   import { useRouter } from 'vue-router'
+  import GMessage from '@/components/g-message/index.ts'
   // const HelloWorld = defineAsyncComponent(() => import('./components/HelloWorld.vue'))
   // https://v3.cn.vuejs.org/api/global-api.html#defineasynccomponent vue官方异步组件
   const HelloWorld = defineAsyncComponent({
@@ -39,6 +41,10 @@ export default { name: 'home' }
 
   const changeMsg = () => {
     msg.value = 'msg-msg.value'
+  }
+
+  const handleMessage = () => {
+      GMessage({message: '消息提示-----测试内容'+Math.random(), type: 'success', duration: 1500})
   }
 
   provide('tips', tips) // 直接给tips，孙组件就是响应式的，这里改变了，孙组件里的值也会改变； 如果是tips.value就不是响应式的

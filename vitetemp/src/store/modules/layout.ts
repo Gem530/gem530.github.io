@@ -1,5 +1,12 @@
 import router from "@/router"
 
+interface routerObj {
+    name: string
+    key: string
+    type?: string
+    data?: Record<string, any>
+}
+
 export default {
     state: {
         // 存储状态 放置变量所用
@@ -16,10 +23,10 @@ export default {
     },
     getters: {
         // 派生状态 就和vue的computed差不多
-        currentRouterGetter (state: any) {
+        currentRouterGetter (state: Record<string, any>) {
             return state.currentRouter
         },
-        routerListGetter (state: any) {
+        routerListGetter (state: Record<string, any>) {
             return state.routerList
         }
     },
@@ -27,9 +34,10 @@ export default {
         // 获取set方法
         // 提交状态修改 不支持异步操作
         // 修改当前路由对象
-        setCurrentRouter (state: any, data: any) {
+        setCurrentRouter (state: Record<string, any>, data: routerObj) {
             // Object.assign(state, data)
             state.currentRouter = data
+            // console.log(router)
             if (data.type === 'query') {
                 router.push({
                     name: data.key.substring(1),
@@ -43,8 +51,8 @@ export default {
             }
         },
         // 添加路由列表
-        addRouterList (state: any, data: any) {
-            const index = state.routerList.findIndex((item: any) => { return item.key === data.key })
+        addRouterList (state: Record<string, any>, data: routerObj) {
+            const index = state.routerList.findIndex((item: routerObj) => { return item.key === data.key })
             if (index === -1) {
                 // 如果在已有路由列表中不存在，直接添加
                 state.routerList.push(data)
@@ -55,9 +63,16 @@ export default {
             // console.log(state.routerList)
         },
         // 删除路由列表
-        removeRouterList (state: any, data: any) {
-            const index = state.routerList.findIndex((item: any) => { return item.key === data.key })
+        removeRouterList (state: Record<string, any>, data: routerObj) {
+            const index = state.routerList.findIndex((item: routerObj) => { return item.key === data.key })
             state.routerList.splice(index, 1)
+        },
+        // 初始化路由
+        initRouterList (state: Record<string, any>) {
+            state.routerList = [{
+                name: '首页',
+                key: '/home'
+            }]
         }
     },
     actions: {
