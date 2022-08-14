@@ -1,6 +1,6 @@
 <template>
     <div class="contanir theme">
-        <div class="box">
+        <div class="box" :class="{ 'box-mobile': !store.getters.base.isPc }">
             <div class="login-title">LOGIN</div>
             <div class="form-input">
                 <span>账 号：</span>
@@ -15,6 +15,7 @@
                 <g-code :num="state.num" :w="60" :h="30" @click="changeCode"></g-code>
             </div>
             <button @click="loginHandle">登录</button>
+            <button @click="registerHandle">注册</button>
         </div>
     </div>
 </template>
@@ -24,19 +25,29 @@
 </script>
 <script setup lang="ts">
     import { reactive, onMounted } from 'vue'
+    import { useStore } from 'vuex'
     import { useRouter } from 'vue-router'
+    import { initScoket } from '@/util/ws.js'
+    import {
+        loginAPI,
+        registerAPI
+    } from '@/api/index'
     import gCode from '@/components/g-code/index.vue'
     import GMessage from '@/components/g-message/index'
 
+    const store = useStore()
     const router = useRouter()
 
     const state = reactive({
         num: '',
-        name: '',
-        pass: '',
+        name: 'admin',
+        pass: 'admin',
         code: ''
     })
-    state.num = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000)
+
+    const reg = /Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)
+    store.dispatch('setBaseAction', { isPc: !reg })
+
     // https://zhuanlan.zhihu.com/p/481640259 解决给组件加name的方法
     // 因为使用auto-import插件，会自动导入onMounted等vue或vue-router的方法，所以不需要每次都导入
     onMounted(() => {
@@ -46,27 +57,62 @@
     // 刷新验证码
     const changeCode = () => {
         state.num = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000)
+        state.code = state.num
     }
+    changeCode()
 
     // 校验
     const checkHandle = () => {
-        console.log(state)
-        if (state.name !== 'admin') return '账号错误'
-        else if (state.pass !== 'admin') return '密码错误'
-        else if (state.code.toString() !== state.num.toString()) return '验证码不一致'
+        // console.log(state)
+        if (!state.name) return '账号不能为空'
+        else if (!state.pass) return '密码不能为空'
+        if (state.code.toString() !== state.num.toString()) return '验证码不一致'
         else return true
     }
 
     // 登录方法
     const loginHandle = () => {
-        console.log(checkHandle())
+        // console.log(checkHandle())
         if (checkHandle() !== true) {
             GMessage({message: checkHandle(), type: 'error', duration: 1500})
             return false
         }
-        GMessage({ message: '登录成功', type: 'success', duration: 2000 })
-        sessionStorage.setItem('token', 'user:admin')
-        router.push('/index')
+        const param = {
+            name: state.name,
+            pass: state.pass
+        }
+        loginAPI(param).then((res) => {
+            GMessage({ message: '登录成功', type: 'success', duration: 2000 })
+            // if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+            //     mobile
+            // } else {
+            //     pc
+            // }
+            console.log(res)
+            const data = res.data[0]
+            store.dispatch('setUserAction', { name: state.name, avator: data.avator, userId: data.Id })
+            initScoket()
+            sessionStorage.setItem('token', JSON.stringify(res.token))
+            const pathUrl = !reg ? '/index' : '/chat'
+            router.push(pathUrl)
+        }).catch((err) => {
+            GMessage({ message: '登录失败：' + err.message, type: 'error', duration: 2000 })
+        })
+    }
+
+    // 注册方法
+    const registerHandle = () => {
+        const param = {
+            name: state.name,
+            pass: state.pass
+        }
+        registerAPI(JSON.parse(JSON.stringify(param))).then(res => {
+            // console.log(res)
+            GMessage({ message: res.message, type: 'success', duration: 2000 })
+        }).catch(err => {
+            // console.log(err, err.message)
+            GMessage({ message: '注册失败：' + err.message, type: 'error', duration: 2000 })
+        })
     }
 </script>
 
@@ -76,6 +122,7 @@
         height: 100vh;
         background: url('@/assets/img/login.jpeg') no-repeat;
         background-size: cover;
+        box-sizing: border-box;
         
         .box {
             border: 1px solid;
@@ -83,9 +130,14 @@
             background: linear-gradient(145deg, rgba(53, 43, 77, 0.5), rgba(97, 86, 182, 0.5));
             color: #ffffff;
             padding: 40px 20px;
-            @include wh(350px, 420px);
+            @include wh(350px, 435px);
             @include pcenter(50%, 10%, -50%, 0);
             box-sizing: border-box;
+
+            &.box-mobile {
+                width: 85%;
+                @include pcenter(50%, 50%, -50%, -50%);
+            }
 
             .login-title {
                 padding-left: 10px;
@@ -131,6 +183,7 @@
                 font-size: 16px;
                 color: #ffffff;
                 border-radius: 40px;
+                margin-bottom: 10px;
                 cursor: pointer;
             }
         }

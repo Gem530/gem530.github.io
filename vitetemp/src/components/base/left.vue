@@ -67,12 +67,14 @@
     // watch
     watch(() => store.getters.base, (val, old) => {
         // console.log(val, old, val.navFlag)
-        if (!val.navFlag) {
-            changeLeftWidth('50px')
-        } else {
-            changeLeftWidth('250px')
-        }
-    }, { deep: true })
+        nextTick(() => {
+            if (!val.navFlag) {
+                changeLeftWidth('50px')
+            } else {
+                changeLeftWidth('250px')
+            }
+        })
+    }, { deep: true, immediate: true })
     // console.log(list)
     // https://zhuanlan.zhihu.com/p/481640259 解决给组件加name的方法
     // 因为使用auto-import插件，会自动导入onMounted等vue或vue-router的方法，所以不需要每次都导入

@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
+// import store from '@/store/modules/user'
 import { menu } from './config'
 
 // 遍历菜单列表并返回meta
@@ -42,7 +43,6 @@ function createRouterChildren () {
     })
     return list
 }
-
 // console.log(createRouterChildren())
 // console.log(...createRouterChildren())
 
@@ -80,6 +80,11 @@ const routes = [
             },
             ...createRouterChildren()
         ]
+    },
+    {
+        path: '/chat',
+        name: 'chat',
+        component: () => import('@/views/chat.vue')
     }
     // { path: '/home', name: 'path', component: () => import('@/views/r-home.vue') },
     // { path: '/canvas', name: 'canvas', component: () => import('@/views/r-canvas.vue') },
@@ -90,5 +95,27 @@ const router = createRouter({
     history: createWebHashHistory(),
     routes
 })
+
+// router.beforeEach((to, from, next) => {
+//     console.log(to, from, store)
+//     next()
+// })
+
+function returnMobileRouter () {
+    const modules = import.meta.glob('../views/mobile/**/**.vue')
+    const keys = Object.keys(modules).filter(item => { return item.indexOf('r-') !== -1 })
+    keys.forEach((item) => {
+        const num1 = item.indexOf('r-')
+        const num2 = item.indexOf('.vue')
+        const pathName = item.substring(num1 + 2, num2)
+        router.addRoute({
+            path: '/' + pathName,
+            name: pathName,
+            component: modules[/* @vite-ignore */ item]
+        })
+    })
+}
+returnMobileRouter()
+
 
 export default router

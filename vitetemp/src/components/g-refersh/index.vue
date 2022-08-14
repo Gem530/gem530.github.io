@@ -110,17 +110,18 @@ export default { name: 'g-refersh' }
         // console.log('手指移动屏幕')
         const num = box.value.scrollTop
         if (num < 1 && state.trueFlag) {
-        // 只有在顶部时，才执行
-        state.moveY = (state.isMobile ? e.touches[0].pageY : e.pageY) - state.startY
-        if (state.moveY > 0) {
-            // 只有值为整数，才是下拉，才执行
-            e.preventDefault()
-            state.referFlag = 1
-            if (state.moveY > 80) {
-                // 设置下拉最大值
-                state.referHeight = 80
+            // 只有在顶部时，才执行
+            state.moveY = (state.isMobile ? e.touches[0].pageY : e.pageY) - state.startY
+            state.referHeight = state.moveY
+            if (state.moveY > 0) {
+                // 只有值为整数，才是下拉，才执行
+                e.preventDefault()
+                if (state.moveY > 80) {
+                    // 设置下拉最大值
+                    state.referHeight = 80
+                    state.referFlag = 1
+                }
             }
-        }
         }
     }
 

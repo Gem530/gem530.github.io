@@ -9,6 +9,8 @@ import '@/assets/css/iconfont.css'
 const app = createApp(App)
 
 directive(app)
+// vite只会暴露vite开头的变量
+// console.log('process.env------', import.meta.env)
 
 app.config.globalProperties.foo = 'foo-bar'
 app.config.globalProperties.$con = () => { console.log('app-fun') }

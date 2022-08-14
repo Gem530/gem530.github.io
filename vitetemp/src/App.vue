@@ -1,11 +1,18 @@
 <template>
     <div>
         <router-view></router-view>
+        <!-- <router-view v-slot="{ Component }">
+            <keep-alive :include="includeList">
+                <component :is="Component"/>
+            </keep-alive>
+        </router-view> -->
     </div>
 </template>
 
 <script setup lang="ts">
     import { getCurrentInstance } from 'vue'
+    import { initScoket } from '@/util/ws.js'
+    initScoket()
 
     // 全局方法
     const app = getCurrentInstance()?.appContext.config.globalProperties
@@ -18,9 +25,13 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  outline: none;
 }
 
-body {
+html,
+body,
+#app {
+  width: 100vw;
   height: 100vh;
   overflow: hidden;
 }

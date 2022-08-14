@@ -1,9 +1,19 @@
 <template>
     <div class="contanir theme">
-        头部菜单{{navFlag}}
-        <button @click="changeTheme">切换主题色</button>
-        <button @click="changeLeftWidth">切换侧边栏宽度</button>
-        <button @click="removeLoaclStorage">清除缓存</button>
+        <div class="user">
+            <div class="user-make">
+                头部菜单{{navFlag}}
+                <button @click="changeLeftWidth">切换侧边栏宽度</button>
+                <button @click="changeTheme">切换主题色</button>
+                <button @click="removeLoaclStorage">清除缓存</button>
+                <button @click="toChat">chat</button>
+            </div>
+
+            <div class="user-info">
+                <img class="user-avator" :src="store.getters.user.avator || avatorImg" alt="">
+                <div>{{store.getters.user.name || '未登录'}}</div>
+            </div>
+        </div>
 
         <div class="router-list">
             <div
@@ -28,6 +38,7 @@
     import { computed, watch } from 'vue'
     import { useStore } from 'vuex'
     import { useRouter } from 'vue-router'
+    import avatorImg from '@/assets/img/avator.jpg'
     // https://zhuanlan.zhihu.com/p/481640259 解决给组件加name的方法
     // 因为使用auto-import插件，会自动导入onMounted等vue或vue-router的方法，所以不需要每次都导入
     // onMounted(() => {
@@ -58,6 +69,11 @@
     }
 
     backHome()
+
+    // 跳转到聊天页面
+    const toChat = () => {
+        router.push('/chat')
+    }
 
     // watch(() => store.getters.routerListGetter, (val, old) => {
     //   console.log('----', val, old)
@@ -126,6 +142,20 @@
         @include wh(calcF(100vw, $leftWidth), $topHeight);
         border-bottom: 1px solid $borderColor;
         z-index: 2;
+
+        .user {
+            height: 30px;
+            padding-right: 10px;
+            @include flex(space-between, center);
+
+            .user-info {
+                @include flex(space-around, center);
+
+                .user-avator {
+                    @include wh(30px, 30px);
+                }
+            }
+        }
 
         .router-list {
             @include wh(100%, 50px);

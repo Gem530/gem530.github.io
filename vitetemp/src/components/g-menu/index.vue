@@ -91,7 +91,7 @@
     })
     
     // 根据菜单等级来右移，显出层次感
-    const paddingLeft = (keys: string, flag: boolean) => {
+    const paddingLeft = (keys: string, flag: boolean = true) => {
         // console.log(keys, text.value, '-')
         return `
             padding-left: ${ flag ? (props.level * 15 + 10) : 15 }px;

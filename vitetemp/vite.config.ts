@@ -9,6 +9,7 @@ export default defineConfig({
   base: './',
   resolve: {
     alias: {
+      "~": path.resolve(__dirname, './'),
       "@": path.resolve(__dirname, 'src')
     }
   },
@@ -29,7 +30,8 @@ export default defineConfig({
   ],
   server: {
     host: 'localhost',
-    port: 8081
+    port: 8081,
+    open: true
     // proxy: {
     //   '/': {
     //     target: 'https://dev.pingthe.xyz:443',

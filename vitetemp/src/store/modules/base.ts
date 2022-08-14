@@ -1,7 +1,8 @@
 export default {
   state: {
     // 存储状态 放置变量所用
-    navFlag: true // true为文字+icon  false为icon
+    isPC: true, // true为pc，false为mobile
+    navFlag: false // true为文字+icon  false为icon
   },
   getters: {
     // 派生状态 就和vue的computed差不多

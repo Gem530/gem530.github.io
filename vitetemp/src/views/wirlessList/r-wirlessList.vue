@@ -1,6 +1,6 @@
 <template>
     <div class="contanir theme">
-        <g-wirless-list
+        <!-- <g-wirless-list
             :list="state.list"
             :showNum="state.showNum"
             :itemHeight="state.itemHeight"
@@ -8,7 +8,7 @@
             <template v-slot:default="slot">
                 <div style="color: red;box-sizing: border-box;border: 1px solid blue;">{{slot.item}}</div>
             </template>
-        </g-wirless-list>
+        </g-wirless-list> -->
     </div>
 </template>
 
