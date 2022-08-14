@@ -94,8 +94,13 @@
     // 跳转到聊天室
     const toChatRoom = (item: chatRoom) => {
         // console.log(item)
-        store.dispatch('setChatRoomAction', item)
-        router.push(`/chatRoom?id=${item.Id}`)
+        const data = {
+            Id: item.send_id, // 用户id
+            name: item.name,
+            avator: ''
+        }
+        store.dispatch('setChatRoomAction', data)
+        router.push(`/chatRoom?id=${data.Id}`)
     }
 
     // 下拉刷新
