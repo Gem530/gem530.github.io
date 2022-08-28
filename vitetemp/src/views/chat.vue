@@ -18,7 +18,8 @@
     import GMessage from '@/components/g-message/index'
     import tabNav from '@/views/mobile/tabNav/index.vue'
     import home from '@/views/mobile/component/home/index.vue'
-    import friends from '@/views/mobile/component/home/friends.vue'
+    // import friends from '@/views/mobile/component/home/r-friends.vue'
+    import friends from '@/views/mobile/views/my-friend.vue'
     import main from '@/views/mobile/component/main/index.vue'
 
     const chat = ref()

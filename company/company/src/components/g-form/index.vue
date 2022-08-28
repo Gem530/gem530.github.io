@@ -4,7 +4,7 @@
             <template
                 :key="i"
                 v-for="(item, i) in props.formList">
-                <el-col :span="attrs.col >= 8 ? 24 : (attrs.col * 4)">
+                <el-col :span="attrs.col">
                     <el-form-item v-if="item.type === 'input' && hideHandle(item.isHide)" v-bind="{...item.formAttrs}">
                         <el-input v-model="state.data[item.formAttrs.prop]" v-bind="{...item.attrs}" />
                     </el-form-item>

@@ -101,3 +101,90 @@ export function getUserMsgRecordAPI (param: tsType.msgFriendRecord): Promise<unk
         data: param
     })
 }
+
+/**
+ * @author hjj
+ * @description 获取好友列表
+ * @query userId 用户id
+ */
+ export function userFriendListAPI (userId: number): Promise<unknown> {
+    return request({
+        method: 'POST',
+        url: '/api/userFriendList',
+        data: { userId }
+    })
+}
+
+/**
+ * @author hjj
+ * @description 获取好友申请列表
+ * @query userId 用户id
+ */
+ export function userFriendRequestListAPI (userId: number): Promise<unknown> {
+    return request({
+        method: 'POST',
+        url: '/api/userFriendRequestList',
+        data: { userId }
+    })
+}
+
+/**
+ * @author hjj
+ * @description 获取用户信息
+ * @query userId 用户id
+ */
+ export function getUserInfoAPI (userId: number): Promise<unknown> {
+    return request({
+        method: 'GET',
+        url: '/api/getUserInfo',
+        data: { userId }
+    })
+}
+
+/**
+ * @author hjj
+ * @description 发起好友申请
+ */
+ export function friendApplyAPI (param: tsType.sendAndRecv): Promise<unknown> {
+    return request({
+        method: 'POST',
+        url: '/api/friendApply',
+        data: param
+    })
+}
+
+/**
+ * @author hjj
+ * @description 好友申请处理
+ */
+ export function updateFriendRequestAPI (param: tsType.friendApply): Promise<unknown> {
+    return request({
+        method: 'POST',
+        url: '/api/updateFriendRequest',
+        data: param
+    })
+}
+
+/**
+ * @author hjj
+ * @description 建群
+ */
+ export function createGroupAPI (param: tsType.createGroup): Promise<unknown> {
+    return request({
+        method: 'POST',
+        url: '/api/createGroup',
+        data: param
+    })
+}
+
+/**
+ * @author hjj
+ * @description 获取用户群列表
+ */
+ export function userGroupListAPI (userId: number): Promise<unknown> {
+    return request({
+        method: 'POST',
+        url: '/api/userGroupList',
+        data: { userId }
+    })
+}

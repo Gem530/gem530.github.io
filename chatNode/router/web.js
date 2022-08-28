@@ -113,13 +113,21 @@ module.exports = app => {
         })
     })
 
+    // 获取用户信息
+    router.get('/getUserInfo', loginAuth, (req, res) => {
+        const body = req.query
+        const sql = `select * from user_data where Id = '${body.userId}'`
+        db.query(sql, (err, result) => {
+            if (err) return res.send(mesRes(err.message, 0, err))
+            res.send(mesRes('获取用户信息', 1, result))
+        })
+    })
+
     // --------------------------------------------- 用户好友接口 ---------------------------------------------
-    // 获取用户列表
+    // 获取用户好友列表
     router.post('/userFriendList', loginAuth, (req, res) => {
         const body = req.body
-        const page = body.page || 1
-        const pageSize = body.pageSize || 10
-        const sql = `select * from friend where Id = '${body.userId}' order by createTime desc limit ${(page - 1) * pageSize}, ${pageSize}`
+        const sql = `select f.Id, f.friend_id, u.name as name from friend f, user_data u where f.user_id = '${body.userId}' and f.friend_id = u.Id and f.link = 1 order by f.createTime desc`
         db.query(sql, (err, result) => {
             if (err) return res.send(mesRes(err.message, 0, err))
             res.send(mesRes('获取用户好友列表', 1, result))
@@ -139,9 +147,7 @@ module.exports = app => {
     // 获取用户好友申请列表
     router.post('/userFriendRequestList', loginAuth, (req, res) => {
         const body = req.body
-        const page = body.page || 1
-        const pageSize = body.pageSize || 10
-        const sql = `select * from friend_request where Id = '${body.userId}' order by createTime desc limit ${(page - 1) * pageSize}, ${pageSize}`
+        const sql = `select f.Id, f.send_id, u.name, f.state from friend_request f, user_data u where f.send_id = u.Id and f.recv_id = '${body.userId}' and f.state != 1 order by f.createTime desc`
         db.query(sql, (err, result) => {
             if (err) return res.send(mesRes(err.message, 0, err))
             res.send(mesRes('获取用户好友申请列表', 1, result))
@@ -167,9 +173,21 @@ module.exports = app => {
         const param = [body.state, body.id]
         db.query(sql, param, (err, result) => {
             if (err) return res.send(mesRes(err.message, 0, err))
-            res.send(mesRes('好友申请处理', 1, result))
+            // res.send(mesRes('好友申请处理', 1, result))
+            insertFriend(body.id, res)
         })
     })
+    // 生成好友记录
+    const insertFriend = (id, res) => {
+        db.query(`select * from friend_request where Id = ${id}`, (err, result) => {
+            if (err) return res.send(mesRes(err.message, 0, err))
+            const body = result[0]
+            db.query('insert into friend (user_id, friend_id, state, link) values (?, ?, ?, ?)', [body.send_id, body.recv_id, 1, 1], (errs, results) => {
+                if (errs) return res.send(mesRes(errs.message, 0, errs))
+                res.send(mesRes('好友申请处理', 1, results))
+            })
+        })
+    }
 
     // 给好友发消息
     router.post('/sendMsgFriend', loginAuth, (req, res) => {
@@ -230,9 +248,7 @@ module.exports = app => {
     // 获取用户群列表
     router.post('/userGroupList', loginAuth, (req, res) => {
         const body = req.body
-        const page = body.page || 1
-        const pageSize = body.pageSize || 10
-        const sql = `select * from my_groups where Id = '${body.userId}' order by createTime desc limit ${(page - 1) * pageSize}, ${pageSize}`
+        const sql = `select * from group_member where member_id = '${body.userId}' order by createTime desc`
         db.query(sql, (err, result) => {
             if (err) return res.send(mesRes(err.message, 0, err))
             res.send(mesRes('获取用户群列表', 1, result))
@@ -267,12 +283,26 @@ module.exports = app => {
     router.post('/createGroup', loginAuth, (req, res) => {
         const body = req.body
         const sql = 'insert into my_groups (group_name, group_member_num) values (?, ?)'
-        const param = [body.groupName, 1]
+        const param = [body.groupName, body.members.length]
         db.query(sql, param, (err, result) => {
             if (err) return res.send(mesRes(err.message, 0, err))
-            res.send(mesRes('建群', 1, result))
+            // res.send(mesRes('建群', 1, result))
+            insertGroupMember(result.insertId, body.groupName, body.members, res)
         })
     })
+    // 添加群成员
+    const insertGroupMember = (id, name, arr, res) => {
+        const sql = 'insert into group_member (group_id, group_name, member_id, member_state, link) values ?'
+        const param = []
+        arr.forEach((item) => {
+            // [群id，群名，成员id，成员身份（0：普通 1：管理 2：群主），是否为成员]
+            param.push([id, name, item.id, item.type, 1])
+        })
+        db.query(sql, [param], (errs, results) => {
+            if (errs) return res.send(mesRes(errs.message, 0, errs))
+            res.send(mesRes('建群', 1, results))
+        })
+    }
 
     // 发起群申请
     router.post('/groupApply', loginAuth, (req, res) => {

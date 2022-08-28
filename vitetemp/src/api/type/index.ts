@@ -32,3 +32,18 @@ export interface msgFriendRecord {
     recvId: number // 接受人id
     pageSize?: number // 每页数量
 }
+
+// 好友申请处理
+export interface friendApply {
+    id: number // 好友申请Id
+    state: number // 状态 2拒绝 1通过 0未处理
+}
+
+// 建群
+export interface createGroup {
+    groupName: string // 群名
+    members: {
+        id: number // 用户id
+        type: number // 用户角色 0：普通 1：管理 2：群主
+    }[] // 群成员
+}

@@ -2,7 +2,7 @@
     <div class="content">
         <GForm
             ref="GFormRef"
-            :col="3"
+            :col="12"
             :rules="form.rules"
             label-width="100px"
             :formList="form.formList"

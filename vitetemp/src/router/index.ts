@@ -108,6 +108,7 @@ function returnMobileRouter () {
         const num1 = item.indexOf('r-')
         const num2 = item.indexOf('.vue')
         const pathName = item.substring(num1 + 2, num2)
+        // console.log(pathName)
         router.addRoute({
             path: '/' + pathName,
             name: pathName,

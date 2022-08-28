@@ -80,8 +80,9 @@
     // 跳转到聊天室
     const toChatRoom = (item: chatRoom) => {
         // console.log(item)
-        store.dispatch('setChatRoomAction', item)
-        router.push(`/chatRoom?id=${item.Id}`)
+        // store.dispatch('setChatRoomAction', item)
+        // router.push(`/chatRoom?id=${item.Id}`)
+        router.push(`/userInfo?id=${item.Id}`)
     }
 
     // 下拉刷新
