@@ -106,8 +106,10 @@ const reset = () => {
     searchHandle()
 }
 // 搜索
-const searchHandle = () => {
-    emits('search', state.data)
+const searchHandle = async () => {
+    formRef.value.validate().then(() => {
+        emits('search', state.data)
+    })
 }
 
 defineExpose({ searchHandle })

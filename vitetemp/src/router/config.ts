@@ -60,6 +60,12 @@ export const menu = [
             key: '/canvasBlur'
         },
         {
+            title: '图片裁剪',
+            icon: 'icon-cut',
+            meta: { keepAlive: true },
+            key: '/clipImg',
+        },
+        {
             title: '临时文件',
             icon: '',
             meta: { keepAlive: true },
