@@ -31,8 +31,22 @@
 html,
 body,
 #app {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+button {
+    min-width: 30px;
+    min-height: 30px;
+    background: skyblue;
+    border: none;
+    padding: 0 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    color: #ffffff;
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
 }
 </style>
