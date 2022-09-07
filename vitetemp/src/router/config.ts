@@ -66,6 +66,12 @@ export const menu = [
             key: '/clipImg',
         },
         {
+            title: '图片标注',
+            icon: 'icon-shoudongbiaozhu',
+            meta: { keepAlive: true },
+            key: '/imgOverlays',
+        },
+        {
             title: '临时文件',
             icon: '',
             meta: { keepAlive: true },

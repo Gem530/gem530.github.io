@@ -12,7 +12,8 @@
 <script setup lang="ts">
     import { getCurrentInstance } from 'vue'
     import { initScoket } from '@/util/ws.js'
-    initScoket()
+    const isMobile = /Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)
+    isMobile && initScoket()
 
     // 全局方法
     const app = getCurrentInstance()?.appContext.config.globalProperties

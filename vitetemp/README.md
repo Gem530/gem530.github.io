@@ -12,3 +12,4 @@ Since TypeScript cannot handle type information for `.vue` imports, they are shi
 
 
 <!-- npm install @types/node --save-dev 可用于解决没有require方法 -->
+https://github.com/EmilyZhang123/vue-label-me
