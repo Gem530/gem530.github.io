@@ -1,7 +1,7 @@
 <template>
     <div class="component theme" :style="`width: ${props.width}px;`">
         <!-- 图片裁剪组件 -->
-        <canvas id="canvas" ref="myCanvas" :width="props.width" :height="props.height"></canvas>
+        <canvas id="canvasDom" ref="myCanvas" :width="props.width" :height="props.height"></canvas>
         <img :src="imgUrl" alt="">
         <div class="flex">
             <button @click="handleScale('-')">-</button>
@@ -14,8 +14,25 @@
                 @input="handleScale('change')"
             />
             <button @click="handleScale('+')">+</button>
-            <button @click="initScle">1:1还原</button>
+            <button @click="initScle">还原</button>
             <button @click="clipHandle">裁剪</button>
+            <div class="flex">
+                <div
+                    :key="item"
+                    v-for="item in props.colors"
+                    :style="`background: ${item};`"
+                    :class="{ 'flex-item': true, 'active-flex': item == activeColor }"
+                    @click="activeColor = item"
+                ></div>
+            </div>
+            <div class="flex">
+                <div
+                    :key="item.key"
+                    v-for="item in props.graphical"
+                    :class="{ 'flex-item': true, 'active-flex': item.key == activeGraphical }"
+                    @click="activeGraphical = item.key"
+                >{{item.name}}</div>
+            </div>
         </div>
     </div>
 </template>
@@ -23,8 +40,8 @@
 <script setup lang="ts" name="g-img-overlays">
     import { ref, onMounted } from 'vue'
     import { fabric } from 'fabric'
-    import defaultImg from '@/assets/img/login.jpeg'
-    const props = defineProps({
+    // import defaultImg from '@/assets/img/login.jpeg'
+    const props: any = defineProps({
         width: {
             type: Number,
             default: 500
@@ -43,7 +60,24 @@
         },
         img: {
             type: String,
-            default: defaultImg
+            default: 'https://img1.baidu.com/it/u=2644452384,3800439215&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500'
+        },
+        colors: {
+            type: Array,
+            default: () => ['pink', 'skyblue', 'orange']
+        },
+        graphical: {
+            type: Array,
+            default: () => [
+                { key: 'Rect', name: '矩形' },
+                { key: 'RectR', name: '圆角矩形' },
+                { key: 'Circle', name: '圆' },
+                { key: 'Ellipse', name: '椭圆' },
+                { key: 'Triangle', name: '三角形' },
+                // { key: 'Line', name: '线段' },
+                // { key: 'Polygon', name: '多边形' },
+                { key: 'IText', name: '文字' },
+            ]
         }
     })
 
@@ -54,10 +88,11 @@
 
     const emits = defineEmits(['getImg'])
 
+    let group: any = null
+    let canvas: any = null
     const myCanvas = ref()
     const uploadInput = ref()
-    const imgValue = ref(null)
-    const canvasRef = ref<any>(null)
+    const imgValue = ref<any>(null)
 
     const imgUrl = ref(undefined)
     // const imgSizes = ref([])
@@ -70,6 +105,8 @@
     const initStep = ref(1)
     const width = props.width
     const height = props.height
+    const activeColor = ref(props.colors[0])
+    const activeGraphical = ref(props.graphical[0]?.key)
 
     nextTick(() => {
         fTop.value = myCanvas.value.getBoundingClientRect().top
@@ -83,11 +120,13 @@
     })
 
     const init = async () => {
-        const canvas = new fabric.Canvas('canvas', {
+        canvas = new fabric.Canvas('canvasDom', {
             width,
             height,
             // preserveObjectStacking: true // true 选中控件后不会置顶层级
         })
+        canvas.lastzoomPointX = width/2
+        canvas.lastzoomPointY = height/2
 
         const img = await imgInit()
         imgStyleInit()
@@ -95,19 +134,16 @@
         // canvas.add(img)
         canvas.setBackgroundImage(img)
         canvas.renderAll()
-        fabricHandleEvent(canvas)
-
-        canvasRef.value = canvas
-        // mouseWheelHandle()
+        fabricHandleEvent()
     }
 
     // fabric事件
-    const fabricHandleEvent = (canvas) => {
+    const fabricHandleEvent = () => {
         canvas.on({
-            'mouse:up': (e) => mouseUpHandle(e, canvas),
-            'mouse:move': (e) => mouseMoveHandle(e, canvas), 
-            'mouse:down': (e) => mouseDownHandle(e, canvas),
-            'mouse:wheel': (e) => mouseWheelHandle(e),
+            'mouse:up': (e: any) => mouseUpHandle(e),
+            'mouse:move': (e: any) => mouseMoveHandle(e), 
+            'mouse:down': (e: any) => mouseDownHandle(e),
+            'mouse:wheel': (e: any) => mouseWheelHandle(e),
         })
     }
 
@@ -122,21 +158,20 @@
     }
 
     // 鼠标滚轮缩放
-    const mouseWheelHandle = ({ e }) => {
+    const mouseWheelHandle = ({ e }: any) => {
         const type = e.deltaY < 0 ? '+' : '-'
         ImgScaleHandle(type, e.pageX - fLeft.value, e.pageY - fTop.value)
     }
 
     // 鼠标按下
-    const mouseDownHandle = ({ e }, canvas) => {
+    const mouseDownHandle = ({ e }: any) => {
         canvas.isDragging = true // isDragging 是自定义的
         canvas.lastPosX = e.clientX // lastPosX 是自定义的
         canvas.lastPosY = e.clientY // lastPosY 是自定义的
-        console.log(canvas.lastPosY, canvas.lastPosX)
     }
 
     // 鼠标移动
-    const mouseMoveHandle = ({ e }, canvas) => {
+    const mouseMoveHandle = ({ e }: any) => {
         if (canvas.isDragging) {
             if (state.isMove) {
                 // 是否可以移动
@@ -151,33 +186,82 @@
     }
 
     // 鼠标抬起
-    const mouseUpHandle = ({ e }, canvas) => {
-        // console.log(e)
+    const mouseUpHandle = ({ e }: any) => {
         if (state.isCreateObject) {
-            console.log(e.clientY, e.clientX, e.clientX - canvas.lastPosX, e.clientY - canvas.lastPosY)
-            createRect(canvas, canvas.lastPosY, canvas.lastPosX, e.clientX - canvas.lastPosX, e.clientY - canvas.lastPosY, e)
+            const top = (canvas.lastPosY - fTop.value + Math.abs(canvas.viewportTransform[5])) / step.value
+            const left = (canvas.lastPosX - fLeft.value + Math.abs(canvas.viewportTransform[4])) / step.value
+            const w = (e.clientX - canvas.lastPosX) / step.value
+            const h = (e.clientY - canvas.lastPosY) / step.value
+            const right = e.clientX / step.value
+            const bottom = e.clientY / step.value
+            switch (activeGraphical.value) {
+                case 'Rect':
+                    createRect(top, left, w, h);
+                    break;
+                case 'RectR':
+                    createRect(top, left, w, h, 10, 10);
+                    break;
+                case 'Circle':
+                    createCircle(top, left, w / 2);
+                    break;
+                case 'Ellipse':
+                    createEllipse(top, left, w / 2, h / 2);
+                    break;
+                case 'Triangle':
+                    createTriangle(top, left, w, h);
+                    break;
+                case 'Line':
+                    createLine(top, left, right, bottom);
+                    break;
+                case 'IText':
+                    createIText(top, left);
+                    break;
+                    
+            }
+            // if (activeGraphical.value == 'rect') {
+            //     createRect(canvas.lastPosY, canvas.lastPosX, e.clientX - canvas.lastPosX, e.clientY - canvas.lastPosY)
+            // }
         }
-        canvas.setViewportTransform(canvas.viewportTransform) // 设置此画布实例的视口转换
         canvas.isDragging = false
     }
 
     // 生成矩形
-    const createRect = (canvas, top, left, width, height, e) => {
-        console.log(top, left, width, height, e.offsetX, e.offsetY, fLeft.value, fTop.value)
-        // top = top - fTop.value
-        // left = left - fLeft.value
-
-        // top = (top - fTop.value) / step.value
-        // left = (left - fLeft.value) / step.value
-        top = (top - fTop.value)
-        left = (left - fLeft.value)
-        width = width / step.value
-        height = height / step.value
-        console.log(top, left, width, height)
-        const rect = new fabric.Rect({ width, height, fill: 'pink', top, left })
-        // const rect = new fabric.Rect({ width, height: top + 0.08, fill: 'pink', top: 0, left: 0 })
+    const createRect = (top: number, left: number, w: number, h: number, rx: number = 0, ry: number = 0) => {
+        const rect = new fabric.Rect({ width: w, height: h, fill: activeColor.value, top, left, rx, ry })
         canvas.add(rect)
     }
+
+    // 生成圆
+    const createCircle = (top: number, left: number, r: number) => {
+        const circle = new fabric.Circle({ radius: r, fill: activeColor.value, top, left })
+        canvas.add(circle)
+    }
+
+    // 生成椭圆
+    const createEllipse = (top: number, left: number, rx: number, ry: number) => {
+        const Ellipse = new fabric.Ellipse({ rx, ry, fill: activeColor.value, top, left })
+        canvas.add(Ellipse)
+    }
+
+    // 生成三角形
+    const createTriangle = (top: number, left: number, w: number, h: number) => {
+        const Triangle = new fabric.Triangle({ width: w, height: h, fill: activeColor.value, top, left })
+        canvas.add(Triangle)
+    }
+
+    // 生成线段
+    const createLine = (top: number, left: number, right: number, bottom: number) => {
+        const Line = new fabric.Line(
+            [top, left, right, bottom],{ stroke: activeColor }
+        )
+        canvas.add(Line)
+    }
+
+// 生成线段
+const createIText = (top: number, left: number) => {
+    const IText = new fabric.IText('请输入文字', { top, left })
+    canvas.add(IText)
+}
 
     // 图片初始化
     const imgStyleInit = () => {
@@ -185,6 +269,7 @@
         imgValue.value.left = width / 2
         imgValue.value.originX = 'center'
         imgValue.value.originY = 'center'
+        imgValue.value.selectable = false
         imgValue.value.cornerStyle = 'circle'
 
         imgValue.value.rotate(0)
@@ -197,16 +282,18 @@
         else if (type == 'init') {
             zoom = 1
             const arr = [1, 0, 0, 1, 0, 0]
-            canvasRef.value.setViewportTransform(arr)
+            canvas.setViewportTransform(arr)
         }
         else {
-            zoom = (type == '-' ? -props.scaleStep : props.scaleStep) + canvasRef.value.getZoom()
+            zoom = (type == '-' ? -props.scaleStep : props.scaleStep) + canvas.getZoom()
         }
         zoom = Math.max(1, zoom) //最小为原来的1/10
         zoom = Math.min(props.maxScale, zoom) //最大是原来的3倍
-        // console.log(zoom, initStep.value)
+        canvas.lastzoomPointX = x
+        canvas.lastzoomPointY = y
         const zoomPoint = new fabric.Point(x, y)
-        canvasRef.value.zoomToPoint(zoomPoint, zoom)
+        canvas.zoomToPoint(zoomPoint, zoom)
+        canvas.setViewportTransform(canvas.viewportTransform) // 设置此画布实例的视口转换
         step.value = zoom
     }
 
@@ -224,16 +311,16 @@
     // 图片渲染
     const imgInit = () => {
         return new Promise((resolve, reject) => {
-            fabric.Image.fromURL(imgLocal.value, img => {
+            fabric.Image.fromURL(imgLocal.value, (img: ImageBitmap) => {
                 imgValue.value = img
                 resolve(img)
-            })
+            }, { crossOrigin: 'anonymous' })
         })
     }
 
     // 返回base64图片
     const toBase64 = (quality: Number = 1, format: String = 'png') => {
-        return canvasRef.value.toDataURL({ top: 0, left: 0, width, height, format, quality })
+        return canvas.toDataURL({ top: 0, left: 0, width, height, format, quality })
     }
 
     // 截图
@@ -256,8 +343,8 @@
     }
 
     // 用于产看压缩后的图片大小
-    const convertBase64UrlToBlob = (urlData) => {
-      var arr = urlData.split(','),
+    const convertBase64UrlToBlob = (urlData: any) => {
+      var arr: any = urlData.split(','),
         mime = arr[0].match(/:(.*?);/)[1],
         bstr = atob(arr[1]),
         n = bstr.length,
@@ -277,6 +364,20 @@
     align-content: center;
     input {
         margin-right: 5px;
+    }
+
+    .flex-item {
+        min-width: 30px;
+        height: 30px;
+        border: 1px solid transparent;
+        padding: 0 5px;
+        margin-right: 5px;
+        text-align: center;
+        line-height: 30px;
+
+        &.active-flex {
+            border: 1px solid red;
+        }
     }
 
     .upload-btn {

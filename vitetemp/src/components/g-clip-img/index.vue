@@ -184,7 +184,7 @@
                 imgValue.value = img
                 imgSizeInit()
                 resolve(img)
-            })
+            }, { crossOrigin: 'anonymous' })
         })
     }
 

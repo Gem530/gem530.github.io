@@ -31,7 +31,7 @@
     import { useStore } from 'vuex'
     import { useRouter } from 'vue-router'
     import { onMounted, reactive } from 'vue'
-    import { chatRoom } from '@/util/otherType.ts'
+    import { chatRoom } from '@/config/otherType.ts'
     import GMessage from '@/components/g-message/index'
     import gWirlessList from '@/components/g-wirlessList/index.vue'
     import { userListAPI } from '@/api/index.ts'
