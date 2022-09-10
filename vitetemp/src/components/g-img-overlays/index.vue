@@ -188,10 +188,7 @@
         canvas.lastPosX = e.clientX // lastPosX 是自定义的
         canvas.lastPosY = e.clientY // lastPosY 是自定义的
         if (state.isCreateObject) {
-            const relaX = canvas.relativeX > 0 ? (canvas.relativeX * 2) : 0
-            const relaY = canvas.relativeY > 0 ? (canvas.relativeY * 2) : 0
-            const top = ((canvas.lastPosY - fTop.value + Math.abs(canvas.viewportTransform[5]) - relaY) / step.value)
-            const left = ((canvas.lastPosX - fLeft.value + Math.abs(canvas.viewportTransform[4]) - relaX) / step.value)
+            const { top, left } = returnObjectInfo(e)
             switch (activeGraphical.value) {
                 case 'Rect':
                     currentObject = new fabric.Rect()
@@ -210,6 +207,7 @@
                     break;
                 case 'IText':
                     currentObject = new fabric.IText('请输入。。', { top, left })
+                    canvas.add(currentObject)
                     break;
             }
         }
@@ -232,27 +230,22 @@
                 console.log(canvas.relativeX, canvas.relativeY, canvas.viewportTransform)
             }
             if (state.isCreateObject) {
-                const relaX = canvas.relativeX > 0 ? (canvas.relativeX * 2) : 0
-                const relaY = canvas.relativeY > 0 ? (canvas.relativeY * 2) : 0
-                const top = ((canvas.lastPosY - fTop.value + Math.abs(canvas.viewportTransform[5]) - relaY) / step.value)
-                const left = ((canvas.lastPosX - fLeft.value + Math.abs(canvas.viewportTransform[4]) - relaX) / step.value)
-                const w = (e.clientX - canvas.lastPosX) / step.value
-                const h = (e.clientY - canvas.lastPosY) / step.value
+                const { top, left, w, h, right, bottom } = returnObjectInfo(e)
                 switch (activeGraphical.value) {
                     case 'Rect':
-                        currentObject.set({ width: w, height: h, fill: activeColor.value, top, left })
+                        currentObject.set({ width: Math.abs(left - right), height: Math.abs(top - bottom), fill: activeColor.value, top: Math.min(top, bottom), left: Math.min(left, right) })
                         canvas.add(currentObject)
                         break;
                     case 'RectR':
-                        currentObject.set({ width: w, height: h, fill: activeColor.value, top, left, rx: 5, ry: 5 })
+                        currentObject.set({ width: Math.abs(left - right), height: Math.abs(top - bottom), fill: activeColor.value, top: Math.min(top, bottom), left: Math.min(left, right), rx: 5, ry: 5 })
                         canvas.add(currentObject)
                         break;
                     case 'Circle':
-                        currentObject.set({ radius: w / 2, fill: activeColor.value, top, left })
+                        currentObject.set({ radius: Math.abs(w / 2), fill: activeColor.value, top: Math.min(top, bottom), left: Math.min(left, right) })
                         canvas.add(currentObject)
                         break;
                     case 'Ellipse':
-                        currentObject.set({ rx: w / 2, ry: h / 2, fill: activeColor.value, top, left })
+                        currentObject.set({ rx: Math.abs(w / 2), ry: Math.abs(h / 2), fill: activeColor.value, top: Math.min(top, bottom), left: Math.min(left, right) })
                         canvas.add(currentObject)
                         break;
                     case 'Triangle':
@@ -269,12 +262,7 @@
     const mouseUpHandle = ({ e }: any) => {
         canvas.isDragging = false
         if (state.isCreateObject) {
-            const relaX = canvas.relativeX > 0 ? (canvas.relativeX * 2) : 0
-            const relaY = canvas.relativeY > 0 ? (canvas.relativeY * 2) : 0
-            const top = ((canvas.lastPosY - fTop.value + Math.abs(canvas.viewportTransform[5]) - relaY) / step.value)
-            const left = ((canvas.lastPosX - fLeft.value + Math.abs(canvas.viewportTransform[4]) - relaX) / step.value)
-            const right = (e.clientX - fLeft.value) / step.value
-            const bottom = (e.clientY - fTop.value) / step.value
+            const { top, left, right, bottom } = returnObjectInfo(e)
             switch (activeGraphical.value) {
                 case 'Line':
                     currentObject = new fabric.Line([left, top, right, bottom],{ stroke: activeColor.value })
@@ -285,6 +273,19 @@
                     break;
             }
         }
+    }
+
+    // 返回 坐标、宽高信息
+    const returnObjectInfo = (e: any) => {
+        const w = (e.clientX - canvas.lastPosX) / step.value
+        const h = (e.clientY - canvas.lastPosY) / step.value
+        const relaX = canvas.relativeX > 0 ? (canvas.relativeX * 2) : 0
+        const relaY = canvas.relativeY > 0 ? (canvas.relativeY * 2) : 0
+        const right = ((e.clientX - fLeft.value + Math.abs(canvas.viewportTransform[4]) - relaX) / step.value)
+        const bottom = ((e.clientY - fTop.value + Math.abs(canvas.viewportTransform[5]) - relaY) / step.value)
+        const top = ((canvas.lastPosY - fTop.value + Math.abs(canvas.viewportTransform[5]) - relaY) / step.value)
+        const left = ((canvas.lastPosX - fLeft.value + Math.abs(canvas.viewportTransform[4]) - relaX) / step.value)
+        return { relaX, relaY, top, left, w, h, right, bottom }
     }
 
     // 选择图形
