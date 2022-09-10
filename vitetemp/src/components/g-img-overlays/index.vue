@@ -16,22 +16,28 @@
             <button @click="handleScale('+')">+</button>
             <button @click="initScle">还原</button>
             <button @click="clipHandle">裁剪</button>
-            <div class="flex">
-                <div
-                    :key="item"
-                    v-for="item in props.colors"
-                    :style="`background: ${item};`"
-                    :class="{ 'flex-item': true, 'active-flex': item == activeColor }"
-                    @click="activeColor = item"
-                ></div>
+            <div v-show="state.isCreateObject">
+                <div class="flex">
+                    <div
+                        :key="item"
+                        v-for="item in props.colors"
+                        :style="`background: ${item};`"
+                        :class="{ 'flex-item': true, 'active-flex': item == activeColor }"
+                        @click="activeColor = item"
+                    ></div>
+                </div>
+                <div class="flex">
+                    <div
+                        :key="item.key"
+                        v-for="item in props.graphical"
+                        :class="{ 'flex-item': true, 'active-flex': item.key == activeGraphical }"
+                        @click="chooseGraphical(item)"
+                    >{{item.name}}</div>
+                </div>
             </div>
             <div class="flex">
-                <div
-                    :key="item.key"
-                    v-for="item in props.graphical"
-                    :class="{ 'flex-item': true, 'active-flex': item.key == activeGraphical }"
-                    @click="activeGraphical = item.key"
-                >{{item.name}}</div>
+                <button @click="handleOperat('isMove')">移动</button>
+                <button @click="handleOperat('isCreateObject')">绘制</button>
             </div>
         </div>
     </div>
@@ -74,14 +80,14 @@
                 { key: 'Circle', name: '圆' },
                 { key: 'Ellipse', name: '椭圆' },
                 { key: 'Triangle', name: '三角形' },
-                // { key: 'Line', name: '线段' },
+                { key: 'Line', name: '线段' },
                 // { key: 'Polygon', name: '多边形' },
                 { key: 'IText', name: '文字' },
             ]
         }
     })
 
-    const state = reactive({
+    const state: any = reactive({
         isMove: false,
         isCreateObject: true
     })
@@ -90,6 +96,8 @@
 
     let group: any = null
     let canvas: any = null
+    let currentObject: any = null
+
     const myCanvas = ref()
     const uploadInput = ref()
     const imgValue = ref<any>(null)
@@ -119,6 +127,13 @@
         init()
     })
 
+    // 画布事件
+    const handleOperat = (type: string) => {
+        for (let k in state) {
+            state[k] = k == type
+        }
+    }
+
     const init = async () => {
         canvas = new fabric.Canvas('canvasDom', {
             width,
@@ -127,6 +142,8 @@
         })
         canvas.lastzoomPointX = width/2
         canvas.lastzoomPointY = height/2
+        canvas.relativeX = 0 // canvas移动的x坐标位移
+        canvas.relativeY = 0 // canvas移动的x坐标位移
 
         const img = await imgInit()
         imgStyleInit()
@@ -134,6 +151,8 @@
         // canvas.add(img)
         canvas.setBackgroundImage(img)
         canvas.renderAll()
+        canvas.selection = false // 不允许直接从画布框选
+        canvas.selectionFullyContained = true // 只选择完全包含在拖动选择矩形中的形状
         fabricHandleEvent()
     }
 
@@ -168,6 +187,32 @@
         canvas.isDragging = true // isDragging 是自定义的
         canvas.lastPosX = e.clientX // lastPosX 是自定义的
         canvas.lastPosY = e.clientY // lastPosY 是自定义的
+        if (state.isCreateObject) {
+            const relaX = canvas.relativeX > 0 ? (canvas.relativeX * 2) : 0
+            const relaY = canvas.relativeY > 0 ? (canvas.relativeY * 2) : 0
+            const top = ((canvas.lastPosY - fTop.value + Math.abs(canvas.viewportTransform[5]) - relaY) / step.value)
+            const left = ((canvas.lastPosX - fLeft.value + Math.abs(canvas.viewportTransform[4]) - relaX) / step.value)
+            switch (activeGraphical.value) {
+                case 'Rect':
+                    currentObject = new fabric.Rect()
+                    break;
+                case 'RectR':
+                    currentObject = new fabric.Rect()
+                    break;
+                case 'Circle':
+                    currentObject = new fabric.Circle()
+                    break;
+                case 'Ellipse':
+                    currentObject = new fabric.Ellipse()
+                    break;
+                case 'Triangle':
+                    currentObject = new fabric.Triangle()
+                    break;
+                case 'IText':
+                    currentObject = new fabric.IText('请输入。。', { top, left })
+                    break;
+            }
+        }
     }
 
     // 鼠标移动
@@ -181,87 +226,102 @@
                 canvas.requestRenderAll()
                 canvas.lastPosX = e.clientX
                 canvas.lastPosY = e.clientY
+                canvas.relativeX = vpt[4] // canvas移动的x坐标位移
+                canvas.relativeY = vpt[5] // canvas移动的x坐标位移
+                canvas.setViewportTransform(canvas.viewportTransform)
+                console.log(canvas.relativeX, canvas.relativeY, canvas.viewportTransform)
+            }
+            if (state.isCreateObject) {
+                const relaX = canvas.relativeX > 0 ? (canvas.relativeX * 2) : 0
+                const relaY = canvas.relativeY > 0 ? (canvas.relativeY * 2) : 0
+                const top = ((canvas.lastPosY - fTop.value + Math.abs(canvas.viewportTransform[5]) - relaY) / step.value)
+                const left = ((canvas.lastPosX - fLeft.value + Math.abs(canvas.viewportTransform[4]) - relaX) / step.value)
+                const w = (e.clientX - canvas.lastPosX) / step.value
+                const h = (e.clientY - canvas.lastPosY) / step.value
+                switch (activeGraphical.value) {
+                    case 'Rect':
+                        currentObject.set({ width: w, height: h, fill: activeColor.value, top, left })
+                        canvas.add(currentObject)
+                        break;
+                    case 'RectR':
+                        currentObject.set({ width: w, height: h, fill: activeColor.value, top, left, rx: 5, ry: 5 })
+                        canvas.add(currentObject)
+                        break;
+                    case 'Circle':
+                        currentObject.set({ radius: w / 2, fill: activeColor.value, top, left })
+                        canvas.add(currentObject)
+                        break;
+                    case 'Ellipse':
+                        currentObject.set({ rx: w / 2, ry: h / 2, fill: activeColor.value, top, left })
+                        canvas.add(currentObject)
+                        break;
+                    case 'Triangle':
+                        currentObject.set({ width: w, height: h, fill: activeColor.value, top, left })
+                        canvas.add(currentObject)
+                        break;
+                }
+                canvas.renderAll()
             }
         }
     }
 
     // 鼠标抬起
     const mouseUpHandle = ({ e }: any) => {
+        canvas.isDragging = false
         if (state.isCreateObject) {
-            const top = (canvas.lastPosY - fTop.value + Math.abs(canvas.viewportTransform[5])) / step.value
-            const left = (canvas.lastPosX - fLeft.value + Math.abs(canvas.viewportTransform[4])) / step.value
-            const w = (e.clientX - canvas.lastPosX) / step.value
-            const h = (e.clientY - canvas.lastPosY) / step.value
-            const right = e.clientX / step.value
-            const bottom = e.clientY / step.value
+            const relaX = canvas.relativeX > 0 ? (canvas.relativeX * 2) : 0
+            const relaY = canvas.relativeY > 0 ? (canvas.relativeY * 2) : 0
+            const top = ((canvas.lastPosY - fTop.value + Math.abs(canvas.viewportTransform[5]) - relaY) / step.value)
+            const left = ((canvas.lastPosX - fLeft.value + Math.abs(canvas.viewportTransform[4]) - relaX) / step.value)
+            const right = (e.clientX - fLeft.value) / step.value
+            const bottom = (e.clientY - fTop.value) / step.value
             switch (activeGraphical.value) {
-                case 'Rect':
-                    createRect(top, left, w, h);
-                    break;
-                case 'RectR':
-                    createRect(top, left, w, h, 10, 10);
-                    break;
-                case 'Circle':
-                    createCircle(top, left, w / 2);
-                    break;
-                case 'Ellipse':
-                    createEllipse(top, left, w / 2, h / 2);
-                    break;
-                case 'Triangle':
-                    createTriangle(top, left, w, h);
-                    break;
                 case 'Line':
-                    createLine(top, left, right, bottom);
+                    currentObject = new fabric.Line([left, top, right, bottom],{ stroke: activeColor.value })
+                    canvas.add(currentObject)
                     break;
                 case 'IText':
-                    createIText(top, left);
+                    canvas.renderAll()
                     break;
-                    
             }
-            // if (activeGraphical.value == 'rect') {
-            //     createRect(canvas.lastPosY, canvas.lastPosX, e.clientX - canvas.lastPosX, e.clientY - canvas.lastPosY)
-            // }
         }
-        canvas.isDragging = false
     }
 
-    // 生成矩形
-    const createRect = (top: number, left: number, w: number, h: number, rx: number = 0, ry: number = 0) => {
-        const rect = new fabric.Rect({ width: w, height: h, fill: activeColor.value, top, left, rx, ry })
-        canvas.add(rect)
+    // 选择图形
+    const chooseGraphical = (item: any) => {
+        activeGraphical.value = item.key
     }
 
-    // 生成圆
-    const createCircle = (top: number, left: number, r: number) => {
-        const circle = new fabric.Circle({ radius: r, fill: activeColor.value, top, left })
-        canvas.add(circle)
-    }
-
-    // 生成椭圆
-    const createEllipse = (top: number, left: number, rx: number, ry: number) => {
-        const Ellipse = new fabric.Ellipse({ rx, ry, fill: activeColor.value, top, left })
-        canvas.add(Ellipse)
-    }
-
-    // 生成三角形
-    const createTriangle = (top: number, left: number, w: number, h: number) => {
-        const Triangle = new fabric.Triangle({ width: w, height: h, fill: activeColor.value, top, left })
-        canvas.add(Triangle)
-    }
-
-    // 生成线段
-    const createLine = (top: number, left: number, right: number, bottom: number) => {
-        const Line = new fabric.Line(
-            [top, left, right, bottom],{ stroke: activeColor }
-        )
-        canvas.add(Line)
-    }
-
-// 生成线段
-const createIText = (top: number, left: number) => {
-    const IText = new fabric.IText('请输入文字', { top, left })
-    canvas.add(IText)
-}
+    // // 生成矩形
+    // const createRect = (top: number, left: number, w: number, h: number, rx: number = 0, ry: number = 0) => {
+    //     currentObject = new fabric.Rect({ width: w, height: h, fill: activeColor.value, top, left, rx, ry })
+    //     canvas.add(currentObject)
+    // }
+    // // 生成圆
+    // const createCircle = (top: number, left: number, r: number) => {
+    //     currentObject = new fabric.Circle({ radius: r, fill: activeColor.value, top, left })
+    //     canvas.add(currentObject)
+    // }
+    // // 生成椭圆
+    // const createEllipse = (top: number, left: number, rx: number, ry: number) => {
+    //     currentObject = new fabric.Ellipse({ rx, ry, fill: activeColor.value, top, left })
+    //     canvas.add(currentObject)
+    // }
+    // // 生成三角形
+    // const createTriangle = (top: number, left: number, w: number, h: number) => {
+    //     currentObject = new fabric.Triangle({ width: w, height: h, fill: activeColor.value, top, left })
+    //     canvas.add(currentObject)
+    // }
+    // // 生成线段
+    // const createLine = (top: number, left: number, right: number, bottom: number) => {
+    //     currentObject = new fabric.Line([top, left, right, bottom],{ stroke: activeColor.value })
+    //     canvas.add(currentObject)
+    // }
+    // // 生成线段
+    // const createIText = (top: number, left: number) => {
+    //     currentObject = new fabric.IText('请输入文字', { top, left })
+    //     canvas.add(currentObject)
+    // }
 
     // 图片初始化
     const imgStyleInit = () => {
@@ -281,6 +341,8 @@ const createIText = (top: number, left: number) => {
         if (type == 'change') zoom = step.value
         else if (type == 'init') {
             zoom = 1
+            canvas.relativeX = 0 // canvas移动的x坐标位移
+            canvas.relativeY = 0 // canvas移动的x坐标位移
             const arr = [1, 0, 0, 1, 0, 0]
             canvas.setViewportTransform(arr)
         }
@@ -292,6 +354,8 @@ const createIText = (top: number, left: number) => {
         canvas.lastzoomPointX = x
         canvas.lastzoomPointY = y
         const zoomPoint = new fabric.Point(x, y)
+        canvas.relativeX = canvas.viewportTransform[4]/zoom // canvas移动的x坐标位移
+        canvas.relativeY = canvas.viewportTransform[5]/zoom // canvas移动的x坐标位移
         canvas.zoomToPoint(zoomPoint, zoom)
         canvas.setViewportTransform(canvas.viewportTransform) // 设置此画布实例的视口转换
         step.value = zoom
