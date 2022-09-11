@@ -40,6 +40,7 @@
                 <button @click="handleOperat('isCreateObject')">绘制</button>
                 <button @click="handleOperat('isStroke')">框</button>
                 <button @click="handleOperat('isOperat')">操作</button>
+                <button @click="delObject" v-show="state.isOperat">删除</button>
             </div>
         </div>
     </div>
@@ -171,6 +172,16 @@
         }
     }
 
+    // 删除节点
+    const delObject = () => {
+        // console.log('删除节点')
+        const arr = canvas.getActiveObjects()
+        // console.log(arr)
+        arr.forEach((item: any) => {
+            canvas.remove(item)
+        })
+    }
+
     const init = async () => {
         canvas = new fabric.Canvas('canvasDom', {
             width,
@@ -299,7 +310,7 @@
                         // canvas.add(currentObject)
                         break;
                     case 'Triangle':
-                        currentObject.set({ width: w, height: h, fill, stroke, top, left })
+                        currentObject.set({ width: Math.abs(left - right), height: Math.abs(top - bottom), fill, stroke, top: Math.min(top, bottom), left: Math.min(left, right) })
                         // canvas.add(currentObject)
                         break;
                 }
