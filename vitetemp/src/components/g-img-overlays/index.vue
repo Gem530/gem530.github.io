@@ -1,7 +1,7 @@
 <template>
-    <div class="component theme" :style="`width: ${props.width}px;`">
+    <div class="component theme" :style="`width: ${width}px;`">
         <!-- 图片裁剪组件 -->
-        <canvas id="canvasDom" ref="myCanvas" :width="props.width" :height="props.height"></canvas>
+        <canvas id="canvasDom" ref="myCanvas" :width="width" :height="height"></canvas>
         <img :src="imgUrl" alt="">
         <div class="flex">
             <button @click="handleScale('-')">-</button>
@@ -38,6 +38,8 @@
             <div class="flex">
                 <button @click="handleOperat('isMove')">移动</button>
                 <button @click="handleOperat('isCreateObject')">绘制</button>
+                <button @click="handleOperat('isStroke')">框</button>
+                <button @click="handleOperat('isOperat')">操作</button>
             </div>
         </div>
     </div>
@@ -72,6 +74,10 @@
             type: Array,
             default: () => ['pink', 'skyblue', 'orange']
         },
+        isImgWH: {
+            type: Boolean,
+            default: false
+        },
         graphical: {
             type: Array,
             default: () => [
@@ -89,7 +95,9 @@
 
     const state: any = reactive({
         isMove: false,
-        isCreateObject: true
+        isCreateObject: true,
+        isStroke: false,
+        isOperat: false
     })
 
     const emits = defineEmits(['getImg'])
@@ -99,20 +107,17 @@
     let currentObject: any = null
 
     const myCanvas = ref()
-    const uploadInput = ref()
     const imgValue = ref<any>(null)
 
     const imgUrl = ref(undefined)
-    // const imgSizes = ref([])
-    // const imgShowList = ref([])
     const imgLocal = ref(props.img)
 
     const step = ref(1)
     const fTop = ref(0)
     const fLeft = ref(0)
     const initStep = ref(1)
-    const width = props.width
-    const height = props.height
+    let width = props.width
+    let height = props.height
     const activeColor = ref(props.colors[0])
     const activeGraphical = ref(props.graphical[0]?.key)
 
@@ -123,14 +128,46 @@
 
     // imgSizes.value = [...props.imgSizes, ...[props.clipWidth]].sort((a, b) => { return a - b })
 
-    onMounted(() => {
+    onMounted(async () => {
+        if (props.isImgWH) {
+            const { w, h }: any = await returnImgWh()
+            width = w
+            height = h
+        }
         init()
     })
+    // 获取图片的宽高
+    const returnImgWh = () => {
+        return new Promise((resolve: any, reject: any) => {
+            let imgDom = new Image()
+            imgDom.src = props.img
+            imgDom.crossOrigin = 'anonymous'
+            imgDom.onload = () => {
+                resolve({ w: imgDom.width, h: imgDom.height })
+            }
+            imgDom.onerror = (err) => {
+                reject(err)
+            }
+        })
+        // return { w, h }
+    }
 
     // 画布事件
     const handleOperat = (type: string) => {
+        canvas.selection = false // 不允许直接从画布框选
         for (let k in state) {
             state[k] = k == type
+        }
+        if (type === 'isStroke') {
+            state.isCreateObject = true
+        }
+        if (type === 'isOperat') {
+            const arr = canvas.getObjects()
+            arr.forEach((item: any) => {
+                item.selectable = true
+            })
+            canvas.selection = true // 不允许直接从画布框选
+            canvas.setViewportTransform(canvas.viewportTransform)
         }
     }
 
@@ -179,11 +216,15 @@
     // 鼠标滚轮缩放
     const mouseWheelHandle = ({ e }: any) => {
         const type = e.deltaY < 0 ? '+' : '-'
+        e.preventDefault()
+        e.stopPropagation()
         ImgScaleHandle(type, e.pageX - fLeft.value, e.pageY - fTop.value)
     }
 
     // 鼠标按下
     const mouseDownHandle = ({ e }: any) => {
+        e.preventDefault()
+        e.stopPropagation()
         canvas.isDragging = true // isDragging 是自定义的
         canvas.lastPosX = e.clientX // lastPosX 是自定义的
         canvas.lastPosY = e.clientY // lastPosY 是自定义的
@@ -192,18 +233,23 @@
             switch (activeGraphical.value) {
                 case 'Rect':
                     currentObject = new fabric.Rect()
+                    canvas.add(currentObject)
                     break;
                 case 'RectR':
                     currentObject = new fabric.Rect()
+                    canvas.add(currentObject)
                     break;
                 case 'Circle':
                     currentObject = new fabric.Circle()
+                    canvas.add(currentObject)
                     break;
                 case 'Ellipse':
                     currentObject = new fabric.Ellipse()
+                    canvas.add(currentObject)
                     break;
                 case 'Triangle':
-                    currentObject = new fabric.Triangle()
+                    currentObject = new fabric.Triangle({ width: 0, height: 0, top, left })
+                    canvas.add(currentObject)
                     break;
                 case 'IText':
                     currentObject = new fabric.IText('请输入。。', { top, left })
@@ -215,6 +261,8 @@
 
     // 鼠标移动
     const mouseMoveHandle = ({ e }: any) => {
+        e.preventDefault()
+        e.stopPropagation()
         if (canvas.isDragging) {
             if (state.isMove) {
                 // 是否可以移动
@@ -227,39 +275,44 @@
                 canvas.relativeX = vpt[4] // canvas移动的x坐标位移
                 canvas.relativeY = vpt[5] // canvas移动的x坐标位移
                 canvas.setViewportTransform(canvas.viewportTransform)
-                console.log(canvas.relativeX, canvas.relativeY, canvas.viewportTransform)
+                // console.log(canvas.relativeX, canvas.relativeY, canvas.viewportTransform)
             }
             if (state.isCreateObject) {
                 const { top, left, w, h, right, bottom } = returnObjectInfo(e)
+                const fill = state.isStroke ? '' : activeColor.value
+                const stroke = state.isStroke ? activeColor.value : ''
                 switch (activeGraphical.value) {
                     case 'Rect':
-                        currentObject.set({ width: Math.abs(left - right), height: Math.abs(top - bottom), fill: activeColor.value, top: Math.min(top, bottom), left: Math.min(left, right) })
-                        canvas.add(currentObject)
+                        currentObject.set({ width: Math.abs(left - right), height: Math.abs(top - bottom), fill, stroke, top: Math.min(top, bottom), left: Math.min(left, right) })
+                        // canvas.add(currentObject)
                         break;
                     case 'RectR':
-                        currentObject.set({ width: Math.abs(left - right), height: Math.abs(top - bottom), fill: activeColor.value, top: Math.min(top, bottom), left: Math.min(left, right), rx: 5, ry: 5 })
-                        canvas.add(currentObject)
+                        currentObject.set({ width: Math.abs(left - right), height: Math.abs(top - bottom), fill, stroke, top: Math.min(top, bottom), left: Math.min(left, right), rx: 5, ry: 5 })
+                        // canvas.add(currentObject)
                         break;
                     case 'Circle':
-                        currentObject.set({ radius: Math.abs(w / 2), fill: activeColor.value, top: Math.min(top, bottom), left: Math.min(left, right) })
-                        canvas.add(currentObject)
+                        currentObject.set({ radius: Math.abs(w / 2), fill, stroke, top: Math.min(top, bottom), left: Math.min(left, right) })
+                        // canvas.add(currentObject)
                         break;
                     case 'Ellipse':
-                        currentObject.set({ rx: Math.abs(w / 2), ry: Math.abs(h / 2), fill: activeColor.value, top: Math.min(top, bottom), left: Math.min(left, right) })
-                        canvas.add(currentObject)
+                        currentObject.set({ rx: Math.abs(w / 2), ry: Math.abs(h / 2), fill, stroke, top: Math.min(top, bottom), left: Math.min(left, right) })
+                        // canvas.add(currentObject)
                         break;
                     case 'Triangle':
-                        currentObject.set({ width: w, height: h, fill: activeColor.value, top, left })
-                        canvas.add(currentObject)
+                        currentObject.set({ width: w, height: h, fill, stroke, top, left })
+                        // canvas.add(currentObject)
                         break;
                 }
                 canvas.renderAll()
+                canvas.setViewportTransform(canvas.viewportTransform) // 设置此画布实例的视口转换
             }
         }
     }
 
     // 鼠标抬起
     const mouseUpHandle = ({ e }: any) => {
+        e.preventDefault()
+        e.stopPropagation()
         canvas.isDragging = false
         if (state.isCreateObject) {
             const { top, left, right, bottom } = returnObjectInfo(e)
@@ -272,6 +325,7 @@
                     canvas.renderAll()
                     break;
             }
+            currentObject.selectable = false // 元素禁止选中
         }
     }
 
