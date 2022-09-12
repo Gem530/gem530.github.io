@@ -14,7 +14,7 @@ export default defineConfig({
     open: true, // 是否自动打开浏览器
     proxy: {
       '/api': {
-        target: 'http://13.168.2.107:9001',
+        target: 'http://13.229.80.231:9001',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       }
@@ -23,10 +23,7 @@ export default defineConfig({
   resolve: {
     // 别名
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "@http": path.resolve(__dirname, "./src/request"),
-      "@utils": path.resolve(__dirname, "./src/utils/index.js"),
-      "@api": path.resolve(__dirname, "./src/api")
+      '@': path.resolve(__dirname, "./src")
     },
   },
   css: {

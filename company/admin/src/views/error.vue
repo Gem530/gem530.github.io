@@ -1,3 +1,3 @@
 <template>
-  <router-view/>
+  404页面
 </template>
