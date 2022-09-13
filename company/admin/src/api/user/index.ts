@@ -10,7 +10,29 @@ import * as tsType from '../type'
  export function loginAPI (data: tsType.loginInfo): Promise<unknown> {
   return request({
       method: 'post',
-      url: '/api/login',
+      url: '/login',
       data
+  })
+}
+
+/**
+ * @author hjj
+ * @description 获取用户信息接口
+ */
+ export function getInfoAPI (): Promise<unknown> {
+  return request({
+    url: '/getInfo',
+    method: 'get'
+  })
+}
+
+/**
+ * @author hjj
+ * @description 退出登录
+ */
+export function logoutAPI() {
+  return request({
+    url: '/logout',
+    method: 'post'
   })
 }
