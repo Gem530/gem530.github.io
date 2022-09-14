@@ -1,5 +1,6 @@
 import axios from "axios"
 import { getItem, setItem } from '@/utils/storage'
+import cache from '@/utils/cache'
 
 // 使用联合类型验证请求方法
 type method = 'get' | 'delete' | 'post' | 'put'
@@ -21,7 +22,8 @@ const timeout = 10000
 function request (config: any): Promise<unknown> {
   config.timeout = config.timeout || timeout
   config.url = BASE_URL + config.url
-  config.headers = Object.assign({ 'token': getItem('token') || '' }, config.headers)
+  // console.log('token--', getItem('token'))
+  config.headers = config.headers || { 'Authorization': getItem('token') || '' }
 
   console.log(config, BASE_URL)
 
@@ -39,6 +41,7 @@ function request (config: any): Promise<unknown> {
       const sessionObj = getItem('sessionObj')
       if (!sessionObj) {
         setItem('sessionObj', requestObj)
+        // cache.session.setJSON('sessionObj', requestObj)
       } else {
         const s_url = sessionObj.url;                // 请求地址
         const s_data = sessionObj.data;              // 请求数据
@@ -50,6 +53,7 @@ function request (config: any): Promise<unknown> {
           reject(new Error(message))
         } else {
           setItem('sessionObj', requestObj)
+          // cache.session.setJSON('sessionObj', requestObj)
         }
       }
     }

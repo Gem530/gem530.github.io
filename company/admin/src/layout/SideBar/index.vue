@@ -1,11 +1,17 @@
 <template>
   <div class="side-bar">
-    <div class="logo">
-      <el-image
-        fit="cover"
-        style="width: 100px; height: 100px"
-        src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
-      />
-    </div>
+    <logo></logo>
+    <menu></menu>
   </div>
 </template>
+
+<script lang="ts" setup name="SideBar">
+import logo from './logo.vue'
+import menu from './menu.vue'
+import { useStore } from 'vuex'
+console.log(useStore().state)
+</script>
+
+<style lang="scss" scoped>
+
+</style>

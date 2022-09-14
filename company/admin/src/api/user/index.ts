@@ -11,7 +11,8 @@ import * as tsType from '../type'
   return request({
       method: 'post',
       url: '/login',
-      data
+      data,
+      headers: {}
   })
 }
 
@@ -34,5 +35,16 @@ export function logoutAPI() {
   return request({
     url: '/logout',
     method: 'post'
+  })
+}
+
+/**
+ * @author hjj
+ * @description 获取路由
+ */
+export function getRoutersAPI () {
+  return request({
+    url: '/getRouters',
+    method: 'get'
   })
 }

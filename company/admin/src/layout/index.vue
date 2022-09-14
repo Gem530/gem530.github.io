@@ -1,6 +1,8 @@
 <template>
   <div class="app-wrapper">
-    <div class="side-bar">侧边栏</div>
+    <div class="side-bar">
+      <SideBar></SideBar>
+    </div>
     <div class="main-wrapper">
       <div class="fixed-header">头部</div>
       <div class="header-mask"></div>
@@ -10,6 +12,7 @@
 </template>
 
 <script lang="ts" setup name="layout">
+import SideBar from './SideBar/index.vue'
 </script>
 
 <style lang="scss" scoped>

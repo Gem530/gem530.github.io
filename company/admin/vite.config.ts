@@ -10,7 +10,7 @@ export default defineConfig({
   base: './',
   server: { // 本地跨域请求
     host: '0.0.0.0',
-    port: 8080,
+    port: 9000,
     open: true, // 是否自动打开浏览器
     proxy: {
       '/api': {
