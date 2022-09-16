@@ -1,3 +1,5 @@
+import { routes } from '@/router'
+import { getAddRoutes } from '@/router/addRoutes'
 import { loginInfo, tagsView } from '@/api/type'
 import { getItem, setItem, removeItem } from '@/utils/storage'
 import { loginAPI, getInfoAPI, logoutAPI, getRoutersAPI } from '@/api/user'
@@ -74,8 +76,8 @@ export default {
     getRouters ({ commit, state }: any) {
       return new Promise((resolve, reject) => {
         getRoutersAPI().then((res: any) => {
-          console.log('vuex-----', res.data)
-          commit('setMenus', res.data || [])
+          // console.log('vuex-----', res.data)
+          commit('setMenus', getAddRoutes(res.data || []))
           resolve(res)
         }).catch((err: Error) => {
           reject(err)

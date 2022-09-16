@@ -13,8 +13,16 @@ declare module '@vue/runtime-core' {
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElInput: typeof import('element-plus/es')['ElInput']
-    HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
+    ElMenu: typeof import('element-plus/es')['ElMenu']
+    ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
+    ElMenuItemGroup: typeof import('element-plus/es')['ElMenuItemGroup']
+    ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
+    GMenu: typeof import('./src/layout/SideBar/GMenu.vue')['default']
+    GSubMenu: typeof import('./src/layout/SideBar/GSubMenu.vue')['default']
+    Logo: typeof import('./src/layout/SideBar/logo.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SideBar: typeof import('./src/layout/SideBar/index.vue')['default']
+    Undefined: typeof import('./src/layout/index.vue')['default']
   }
 }

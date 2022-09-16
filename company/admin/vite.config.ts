@@ -43,7 +43,7 @@ export default defineConfig({
     }),
     Components({
       //组件自动导入配置
-      dirs: ["src/components"],
+      dirs: ["src/components","src/layout"],
       extensions: ["vue", "tsx", "jsx"],
       // 搜索子目录
       deep: true,

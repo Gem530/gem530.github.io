@@ -61,7 +61,7 @@ const loginHandle = () => {
         username: form.value.username,
         password: encrypt(form.value.password) as string
       }
-      console.log(params)
+      // console.log(params)
       store.dispatch('login', params).then(() => {
         loading.value = false
         // store.dispatch('getRouters').then((res) => {

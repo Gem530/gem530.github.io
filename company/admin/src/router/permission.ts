@@ -9,7 +9,7 @@ router.beforeEach(async (to, from, next) => {
   NProgress.start()
   const token = getItem('token')
   // console.log('beforeEach--', to, from)
-  console.log(store.state.menus)
+  // console.log(store.state.menus)
   if (to.path == '/login') {
     next()
     return false

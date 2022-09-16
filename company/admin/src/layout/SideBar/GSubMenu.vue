@@ -1,28 +1,40 @@
 <template>
-  <el-menu-item :index="props.name" :to="props.path">
-    <el-icon><setting /></el-icon>
-    <template #title>{{props.name}}</template>
-    <GSubMenu
-      :key="item.path"
-      :path="item.path"
-      :name="item.meta.title"
-      v-for="item in props.children"
-    ></GSubMenu>
-  </el-menu-item>
+  <div v-if="!route.hidden">
+    <el-sub-menu
+      v-if="route.children"
+      :index="route.meta?.title">
+      <template #title>
+        <!-- <el-icon><setting /></el-icon> -->
+        <span>{{route.meta?.title}}</span>
+      </template>
+      <GSubMenu
+        :route="item"
+        :key="item.path"
+        v-for="item in route.children"
+      ></GSubMenu>
+    </el-sub-menu>
+
+    <el-menu-item v-else :index="route.meta?.title">
+        <template #title>
+          <!-- <el-icon><setting /></el-icon> -->
+          <span>{{route.meta?.title}}</span>
+        </template>
+    </el-menu-item>
+  </div>
 </template>
 
 <script lang="ts" setup name="GSubMenu">
-import { ref, defineProps } from 'vue'
+import { ref, toRefs, defineProps } from 'vue'
 const props: any = defineProps({
   path: {
     type: String
   },
-  name: {
-    type: String
-  },
-  children: {
-    type: Array,
-    default: () => []
+  route: {
+    type: Object
   }
 })
+const { route } = toRefs(props)
 </script>
+
+<style lang="scss">
+</style>

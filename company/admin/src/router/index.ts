@@ -23,7 +23,7 @@ import Layout from '@/layout/index.vue'
   }
  */
 
-const routes = [
+export const routes = [
   {
     path: "/:pathMatch(.*)*",
     component: () => import(/* webpackChunkName: "error" */ '@/views/error.vue'),
@@ -46,7 +46,7 @@ const routes = [
     children: [
       {
         path: '/index',
-        component: () => import(/* webpackChunkName: "error" */ '@/views/index.vue'),
+        component: () => import(/* webpackChunkName: "home" */ '@/views/index.vue'),
         name: 'Index',
         meta: { title: '首页', icon: 'dashboard', affix: true }
       }
