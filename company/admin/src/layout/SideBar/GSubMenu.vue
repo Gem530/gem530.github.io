@@ -4,9 +4,10 @@
       v-if="route.children"
       :index="route.meta?.title">
       <template #title>
-        <!-- <el-icon><setting /></el-icon> -->
-        <span>{{route.meta?.title}}</span>
+          <GMenuItem :icon="route.meta?.icon" :text="route.meta?.title"></GMenuItem>
       </template>
+
+      <!-- 递归实现多级菜单 -->
       <GSubMenu
         :route="item"
         :key="item.path"
@@ -14,17 +15,18 @@
       ></GSubMenu>
     </el-sub-menu>
 
-    <el-menu-item v-else :index="route.meta?.title">
+    <el-menu-item v-else :index="route.meta?.title" @click="toPath(route.path)">
         <template #title>
-          <!-- <el-icon><setting /></el-icon> -->
-          <span>{{route.meta?.title}}</span>
+          <GMenuItem :icon="route.meta?.icon" :text="route.meta?.title"></GMenuItem>
         </template>
     </el-menu-item>
   </div>
 </template>
 
 <script lang="ts" setup name="GSubMenu">
+import { useRouter } from 'vue-router'
 import { ref, toRefs, defineProps } from 'vue'
+const router = useRouter()
 const props: any = defineProps({
   path: {
     type: String
@@ -34,6 +36,10 @@ const props: any = defineProps({
   }
 })
 const { route } = toRefs(props)
+
+const toPath = (path: string) => {
+  router.push(path)
+}
 </script>
 
 <style lang="scss">

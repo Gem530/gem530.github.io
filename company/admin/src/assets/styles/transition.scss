@@ -1,0 +1,24 @@
+
+
+.slide-left-enter-from {
+  transform: translateX(-20px);
+  opacity: 0;
+}
+
+.slide-left-enter-to {
+  transform: translateX(0px);
+}
+
+.slide-left-leave-from {
+  transform: translateX(0);
+}
+
+.slide-left-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: all 0.3s;
+}

@@ -1,4 +1,5 @@
-import { routes } from '@/router'
+// import { routes } from '@/router'
+import { routesList } from '@/router/config'
 import { getAddRoutes } from '@/router/addRoutes'
 import { loginInfo, tagsView } from '@/api/type'
 import { getItem, setItem, removeItem } from '@/utils/storage'
@@ -14,7 +15,7 @@ export default {
     roles: [],
     avator: '',
     userInfo: undefined,
-    menus: (getItem('menus') || []) as tagsView[],
+    menus: [] as tagsView[],
     token: getItem('token') || '',
   },
   getters: {
@@ -32,7 +33,7 @@ export default {
     },
     setMenus (state: any, menus: tagsView[]) {
       state.menus = menus
-      setItem('menus', menus)
+      // setItem('menus', menus)
     },
     setUserInfo (state: any, res: any) {
       const user = res.user
@@ -76,8 +77,7 @@ export default {
     getRouters ({ commit, state }: any) {
       return new Promise((resolve, reject) => {
         getRoutersAPI().then((res: any) => {
-          // console.log('vuex-----', res.data)
-          commit('setMenus', getAddRoutes(res.data || []))
+          commit('setMenus', getAddRoutes(routesList || []))
           resolve(res)
         }).catch((err: Error) => {
           reject(err)

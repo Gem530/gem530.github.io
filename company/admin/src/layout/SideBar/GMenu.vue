@@ -18,12 +18,9 @@ import { ref } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 const isCollapse = ref(false)
-console.log(store.state.menus)
+// console.log(store.state.menus)
 // console.log(111111)
 </script>
 
 <style lang="scss">
-.el-menu {
-  border-right: none;
-}
 </style>

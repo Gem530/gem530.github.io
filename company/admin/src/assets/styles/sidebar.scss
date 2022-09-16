@@ -1,0 +1,25 @@
+.side-bar {
+  flex: none;
+  width: $baseSideBarWidth;
+  box-shadow: 2px 2px 5px $borderThemeColor;
+  // border: 1px solid $borderThemeColor;
+
+  :deep(.el-menu) {
+    border-right: none;
+  }
+
+  .logo {
+    @include flex();
+    padding: 5px 0;
+    img {
+      width: 50px;
+      height: 50px;
+      margin-right: 5px;
+    }
+  }
+
+  .g-menu-icon {
+    font-size: 16px !important;
+    margin-right: 10px;
+  }
+}

@@ -15,7 +15,7 @@
             </el-input>
           </el-form-item>
           <el-form-item prop="password">
-            <el-input v-model="form.password" placeholder="密码" type="password">
+            <el-input v-model="form.password" placeholder="密码" type="password" @keyup.enter="loginHandle">
               <template #prefix><el-icon><Lock /></el-icon></template>
             </el-input>
           </el-form-item>
@@ -42,8 +42,8 @@ const router = useRouter()
 const loginRef = ref()
 const loading = ref(false)
 const form = ref<tsType.loginInfo>({
-  username: '',
-  password: ''
+  username: 'superadmin',
+  password: '123456'
 })
 const rules = ref({
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],

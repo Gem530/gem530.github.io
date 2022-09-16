@@ -1,18 +1,17 @@
 <template>
   <div class="app-wrapper">
-    <div class="side-bar">
-      <SideBar></SideBar>
-    </div>
+    <SideBar></SideBar>
     <div class="main-wrapper">
-      <div class="fixed-header">头部</div>
+      <div class="fixed-header">
+        <NavBar/>
+      </div>
       <div class="header-mask"></div>
-      <div>主体</div>
+      <AppMain/>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup name="layout">
-import SideBar from './SideBar/index.vue'
 </script>
 
 <style lang="scss" scoped>
@@ -20,11 +19,6 @@ import SideBar from './SideBar/index.vue'
   width: 100%;
   height: 100%;
   display: flex;
-
-  .side-bar {
-    flex: none;
-    width: $baseSideBarWidth;
-  }
 
   .main-wrapper {
     flex: none;

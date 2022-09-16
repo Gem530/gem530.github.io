@@ -10,6 +10,7 @@ router.beforeEach(async (to, from, next) => {
   const token = getItem('token')
   // console.log('beforeEach--', to, from)
   // console.log(store.state.menus)
+  // console.log(router.getRoutes())
   if (to.path == '/login') {
     next()
     return false
@@ -20,14 +21,14 @@ router.beforeEach(async (to, from, next) => {
   } else {
     if (store.state.menus.length === 0) {
       await store.dispatch('getRouters')
-      // .then((res) => {
-      //   console.log('permission-----', res)
-      //   // 处理刷新时空白页问题
-      //   // if (!initRoute && to.matched.length == 0) {
-      //   //   initRoute = true;
-      //   //   router.push(to.path);
-      //   // }
-      // })
+      .then((res) => {
+        // console.log('permission-----', res)
+        // 处理刷新时空白页问题
+        // if (!initRoute && to.matched.length == 0) {
+        //   initRoute = true;
+        //   router.push(to.path);
+        // }
+      })
       next({ ...to, replace: true })
     } else {
       let routeInfo = {

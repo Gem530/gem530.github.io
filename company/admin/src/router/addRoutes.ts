@@ -1,17 +1,10 @@
 import layout from "@/layout/index.vue";
-import router from "./index";
+import router, { routeHome } from "./index";
 import { defineAsyncComponent } from "vue";
 const modules = import.meta.glob("../views/**/**.vue");
 
 // 公共路由表
-const publicRoutes = [
-  {
-    path: '/index',
-    component: () => import(/* webpackChunkName: "home" */ '@/views/index.vue'),
-    name: 'Index',
-    meta: { title: '首页', icon: 'dashboard', affix: true }
-  },
-];
+const publicRoutes = routeHome
 
 // 递归处理菜单
 function filterAddRoutes(routes:any, parentName:any=null) {
@@ -37,7 +30,7 @@ function filterAddRoutes(routes:any, parentName:any=null) {
 export function getAddRoutes(routes:any) {
   let addRouteData = filterAddRoutes(routes);
   addRouteData.unshift(...publicRoutes);
-  console.log(addRouteData)
+  // console.log(addRouteData)
   return addRouteData;
 }
 

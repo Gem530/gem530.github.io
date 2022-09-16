@@ -23,7 +23,14 @@ import Layout from '@/layout/index.vue'
   }
  */
 
-export const routes = [
+export const routeHome = [{
+  path: '/index',
+  component: () => import(/* webpackChunkName: "home" */ '@/views/index.vue'),
+  name: 'Index',
+  meta: { title: '首页', icon: 'House', affix: true }
+}]
+
+const routes = [
   {
     path: "/:pathMatch(.*)*",
     component: () => import(/* webpackChunkName: "error" */ '@/views/error.vue'),
@@ -43,14 +50,7 @@ export const routes = [
     path: '',
     component: Layout,
     redirect: '/index',
-    children: [
-      {
-        path: '/index',
-        component: () => import(/* webpackChunkName: "home" */ '@/views/index.vue'),
-        name: 'Index',
-        meta: { title: '首页', icon: 'dashboard', affix: true }
-      }
-    ]
+    children: routeHome
   }
 ]
 
@@ -58,7 +58,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
-    console.log('scrollBehavior--', to, from, savedPosition)
+    // console.log('scrollBehavior--', to, from, savedPosition)
     if (savedPosition) {
       return savedPosition
     } else {

@@ -7,6 +7,10 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    AppMain: typeof import('./src/layout/AppMain/index.vue')['default']
+    ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']
+    ElBreadcrumbItem: typeof import('element-plus/es')['ElBreadcrumbItem']
+    ElBreadcurmbItem: typeof import('element-plus/es')['ElBreadcurmbItem']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
     ElForm: typeof import('element-plus/es')['ElForm']
@@ -16,10 +20,12 @@ declare module '@vue/runtime-core' {
     ElMenu: typeof import('element-plus/es')['ElMenu']
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
     ElMenuItemGroup: typeof import('element-plus/es')['ElMenuItemGroup']
+    ElPopover: typeof import('element-plus/es')['ElPopover']
     ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
     GMenu: typeof import('./src/layout/SideBar/GMenu.vue')['default']
+    GMenuItem: typeof import('./src/layout/SideBar/GMenuItem.vue')['default']
     GSubMenu: typeof import('./src/layout/SideBar/GSubMenu.vue')['default']
-    Logo: typeof import('./src/layout/SideBar/logo.vue')['default']
+    NavBar: typeof import('./src/layout/NavBar/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SideBar: typeof import('./src/layout/SideBar/index.vue')['default']

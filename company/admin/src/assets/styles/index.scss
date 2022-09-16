@@ -1,12 +1,9 @@
 @import './variables.module.scss';
 
-$bgThemeWhite: var(--bg-theme-white);
-$bgThemeGray: var(--bg-theme-gray);
-$textBlack: var(--text-theme-black);
-$borderThemeColor: var(--border-theme-gray);
-$baseSideBarWidth: var(--base-side-bar-width, 200px);
-$baseFixedHeaderHeight: var(--base-side-bar-width, 60px);
-
+$bgThemeWhiteInit: #fff;
+$bgThemeGrayInit: #999;
+$textBlackInit: #333;
+$borderThemeColorInit: #efefef;
 $blue: #324157;
 $light-blue: #3A71A8;
 $red: #C03639;
@@ -15,3 +12,62 @@ $green: #30B08F;
 $tiffany: #4AB7BD;
 $yellow: #FEC171;
 $panGreen: #30B08F;
+
+$bgThemeWhite: var(--bg-theme-white, $bgThemeWhiteInit);
+$bgThemeGray: var(--bg-theme-gray, $bgThemeGrayInit);
+$textBlack: var(--text-theme-black, $textBlackInit);
+$borderThemeColor: var(--border-theme-gray, $borderThemeColorInit);
+$baseSideBarWidth: var(--base-side-bar-width, 200px);
+$baseFixedHeaderHeight: var(--base-side-bar-width, 60px);
+
+// flex
+@mixin flex($justify_content: center, $align_items: center, $dirction: row, $wrap: wrap) {
+  display: flex;
+  flex-direction: $dirction;
+  justify-content: $justify_content;
+  align-items: $align_items;
+  flex-wrap: $wrap;
+}
+
+// 定位上下左右居中
+@mixin pcenter($top: 50%, $left: 50%, $translateY: -50%, $translateX: -50%, $position: absolute) {
+  position: $position;
+  top: $top;
+  left: $left;
+  transform: translate($translateX, $translateY);
+}
+
+// 文字垂直水平居中
+@mixin textcenter($height: 16px, $align: center) {
+  text-align: $align;
+  line-height: $height;
+}
+
+// 隐藏滚动条
+@mixin overflowAutoHid {
+  &::-webkit-scrollbar {
+    width: 0px;
+  }
+}
+
+// 文字隐藏
+@mixin text_overflow($lines: 1) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: $lines;
+  -moz-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  @if $lines == 1 {
+    white-space: nowrap;
+    display: block;
+  } @else {
+    display: -webkit-box;
+  }
+}
+
+// 适用大部分组件主题色
+.theme {
+  background: $bgThemeWhite;
+  color: $textBlack;
+}
