@@ -1,6 +1,5 @@
-import { loginInfo, tagsView } from '@/api/type'
-import { getItem, setItem, removeItem } from '@/utils/storage'
-import { loginAPI, getInfoAPI, logoutAPI } from '@/api/user'
+import { tagsView } from '@/api/type'
+import { getItem, setItem } from '@/utils/storage'
 
 export default {
   namespaced: true,
@@ -18,13 +17,13 @@ export default {
     // 获取set方法
     // 提交状态修改 不支持异步操作
     pushTagsView (state: any, tagsInfo: tagsView) {
-      // Object.assign(state, tagsView)
-      const i = state.tagsView.find((item: tagsView) => { return item.path === tagsInfo.path })
+      const i = state.tagsView.findIndex((item: tagsView) => { return item.path === tagsInfo.path })
+      console.log(i)
       if (i === -1) state.tagsView.push(tagsInfo)
       setItem('tagsView', state.tagsView)
     },
     delTagsView (state: any, path: string) {
-      const i = state.tagsView.find((item: tagsView) => { return item.path === path })
+      const i = state.tagsView.findIndex((item: tagsView) => { return item.path === path })
       if (i !== -1) state.tagsView.splice(i, 1)
       setItem('tagsView', state.tagsView)
     }

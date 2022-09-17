@@ -19,6 +19,9 @@ router.beforeEach(async (to, from, next) => {
     next({ path: '/login' })
     return false
   } else {
+    if (store.state.roles.length === 0) {
+      await store.dispatch('getInfo')
+    }
     if (store.state.menus.length === 0) {
       await store.dispatch('getRouters')
       .then((res) => {

@@ -1,16 +1,14 @@
 <template>
-  <div class="side-bar">
+  <div class="side-bar theme">
     <div class="logo">
       <img src="https://img1.baidu.com/it/u=2644452384,3800439215&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500" alt="">
-      <span>GEM-ADMIN</span>
+      <span v-if="!$store.state.isCollapse">GEM-ADMIN</span>
     </div>
     <GMenu></GMenu>
   </div>
 </template>
 
 <script lang="ts" setup name="SideBar">
-import { useStore } from 'vuex'
-// console.log(useStore().state)
 </script>
 
 <style lang="scss" scoped>

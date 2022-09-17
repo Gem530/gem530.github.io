@@ -1,38 +1,45 @@
 <template>
   <div class="nav-bar">
     <div class="nav-left">
-      <el-button :icon="sideShow ? 'Fold' : 'Expand'" type="primary" size="small" @click="changeSide"></el-button>
-      <el-breadcrumb separator="/">
-        <el-breadcrumb-item
-          :key="item.path"
-          v-for="(item, i) in breadList">
-          <span v-if="(i + 1) < breadList.length">{{item.meta?.title}}</span>
-          <a v-else :href="item.path" class="color-black">{{item.meta?.title}}</a>
-        </el-breadcrumb-item>
-      </el-breadcrumb>
+      <el-button
+        size="small"
+        type="primary"
+        :icon="isCollapse ? 'Expand' : 'Fold'"
+        @click="changeSide"
+      ></el-button>
+      <Breadcrumb></Breadcrumb>
     </div>
 
     <div class="nav-right">
-      <el-popover placement="bottom" trigger="click">
-        <template #reference>
-          <img class="avatar" src="https://img1.baidu.com/it/u=2644452384,3800439215&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500" alt="">
-        </template>
-        <div><el-button>退出登录</el-button></div>
-      </el-popover>
+      <el-button size="small" type="primary" @click="changeColor">换肤</el-button>
+      <AdminInfo></AdminInfo>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup name="NavBar">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-const router = useRouter()
-const sideShow = ref(true)
-const breadList = ref(router.currentRoute.value.matched)
+import { useStore } from 'vuex'
+import { ref, computed } from 'vue'
+// import { bgThemeWhiteInit, textBlackInit } from '@/assets/styles/variables.module.scss'
+const store = useStore()
+const isCollapse = computed(() => store.state.isCollapse)
+const colorFlag = ref(false)
 
-console.log(router)
 const changeSide = () => {
-  sideShow.value = !sideShow.value
+  store.commit('toggleCollapse')
+  changeScssData('--base-side-bar-width', isCollapse.value ? '64px' : '200px')
+}
+
+const changeColor = () => {
+  changeScssData('--bg-theme-white', colorFlag.value ? '#fff' : '#333')
+  changeScssData('--text-theme-black', colorFlag.value ? '#333' : '#fff')
+  colorFlag.value = !colorFlag.value
+}
+
+// 改变scss全局变量方法
+const changeScssData = (varName: string, varValue: string) => {
+  // 使用这个方法改变scss全局变量时，scss定义需要这样：$white: var(--colorWhite, #ffffff); 要加上var(--xxx, xxx)
+  document.getElementsByTagName('body')[0].style.setProperty(varName, varValue)
 }
 </script>
 
@@ -43,27 +50,10 @@ const changeSide = () => {
 
   .nav-left {
     @include flex(flex-start);
-
-    .el-breadcrumb {
-      margin-left: 10px;
-
-      .el-breadcrumb__inner .color-black,
-      .el-breadcrumb__inner .color-black:hover {
-        font-weight: 600;
-        color: #000;
-        cursor: pointer;
-      }
-    }
   }
 
   .nav-right {
     @include flex(flex-end);
-    
-    .avatar {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-    }
   }
 }
 </style>

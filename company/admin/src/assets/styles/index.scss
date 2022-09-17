@@ -1,24 +1,11 @@
 @import './variables.module.scss';
 
-$bgThemeWhiteInit: #fff;
-$bgThemeGrayInit: #999;
-$textBlackInit: #333;
-$borderThemeColorInit: #efefef;
-$blue: #324157;
-$light-blue: #3A71A8;
-$red: #C03639;
-$pink: #E65D6E;
-$green: #30B08F;
-$tiffany: #4AB7BD;
-$yellow: #FEC171;
-$panGreen: #30B08F;
-
 $bgThemeWhite: var(--bg-theme-white, $bgThemeWhiteInit);
 $bgThemeGray: var(--bg-theme-gray, $bgThemeGrayInit);
 $textBlack: var(--text-theme-black, $textBlackInit);
 $borderThemeColor: var(--border-theme-gray, $borderThemeColorInit);
 $baseSideBarWidth: var(--base-side-bar-width, 200px);
-$baseFixedHeaderHeight: var(--base-side-bar-width, 60px);
+$baseFixedHeaderHeight: var(--base-side-bar-height, 70px);
 
 // flex
 @mixin flex($justify_content: center, $align_items: center, $dirction: row, $wrap: wrap) {
@@ -68,6 +55,6 @@ $baseFixedHeaderHeight: var(--base-side-bar-width, 60px);
 
 // 适用大部分组件主题色
 .theme {
-  background: $bgThemeWhite;
-  color: $textBlack;
+  background: $bgThemeWhite !important;
+  color: $textBlack !important;
 }

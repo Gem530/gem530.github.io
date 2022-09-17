@@ -1,9 +1,13 @@
 <template>
   <el-menu
     mode="vertical"
-    :unique-opened="true"
+    :unique-opened="false"
     :collapse="isCollapse"
     :collapse-transition="false"
+    :default-active="defaultActive"
+    :default-openeds="activeCollapse"
+    @open="openMenu"
+    @close="closeMenu"
   >
     <GSubMenu
       :route="item"
@@ -14,12 +18,21 @@
 </template>
 
 <script lang="ts" setup name="GMenu">
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
-const isCollapse = ref(false)
-// console.log(store.state.menus)
-// console.log(111111)
+const isCollapse = computed(() => store.state.isCollapse)
+const defaultActive = computed(() => store.state.defaultActive)
+const activeCollapse = computed(() => store.state.activeCollapse)
+
+const openMenu = (index: any) => {
+  // console.log(index)
+  store.commit('pushCollapse', index)
+}
+const closeMenu = (index: any) => {
+  // console.log(index)
+  store.commit('removeCollapse', index)
+}
 </script>
 
 <style lang="scss">

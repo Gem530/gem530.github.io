@@ -1,7 +1,7 @@
 <template>
-  <div class="g-menu-item">
-    <el-icon><component v-if="props.icon" :is="props.icon" class="g-menu-icon"></component></el-icon>
-    <span>{{props.text}}</span>
+  <div class="g-menu-item theme">
+    <el-icon class="g-menu-icon"><component v-if="props.icon" :is="props.icon"></component></el-icon>
+    <span class="sub-menu-text">{{props.text}}</span>
   </div>
 </template>
 
@@ -14,4 +14,11 @@ const props = defineProps({
 </script>
 
 <style lang="scss">
+.g-menu-item {
+  @include flex();
+
+  .g-menu-icon {
+    margin-right: 10px;
+  }
+}
 </style>

@@ -1,7 +1,7 @@
 export const routesList = [
     {
-      name: "/accounting",
-      path: "/accounting",
+      name: "/form",
+      path: "/form",
       hidden: false,
       redirect: "noRedirect",
       component: "Layout",
@@ -9,10 +9,10 @@ export const routesList = [
       meta: { title: "表单", icon: "ChatSquare", noCache: false, link: null },
       children: [
         {
-          name: "Withdraw-order",
-          path: "accounting/withdraw-order",
+          name: "form-temp",
+          path: "form/form-temp",
           hidden: false,
-          component: "accounting/withdraw-order",
+          component: "form/form-temp",
           meta: {
             title: "搜索表单",
             icon: "Search",

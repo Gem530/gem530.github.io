@@ -2,9 +2,12 @@
   <div v-if="!route.hidden">
     <el-sub-menu
       v-if="route.children"
+      popper-append-to-body
       :index="route.meta?.title">
       <template #title>
-          <GMenuItem :icon="route.meta?.icon" :text="route.meta?.title"></GMenuItem>
+        <!-- <GMenuItem :icon="route.meta?.icon" :text="route.meta?.title"></GMenuItem> -->
+        <el-icon><component v-if="route.meta?.icon" :is="route.meta?.icon"></component></el-icon>
+        <span class="sub-menu-text">{{route.meta?.title}}</span>
       </template>
 
       <!-- 递归实现多级菜单 -->
@@ -15,17 +18,18 @@
       ></GSubMenu>
     </el-sub-menu>
 
-    <el-menu-item v-else :index="route.meta?.title" @click="toPath(route.path)">
-        <template #title>
-          <GMenuItem :icon="route.meta?.icon" :text="route.meta?.title"></GMenuItem>
-        </template>
+    <el-menu-item v-else :index="route.meta?.title" @click="toPath(route.path, route.meta?.title)">
+        <el-icon><component v-if="route.meta?.icon" :is="route.meta?.icon"></component></el-icon>
+        <template #title>{{route.meta?.title}}</template>
     </el-menu-item>
   </div>
 </template>
 
 <script lang="ts" setup name="GSubMenu">
+import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ref, toRefs, defineProps } from 'vue'
+const store = useStore()
 const router = useRouter()
 const props: any = defineProps({
   path: {
@@ -37,7 +41,8 @@ const props: any = defineProps({
 })
 const { route } = toRefs(props)
 
-const toPath = (path: string) => {
+const toPath = (path: string, name: string) => {
+  store.commit('setDefaultActive', name)
   router.push(path)
 }
 </script>

@@ -1,7 +1,7 @@
 <template>
   <div class="app-wrapper">
     <SideBar></SideBar>
-    <div class="main-wrapper">
+    <div class="main-wrapper theme">
       <div class="fixed-header">
         <NavBar/>
       </div>
@@ -23,12 +23,14 @@
   .main-wrapper {
     flex: none;
     width: calc(100% - $baseSideBarWidth);
+    padding: 10px;
+    overflow-y: auto;
 
     .fixed-header {
       position: fixed;
       top: 0;
       left: $baseSideBarWidth;
-      width: 100%;
+      width: calc(100% - $baseSideBarWidth);
       height: $baseFixedHeaderHeight;
     }
 
