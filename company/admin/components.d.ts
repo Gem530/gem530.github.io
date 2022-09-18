@@ -12,7 +12,6 @@ declare module '@vue/runtime-core' {
     Breadcrumb: typeof import('./src/layout/NavBar/Breadcrumb.vue')['default']
     ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']
     ElBreadcrumbItem: typeof import('element-plus/es')['ElBreadcrumbItem']
-    ElBreadcurmbItem: typeof import('element-plus/es')['ElBreadcurmbItem']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
@@ -24,9 +23,10 @@ declare module '@vue/runtime-core' {
     ElInput: typeof import('element-plus/es')['ElInput']
     ElMenu: typeof import('element-plus/es')['ElMenu']
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
-    ElMenuItemGroup: typeof import('element-plus/es')['ElMenuItemGroup']
-    ElPopover: typeof import('element-plus/es')['ElPopover']
+    ElScrollbar: typeof import('element-plus/es')['ElScrollbar']
     ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
+    ElTabPane: typeof import('element-plus/es')['ElTabPane']
+    ElTabs: typeof import('element-plus/es')['ElTabs']
     GMenu: typeof import('./src/layout/SideBar/GMenu.vue')['default']
     GMenuItem: typeof import('./src/layout/SideBar/GMenuItem.vue')['default']
     GSubMenu: typeof import('./src/layout/SideBar/GSubMenu.vue')['default']
@@ -34,6 +34,7 @@ declare module '@vue/runtime-core' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SideBar: typeof import('./src/layout/SideBar/index.vue')['default']
+    TagsMenu: typeof import('./src/layout/TagsMenu/index.vue')['default']
     Undefined: typeof import('./src/layout/index.vue')['default']
   }
 }

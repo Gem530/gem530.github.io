@@ -8,6 +8,7 @@ const publicRoutes = routeHome
 
 // 递归处理菜单
 function filterAddRoutes(routes:any, parentName:any=null) {
+  console.log(routes)
   for (const route of routes) {
     if (!route["component"] || route["component"] === "Layout") {
       route["component"] = layout;

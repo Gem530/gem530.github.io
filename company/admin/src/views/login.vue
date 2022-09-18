@@ -54,19 +54,12 @@ const loginHandle = () => {
   loginRef.value.validate((val: Boolean) => {
     if (val) {
       loading.value = true
-      Cookies.set("username", form.value.username, { expires: 30 });
-      Cookies.set("password", encrypt(form.value.password), { expires: 30 });
-      Cookies.set("rememberMe", true, { expires: 30 }); // 是否记住密码
       const params = {
         username: form.value.username,
         password: encrypt(form.value.password) as string
       }
-      // console.log(params)
       store.dispatch('login', params).then(() => {
         loading.value = false
-        // store.dispatch('getRouters').then((res) => {
-        //   console.log(res)
-        // })
         router.replace('/')
       }).catch(() => {
         loading.value = false

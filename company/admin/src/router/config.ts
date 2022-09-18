@@ -2,11 +2,11 @@ export const routesList = [
     {
       name: "/form",
       path: "/form",
-      hidden: false,
       redirect: "noRedirect",
       component: "Layout",
+      hidden: false,
       alwaysShow: true,
-      meta: { title: "表单", icon: "ChatSquare", noCache: false, link: null },
+      meta: { title: "表单", icon: "ChatSquare" },
       children: [
         {
           name: "form-temp",
@@ -20,7 +20,15 @@ export const routesList = [
             link: null,
           },
         },
-      ],
+        {
+          name: 'upload',
+          path: "upload",
+          component: "upload/index",
+          hidden: false,
+          alwaysShow: true,
+          meta: { title: "图片上传", icon: "Upload" },
+        },
+      ]
     },
 ]
 // export const routesList = [

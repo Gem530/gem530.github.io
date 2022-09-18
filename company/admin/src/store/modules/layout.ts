@@ -22,16 +22,16 @@ export default {
       state.isCollapse = !state.isCollapse
       // setItem('isCollapse', state.isCollapse)
     },
-    setDefaultActive (state: any, name: string) {
-      state.defaultActive = name
+    setDefaultActive (state: any, path: string) {
+      state.defaultActive = path
       setItem('defaultActive', state.defaultActive)
     },
-    pushCollapse (state: any, name: string) {
-      if (state.activeCollapse.indexOf(name) === -1) state.activeCollapse.push(name)
+    pushCollapse (state: any, path: string) {
+      if (state.activeCollapse.indexOf(path) === -1) state.activeCollapse.push(path)
       setItem('activeCollapse', state.activeCollapse)
     },
-    removeCollapse (state: any, name: string) {
-      const num = state.activeCollapse.findIndex((v: string) => v == name)
+    removeCollapse (state: any, path: string) {
+      const num = state.activeCollapse.findIndex((v: string) => v == path)
       if (num !== -1) state.activeCollapse.splice(num, 1)
       setItem('activeCollapse', state.activeCollapse)
     },

@@ -1,9 +1,9 @@
 <template>
   <div v-if="!route.hidden">
     <el-sub-menu
+      :index="route.path"
       v-if="route.children"
-      popper-append-to-body
-      :index="route.meta?.title">
+      popper-append-to-body>
       <template #title>
         <!-- <GMenuItem :icon="route.meta?.icon" :text="route.meta?.title"></GMenuItem> -->
         <el-icon><component v-if="route.meta?.icon" :is="route.meta?.icon"></component></el-icon>
@@ -18,7 +18,7 @@
       ></GSubMenu>
     </el-sub-menu>
 
-    <el-menu-item v-else :index="route.meta?.title" @click="toPath(route.path, route.meta?.title)">
+    <el-menu-item v-else :index="route.path" @click="toPath(route.path)">
         <el-icon><component v-if="route.meta?.icon" :is="route.meta?.icon"></component></el-icon>
         <template #title>{{route.meta?.title}}</template>
     </el-menu-item>
@@ -41,8 +41,8 @@ const props: any = defineProps({
 })
 const { route } = toRefs(props)
 
-const toPath = (path: string, name: string) => {
-  store.commit('setDefaultActive', name)
+const toPath = (path: string) => {
+  store.commit('setDefaultActive', path)
   router.push(path)
 }
 </script>

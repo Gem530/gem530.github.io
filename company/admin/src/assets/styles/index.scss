@@ -5,7 +5,8 @@ $bgThemeGray: var(--bg-theme-gray, $bgThemeGrayInit);
 $textBlack: var(--text-theme-black, $textBlackInit);
 $borderThemeColor: var(--border-theme-gray, $borderThemeColorInit);
 $baseSideBarWidth: var(--base-side-bar-width, 200px);
-$baseFixedHeaderHeight: var(--base-side-bar-height, 70px);
+$baseFixedHeaderHeight: var(--base-side-bar-height, 90px);
+@import './element.scss';
 
 // flex
 @mixin flex($justify_content: center, $align_items: center, $dirction: row, $wrap: wrap) {

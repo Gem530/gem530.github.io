@@ -1,4 +1,5 @@
 import { tagsView } from '@/api/type'
+import router, { routeHome } from '@/router'
 import { getItem, setItem } from '@/utils/storage'
 
 export default {
@@ -18,13 +19,20 @@ export default {
     // 提交状态修改 不支持异步操作
     pushTagsView (state: any, tagsInfo: tagsView) {
       const i = state.tagsView.findIndex((item: tagsView) => { return item.path === tagsInfo.path })
-      console.log(i)
+      // console.log(tagsInfo)
       if (i === -1) state.tagsView.push(tagsInfo)
       setItem('tagsView', state.tagsView)
     },
     delTagsView (state: any, path: string) {
+      if (!state.tagsView.length) {
+        state.tagsView = routeHome
+      }
+
       const i = state.tagsView.findIndex((item: tagsView) => { return item.path === path })
-      if (i !== -1) state.tagsView.splice(i, 1)
+      if (i !== -1) {
+        state.tagsView.splice(i, 1)
+        router.push(state.tagsView[i-1]?.path || '/index')
+      }
       setItem('tagsView', state.tagsView)
     }
   },

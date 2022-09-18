@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
 import Layout from '@/layout/index.vue'
 
 /**
@@ -24,9 +24,9 @@ import Layout from '@/layout/index.vue'
  */
 
 export const routeHome = [{
-  path: '/index',
+  path: '/home',
   component: () => import(/* webpackChunkName: "home" */ '@/views/index.vue'),
-  name: 'Index',
+  name: 'Home',
   meta: { title: '首页', icon: 'House', affix: true }
 }]
 
@@ -49,13 +49,13 @@ const routes = [
   {
     path: '',
     component: Layout,
-    redirect: '/index',
+    redirect: '/home',
     children: routeHome
   }
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
     // console.log('scrollBehavior--', to, from, savedPosition)

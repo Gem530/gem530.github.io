@@ -20,7 +20,7 @@
 <script lang="ts" setup name="NavBar">
 import { useStore } from 'vuex'
 import { ref, computed } from 'vue'
-// import { bgThemeWhiteInit, textBlackInit } from '@/assets/styles/variables.module.scss'
+import { toggleTheme, changeScssData } from '@/utils/theme'
 const store = useStore()
 const isCollapse = computed(() => store.state.isCollapse)
 const colorFlag = ref(false)
@@ -31,15 +31,12 @@ const changeSide = () => {
 }
 
 const changeColor = () => {
-  changeScssData('--bg-theme-white', colorFlag.value ? '#fff' : '#333')
-  changeScssData('--text-theme-black', colorFlag.value ? '#333' : '#fff')
+  const theme = {
+    bg: colorFlag.value ? '#fff' : '#333',
+    text: colorFlag.value ? '#333' : '#fff'
+  }
+  toggleTheme(theme)
   colorFlag.value = !colorFlag.value
-}
-
-// 改变scss全局变量方法
-const changeScssData = (varName: string, varValue: string) => {
-  // 使用这个方法改变scss全局变量时，scss定义需要这样：$white: var(--colorWhite, #ffffff); 要加上var(--xxx, xxx)
-  document.getElementsByTagName('body')[0].style.setProperty(varName, varValue)
 }
 </script>
 

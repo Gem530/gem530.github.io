@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import path from "path"
 import vue from '@vitejs/plugin-vue'
 import ViteImages from "vite-plugin-vue-images" //自动导入图片
+import compression from 'vite-plugin-compression' // gzip 压缩
 import Components from "unplugin-vue-components/vite" //自动导入组件
 import { AntDesignVueResolver,ElementPlusResolver  } from "unplugin-vue-components/resolvers"; //按需加载ant/elementplus
 
@@ -29,7 +30,8 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        additionalData: `@import "@/assets/styles/index.scss";`
+        // additionalData: `@import "@/assets/styles/index.scss";`
+        additionalData: `@use "@/assets/styles/index.scss" as *;`
       }
     }
   },
@@ -50,5 +52,14 @@ export default defineConfig({
       // ui库解析器，也可以自定义
       resolvers: [AntDesignVueResolver(),ElementPlusResolver()],
     }),
+    // http://doc.ruoyi.vip/ruoyi-vue/other/faq.html#使用gzip解压缩静态文件
+    compression({
+      ext: '.gz',
+      deleteOriginFile: false,
+      verbose: true,
+      disable: false,
+      threshold: 10240,
+      algorithm: 'gzip',
+    })
   ]
 })

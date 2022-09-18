@@ -4,6 +4,7 @@
     <div class="main-wrapper theme">
       <div class="fixed-header">
         <NavBar/>
+        <TagsMenu/>
       </div>
       <div class="header-mask"></div>
       <AppMain/>
