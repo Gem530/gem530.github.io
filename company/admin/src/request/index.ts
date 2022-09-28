@@ -1,6 +1,8 @@
 import axios from "axios"
-import { getItem, setItem } from '@/utils/storage'
+import router from "@/router"
 import cache from '@/utils/cache'
+import { getItem, setItem } from '@/utils/storage'
+import { ElMessage, ElMessageBox } from "element-plus"
 
 // 使用联合类型验证请求方法
 type method = 'get' | 'delete' | 'post' | 'put'
@@ -64,12 +66,28 @@ function request (config: any): Promise<unknown> {
         return
       }
       const { status, data } = res
-      if (status === 200 && data.code !== 0) {
+      if (status === 200 && data.code === 200) {
         resolve(data)
+      } else if (data.code === 401 || data.code === 403) {
+        ElMessageBox.confirm(
+          '登录已过期，是否重新登录?',
+          '提示'
+        ).then(() => {
+          router.push('/login')
+        }).catch(() => {})
+        reject(data)
       } else {
+        ElMessage({
+          message: data.msg,
+          type: 'error'
+        })
         reject(data)
       }
     }).catch(err => {
+      ElMessage({
+        message: err.message,
+        type: 'error'
+      })
       reject(err)
     })
   })
