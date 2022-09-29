@@ -5,7 +5,7 @@
   </div>
 </template>
 
-<script lang="ts" setup name="GMenuItem">
+<script lang="ts" setup name="g-menu-item">
 import { defineProps } from 'vue'
 const props = defineProps({
   icon: String,

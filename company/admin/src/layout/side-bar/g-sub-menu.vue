@@ -11,11 +11,11 @@
       </template>
 
       <!-- 递归实现多级菜单 -->
-      <GSubMenu
+      <g-sub-menu
         :route="item"
         :key="item.path"
         v-for="item in route.children"
-      ></GSubMenu>
+      ></g-sub-menu>
     </el-sub-menu>
 
     <el-menu-item v-else :index="route.path" @click="toPath(route.path)">
@@ -25,7 +25,7 @@
   </div>
 </template>
 
-<script lang="ts" setup name="GSubMenu">
+<script lang="ts" setup name="g-sub-menu">
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ref, toRefs, defineProps } from 'vue'

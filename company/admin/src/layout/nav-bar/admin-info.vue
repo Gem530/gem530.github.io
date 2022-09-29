@@ -11,7 +11,7 @@
   <el-icon class="nav-icon" @click="toggle"><component :is="'Rank'"></component></el-icon>
 </template>
 
-<script lang="ts" setup name="NavBar">
+<script lang="ts" setup name="admin-info">
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { useFullscreen } from '@vueuse/core'

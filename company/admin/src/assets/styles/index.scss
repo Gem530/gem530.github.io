@@ -32,14 +32,14 @@ $baseFixedHeaderHeight: var(--base-side-bar-height, 90px);
 }
 
 // 隐藏滚动条
-@mixin overflowAutoHid {
+@mixin overflow-auto-hide {
   &::-webkit-scrollbar {
     width: 0px;
   }
 }
 
 // 文字隐藏
-@mixin text_overflow($lines: 1) {
+@mixin text-overflow($lines: 1) {
   overflow: hidden;
   text-overflow: ellipsis;
   -webkit-line-clamp: $lines;

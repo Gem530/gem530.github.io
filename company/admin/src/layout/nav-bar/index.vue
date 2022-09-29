@@ -7,17 +7,17 @@
         :icon="isCollapse ? 'Expand' : 'Fold'"
         @click="changeSide"
       ></el-button>
-      <Breadcrumb></Breadcrumb>
+      <breadcrumb></breadcrumb>
     </div>
 
     <div class="nav-right">
       <el-button size="small" type="primary" @click="changeColor">换肤</el-button>
-      <AdminInfo></AdminInfo>
+      <admin-info></admin-info>
     </div>
   </div>
 </template>
 
-<script lang="ts" setup name="NavBar">
+<script lang="ts" setup name="nav-bar">
 import { useStore } from 'vuex'
 import { ref, computed } from 'vue'
 import { toggleTheme, changeScssData } from '@/utils/theme'

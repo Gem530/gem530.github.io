@@ -9,15 +9,15 @@
     @open="openMenu"
     @close="closeMenu"
   >
-    <GSubMenu
+    <g-sub-menu
       :route="item"
       :key="item.path"
       v-for="item in store.state.menus"
-    ></GSubMenu>
+    ></g-sub-menu>
   </el-menu>
 </template>
 
-<script lang="ts" setup name="GMenu">
+<script lang="ts" setup name="g-menu">
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()

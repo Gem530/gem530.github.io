@@ -5,17 +5,17 @@
       v-for="(item, i) in breadList">
       <el-breadcrumb-item v-if="item.path">
         <div v-if="(i + 1) < breadList.length">
-          <GMenuItem :icon="item.meta?.icon" :text="item.meta?.title"></GMenuItem>
+          <g-menu-item :icon="item.meta?.icon" :text="item.meta?.title"></g-menu-item>
         </div>
         <a v-else :href="item.path" class="color-black theme">
-          <GMenuItem :icon="item.meta?.icon" :text="item.meta?.title"></GMenuItem>
+          <g-menu-item :icon="item.meta?.icon" :text="item.meta?.title"></g-menu-item>
         </a>
       </el-breadcrumb-item>
     </template>
   </el-breadcrumb>
 </template>
 
-<script lang="ts" setup name="Breadcrumb">
+<script lang="ts" setup name="breadcrumb">
 import { ref, watch } from 'vue'
 import { useRouter, RouteLocationMatched } from 'vue-router'
 const router = useRouter()

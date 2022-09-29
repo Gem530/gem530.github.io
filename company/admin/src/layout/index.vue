@@ -1,13 +1,13 @@
 <template>
   <div class="app-wrapper">
-    <SideBar></SideBar>
+    <side-bar></side-bar>
     <div class="main-wrapper theme">
       <div class="fixed-header">
-        <NavBar/>
-        <TagsMenu/>
+        <nav-bar/>
+        <tags-menu/>
       </div>
       <div class="header-mask"></div>
-      <AppMain/>
+      <app-main/>
     </div>
   </div>
 </template>

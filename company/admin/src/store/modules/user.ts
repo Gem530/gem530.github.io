@@ -1,7 +1,7 @@
 // import { routes } from '@/router'
 import { routesList } from '@/router/config'
-import { getAddRoutes } from '@/router/addRoutes'
 import { loginInfo, tagsView } from '@/api/type'
+import { getAddRoutes } from '@/router/add-routes'
 import { getItem, setItem, removeItem } from '@/utils/storage'
 import { loginAPI, getInfoAPI, logoutAPI, getRoutersAPI } from '@/api/user'
 

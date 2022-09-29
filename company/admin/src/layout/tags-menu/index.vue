@@ -16,7 +16,7 @@
   </el-tabs>
 </template>
 
-<script lang="ts" setup name="TagsMenu">
+<script lang="ts" setup name="tags-menu">
 import { useStore } from 'vuex'
 import { ref, watch, computed, } from 'vue'
 import { useRoute, useRouter, RouteLocationNormalizedLoaded } from 'vue-router'

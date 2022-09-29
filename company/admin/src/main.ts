@@ -3,16 +3,20 @@ import App from './App.vue'
 import store from './store'
 import router from './router'
 import directives from './directives'
+import installPlugins from './plugins'
 import * as Icons from '@element-plus/icons-vue'
 
+import 'element-plus/theme-chalk/el-input.css'
 import 'element-plus/theme-chalk/el-message.css'
-// import 'element-plus/theme-chalk/el-loading.css'
+import 'element-plus/theme-chalk/el-loading.css'
 import 'element-plus/theme-chalk/el-message-box.css'
-// import 'element-plus/theme-chalk/el-notification.css'
+import 'element-plus/theme-chalk/el-notification.css'
 
 import './router/permission'
 
 const app = createApp(App)
+
+installPlugins(app)
 
 directives(app)
 app.use(router)

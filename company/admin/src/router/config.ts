@@ -9,6 +9,14 @@ export const routesList = [
       meta: { title: "表单", icon: "ChatSquare" },
       children: [
         {
+          name: 'pop-btn',
+          path: "pop-btn",
+          component: "pop-btn/index",
+          hidden: false,
+          alwaysShow: true,
+          meta: { title: "函数式弹框", icon: "Loading" },
+        },
+        {
           name: "form-temp",
           path: "form/form-temp",
           hidden: false,
