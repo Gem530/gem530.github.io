@@ -63,13 +63,23 @@
             <g-img-upload v-model="state.data[item.prop]" :="{...item.attrs}"/>
           </el-form-item>
 
-          <el-form-item v-if="item.type === 'slot' && hideHandle(item.isHide)" :="{...item}">
-            <slot :name="item.prop"  :="{data: state.data[item.prop], formData: state.data}">{{state.data[item.prop]}}</slot>
+          <el-form-item :="{...item}" v-if="item.type === 'wangEditor' && hideHandle(item.isHide)">
+            <g-wang-editor v-model="state.data[item.prop]" :="{...item.attrs}"/>
           </el-form-item>
 
-          <el-form-item :label="item.label" :prop="item.prop" v-if="item.type === 'btn' && hideHandle(item.isHide)">
-            <el-button v-if="item.btn.reset" @click="resetHandle">重置</el-button>
-            <el-button v-if="item.btn.search" type="primary" @click="searchHandle">提交</el-button>
+          <el-form-item :="{...item}" v-if="item.type === 'cascader' && hideHandle(item.isHide)">
+            <el-cascader v-model="state.data[item.prop]" :options="item.data" :="{...item.attrs}"/>
+          </el-form-item>
+
+          <el-form-item :="{...item}" v-if="item.type === 'slot' && hideHandle(item.isHide)">
+            <slot :name="item.prop"  :="{data: state.data[item.prop], formData: state.data, item}">{{state.data[item.prop]}}</slot>
+          </el-form-item>
+
+          <slot :name="item.prop" v-if="item.type === 'form-slot' && hideHandle(item.isHide)" :="{data: state.data[item.prop], formData: state.data, item}">{{state.data[item.prop]}}</slot>
+
+          <el-form-item :="{...item}" v-if="item.type === 'btn' && hideHandle(item.isHide)">
+            <el-button v-if="item.btn?.reset" @click="resetHandle">重置</el-button>
+            <el-button v-if="item.btn?.search" type="primary" @click="searchHandle">提交</el-button>
           </el-form-item>
 
         </el-col>
@@ -79,6 +89,7 @@
 </template>
 
 <script lang="ts" setup name="g-form">
+import dayjs from 'dayjs'
 import { FormRules } from 'element-plus'
 import {
   ref,
@@ -90,30 +101,52 @@ import {
   withDefaults,
 } from 'vue'
 
+interface formItem {
+  col?: number,
+  type: string,
+  prop: string,
+  data?: any[],
+  attrs?: any,
+  value?: string,
+  label?: string,
+  isHide?: boolean|Function,
+  btn?: {
+    reset?: boolean,
+    search?: boolean
+  }
+}
+
 const formRef = ref()
 const attrs = useAttrs()
 const emits = defineEmits(['search'])
 const props = withDefaults(defineProps<{
   rules?: FormRules,
-  formList?: any[]
+  formList?: formItem[],
+  timeFormat?: string,
+  dateFormat?: string
 }>(), {
   rules: undefined,
-  formList: () => []
+  formList: () => [],
+  timeFormat: 'HH:mm:ss',
+  dateFormat: 'YYYY-MM-DD HH:mm:ss'
 })
 
-const state: any = reactive({
-    data: {},
-    temp: []
+const state: {
+  data: Record<string, any>,
+  temp: formItem[]
+} = reactive({
+  data: {},
+  temp: []
 })
 state.temp = JSON.parse(JSON.stringify(props.formList))
-state.temp.forEach((item: any) => {
-    if (item.prop) {
-        state.data[item.prop] = item.value || undefined
-    }
+state.temp.forEach((item: formItem) => {
+  if (item.prop) {
+    state.data[item.prop] = item.value || undefined
+  }
 })
 
 // 是否隐藏
-const hideHandle = (val: boolean|object) => {
+const hideHandle = (val: boolean|Function|undefined) => {
   if (typeof val === 'function') return !val(state.data)
   return !val
 }
@@ -125,17 +158,51 @@ const resetHandle = () => {
 
 const searchHandle = () => {
   formRef.value.validate().then(() => {
-    emits('search', state.data)
+    emits('search', formData())
   })
 }
 
-defineExpose({ searchHandle })
+const formData = () => {
+  const newData = JSON.parse(JSON.stringify(state.data))
+  Object.keys(newData).forEach((item: any) => {
+    const currentItem = props.formList.find((v: formItem) => v.prop === item)
+    if (currentItem) {
+      switch (currentItem.type) {
+        case 'date':
+          if (['datetimerange', 'daterange'].includes(currentItem.attrs?.type)) {
+            newData['startDateRange'] = dayjs(newData[item][0]).format(props.dateFormat)
+            newData['endDateRange'] = dayjs(newData[item][1]).format(props.dateFormat)
+          } else if (['date', 'datetime'].includes(currentItem.attrs?.type) || !currentItem.attrs?.type) {
+            newData[item] = dayjs(newData[item]).format(props.dateFormat)
+          }
+          break;
+        case 'time':
+          if (currentItem.attrs?.isRange) {
+            newData['startTimeRange'] = dayjs(newData[item][0]).format(props.timeFormat)
+            newData['endTimeRange'] = dayjs(newData[item][1]).format(props.timeFormat)
+          } else {
+            newData[item] = dayjs(newData[item]).format(props.timeFormat)
+          }
+          break;
+        case 'upload':
+          newData[item] = newData[item].map((v: any) => v.response?.data ? v.response.data : v.url )
+          break;
+        default:
+          break
+      }
+    }
+  })
+  return newData
+}
+
+defineExpose({ searchHandle, hideHandle })
 </script>
 
 <style lang="scss" scoped>
 .el-form-item {
   :deep(.el-date-editor--time),
-  :deep(.el-date-editor--date) {
+  :deep(.el-date-editor--date),
+  :deep(.el-date-editor--datetime) {
     .el-input__wrapper {
       width: 100% !important;
     }

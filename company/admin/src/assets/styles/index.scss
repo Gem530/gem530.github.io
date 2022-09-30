@@ -59,3 +59,13 @@ $baseFixedHeaderHeight: var(--base-side-bar-height, 90px);
   background: $bgThemeWhite !important;
   color: $textBlack !important;
 }
+
+// 富文本控制图片/视频宽度
+:deep(.rich-show-content) {
+  width: 100px;
+
+  img,
+  video {
+    max-width: 100% !important;
+  }
+}

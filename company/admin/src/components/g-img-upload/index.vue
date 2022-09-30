@@ -76,7 +76,7 @@ const props = withDefaults(defineProps<{
   isHidePreview?: boolean,
 }>(), {
   data: () => ({ fileTo: '' }),
-  action: "http://54.151.135.104:9001/upload/img",
+  action: import.meta.env.VITE_APP_BASE_URL + "/upload/img",
   fileSize: 5,
   fileType: () => ['png', 'jpg', 'gif', 'jpeg'],
   isHideTip: false,

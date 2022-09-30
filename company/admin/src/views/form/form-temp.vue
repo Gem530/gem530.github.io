@@ -7,8 +7,21 @@
       :rules="state.rules"
       :formList="state.formList"
       @search="search">
+      <!-- 整体插槽 -->
+      <template #formTest="item">
+        <el-form-item :prop="item.item.prop">
+          <template #label>
+            <div class="flex">
+              <el-icon><QuestionFilled /></el-icon>
+              <span>{{item.item.label}}</span>
+            </div>
+          </template>
+          <el-input v-model="item.formData[item.item.prop]" placeholder="请输入内容"></el-input>
+        </el-form-item>
+      </template>
+      <!-- 内容插槽 不包括el-form-item -->
       <template #tips="item">
-        <el-input v-model="item.formData['tips']" @keyup.enter="childHandle($event)"></el-input>
+        <el-input v-model="item.formData[item.item.prop]" @keyup.enter="childHandle($event)"></el-input>
       </template>
       <template #test="item">222-{{item.data}}{{item}}</template>
     </g-form>
@@ -17,34 +30,35 @@
 
 <script lang="ts" setup name="form-temp">
 import { ref, reactive } from 'vue'
+import { areaList } from '@/config/addres'
 const GFormRef = ref()
 const state = reactive({
   rules: {},
   formList: [{
-    col: 10,
+    col: 12,
     type: 'input',
     prop: 'name',
     value: '张三',
     label: '姓名',
     isHide: (item: any) => Number(item.age) < 1,
     attrs: { type:'text', clearable: true, placeholder: '请输入姓名',
-      'onkeyup': (event: any) => childHandle(event)
+      'onkeyup': (event: KeyboardEvent) => childHandle(event)
     }
   },{
-    col: 10,
+    col: 12,
     type: 'number',
     prop: 'age',
     value: 18,
     label: '年龄',
     attrs: { min: 1, max: 20, size: 'small', placeholder: '请输入年龄' }
   },{
-    col: 10,
+    col: 12,
     type: 'input',
     prop: 'desc',
     label: '描述',
     attrs: { type: 'textarea', placeholder: '请输入描述' }
   },{
-    col: 10,
+    col: 12,
     type: 'radio',
     value: 1,
     prop: 'sex',
@@ -54,7 +68,7 @@ const state = reactive({
       { label: '女', value: 0 }
     ]
   },{
-    col: 10,
+    col: 12,
     type: 'checkbox',
     value: [1],
     prop: 'like',
@@ -64,7 +78,7 @@ const state = reactive({
       { label: '游泳', value: 0 }
     ]
   },{
-    col: 10,
+    col: 12,
     type: 'select',
     value: 1,
     prop: 'school',
@@ -75,7 +89,7 @@ const state = reactive({
       { label: '祁阳一中', value: 0 }
     ]
   },{
-    col: 10,
+    col: 12,
     type: 'select',
     value: [1],
     prop: 'grade',
@@ -86,7 +100,7 @@ const state = reactive({
       { label: '第二', value: 0 }
     ]
   },{
-    col: 10,
+    col: 12,
     type: 'time',
     prop: 'startTime',
     label: '上学时间',
@@ -94,7 +108,15 @@ const state = reactive({
       'onChange': () => GFormRef.value.searchHandle()
     }
   },{
-    col: 10,
+    col: 12,
+    type: 'time',
+    prop: 'startTimeBetwwen',
+    label: '上学时间范围',
+    attrs: { isRange: true, clearable: true, startPlaceholder: "开始时间", endPlaceholder: "结束时间", style: 'width:100%;',
+      'onChange': () => GFormRef.value.searchHandle()
+    }
+  },{
+    col: 12,
     type: 'date',
     prop: 'createTime',
     label: '入学日期',
@@ -102,42 +124,62 @@ const state = reactive({
       'onChange': () => GFormRef.value.searchHandle()
     }
   },{
-    col: 10,
+    col: 12,
     type: 'date',
     prop: 'createTimeBetween',
     label: '入学日期范围',
     attrs: { clearable: true, type: 'datetimerange', startPlaceholder: "开始时间", endPlaceholder: "结束时间" }
   },{
-    col: 10,
+    col: 12,
     type: 'switch',
     prop: 'state',
     label: '状态',
     attrs: { activeValue: 1, inactiveValue: 0 }
   },{
-    col: 10,
-    type: 'upload',
-    value: ['https://fa-file-test.s3.ap-southeast-1.amazonaws.com/uploadfile/About us备份@2x.png'],
-    prop: 'imgList',
-    label: '头像',
-    attrs: { limit: 1 }
+    col: 12,
+    type: 'form-slot',
+    value: '1212',
+    prop: 'formTest',
+    label: '插槽'
   },{
-    col: 10,
+    col: 12,
     type: 'slot',
     value: '插槽测试11',
     prop: 'tips',
-    label: '插槽'
+    label: '内容插槽1'
   },{
-    col: 10,
+    col: 12,
+    type: 'cascader',
+    value: [],
+    prop: 'addres',
+    label: '地址',
+    attrs: { props: { value: 'code' }, style: 'width: 100%;' },
+    data: areaList
+  },{
+    col: 12,
     type: 'btn',
     btn: {
       search: true,
       reset: true
     }
   },{
-    col: 10,
+    col: 12,
     type: 'slot',
     value: '插槽6666666',
     prop: 'test'
+  },{
+    col: 12,
+    type: 'upload',
+    value: ['https://fa-file-test.s3.ap-southeast-1.amazonaws.com/uploadfile/About us备份@2x.png'],
+    prop: 'imgList',
+    label: '头像',
+    attrs: { limit: 2 }
+  },{
+    col: 12,
+    type: 'wangEditor',
+    prop: 'content',
+    label: '内容插槽2',
+    attrs: { height: 350 }
   }]
 })
 
@@ -145,7 +187,13 @@ const search = (item: any) => {
   console.log('表单组件:', item)
 }
 
-const childHandle = (event: any) => {
-  if (event.keyCode==13) GFormRef.value.searchHandle()
+const childHandle = (event: KeyboardEvent) => {
+  if (event.keyCode == 13) GFormRef.value.searchHandle()
 }
 </script>
+
+<style lang="scss" scoped>
+.flex {
+  @include flex();
+}
+</style>

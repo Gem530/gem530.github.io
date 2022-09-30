@@ -2,7 +2,7 @@
   <div class="app-wrapper">
     <side-bar></side-bar>
     <div class="main-wrapper theme">
-      <div class="fixed-header">
+      <div class="fixed-header theme">
         <nav-bar/>
         <tags-menu/>
       </div>
@@ -33,6 +33,7 @@
       left: $baseSideBarWidth;
       width: calc(100% - $baseSideBarWidth);
       height: $baseFixedHeaderHeight;
+      z-index: 10;
     }
 
     .header-mask {

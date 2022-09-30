@@ -23,7 +23,9 @@
     "vite-plugin-vue-images": "^0.6.1",
     "vue": "^3.2.37",
     "vue-router": "^4.1.5",
-    "vuex": "^4.0.2"
+    "vuex": "^4.0.2",
+    "@wangeditor/editor": "^5.1.15",
+    "@wangeditor/editor-for-vue": "^5.1.12"
   },
   "devDependencies": {
     "@types/js-cookie": "^3.0.2",

@@ -10,3 +10,15 @@ export interface tagsView {
   path: string,
   meta: any
 }
+
+// 列表
+export interface list {
+  pageIndex: number,
+  pageSize: number
+}
+
+// 渠道标识列表
+export interface logList extends list {
+  phoneNum: string, // 手机号
+  sendState?: string,
+}
