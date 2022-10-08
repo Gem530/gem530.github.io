@@ -16,3 +16,26 @@ export function getListAPI(params: tsType.channleList) {
     params
   });
 }
+
+/**
+ * @author hjj
+ * @description app操作日志列表
+ */
+export function sysLogAPI(params: tsType.appoperateList) {
+  return request({
+    url: "/app/operLog/page",
+    method: "get",
+    params
+  });
+}
+
+/**
+ * @author hjj
+ * @description 批量删除app操作日志列表
+ */
+export function delSysLogAPI(operIds: string) {
+  return request({
+    url: `/app/operLog/del/${operIds}`,
+    method: "delete"
+  });
+}

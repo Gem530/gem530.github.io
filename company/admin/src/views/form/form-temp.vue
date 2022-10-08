@@ -29,8 +29,9 @@
           clearable
           :req="req"
           value-key="phoneNum"
-          v-model="item.formData[item.item.prop]"
+          style="width: 100%;"
           placeholder="请输入手机号"
+          v-model="item.formData[item.item.prop]"
           @change="remoteInputChange"
         />
       </template>
@@ -38,8 +39,9 @@
         <g-remote-select
           clearable
           :req="req"
-          v-model="item.formData[item.item.prop]"
+          style="width: 100%;"
           placeholder="请输入手机号"
+          v-model="item.formData[item.item.prop]"
           @change="remoteSelectChange"
         />
       </template>

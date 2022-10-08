@@ -41,7 +41,6 @@ export default {
   },
   // 关闭加载动画
   closeLoading () {
-    console.log(loadingInstance)
     loadingInstance.close();
   }
 }

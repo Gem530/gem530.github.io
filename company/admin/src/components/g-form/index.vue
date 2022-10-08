@@ -80,6 +80,7 @@
           <el-form-item :="{...item}" v-if="item.type === 'btn' && hideHandle(item.isHide)">
             <el-button v-if="item.btn?.reset" @click="resetHandle">重置</el-button>
             <el-button v-if="item.btn?.search" type="primary" @click="searchHandle">提交</el-button>
+            <slot name="make-btn"></slot>
           </el-form-item>
 
         </el-col>

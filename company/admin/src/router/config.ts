@@ -49,6 +49,25 @@ export const routesList = [
         },
       ]
     },
+    {
+      name: 'table',
+      path: '/table',
+      redirect: "noRedirect",
+      component: "Layout",
+      hidden: false,
+      alwaysShow: true,
+      meta: { title: "表格", icon: "Grid" },
+      children: [
+        {
+          name: 'table-vue',
+          path: "table/index",
+          component: "table/index",
+          hidden: false,
+          alwaysShow: true,
+          meta: { title: "表格", icon: "Grid" },
+        }
+      ]
+    }
 ]
 // export const routesList = [
 //   {
