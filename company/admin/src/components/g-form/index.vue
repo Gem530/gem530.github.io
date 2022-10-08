@@ -141,7 +141,7 @@ const state: {
 state.temp = JSON.parse(JSON.stringify(props.formList))
 state.temp.forEach((item: formItem) => {
   if (item.prop) {
-    state.data[item.prop] = item.value || undefined
+    state.data[item.prop] = item.value ?? undefined
   }
 })
 

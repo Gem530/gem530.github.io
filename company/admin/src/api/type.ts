@@ -1,6 +1,16 @@
+// api接口
+export interface baseAPI<t> {
+  data?: t,
+  params?: t,
+  url: string,
+  method: string,
+  headers?: Headers|any, // 请求头
+  timeout?: number|string
+}
+
 // 登录信息
 export interface loginInfo {
-  username: string // 用户名
+  username: string, // 用户名
   password: string // 密码
 }
 
@@ -18,7 +28,7 @@ export interface list {
 }
 
 // 渠道标识列表
-export interface logList extends list {
+export interface channleList extends list {
   phoneNum: string, // 手机号
   sendState?: string,
 }

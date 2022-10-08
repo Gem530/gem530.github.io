@@ -9,7 +9,7 @@ import * as tsType from '../type'
  * @param pageIndex 页码
  * @param pageSize 每页总量
  */
-export function getListAPI(params: tsType.logList) {
+export function getListAPI(params: tsType.channleList) {
   return request({
     url: "/v1/sms/page",
     method: "get",

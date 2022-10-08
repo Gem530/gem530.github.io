@@ -24,14 +24,42 @@
         <el-input v-model="item.formData[item.item.prop]" @keyup.enter="childHandle($event)"></el-input>
       </template>
       <template #test="item">222-{{item.data}}{{item}}</template>
+      <template #channle="item">
+        <g-remote-input
+          clearable
+          :req="req"
+          value-key="phoneNum"
+          v-model="item.formData[item.item.prop]"
+          placeholder="请输入手机号"
+          @change="remoteInputChange"
+        />
+      </template>
+      <template #channle2="item">
+        <g-remote-select
+          clearable
+          :req="req"
+          v-model="item.formData[item.item.prop]"
+          placeholder="请输入手机号"
+          @change="remoteSelectChange"
+        />
+      </template>
     </g-form>
   </div>
 </template>
 
 <script lang="ts" setup name="form-temp">
 import { ref, reactive } from 'vue'
+import * as tsType from '@/api/type'
 import { areaList } from '@/config/addres'
 const GFormRef = ref()
+const req: tsType.baseAPI<any> = {
+  url: '/v1/sms/page',
+  method: 'get',
+  params: {
+    pageIndex: 1,
+    pageSize: 10
+  }
+}
 const state = reactive({
   rules: {},
   formList: [{
@@ -180,6 +208,18 @@ const state = reactive({
     prop: 'content',
     label: '内容插槽2',
     attrs: { height: 350 }
+  },{
+    col: 12,
+    type: 'slot',
+    value: '',
+    prop: 'channle',
+    label: '手机号1'
+  },{
+    col: 12,
+    type: 'slot',
+    value: '',
+    prop: 'channle2',
+    label: '手机号2'
   }]
 })
 
@@ -189,6 +229,14 @@ const search = (item: any) => {
 
 const childHandle = (event: KeyboardEvent) => {
   if (event.keyCode == 13) GFormRef.value.searchHandle()
+}
+
+const remoteInputChange = (item: any) => {
+  console.log('remoteInputChange', item)
+}
+
+const remoteSelectChange = (item: any) => {
+  console.log('remoteSelectChange', item)
 }
 </script>
 

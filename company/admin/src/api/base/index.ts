@@ -1,5 +1,12 @@
 import request from '@/request'
 import * as tsType from '../type'
+/**
+ * @author hjj
+ * @description 用于动态接口
+ */
+ export function baseAPI (req: tsType.baseAPI<any>): Promise<unknown> {
+  return request(req)
+}
 
 /**
  * @author hjj
