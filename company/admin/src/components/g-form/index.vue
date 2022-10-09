@@ -78,8 +78,8 @@
           <slot :name="item.prop" v-if="item.type === 'form-slot' && hideHandle(item.isHide)" :="{data: state.data[item.prop], formData: state.data, item}">{{state.data[item.prop]}}</slot>
 
           <el-form-item :="{...item}" v-if="item.type === 'btn' && hideHandle(item.isHide)">
-            <el-button v-if="item.btn?.reset" @click="resetHandle">重置</el-button>
-            <el-button v-if="item.btn?.search" type="primary" @click="searchHandle">提交</el-button>
+            <el-button v-if="item.btn?.search" type="primary" @click="searchHandle">{{item.btn?.searchName || '提交'}}</el-button>
+            <el-button v-if="item.btn?.reset" @click="resetHandle">{{item.btn?.resetName || '重置'}}</el-button>
             <slot name="make-btn"></slot>
           </el-form-item>
 
@@ -113,7 +113,9 @@ interface formItem {
   isHide?: boolean|Function,
   btn?: {
     reset?: boolean,
-    search?: boolean
+    search?: boolean,
+    resetName?: string,
+    searchName?: string
   }
 }
 
@@ -152,8 +154,12 @@ const hideHandle = (val: boolean|Function|undefined) => {
   return !val
 }
 
-const resetHandle = () => {
+const clearValidte = () => {
   formRef.value.resetFields()
+}
+
+const resetHandle = () => {
+  clearValidte()
   searchHandle()
 }
 
@@ -196,7 +202,7 @@ const formData = () => {
   return newData
 }
 
-defineExpose({ searchHandle, hideHandle })
+defineExpose({ clearValidte, resetHandle, searchHandle, hideHandle })
 </script>
 
 <style lang="scss" scoped>

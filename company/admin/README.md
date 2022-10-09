@@ -19,3 +19,5 @@ You can learn more about Take Over mode [here](https://github.com/johnsoncodehk/
   文件名
   组件使用
   css类名
+
+https://aitrade.ga/books/lightweight-charts-docs-cn/book/home.html k线图学习链接

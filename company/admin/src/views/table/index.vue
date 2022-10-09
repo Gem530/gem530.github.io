@@ -11,6 +11,7 @@
         <el-button @click="delLog" type="primary">删除</el-button>
       </template>
     </g-form>
+
     <g-table
       :total="total"
       :data="tableData"
@@ -20,12 +21,20 @@
       @pagination="getList"
       @selectionChange="selectionChange">
       <template #column-status="scope">{{scope.row.status == 0 ? '正常' : '异常'}}</template>
-      <template #table-column-test>
-        <el-table-column label="test">
-          <template #="scope">test-{{scope.row.name}}</template>
+      <template #table-column-make>
+        <el-table-column fixed="right" label="操作" align="center">
+          <template #="scope"><el-button @click="editData(scope.row)">编辑</el-button></template>
         </el-table-column>
       </template>
     </g-table>
+
+    <g-modal-form
+      title="编辑"
+      v-model:show="state.show"
+      :rules="state.dialogRules"
+      :formList="state.dialogFormList"
+      @confirm="confirm"
+    ></g-modal-form>
   </div>
 </template>
 
@@ -52,11 +61,13 @@ const columns: any[] = [
   { sort: 6, attrs: {align:'center',width: ''}, type: 'operIp', label: `操作地址` },
   { sort: 9, attrs: {align:'center',width: ''}, type: 'status', label: `操作状态` },
   { sort: 8, attrs: {align:'center',width: '',sortable:true}, type: 'operTime', label: `操作日期` },
+  { sort: 8, slot: 'make' },
 ]
 
 const total = ref(0)
 const state = reactive({
   rules: {},
+  show: false,
   formList: [
     {
       col: 8,
@@ -106,15 +117,9 @@ const state = reactive({
       attrs: {
         clearable: true,
         placeholder: '操作状态',
-        'onChange': (event: KeyboardEvent) => keyUpSearch(event)
+        'onChange': () => changeSearch()
       },
-      data: [{
-        label: '正常',
-        value: 0
-      }, {
-        label: '异常',
-        value: 1
-      }]
+      data: [{ label: '正常', value: 0 }, { label: '异常', value: 1 }]
     },
     {
       col: 8,
@@ -125,8 +130,8 @@ const state = reactive({
         type: 'daterange',
         clearable: true,
         rangeSeparator: "-",
-        startPlaceholder: "开始时间",
         endPlaceholder: "结束时间",
+        startPlaceholder: "开始时间",
         'onChange': () => changeSearch()
       }
     },
@@ -135,7 +140,9 @@ const state = reactive({
       type: 'btn',
       btn: {
         search: true,
-        reset: true
+        searchName: '搜索',
+        reset: true,
+        resetName: '重置'
       }
     }
   ],
@@ -148,7 +155,32 @@ const state = reactive({
     operName: undefined, // 操作人员名称
     startTime: undefined, // 开始时间
   },
-  oprtIdList: []
+  oprtIdList: [],
+  dialogRules: {
+    operId: [{ required: true, message: '请输入日志编号', trigger: 'blur' }]
+  },
+  dialogFormList: [
+    {
+      value: '11',
+      type: 'input',
+      prop: 'operId',
+      label: '日志编号',
+      attrs: {
+        type: 'text',
+        clearable: true,
+      }
+    },
+    {
+      value: '22',
+      type: 'input',
+      prop: 'title',
+      label: '系统模块',
+      attrs: {
+        type: 'text',
+        clearable: true,
+      }
+    },
+  ]
 })
 
 const keyUpSearch = (event: KeyboardEvent) => {
@@ -159,14 +191,13 @@ const changeSearch = () => {
 }
 
 const search = (item: any) => {
-  // console.log(item)
   state.formData = {
     pageSize: 10,
     pageIndex: 1,
     title: item.title, // 模块标题
     status: item.status, // 操作状态（0正常 1异常）
-    endTime: item.endDateRange, // 结束时间
     operName: item.operName, // 操作人员名称
+    endTime: item.endDateRange, // 结束时间
     startTime: item.startDateRange // 开始时间
   }
   getList()
@@ -178,8 +209,8 @@ const getList = () => {
   sysLogAPI(state.formData).then((res: any) => {
     proxy.$modal.closeLoading()
     if (res.code === 200) {
-      tableData.value = res.data.rows || []
       total.value = res.data.total
+      tableData.value = res.data.rows || []
     } else {
       proxy.$modal.message({ type: 'error', message: res.msg })
     }
@@ -197,6 +228,8 @@ const delLog = () => {
     if (res.code === 200) {
       proxy.$modal.message({ type: 'success', message: '删除成功' })
       getList()
+    } else {
+      proxy.$modal.message({ type: 'error', message: res.msg })
     }
   }).catch((err: Error) => {
     proxy.$modal.closeLoading()
@@ -205,7 +238,20 @@ const delLog = () => {
 }
 
 const selectionChange = (val: any) => {
-  // console.log('selectionChange', val)
   state.oprtIdList = val.map((v: any) => v.operId)
+}
+
+const editData = (v: any) => {
+  for (let k in v) {
+    state.dialogFormList.forEach((item: any) => {
+      if (item['prop'] === k) item['value'] = v[k]
+    })
+  }
+  state.show = true
+}
+
+const confirm = (item: any) => {
+  console.log(item)
+  state.show = false
 }
 </script>

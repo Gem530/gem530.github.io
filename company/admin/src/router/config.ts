@@ -67,6 +67,33 @@ export const routesList = [
           meta: { title: "表格", icon: "Grid" },
         }
       ]
+    },
+    {
+      name: 'echart',
+      path: '/echart',
+      redirect: "noRedirect",
+      component: "Layout",
+      hidden: false,
+      alwaysShow: true,
+      meta: { title: "echart", icon: "PieChart" },
+      children: [
+        {
+          name: 'echart-vue',
+          path: "echart/index",
+          component: "echart/index",
+          hidden: false,
+          alwaysShow: true,
+          meta: { title: "echart", icon: "PieChart" },
+        },
+        {
+          name: 'light-charts',
+          path: "echart/light-charts",
+          component: "echart/light-charts",
+          hidden: false,
+          alwaysShow: true,
+          meta: { title: "k线图", icon: "DataLine" },
+        }
+      ]
     }
 ]
 // export const routesList = [

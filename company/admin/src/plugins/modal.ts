@@ -32,11 +32,11 @@ export default {
     }, config))
   },
   // 加载动画
-  loading (content: string) {
+  loading (content: string, color: string) {
     loadingInstance = ElLoading.service({
       lock: true,
       text: content || '正在加载中...',
-      background: 'rgba(0, 0, 0, 0.7)'
+      background: color || 'rgba(0, 0, 0, 0.7)'
     })
   },
   // 关闭加载动画

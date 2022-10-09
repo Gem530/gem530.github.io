@@ -28,6 +28,7 @@
     </el-table>
     <el-pagination
       :total="total"
+      v-if="!hidePage"
       :layout="props.layout"
       style="margin-top: 10px;"
       v-model:currentPage="page"
@@ -55,9 +56,10 @@ const props = withDefaults(defineProps<{
   data: any[],
   page?: number,
   total?: number,
-  layout?: string,
   columns: any[],
+  layout?: string,
   pageSize?: number,
+  hidePage?: boolean,
   pageSizes?: number[]
 }>(), {
   data: () => [],
@@ -66,6 +68,7 @@ const props = withDefaults(defineProps<{
   layout: 'total, sizes, prev, pager, next, jumper',
   columns: () => [],
   pageSize: 10,
+  hidePage: false,
   pageSizes: () => [10, 20, 30, 40, 50]
 })
 
