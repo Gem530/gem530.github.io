@@ -94,7 +94,26 @@ export const routesList = [
           meta: { title: "k线图", icon: "DataLine" },
         }
       ]
-    }
+    },
+    {
+      name: 'map',
+      path: '/map',
+      redirect: "noRedirect",
+      component: "Layout",
+      hidden: false,
+      alwaysShow: true,
+      meta: { title: "地图", icon: "Grid" },
+      children: [
+        {
+          name: 'map-vue',
+          path: "map/index",
+          component: "map/index",
+          hidden: false,
+          alwaysShow: true,
+          meta: { title: "百度地图", icon: "Grid" },
+        }
+      ]
+    },
 ]
 // export const routesList = [
 //   {

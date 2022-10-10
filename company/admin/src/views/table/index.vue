@@ -222,6 +222,10 @@ const getList = () => {
 getList()
 
 const delLog = () => {
+  if (!state.oprtIdList.length) {
+    proxy.$modal.message({ type: 'error', message: '请选择删除的日志' })
+    return
+  }
   proxy.$modal.loading()
   delSysLogAPI(state.oprtIdList.join(',') as string).then((res: any) => {
     proxy.$modal.closeLoading()

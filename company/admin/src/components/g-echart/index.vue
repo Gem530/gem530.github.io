@@ -18,8 +18,8 @@ import {
 const echartsDom = ref()
 // const echarts: any = inject("echarts")
 const props = withDefaults(defineProps<{
-    width: string,
-    height: string,
+    width?: string,
+    height?: string,
     options: any
 }>(), {
     width: '400px',
