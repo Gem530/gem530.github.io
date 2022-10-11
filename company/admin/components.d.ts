@@ -54,6 +54,7 @@ declare module '@vue/runtime-core' {
     GImgUpload: typeof import('./src/components/g-img-upload/index.vue')['default']
     GLightCharts: typeof import('./src/components/g-light-charts/index.vue')['default']
     GMap: typeof import('./src/components/g-map/index.vue')['default']
+    GMapGao: typeof import('./src/components/g-map/g-map-gao.vue')['default']
     GMenu: typeof import('./src/layout/side-bar/g-menu.vue')['default']
     GMenuItem: typeof import('./src/layout/side-bar/g-menu-item.vue')['default']
     GModalForm: typeof import('./src/components/g-modal-form/index.vue')['default']

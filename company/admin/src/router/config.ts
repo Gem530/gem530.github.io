@@ -102,7 +102,7 @@ export const routesList = [
       component: "Layout",
       hidden: false,
       alwaysShow: true,
-      meta: { title: "地图", icon: "Grid" },
+      meta: { title: "地图", icon: "MapLocation" },
       children: [
         {
           name: 'map-vue',
@@ -110,7 +110,7 @@ export const routesList = [
           component: "map/index",
           hidden: false,
           alwaysShow: true,
-          meta: { title: "百度地图", icon: "Grid" },
+          meta: { title: "百度地图", icon: "LocationInformation" },
         }
       ]
     },
