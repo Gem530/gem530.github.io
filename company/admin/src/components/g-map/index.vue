@@ -1,12 +1,16 @@
 <template>
   <el-autocomplete
-    v-model="value"
+    v-model="adrname"
     value-key="title"
     placeholder="请输入地址"
     :fetch-suggestions="searchAddress"
     @select="handleSelect"
   />
   <el-button @click="searchCrium">搜索周边</el-button>
+  <el-button @click="toAddress('WalkingRoute')">到这去-步行</el-button>
+  <el-button @click="toAddress('RidingRoute')">到这去-骑行</el-button>
+  <el-button @click="toAddress('TransitRoute')">到这去-公交</el-button>
+  <el-button @click="toAddress('DrivingRoute')">到这去-驾车</el-button>
   <div ref="GMapRef" :style="{width: props.width,height: props.height}"></div>
 </template>
 
@@ -31,9 +35,13 @@ const props = withDefaults(defineProps<{
 })
 
 let map: any
-const value = ref()
+const adrname = ref()
 const localInfo: any = ref()
 const BMap = (window as any).BMap
+const targetPoint = ref({
+  lng: 116.404,
+  lat: 39.915
+})
 
 onMounted(async () => {
   localInfo.value = await getLocation()
@@ -87,34 +95,22 @@ const init = () => {
   map.addEventListener('click', (e: any) => {
     const { lng, lat } = e.point
     // addMarker(lng, lat)
+    targetPoint.value = e.point
     console.log(lng, lat)
   })
-
-  // 驾车路线 DrivingRoute
-  // 步行路线 WalkingRoute
-  // 公交路线 TransitRoute https://lbsyun.baidu.com/jsdemo3.0.htm#transitroute
-  // 骑行路线 RidingRoute
-  // var walking = new BMap.WalkingRoute(map, { 
-  //   renderOptions: { 
-  //     map: map, 
-  //     autoViewport: true 
-  //   }
-  // })
-  // var start = new BMap.Point(116.310791, 40.003419)
-  // var end = new BMap.Point(116.326419, 40.003519)
-  // walking.search(start, end)
 }
 
 // 选择地址
 const handleSelect = (item: any) => {
+  map.clearOverlays() // 清除地图上所有覆盖物
   map.centerAndZoom(item.point, 15)
   addMarker(item.point.lng, item.point.lat)
+  targetPoint.value = item.point
   emits('getMapInfo', item)
 }
 
 // 地址搜索
 const searchAddress = (query: string, cb: (arg: any) => void) => {
-  map.clearOverlays() // 清除地图上所有覆盖物
   let local = new BMap.LocalSearch(map, { // 智能搜索
     onSearchComplete: () => {
       const result = local.getResults()?.Ir || []
@@ -128,14 +124,36 @@ const searchAddress = (query: string, cb: (arg: any) => void) => {
 // 搜索周边
 const searchCrium = () => {
   map.clearOverlays() // 清除地图上所有覆盖物
+  const range = 1000 // 搜索的范围
   const { lng, lat } = localInfo.value.point
   let point = new BMap.Point(lng, lat)
-  var circle = new BMap.Circle(point,1000,{fillColor:"blue", strokeWeight: 1 ,fillOpacity: 0.3, strokeOpacity: 0.3})
+  var circle = new BMap.Circle(point, range, {fillColor:"blue", strokeWeight: 1 ,fillOpacity: 0.3, strokeOpacity: 0.3})
   map.addOverlay(circle);
   let local = new BMap.LocalSearch(map, { //智能搜索
     renderOptions: {map: map, autoViewport: false}
   })
-  local.searchNearby('餐饮',point,500)
+  local.searchNearby(adrname.value, point, range)
+}
+
+// 路线规划
+const toAddress = (type: string) => {
+  map.clearOverlays() // 清除地图上所有覆盖物
+  // 驾车路线 DrivingRoute
+  // 步行路线 WalkingRoute
+  // 公交路线 TransitRoute https://lbsyun.baidu.com/jsdemo3.0.htm#transitroute
+  // 骑行路线 RidingRoute
+  let walking = new BMap[type](map, { 
+    renderOptions: { 
+      map: map, 
+      autoViewport: true 
+    }
+  })
+  const { lng, lat } = localInfo.value.point
+  const { lng: tlng, lat: tlat } = targetPoint.value
+  let start = new BMap.Point(lng, lat)
+  let end = new BMap.Point(tlng, tlat)
+  console.log(lng, lat, tlng, tlat)
+  walking.search(start, end)
 }
 
 // 添加marker
