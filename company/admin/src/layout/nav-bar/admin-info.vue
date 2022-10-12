@@ -8,7 +8,7 @@
       </el-dropdown-menu>
     </template>
   </el-dropdown>
-  <el-icon class="nav-icon" @click="toggle"><component :is="'Rank'"></component></el-icon>
+  <g-icon class="nav-icon" icon="Rank" :size="18" @click="toggle"></g-icon>
 </template>
 
 <script lang="ts" setup name="admin-info">
@@ -41,7 +41,6 @@ const loginOut = () => {
 }
 
 .nav-icon {
-  font-size: 18px;
   cursor: pointer;
 }
 </style>

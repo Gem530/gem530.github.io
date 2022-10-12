@@ -142,17 +142,20 @@ const toAddress = (type: string) => {
   // 步行路线 WalkingRoute
   // 公交路线 TransitRoute https://lbsyun.baidu.com/jsdemo3.0.htm#transitroute
   // 骑行路线 RidingRoute
-  let walking = new BMap[type](map, { 
-    renderOptions: { 
-      map: map, 
-      autoViewport: true 
+  let walking = new BMap[type](map, {
+    onSearchComplete: () => {
+      const result = walking.getResults() // 获取路线结果
+      console.log(result)
+    },
+    renderOptions: {
+      map: map,
+      autoViewport: true
     }
   })
   const { lng, lat } = localInfo.value.point
   const { lng: tlng, lat: tlat } = targetPoint.value
   let start = new BMap.Point(lng, lat)
   let end = new BMap.Point(tlng, tlat)
-  console.log(lng, lat, tlng, tlat)
   walking.search(start, end)
 }
 

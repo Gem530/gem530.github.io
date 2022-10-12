@@ -11,12 +11,12 @@
           :rules="rules">
           <el-form-item prop="username">
             <el-input v-model="form.username" placeholder="用户名">
-              <template #prefix><el-icon><User /></el-icon></template>
+              <template #prefix><g-icon icon="User"></g-icon></template>
             </el-input>
           </el-form-item>
           <el-form-item prop="password">
             <el-input v-model="form.password" placeholder="密码" type="password" @keyup.enter="loginHandle">
-              <template #prefix><el-icon><Lock /></el-icon></template>
+              <template #prefix><g-icon icon="Lock"></g-icon></template>
             </el-input>
           </el-form-item>
           <el-button :loading="loading" type="primary" @click="loginHandle">

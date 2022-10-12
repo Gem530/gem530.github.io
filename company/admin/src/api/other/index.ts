@@ -39,3 +39,84 @@ export function delSysLogAPI(operIds: string) {
     method: "delete"
   });
 }
+
+/**
+ * @author hjj
+ * @description 查询菜单列表
+ */
+export function listMenu(params: tsType.menuList) {
+  return request({
+    url: '/system/menu/list',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * @author hjj
+ * @description 根据菜单ID获取菜单详情
+ */
+export function getMenu(menuId: number) {
+  return request({
+    url: '/system/menu/' + menuId,
+    method: 'get'
+  })
+}
+
+/**
+ * @author hjj
+ * @description 查询菜单下拉树结构
+ */
+export function treeselect(params: Partial<tsType.menuList>) {
+  return request({
+    url: '/system/menu/treeselect',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * @author hjj
+ * @description 根据角色ID查询菜单下拉树结构
+ */
+export function roleMenuTreeselect(roleId: number) {
+  return request({
+    url: '/system/menu/roleMenuTreeselect/' + roleId,
+    method: 'get'
+  })
+}
+
+/**
+ * @author hjj
+ * @description 新增菜单
+ */
+export function addMenu(data: tsType.addMenu) {
+  return request({
+    url: '/system/menu/add',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * @author hjj
+ * @description 修改菜单
+ */
+export function updateMenu(data: tsType.addMenu) {
+  return request({
+    url: '/system/menu/edit',
+    method: 'put',
+    data
+  })
+}
+
+/**
+ * @author hjj
+ * @description 删除菜单
+ */
+export function delMenu(menuId: number) {
+  return request({
+    url: '/system/menu/' + menuId,
+    method: 'delete'
+  })
+}

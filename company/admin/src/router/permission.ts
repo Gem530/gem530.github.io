@@ -27,10 +27,9 @@ router.beforeEach(async (to, from, next) => {
       .then((res) => {
         // console.log('permission-----', res)
         // 处理刷新时空白页问题
-        // if (!initRoute && to.matched.length == 0) {
-        //   initRoute = true;
-        //   router.push(to.path);
-        // }
+        if (to.matched.length == 0) {
+          router.push(to.path);
+        }
       })
       next({ ...to, replace: true })
     } else {

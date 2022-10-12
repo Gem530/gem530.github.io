@@ -43,3 +43,33 @@ export interface appoperateList extends list {
   status?: number, // 操作状态（0正常 1异常）
   title?: string, // 模块标题
 }
+
+// 菜单列表
+export interface menuList {
+  status: string, // 状态
+  menuName: string, // 菜单名称
+}
+
+// 新增菜单
+export interface addMenu {
+  children?: addMenu[],
+  component?: string, // 组件路径
+  createBy?: string, // 创建者
+  createTime?: string, // 创建时间
+  icon?: string, // 菜单图标
+  isCache?: number, // 是否缓存（0缓存 1不缓存）
+  isFrame?: number, // 是否为外链（0是 1否）
+  menuId?: number, // 菜单ID
+  menuName?: string, // 菜单名称
+  menuType?: string, // 菜单类型（M目录 C菜单 F按钮）
+  orderNum?: number, // 显示顺序
+  parentId?: number, // 父菜单ID
+  path?: string, // 路由地址
+  perms?: string, // 权限标识
+  query?: string, // 路由参数
+  remark?: string, // 备注
+  status?: string, // 菜单状态（0正常 1停用）
+  updateBy?: string, // 更新者
+  updateTime?: string, // 更新时间
+  visible?: string // 菜单状态（0显示 1隐藏）
+}

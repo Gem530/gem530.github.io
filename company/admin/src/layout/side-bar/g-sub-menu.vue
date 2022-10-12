@@ -6,7 +6,7 @@
       popper-append-to-body>
       <template #title>
         <!-- <GMenuItem :icon="route.meta?.icon" :text="route.meta?.title"></GMenuItem> -->
-        <el-icon><component v-if="route.meta?.icon" :is="route.meta?.icon"></component></el-icon>
+        <g-icon v-if="route.meta?.icon" :icon="route.meta?.icon"></g-icon>
         <span class="sub-menu-text">{{route.meta?.title}}</span>
       </template>
 
@@ -19,7 +19,7 @@
     </el-sub-menu>
 
     <el-menu-item v-else :index="route.path" @click="toPath(route.path)">
-        <el-icon><component v-if="route.meta?.icon" :is="route.meta?.icon"></component></el-icon>
+        <g-icon v-if="route.meta?.icon" :icon="route.meta?.icon"></g-icon>
         <template #title>{{route.meta?.title}}</template>
     </el-menu-item>
   </div>

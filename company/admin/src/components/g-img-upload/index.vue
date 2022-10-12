@@ -17,7 +17,7 @@
       @success="handleSuccess"
       @preview="handlePictureCardPreview"
     >
-      <el-icon><Plus /></el-icon>
+      <g-icon icon="Plus" :size="30"></g-icon>
       <template #tip v-if="!props.isHideTip && fileList.length < attrs?.limit">
         <slot name="tip">
           <div class="el-upload__tip">图片不能超过 {{props.fileSize}}MB</div>
@@ -48,7 +48,7 @@ import {
   getCurrentInstance,
   ComponentInternalInstance
 } from 'vue'
-interface data {
+interface dataType {
   fileTo: string
 }
 interface response {
@@ -66,7 +66,7 @@ interface upload extends UploadFile {
 const emits = defineEmits(['update:modelValue'])
 const attrs = useAttrs() as unknown as attrsType
 const props = withDefaults(defineProps<{
-  data?: data,
+  data?: dataType,
   action?: string,
   fileSize?: number,
   fileType?: string[],

@@ -12,7 +12,7 @@
         <el-form-item :prop="item.item.prop">
           <template #label>
             <div class="flex">
-              <el-icon><QuestionFilled /></el-icon>
+              <g-icon icon="QuestionFilled"></g-icon>
               <span>{{item.item.label}}</span>
             </div>
           </template>

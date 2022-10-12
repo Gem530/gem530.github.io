@@ -4,16 +4,17 @@
     :model-value="props.show"
     @closed="close"
   >
-    <slot name="content">
-      <g-form
-        ref="GFormRef"
-        v-if="props.show"
-        label-width="100px"
-        :rules="props.rules"
-        :formList="props.formList"
-        @search="search"
-      ></g-form>
-    </slot>
+    <g-form
+      ref="GFormRef"
+      v-if="props.show"
+      label-width="100px"
+      :rules="props.rules"
+      :formList="props.formList"
+      @search="search">
+      <template v-for="(item, i) in props.formList" :key="i">
+        <!-- <template #item.prop v-if="item.type === 'slot'"></template> -->
+      </template>
+    </g-form>
     <template #footer>
       <slot name="footer">
         <span class="dialog-footer">

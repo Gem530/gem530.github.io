@@ -1,4 +1,5 @@
 @import './variables.module.scss';
+@import './iconfont.scss';
 
 $bgThemeWhite: var(--bg-theme-white, $bgThemeWhiteInit);
 $bgThemeGray: var(--bg-theme-gray, $bgThemeGrayInit);
@@ -67,5 +68,12 @@ $baseFixedHeaderHeight: var(--base-side-bar-height, 90px);
   img,
   video {
     max-width: 100% !important;
+  }
+}
+
+// 解决elemnt-plus图标与字体图标冲突
+.el-icon {
+  &.el-input__icon::before {
+    display: none;
   }
 }

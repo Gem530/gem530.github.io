@@ -47,6 +47,14 @@ export const routesList = [
           alwaysShow: true,
           meta: { title: "远程表单", icon: "Search" },
         },
+        {
+          name: 'icon',
+          path: "form/icon",
+          component: "form/icon/index",
+          hidden: false,
+          alwaysShow: true,
+          meta: { title: "选择icon", icon: "ElementPlus" },
+        },
       ]
     },
     {
@@ -58,6 +66,14 @@ export const routesList = [
       alwaysShow: true,
       meta: { title: "表格", icon: "Grid" },
       children: [
+        {
+          name: 'menu',
+          path: "table/menu",
+          component: "table/menu/index",
+          hidden: false,
+          alwaysShow: true,
+          meta: { title: "菜单管理", icon: "MenuIcon" },
+        },
         {
           name: 'table-vue',
           path: "table/index",

@@ -1,6 +1,6 @@
 <template>
   <div class="g-menu-item theme">
-    <el-icon class="g-menu-icon"><component v-if="props.icon" :is="props.icon"></component></el-icon>
+    <g-icon class="g-menu-icon" v-if="props.icon" :icon="props.icon"></g-icon>
     <span class="sub-menu-text">{{props.text}}</span>
   </div>
 </template>
