@@ -30,6 +30,7 @@
 </template>
 
 <script lang="ts" setup name="g-modal-form">
+import { cloneDeep } from '@/utils'
 import {
   ref,
   watch,
@@ -85,7 +86,7 @@ const initModalData = (item: any, title: string = '新增') => {
   setTimeout(()=> {
     // 使用nextTick获取到的GFormRef.value为undfined
     titleR.value = title
-    GFormRef.value.initData(item)
+    GFormRef.value.initData(cloneDeep(item))
   }, 0)
 }
 
