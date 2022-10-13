@@ -30,6 +30,7 @@
 
     <g-modal-form
       title="编辑"
+      ref="modalFormRef"
       v-model:show="state.show"
       :rules="state.dialogRules"
       :formList="state.dialogFormList"
@@ -49,7 +50,9 @@ import {
 } from 'vue'
 
 const GFormRef = ref()
+const modalFormRef = ref()
 const { proxy } = getCurrentInstance() as ComponentInternalInstance as any
+
 const tableData = ref([])
 const columns: any[] = [
   { sort: 1, attrs: {align:'center',type: 'selection'} },
@@ -246,11 +249,12 @@ const selectionChange = (val: any) => {
 }
 
 const editData = (v: any) => {
-  for (let k in v) {
-    state.dialogFormList.forEach((item: any) => {
-      if (item['prop'] === k) item['value'] = v[k]
-    })
-  }
+  // for (let k in v) {
+  //   state.dialogFormList.forEach((item: any) => {
+  //     if (item['prop'] === k) item['value'] = v[k]
+  //   })
+  // }
+  modalFormRef.value.initModalData(v, '编辑')
   state.show = true
 }
 

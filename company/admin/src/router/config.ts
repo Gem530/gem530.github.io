@@ -55,6 +55,14 @@ export const routesList = [
           alwaysShow: true,
           meta: { title: "选择icon", icon: "ElementPlus" },
         },
+        {
+          name: 'tree',
+          path: "form/tree",
+          component: "form/tree/index",
+          hidden: false,
+          alwaysShow: true,
+          meta: { title: "树形组件", icon: "CaretTop" },
+        },
       ]
     },
     {

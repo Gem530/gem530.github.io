@@ -5,9 +5,13 @@
     v-model:visible="visible"
     :placement="props.position">
     <template #reference>
-      <el-input v-model="searchValue" :style="{width: props.width+'px'}" @keyup.enter="searchIcon">
+      <el-input
+        v-model="searchValue"
+        :placeholder="props.placeholder"
+        :style="{width: props.width+'px'}"
+        @keyup.enter="searchIcon">
         <template #prepend>
-          <g-icon :icon="iconCur" :size="20"></g-icon>
+          <g-icon :icon="iconCur" :size="20" v-if="iconCur"></g-icon>
         </template>
       </el-input>
     </template>
@@ -38,12 +42,14 @@ const emits = defineEmits(['update:icon'])
 const props = withDefaults(defineProps<{
   icon?: string,
   width?: number,
+  placeholder?: string,
   trigger?: 'click'|'hover'|'focus'|'contextmenu',
   position?: 'top'|'top-start'|'top-end'|'bottom'|'bottom-start'|'bottom-end'|'left'|'left-start'|'left-end'|'right'|'right-start'|'right-end'
 }>(), {
   width: 650,
   trigger: 'click',
-  position: 'bottom-start'
+  position: 'bottom-start',
+  placeholder: '请选择icon图标'
 })
 
 for (let k in Icons) {
@@ -54,12 +60,14 @@ const iconCur = ref('')
 const visible = ref(false)
 const searchValue = ref('')
 const iconArr = ref(iconList)
-iconCur.value = props.icon ?? iconArr.value[0]
+const propsIcon = props.icon === '#' ? '' : props.icon
+iconCur.value = propsIcon ?? iconArr.value[0]
 searchValue.value = iconCur.value
 
 const searchIcon = () => {
   visible.value = true
-  iconArr.value = iconList.filter(v => v.toLowerCase().indexOf(searchValue.value.toLowerCase()) !== -1)
+  iconArr.value = !searchValue.value ? iconList :
+    iconList.filter(v => v.toLowerCase().indexOf(searchValue.value.toLowerCase()) !== -1)
 }
 
 const chooseIcon = (value: string) => {

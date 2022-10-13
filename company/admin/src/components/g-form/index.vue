@@ -6,7 +6,7 @@
     :rules="props.rules">
     <el-row>
       <template :key="item.key" v-for="item in props.formList">
-        <el-col :span="item.col || 24">
+        <el-col :span="hideHandle(item.isHide) ? (item.col || 24) : 0">
 
           <el-form-item :="{...item}" v-if="item.type === 'input' && hideHandle(item.isHide)">
             <el-input v-model="state.data[item.prop]" :="{...item.attrs}"></el-input>
@@ -71,10 +71,12 @@
             <el-cascader v-model="state.data[item.prop]" :options="item.data" :="{...item.attrs}"/>
           </el-form-item>
 
+          <!-- 使用插槽，value不能为undefind -->
           <el-form-item :="{...item}" v-if="item.type === 'slot' && hideHandle(item.isHide)">
             <slot :name="item.prop"  :="{data: state.data[item.prop], formData: state.data, item}">{{state.data[item.prop]}}</slot>
           </el-form-item>
 
+          <!-- 使用插槽，value不能为undefind -->
           <slot :name="item.prop" v-if="item.type === 'form-slot' && hideHandle(item.isHide)" :="{data: state.data[item.prop], formData: state.data, item}">{{state.data[item.prop]}}</slot>
 
           <el-form-item :="{...item}" v-if="item.type === 'btn' && hideHandle(item.isHide)">
@@ -91,9 +93,11 @@
 
 <script lang="ts" setup name="g-form">
 import dayjs from 'dayjs'
+import { cloneDeep } from '@/utils'
 import { FormRules } from 'element-plus'
 import {
   ref,
+  nextTick,
   reactive,
   useAttrs,
   defineProps,
@@ -144,7 +148,7 @@ const state: {
 state.temp = JSON.parse(JSON.stringify(props.formList))
 state.temp.forEach((item: formItem) => {
   if (item.prop) {
-    state.data[item.prop] = item.value ?? undefined
+    state.data[item.prop] = item.value ?? (item.type === 'slot' ? '' : undefined)
   }
 })
 
@@ -156,6 +160,10 @@ const hideHandle = (val: boolean|Function|undefined) => {
 
 const clearValidte = () => {
   formRef.value.resetFields()
+}
+
+const initData = (item: any) => {
+  state.data = item
 }
 
 const resetHandle = () => {
@@ -170,7 +178,8 @@ const searchHandle = () => {
 }
 
 const formData = () => {
-  const newData = JSON.parse(JSON.stringify(state.data))
+  // const newData = JSON.parse(JSON.stringify(state.data))
+  const newData = cloneDeep(state.data)
   Object.keys(newData).forEach((item: any) => {
     const currentItem = props.formList.find((v: formItem) => v.prop === item)
     if (currentItem) {
@@ -202,7 +211,7 @@ const formData = () => {
   return newData
 }
 
-defineExpose({ clearValidte, resetHandle, searchHandle, hideHandle })
+defineExpose({ initData, clearValidte, resetHandle, searchHandle, hideHandle })
 </script>
 
 <style lang="scss" scoped>
