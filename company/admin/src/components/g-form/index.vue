@@ -183,9 +183,11 @@ const formData = () => {
   Object.keys(newData).forEach((item: any) => {
     const currentItem = props.formList.find((v: formItem) => v.prop === item)
     if (currentItem) {
+      if (newData[item] == undefined || newData[item] == null) return
       switch (currentItem.type) {
         case 'date':
           if (['datetimerange', 'daterange'].includes(currentItem.attrs?.type)) {
+            if (newData[item].length < 2) return
             newData['startDateRange'] = dayjs(newData[item][0]).format(props.dateFormat)
             newData['endDateRange'] = dayjs(newData[item][1]).format(props.dateFormat)
           } else if (['date', 'datetime'].includes(currentItem.attrs?.type) || !currentItem.attrs?.type) {
@@ -194,6 +196,7 @@ const formData = () => {
           break;
         case 'time':
           if (currentItem.attrs?.isRange) {
+            if (newData[item].length < 2) return
             newData['startTimeRange'] = dayjs(newData[item][0]).format(props.timeFormat)
             newData['endTimeRange'] = dayjs(newData[item][1]).format(props.timeFormat)
           } else {

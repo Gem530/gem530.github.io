@@ -1,7 +1,7 @@
 import axios from "axios"
 import router from "@/router"
 import cache from '@/utils/cache'
-import { getItem, setItem } from '@/utils/storage'
+import { getItem, setItem, getLocalItem } from '@/utils/storage'
 import { ElMessage, ElMessageBox } from "element-plus"
 
 // 使用联合类型验证请求方法
@@ -24,8 +24,8 @@ const timeout = 10000
 function request (config: any): Promise<unknown> {
   config.timeout = config.timeout || timeout
   config.url = BASE_URL + config.url
-  // console.log('token--', getItem('token'))
-  config.headers = config.headers || { 'Authorization': getItem('token') || '' }
+  // console.log('token--', getLocalItem('token'))
+  config.headers = config.headers || { 'Authorization': getLocalItem('token') || '' }
 
   // console.log(config, BASE_URL)
 

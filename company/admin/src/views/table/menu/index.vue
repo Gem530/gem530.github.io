@@ -31,7 +31,8 @@
         <g-tree v-model="item.formData[item.item.prop]" @select="selectTree($event, item)"></g-tree>
       </template>
       <template #icon="item">
-        <g-choose-icon v-model:icon="item.formData[item.item.prop]"></g-choose-icon>
+        {{item.formData[item.item.prop]}}
+        <g-choose-icon v-model="item.formData[item.item.prop]"></g-choose-icon>
       </template>
     </g-modal-form>
   </div>
@@ -211,6 +212,7 @@ const toggle = () => {
 }
 
 const editData = (v: any) => {
+  console.log(v)
   modalFormRef.value.initModalData(v, '编辑菜单')
   state.show = true
 }

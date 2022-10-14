@@ -1,7 +1,7 @@
 <template>
   <div>
-    <el-button @click="clickLoading('正在加载中...')">加载</el-button>
-    <el-button @click="clickNotif('通知111111')">通知</el-button>
+    <el-button @click="clickLoading('正在加载中...')" v-hasPermi="['home:rechargechannelamountstatistics']">加载</el-button>
+    <el-button @click="clickNotif('通知111111')" v-if="proxy.$auth.hasPermi(['home:rechargechannelamountstatistics'])">通知</el-button>
     <el-button :key="item.type" v-for="item in notList" @click="clickNotif(item)">{{item.message}}</el-button>
     <el-button @click="clickMessage('消息111111')">消息</el-button>
     <el-button :key="item.type" v-for="item in msgList" @click="clickMessage(item)">{{item.message}}</el-button>

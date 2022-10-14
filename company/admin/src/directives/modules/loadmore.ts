@@ -1,3 +1,6 @@
+/**
+ * v-loadmores 触底加载
+ */
 export default {
   name: 'loadmores', // 自定义指令名称
   fn: {

@@ -44,8 +44,22 @@ const targetPoint = ref({
 })
 
 onMounted(async () => {
-  localInfo.value = await getLocation()
-  init()
+  localInfo.value = {
+    point: {
+      lng: props.lng,
+      lat: props.lat
+    },
+    address: ''
+  }
+  getLocation().then((res) => {
+    console.log(res)
+    localInfo.value = res
+    init()
+  }).catch((err: number) => {
+    // err 获取定位的状态码
+    console.log(err)
+    init()
+  })
 })
 
 // 获取当前位置

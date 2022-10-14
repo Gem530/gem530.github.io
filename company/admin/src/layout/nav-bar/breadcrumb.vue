@@ -2,14 +2,9 @@
   <el-breadcrumb separator="/">
     <template
       :key="item.path"
-      v-for="(item, i) in breadList">
+      v-for="item in breadList">
       <el-breadcrumb-item v-if="item.path">
-        <div v-if="(i + 1) < breadList.length">
-          <g-menu-item :icon="item.meta?.icon" :text="item.meta?.title"></g-menu-item>
-        </div>
-        <a v-else :href="item.path" class="color-black theme">
-          <g-menu-item :icon="item.meta?.icon" :text="item.meta?.title"></g-menu-item>
-        </a>
+        <g-menu-item :icon="item.meta?.icon" :text="item.meta?.title"></g-menu-item>
       </el-breadcrumb-item>
     </template>
   </el-breadcrumb>

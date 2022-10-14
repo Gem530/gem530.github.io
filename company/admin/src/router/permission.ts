@@ -1,13 +1,13 @@
 import router from './index'
+import 'nprogress/nprogress.css'
 import NProgress from 'nprogress'
 import store from '@/store/index'
-import { getItem } from '@/utils/storage'
-import 'nprogress/nprogress.css'
+import { getLocalItem } from '@/utils/storage'
 
 let initRoute = false // 初始化动态路由
 router.beforeEach(async (to, from, next) => {
   NProgress.start()
-  const token = getItem('token')
+  const token = getLocalItem('token')
   // console.log('beforeEach--', to, from)
   // console.log(store.state.menus)
   // console.log(router.getRoutes())

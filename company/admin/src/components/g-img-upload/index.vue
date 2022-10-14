@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts" setup name="g-upload">
-import { getItem } from '@/utils/storage'
+import { getLocalItem } from '@/utils/storage'
 import { UploadFile, ElMessage, UploadRawFile } from 'element-plus'
 import {
   ref,
@@ -87,7 +87,7 @@ const props = withDefaults(defineProps<{
 
 const fileList = ref<UploadFiles>([])
 const { proxy } = getCurrentInstance() as ComponentInternalInstance as any
-const headers = ref({ Authorization: getItem('token') })
+const headers = ref({ Authorization: getLocalItem('token') })
 const imgView = reactive({
   index: 5,
   showView: false

@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2>地图</h2>
-    <g-map @getMapInfo="getMapInfo"></g-map>
+    <g-map @getMapInfo="getMapInfo" :lng="116.404" :lat="39.915"></g-map>
   </div>
 </template>
 

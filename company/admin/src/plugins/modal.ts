@@ -13,8 +13,14 @@ export default {
     ElNotification(content)
   },
   // 消息弹窗
-  message (content: string|MessageParams) {
-    ElMessage(content)
+  message (content: MessageParams|string) {
+    let container: MessageParams
+    if (typeof content === 'string') {
+      container = { type: 'success', message: content }
+    } else {
+      container = content
+    }
+    ElMessage(container)
   },
   // 确认窗体
   confirm (content: string, title: string, config: ElMessageBoxOptions = {}) {

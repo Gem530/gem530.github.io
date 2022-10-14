@@ -21,8 +21,10 @@ const router = useRouter()
 const { isFullscreen, enter, exit, toggle } = useFullscreen();
 
 const loginOut = () => {
-  store.dispatch('loginOut')
-  router.push('/login')
+  store.dispatch('loginOut').then(() => {
+    router.push('/login')
+    location.reload()
+  })
 }
 </script>
 

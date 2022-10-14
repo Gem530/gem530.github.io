@@ -1,3 +1,6 @@
+/**
+ * v-copy 复制文字
+ */
 export default {
   name: 'copy',
   fn: {

@@ -4,17 +4,26 @@
     :trigger="props.trigger"
     v-model:visible="visible"
     :placement="props.position">
+    
     <template #reference>
       <el-input
-        v-model="searchValue"
-        :placeholder="props.placeholder"
-        :style="{width: props.width+'px'}"
-        @keyup.enter="searchIcon">
+        readonly
+        v-model="iconCur"
+        :placeholder="props.placeholder">
         <template #prepend>
           <g-icon :icon="iconCur" :size="20" v-if="iconCur"></g-icon>
         </template>
+        <template #append>
+          <g-icon icon="DocumentCopy" v-copy="iconCur" v-copy:callback="copySuccess" @click.stop=""></g-icon>
+        </template>
       </el-input>
     </template>
+
+    <el-input
+      v-model="searchValue"
+      placeholder="请输入图标名称，不区分大小写"
+      @keyup.enter="searchIcon"
+    />
     <div class="icon-flex">
       <div
         :key="item"
@@ -33,15 +42,19 @@ import { iconList } from './config'
 import * as Icons from '@element-plus/icons-vue'
 import {
   ref,
+  watch,
   defineEmits,
   defineProps,
-  withDefaults
+  withDefaults,
+  getCurrentInstance,
+  ComponentInternalInstance
 } from 'vue'
 
-const emits = defineEmits(['update:icon'])
+const emits = defineEmits(['update:modelValue'])
+const { proxy } = getCurrentInstance() as ComponentInternalInstance as any
 const props = withDefaults(defineProps<{
-  icon?: string,
   width?: number,
+  modelValue?: string,
   placeholder?: string,
   trigger?: 'click'|'hover'|'focus'|'contextmenu',
   position?: 'top'|'top-start'|'top-end'|'bottom'|'bottom-start'|'bottom-end'|'left'|'left-start'|'left-end'|'right'|'right-start'|'right-end'
@@ -60,9 +73,11 @@ const iconCur = ref('')
 const visible = ref(false)
 const searchValue = ref('')
 const iconArr = ref(iconList)
-const propsIcon = props.icon === '#' ? '' : props.icon
-iconCur.value = propsIcon ?? iconArr.value[0]
-searchValue.value = iconCur.value
+
+watch(() => props.modelValue, (value: string|undefined) => {
+  if (value === undefined || value === '' || value === '#') return
+  iconCur.value = value ?? iconArr.value[0]
+})
 
 const searchIcon = () => {
   visible.value = true
@@ -73,8 +88,12 @@ const searchIcon = () => {
 const chooseIcon = (value: string) => {
   iconCur.value = value
   visible.value = false
-  searchValue.value = iconCur.value
-  emits('update:icon', value)
+  searchValue.value = ''
+  emits('update:modelValue', value)
+}
+
+const copySuccess = () => {
+  proxy.$modal.message('复制成功')
 }
 </script>
 

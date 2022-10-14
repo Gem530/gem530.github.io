@@ -2,8 +2,8 @@
 import { routesList } from '@/router/config'
 import { loginInfo, tagsView } from '@/api/type'
 import { getAddRoutes } from '@/router/add-routes'
-import { getItem, setItem, removeItem } from '@/utils/storage'
 import { loginAPI, getInfoAPI, logoutAPI, getRoutersAPI } from '@/api/user'
+import { getItem, setItem, removeAllItem, getLocalItem, setLocalItem, removeLocalItem } from '@/utils/storage'
 
 export default {
   namespaced: true,
@@ -16,7 +16,8 @@ export default {
     avator: '',
     userInfo: undefined,
     menus: [] as tagsView[],
-    token: getItem('token') || '',
+    token: getLocalItem('token') || '',
+    permissions: getItem('permissions') || [],
   },
   getters: {
     // 派生状态 就和vue的computed差不多
@@ -29,7 +30,7 @@ export default {
     // 提交状态修改 不支持异步操作
     setToken (state: any, token: any) {
       state.token = token
-      setItem('token', token)
+      setLocalItem('token', token)
     },
     setMenus (state: any, menus: tagsView[]) {
       state.menus = menus
@@ -41,6 +42,7 @@ export default {
       if (res.roles && res.roles.length > 0) { // 验证返回的roles是否是一个非空数组
         state.roles = res.roles
         state.permissions = res.permissions
+        setItem('permissions', res.permissions)
       } else {
         state.roles = ['ROLE_DEFAULT']
       }
@@ -90,7 +92,8 @@ export default {
           state.token = ''
           state.roles = []
           state.permissions = []
-          removeItem('token')
+          removeLocalItem('token')
+          removeAllItem()
           resolve(true)
         }).catch((err: Error) => {
           reject(err)
