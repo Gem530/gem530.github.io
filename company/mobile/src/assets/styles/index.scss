@@ -1,1 +1,15 @@
-$bodyColorWhite: var(--body-color-white, #fff);
+@import './iconfont.scss';
+@import './transition.scss';
+
+$bodyColorGray: var(--body-color-gray, #AAAAAA);
+$bodyColorBlue: var(--body-color-blue, #2879ff);
+$bodyColorWhite: var(--body-color-white, #ffffff);
+$bodyColorGreen: var(--body-color-green, #00c087);
+$bodyColorBlack: var(--body-color-black, #000000);
+$bodyColorGolden: var(--body-color-golden, #FFD78F);
+$bodyColorOrange: var(--body-color-orange, #fd5656);
+$bodyColorDefault: var(--body-color-default, #333333);
+$bodyColorDescGray: var(--body-color-desc-gray, #999999);
+$bodyBackgroundGray: var(--body-background-gray, #f8f7f5);
+$bodyColorGreenOpacity: var(--body-color-green-opacity, #e6f8f5);
+$bodyColorOrangeOpacity: var(--body-color-orange-opacity, #fcefec);

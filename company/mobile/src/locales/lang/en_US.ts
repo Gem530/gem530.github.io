@@ -5,6 +5,9 @@ export default {
     },
     me: {
       title: 'ME'
+    },
+    detail: {
+      title: 'Detail'
     }
   }
 }

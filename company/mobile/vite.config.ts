@@ -49,25 +49,25 @@ export default defineConfig(({ command, mode }) => {
       },
       postcss: {
         plugins: [
+          autoprefixer(), // 自动补全css浏览器前缀
           postcssToRem({ // 搭配 amfe-flexible 使用，amfe-flexible 在main.ts中引入
             rootValue: 37.5, //1rem的大小
             propList: ["*"], //需要转换的属性
             // selectorBlackList: ['.norem'] // 过滤掉.norem- 开头的class，不进行rem转换
           }),
-          autoprefixer(), // 自动补全css浏览器前缀
         ],
       },
     },
     plugins: [
       vue(),
       Components({
-        //组件自动导入配置
-        dirs: ["src/components"],
-        extensions: ["vue", "tsx", "jsx"],
         // 搜索子目录
         deep: true,
+        //组件自动导入配置
+        dirs: ["src/components"],
         // ui库解析器，也可以自定义
         resolvers: [VantResolver()],
+        extensions: ["vue", "tsx", "jsx"],
       })
     ]
   }

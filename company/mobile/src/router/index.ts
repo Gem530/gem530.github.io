@@ -12,8 +12,14 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/me',
     name: 'Me',
-    component:()=>import(/* webpackChunkName: "home" */ '@/views/me/index.vue'),
+    component:()=>import(/* webpackChunkName: "me" */ '@/views/me/index.vue'),
     meta:{ title: t('router.me.title') }
+  },
+  {
+    path: '/detail',
+    name: 'Detail',
+    component:()=>import(/* webpackChunkName: "home" */ '@/views/detail/index.vue'),
+    meta:{ title: t('router.detail.title') }
   },
 ]
 
@@ -21,7 +27,7 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
-    return { top: 0 }
+    return { top: savedPosition?.top || 0 } // 当前页面刷新，会保存滚动条位置
   }
 })
 

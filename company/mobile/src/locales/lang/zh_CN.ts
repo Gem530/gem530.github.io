@@ -5,6 +5,9 @@ export default {
     },
     me: {
       title: '我的'
+    },
+    detail: {
+      title: '详情'
     }
   }
 }
