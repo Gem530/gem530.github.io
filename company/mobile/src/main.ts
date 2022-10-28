@@ -6,6 +6,8 @@ import i18n from './locales'
 import './router/permission'
 import router from './router'
 
+import 'vant/es/toast/style'
+
 const app = createApp(App)
 
 app.use(router)
