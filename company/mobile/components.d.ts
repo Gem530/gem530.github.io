@@ -8,11 +8,15 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     Footer: typeof import('./src/components/Footer/index.vue')['default']
+    GForm: typeof import('./src/components/GForm/index.vue')['default']
     NavBar: typeof import('./src/components/NavBar/index.vue')['default']
     Qrcode: typeof import('./src/components/Qrcode/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     VanButton: typeof import('vant/es')['Button']
+    VanCellGroup: typeof import('vant/es')['CellGroup']
+    VanField: typeof import('vant/es')['Field']
+    VanForm: typeof import('vant/es')['Form']
     VanIcon: typeof import('vant/es')['Icon']
     VanNavBar: typeof import('vant/es')['NavBar']
     VanTabbar: typeof import('vant/es')['Tabbar']
