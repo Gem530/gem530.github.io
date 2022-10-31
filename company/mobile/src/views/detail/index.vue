@@ -4,20 +4,23 @@
       <template #right>121</template>
     </NavBar>
     <GForm
+      ref="GFormRef"
       input-align="right"
       :formList="formList"
       error-message-align="right"
       @submit="submit"
     ></GForm>
+    <button @click="onSubmit">提交</button>
   </div>
 </template>
 
 <script lang="ts" setup name="Detail">
 import { ref } from 'vue'
 
+const GFormRef= ref()
 const formList = ref([
   {
-    value: '12',
+    values: '12',
     type: 'input',
     label: '用户名',
     required: true,
@@ -35,7 +38,7 @@ const formList = ref([
     rules: [{ required: true, message: '不能为空' }],
   },
   {
-    value: '深圳',
+    values: '深圳',
     type: 'input',
     label: '地址',
     required: true,
@@ -111,7 +114,7 @@ const formList = ref([
     type: 'upload',
     required: true,
     rules: [{ required: true, message: '不能为空' }],
-    value: ['https://fastly.jsdelivr.net/npm/@vant/assets/leaf.jpeg'],
+    values: ['https://fastly.jsdelivr.net/npm/@vant/assets/leaf.jpeg'],
     attrs: {
       maxCount: 1
     }
@@ -124,10 +127,10 @@ const formList = ref([
     required: true,
     valueKey: 'value',
     placeholder: '请选择',
-    columnsFieldNames: { text: 'name' },
     rules: [{ required: true, message: '不能为空' }],
     attrs: {
-      title: '选项'
+      title: '选项',
+      columnsFieldNames: { text: 'name' },
     },
     // data: [ '湖南', '广东', '广西' ]
     data: [
@@ -136,6 +139,103 @@ const formList = ref([
       { name: '广西', value: 3 },
     ]
   },
+  {
+    label: '时间',
+    required: true,
+    prop: 'createTime',
+    name: 'createTime',
+    type: 'timePicker',
+    placeholder: '请选择时间',
+    rules: [{ required: true, message: '不能为空' }],
+    attrs: {
+      type: 'date',
+      title: '开始时间'
+    },
+  },
+  {
+    label: '日历',
+    required: true,
+    // values: new Date(),
+    type: 'datePicker',
+    prop: 'dateCalendar',
+    name: 'dateCalendar',
+    placeholder: '请选择日期',
+    rules: [{ required: true, message: '不能为空' }],
+    attrs: {
+      title: '日期',
+      // type: 'range'
+      // type: 'multiple'
+      showConfirm: false
+    },
+  },
+  {
+    required: true,
+    prop: 'areaPicker',
+    name: 'areaPicker',
+    type: 'areaPicker',
+    label: '地址picker',
+    placeholder: '请选择地址', // 地址列表使用vant提供的地址
+    rules: [{ required: true, message: '不能为空' }],
+    attrs: {
+      title: '地址picker',
+      columnsPlaceholder: ['请选择', '请选择', '请选择']
+    },
+  },
+  {
+    label: '级联',
+    required: true,
+    type: 'cascader',
+    prop: 'cascaders',
+    name: 'cascaders',
+    placeholder: '请选择',
+    rules: [{ required: true, message: '不能为空' }],
+    attrs: {
+      title: '级联',
+      fieldNames: {
+        text: 'name',
+        value: 'code',
+        children: 'items'
+      }
+    },
+    data: [
+      {
+        name: '浙江省',
+        code: '330000',
+        items: [{ name: '杭州市', code: '330100' }],
+      },
+      {
+        name: '江苏省',
+        code: '320000',
+        items: [{ name: '南京市', code: '320100' }],
+      },
+    ]
+  },
+  {
+    prop: 'target',
+    name: 'target',
+    type: 'select',
+    required: true,
+    label: '目的地',
+    placeholder: '请选择',
+    rules: [{ required: true, message: '不能为空' }],
+    attrs: {
+      title: '选项',
+    },
+    data: [
+      { name: '湖南', value: 1 },
+      { name: '广东', value: 2 },
+      { name: '广西', value: 3 },
+    ]
+  },
+  {
+    type: 'submit',
+    attrs: {
+      text: 'submit'
+    }
+  },
+  {
+    type: 'reset'
+  }
 ])
 
 // 函数校验
@@ -147,6 +247,10 @@ const validatorMessage = (val: number) => {
 
 const submit = (item: any) => {
   console.log('submit', item)
+}
+
+const onSubmit = () => {
+  GFormRef.value.Submithandle()
 }
 </script>
 
