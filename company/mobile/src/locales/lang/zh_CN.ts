@@ -7,7 +7,7 @@ export default {
       title: '我的'
     },
     detail: {
-      title: '详情'
+      title: '表单'
     }
   }
 }

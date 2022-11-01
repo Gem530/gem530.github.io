@@ -7,7 +7,7 @@ export default {
       title: 'ME'
     },
     detail: {
-      title: 'Detail'
+      title: 'Form'
     }
   }
 }

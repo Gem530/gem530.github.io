@@ -117,9 +117,21 @@
         <GSelect
           :="{...item}"
           :data="item.data"
+          :title="item.attrs.title"
           v-if="item.type == 'select'"
+          :dataFormat="item.attrs.dataFormat"
+          :cancelText="item.attrs.cancelText"
+          :confirmText="item.attrs.confirmText"
+          :showAllChoose="item.attrs.showAllChoose"
           v-model="state.data[item.prop]"
         ></GSelect>
+
+        <slot
+          v-if="item.type == 'slot'"
+          :name="`field-${item.prop}`"
+          :item="item"
+          :data="state.data"
+        ></slot>
 
         <div style="margin: 16px;" v-if="item.type == 'submit'">
           <van-button
@@ -193,7 +205,7 @@ const state: {
 state.temp = JSON.parse(JSON.stringify(props.formList))
 state.temp.forEach((item: formItem) => {
   if (item.prop) {
-    state.data[item.prop] = item.values ?? (['slot', 'stepper'].indexOf(item.type) != -1 ? '' : undefined)
+    state.data[item.prop] = item.values ?? (['slot', 'stepper'].includes(item.type) ? '' : undefined)
   }
 })
 

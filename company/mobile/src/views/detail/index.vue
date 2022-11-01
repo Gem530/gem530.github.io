@@ -8,14 +8,23 @@
       input-align="right"
       :formList="formList"
       error-message-align="right"
-      @submit="submit"
-    ></GForm>
+      @submit="submit">
+      <template #field-test="{item, data}">
+        <!-- {{item}}--{{data}} -->
+        <van-field
+          label="测试"
+          placeholder="请填写测试"
+          v-model="data[item.prop]"
+        />
+      </template>
+    </GForm>
     <button @click="onSubmit">提交</button>
   </div>
 </template>
 
 <script lang="ts" setup name="Detail">
 import { ref } from 'vue'
+import { toArrayTwo } from '@/utils'
 
 const GFormRef= ref()
 const formList = ref([
@@ -211,6 +220,7 @@ const formList = ref([
     ]
   },
   {
+    values: [1,2],
     prop: 'target',
     name: 'target',
     type: 'select',
@@ -219,13 +229,24 @@ const formList = ref([
     placeholder: '请选择',
     rules: [{ required: true, message: '不能为空' }],
     attrs: {
-      title: '选项',
+      title: '多选',
+      // showAllChoose: true,
+      cancelText: 'cancel',
+      confirmText: 'confirm',
+      dataFormat: {
+        text: 'name',
+        value: 'value'
+      }
     },
     data: [
       { name: '湖南', value: 1 },
       { name: '广东', value: 2 },
       { name: '广西', value: 3 },
     ]
+  },
+  {
+    type: 'slot',
+    prop: 'test'
   },
   {
     type: 'submit',
