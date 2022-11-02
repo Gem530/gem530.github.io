@@ -8,6 +8,9 @@ export default {
     },
     detail: {
       title: '表单'
+    },
+    commonStyle: {
+      title: '复用样式'
     }
   }
 }

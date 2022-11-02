@@ -8,6 +8,9 @@ export default {
     },
     detail: {
       title: 'Form'
+    },
+    commonStyle: {
+      title: 'CommonStyle'
     }
   }
 }

@@ -2,8 +2,9 @@
   <div>
     <h1>{{$t('router.home.title')}}</h1>
     <van-button @click="changeLanguage">当前语言-{{locale}}</van-button>
-    <router-link to="/me">我的</router-link>
-    <router-link to="/detail">详情</router-link>
+    <p><router-link to="/me">我的</router-link></p>
+    <p><router-link to="/detail">详情</router-link></p>
+    <p><router-link to="/commonStyle">复用样式</router-link></p>
     <img :src="img" alt="">
     <Qrcode value="https://www.baidu.com"></Qrcode>
     <p></p>

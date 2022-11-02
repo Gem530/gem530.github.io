@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer">
+  <footer :class="{'footer': true, 'height': tabShow}">
     <transition name="up-down">
 
       <van-tabbar
@@ -75,7 +75,9 @@ const changeFooter = (val: number) => {
 
 <style lang="scss" scoped>
 .footer {
-  height: 50px;
+  &.height {
+    height: 50px;
+  }
 
   :deep(.van-tabbar) {
     border-radius: 10px 10px 0 0;

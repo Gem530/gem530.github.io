@@ -1,9 +1,11 @@
 <template>
-  <van-nav-bar class="custom-nav-bar" :title="titleName" :="attrs" @click-left="clickLeft">
-    <template v-if="slots.left" #left><slot name="left"></slot></template>
-    <template v-if="slots.title" #title><slot name="title"></slot></template>
-    <template v-if="slots.right" #right><slot name="right"></slot></template>
-  </van-nav-bar>
+  <van-config-provider :theme-vars="themeVars" class="height">
+    <van-nav-bar class="custom-nav-bar" :title="titleName" :="attrs" @click-left="clickLeft">
+      <template v-if="slots.left" #left><slot name="left"></slot></template>
+      <template v-if="slots.title" #title><slot name="title"></slot></template>
+      <template v-if="slots.right" #right><slot name="right"></slot></template>
+    </van-nav-bar>
+  </van-config-provider>
 </template>
 
 <script lang="ts" setup name="NavBar">
@@ -30,6 +32,10 @@ const props = withDefaults(defineProps<{
 })
 
 const titleName = ref('')
+const themeVars = ref({
+  navBarIconColor: '#333',
+  navBarBackgroundColor: 'transparent'
+})
 if (typeof props.title == 'boolean') titleName.value = route.meta.title as string
 else if (props.title) titleName.value = props.title
 
@@ -39,19 +45,11 @@ const clickLeft = () => {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+.height {
+  min-height: 46px;
+}
 .custom-nav-bar{
-  &.van-nav-bar{
-    box-shadow: 0 2px 5px 0 rgba(37,27,96,0.10);
-    background:var(--body-color-white) !important;
-    .van-icon{
-      color:var(--body-txet-nav-color) !important;
-    }
-    .van-nav-bar__title{
-      font-family: SFCompactDisplay-Bold;
-      font-size:16px;
-      color:var(--body-color-nav-darkblue) !important;
-    }
-  }
+  backdrop-filter: blur(8px); // 动态毛玻璃的效果 这个盒子下层的的元素出现毛玻璃效果
 }
 </style>

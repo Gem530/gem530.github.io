@@ -18,8 +18,14 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/detail',
     name: 'Detail',
-    component:()=>import(/* webpackChunkName: "home" */ '@/views/detail/index.vue'),
+    component:()=>import(/* webpackChunkName: "detail" */ '@/views/detail/index.vue'),
     meta:{ title: t('router.detail.title') }
+  },
+  {
+    path: '/commonStyle',
+    name: 'CommonStyle',
+    component:()=>import(/* webpackChunkName: "commonStyle" */ '@/views/commonStyle/index.vue'),
+    meta:{ title: t('router.commonStyle.title') }
   },
 ]
 
