@@ -21,3 +21,9 @@ You can learn more about Take Over mode [here](https://github.com/johnsoncodehk/
   css类名
 
 https://aitrade.ga/books/lightweight-charts-docs-cn/book/home.html k线图学习链接
+
+package.json
+scripts {
+  build: 'vue-tsc --noEmit && vite build' // 打包时校验ts
+  build: 'vite build' // 打包时不校验ts
+}

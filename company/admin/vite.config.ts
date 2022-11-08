@@ -61,5 +61,16 @@ export default defineConfig({
       threshold: 10240,
       algorithm: 'gzip',
     })
-  ]
+  ],
+  build: {
+    outDir: 'admin', // 指定输出路径，与vite.config.ts平级
+    minify: 'terser', // 混淆器，terser构建后文件体积更小
+    terserOptions: {
+      compress: {
+        //生产环境时移除console
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
+  },
 })
