@@ -282,6 +282,72 @@ const init = () => {
   // });
 }
 
+const update = () => {
+  var data = splitData(JSON.parse(JSON.stringify(rawDatas.value)));
+  myChart.setOption({
+    series: [
+      {
+        name: 'Dow-Jones index',
+        type: 'candlestick',
+        data: data.values,
+        itemStyle: {
+          color: upColor,
+          color0: downColor,
+          borderColor: undefined,
+          borderColor0: undefined
+        },
+      },
+      {
+        name: 'MA5',
+        type: 'line',
+        data: calculateMA(5, data),
+        smooth: true,
+        showSymbol: false,
+        lineStyle: {
+          opacity: 0.5
+        }
+      },
+      {
+        name: 'MA10',
+        type: 'line',
+        data: calculateMA(10, data),
+        smooth: true,
+        showSymbol: false,
+        lineStyle: {
+          opacity: 0.5
+        }
+      },
+      {
+        name: 'MA20',
+        type: 'line',
+        data: calculateMA(20, data),
+        smooth: true,
+        showSymbol: false,
+        lineStyle: {
+          opacity: 0.5
+        }
+      },
+      {
+        name: 'MA30',
+        type: 'line',
+        data: calculateMA(30, data),
+        smooth: true,
+        showSymbol: false,
+        lineStyle: {
+          opacity: 0.5
+        }
+      },
+      {
+        name: 'Volume',
+        type: 'bar',
+        xAxisIndex: 1,
+        yAxisIndex: 1,
+        data: data.volumes
+      }
+    ]
+  })
+}
+
 let timer: any
 let count: number = 1
 const cricule = () => {
@@ -303,7 +369,7 @@ const criculeHandle = () => {
     count++
     rawDatas.value = [...rawDatas.value, ["2016-06-22", 17832.67, 17780.83, 17770.36, 17920.16, 89440000]]
     // console.log(rawDatas.value)
-    init()
+    update()
     // ["2016-06-22", 17832.67, 17780.83, 17770.36, 17920.16, 89440000]
   }, 1000)
 }
