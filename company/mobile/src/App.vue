@@ -8,7 +8,7 @@
   </router-view>
 
   <FixedIcon :size="30">
-    <van-icon name="gift-card" size="30"/>
+    <van-icon name="gift-card" size="30" color="orange"/>
   </FixedIcon>
 
   <Footer></Footer>
