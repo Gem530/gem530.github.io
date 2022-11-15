@@ -47,11 +47,11 @@
 
     <div class="flex-betweent-item">
       <div class="f-b-i-left">f-b-i-left</div>
-      <div class="f-b-i-rght">f-b-i-rght</div>
+      <div class="f-b-i-right">f-b-i-right</div>
     </div>
     <div class="flex-betweent-item">
       <div class="f-b-i-left">f-b-i-left</div>
-      <div class="f-b-i-rght">f-b-i-rght</div>
+      <div class="f-b-i-right">f-b-i-right</div>
     </div>
 
     <div class="html-value" v-html="htmlValue"></div>
@@ -298,7 +298,7 @@ const htmlValue = "<p><span style=\"color: rgb(225, 60, 57); font-size: 22px;\">
     font-weight: 600;
   }
   .f-b-i-right {
-    color: #eee;
+    color: #999;
   }
 }
 
