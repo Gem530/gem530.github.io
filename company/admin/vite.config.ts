@@ -14,10 +14,10 @@ export default defineConfig({
     port: 9000,
     open: true, // 是否自动打开浏览器
     proxy: {
-      '/api': {
-        target: 'http://54.151.135.104:9001',
+      '/dev-api': {
+        target: 'http://13.212.17.88:8086/prod-api',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
+        rewrite: (path) => path.replace(/^\/dev-api/, ""),
       }
     }
   },

@@ -45,6 +45,9 @@
           @change="remoteSelectChange"
         />
       </template>
+      <template #make-btn>
+        <el-button>测试按钮</el-button>
+      </template>
     </g-form>
   </div>
 </template>

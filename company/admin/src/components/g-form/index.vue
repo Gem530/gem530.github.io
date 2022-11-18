@@ -73,16 +73,21 @@
 
           <!-- 使用插槽，value不能为undefind -->
           <el-form-item :="{...item}" v-if="item.type === 'slot' && hideHandle(item.isHide)">
-            <slot :name="item.prop"  :="{data: state.data[item.prop], formData: state.data, item}">{{state.data[item.prop]}}</slot>
+            <slot :name="item.prop" :="{data: state.data[item.prop], formData: state.data, item}">
+              <Body :="item"/>
+            </slot>
           </el-form-item>
 
           <!-- 使用插槽，value不能为undefind -->
-          <slot :name="item.prop" v-if="item.type === 'form-slot' && hideHandle(item.isHide)" :="{data: state.data[item.prop], formData: state.data, item}">{{state.data[item.prop]}}</slot>
+          <slot :name="item.prop" v-if="item.type === 'form-slot' && hideHandle(item.isHide)" :="{data: state.data[item.prop], formData: state.data, item}">
+            <Body :="item"/>
+          </slot>
+
 
           <el-form-item :="{...item}" v-if="item.type === 'btn' && hideHandle(item.isHide)">
             <el-button v-if="item.btn?.search" type="primary" @click="searchHandle">{{item.btn?.searchName || '提交'}}</el-button>
             <el-button v-if="item.btn?.reset" @click="resetHandle">{{item.btn?.resetName || '重置'}}</el-button>
-            <slot name="make-btn"></slot>
+            <slot name="make-btn"><Body/></slot>
           </el-form-item>
 
         </el-col>
@@ -96,10 +101,12 @@ import dayjs from 'dayjs'
 import { cloneDeep } from '@/utils'
 import { FormRules } from 'element-plus'
 import {
+  h,
   ref,
   nextTick,
   reactive,
   useAttrs,
+  useSlots,
   defineProps,
   defineEmits,
   defineExpose,
@@ -124,7 +131,8 @@ interface formItem {
 }
 
 const formRef = ref()
-const attrs = useAttrs()
+const attrs: any = useAttrs()
+const slots: any = useSlots()
 const emits = defineEmits(['search'])
 const props = withDefaults(defineProps<{
   rules?: FormRules,
@@ -151,6 +159,21 @@ state.temp.forEach((item: formItem) => {
     state.data[item.prop] = item.value ?? (item.type === 'slot' ? '' : undefined)
   }
 })
+
+console.log(attrs.slots)
+// const Body = (item: any) => {
+//   console.log('item', item)
+//   return h("div");
+// };
+const Body = (item: any) => {
+  console.log('item', item)
+  if (item.type != 'slot') return
+  let slotTemp = slots[item.prop] ?? attrs.slots[item.prop]
+  console.log('---', slotTemp)
+  return h('div', {
+    customSlot: () => [slotTemp()]
+  })
+}
 
 // 是否隐藏
 const hideHandle = (val: boolean|Function|undefined) => {

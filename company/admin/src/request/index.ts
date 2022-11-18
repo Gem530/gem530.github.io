@@ -76,6 +76,14 @@ function request (config: any): Promise<unknown> {
           router.push('/login')
         }).catch(() => {})
         reject(data)
+      } else if (data.code === 409) {
+        ElMessageBox.confirm(
+          '您的账号已在其他设备登录，请重新登录',
+          '提示'
+        ).then(() => {
+          router.push('/login')
+        }).catch(() => {})
+        reject(data)
       } else {
         ElMessage({
           message: data.msg,

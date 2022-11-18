@@ -27,13 +27,14 @@
       :rules="state.dialogRules"
       :formList="state.dialogFormList"
       @confirm="confirm">
-      <template #parentId="item">
+      <template #parentId>parentId1111</template>
+      <template #icon>icon1111</template>
+      <!-- <template #parentId="item">
         <g-tree v-model="item.formData[item.item.prop]" @select="selectTree($event, item)"></g-tree>
       </template>
       <template #icon="item">
-        {{item.formData[item.item.prop]}}
         <g-choose-icon v-model="item.formData[item.item.prop]"></g-choose-icon>
-      </template>
+      </template> -->
     </g-modal-form>
   </div>
 </template>
