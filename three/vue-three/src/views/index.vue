@@ -78,7 +78,7 @@ const init = async () => {
   scene.add(point); // 点光源添加到场景中
 
   // 环境光
-  ambient = new THREE.AmbientLight(0x444444);
+  ambient = new THREE.AmbientLight(0xffffff);
   scene.add(ambient); // 环境光添加到场景中
 
   // 相机设置
