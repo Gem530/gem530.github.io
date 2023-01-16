@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Three.js-webgl室内设计效果全景在线预览</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+
+    #menu {
+      position: absolute;
+      bottom: 0px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      z-index: 102;
+      width: 500px;
+      height: 80px
+    }
+
+    #menu>div {
+      padding: 5px;
+    }
+
+    #menu span {
+      display: inline-block;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    .el-button--danger {
+      font-size: 25px !important;
+      background: rgba(0, 0, 0, 0.5) !important;
+      border-width: 0px !important;
+      width: 50px !important;
+      height: 50px !important;
+    }
+
+    [v-cloak] {
+      display: none;
+    }
+  </style>
+  <script src="js/three.min.js"></script>
+  <script src="js/OrbitControls.js"></script>
+  <script src="js/vue@2.5.16.min.js"></script>
+  <script src="js/elementUI.js"></script>
+  <link rel="stylesheet" href="css/index.css">
+  <script src="js/path.js"></script>
+</head>
+
+<body>
+  <div id="app" z-index="105">
+    <div v-cloak id="menu" :style="{left:width/2 + -250+'px',}">
+      <div><span style="font-weight:bold;cursor:default;"> 风格:</span><span v-for="obj in styleArr"
+          @click="styleClick(obj)" :style="obj.styleObj"> {{ obj.name }}</span></div>
+      <div><span style="font-weight:bold;cursor:default;"> 位置:</span><span v-for="obj in posArr" @click="posClick(obj)"
+          :style="obj.styleObj" v-if="obj.jpgNameArr.length"> {{ obj.name }}</span></div>
+    </div>
+    <div style="position: absolute;right:5px;" :style="{top:height/2+'px'}">
+      <el-button type="danger" circle icon="el-icon-arrow-right" @click="nextClick()"></el-button>
+    </div>
+    <div style="position: absolute;left:5px;" :style="{top:height/2+'px'}">
+      <el-button type="danger" circle icon="el-icon-arrow-left" @click="upClick()"></el-button>
+    </div>
+    <div v-cloak
+      style="color:#00ffff;width:60px;height:60px;border-radius: 30px;left:5px;top:5px;font-size:18px;background: rgba(0, 0, 0, 0.5);position: absolute;">
+      <div style="margin-top:17px;width:60px;text-align:center;"> {{ num }}/{{ N }}</div>
+    </div>
+    <div style="position: absolute;right:20px;top:20px">
+      <el-button type="danger" circle @click="audioClick()"><i><img
+            :src="(audioBoool)?('./UI/打开声音.png'):('./UI/关闭声音.png')" alt="" height="20" width="20"></i></el-button>
+      <el-button type="danger" circle @click="ScreenClick()"><i><img
+            :src="(ScreenBoool)?('./UI/全屏5.png'):('./UI/退出全屏.png')" alt="" width="18" height="18"></i></el-button>
+      <el-button type="danger" circle @click="rotateClick()"><i><img
+            :src="(rotateBoool)?('./UI/旋转.png'):('./UI/停止旋转.png')" alt="" width="20" height="20"></i></el-button>
+      <el-button type="danger" circle @click="questionClick()"><i><img src="./UI/帮助5.png" alt="" width="22"
+            height="22"></i></el-button>
+    </div>
+  </div>
+  <script src="js/index.js"></script>
+</body>
+
+</html>
