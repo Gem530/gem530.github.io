@@ -1,6 +1,8 @@
 # Vue 3 + TypeScript + Vite
 
 # Three
+https://threejs.org/
+http://raw.githack.com/mrdoob/three.js/dev/examples/index.html#webgl_animation_keyframes
 郭隆邦-three技术博客 http://www.yanhuangxueyuan.com/doc/Three.js/removeDispose.html
 3d案例 http://www.yanhuangxueyuan.com/3D.html  https://www.bilibili.com/video/BV1sa41177uc/?spm_id_from=333.999.0.0&vd_source=cb49b470aa2dde87316d7da4fce65d1a
 three.js glb gltf 3d模型免费素材网站https://glbxz.com/err/search.php?keyword=%E5%85%8D%E8%B4%B9
