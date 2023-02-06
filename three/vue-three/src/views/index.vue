@@ -3,6 +3,10 @@
     <h3>简易3d模型切换</h3>
     <button @click="changeTab(1)">柜子</button>
     <button @click="changeTab(2)">椅子</button>
+    <div>
+      <button @click="changeMaterial(1)">蓝色光滑材质</button>
+      <button @click="changeMaterial(2)">修改颜色</button>
+    </div>
   </div>
   <div ref="box"></div>
 </template>
@@ -11,7 +15,10 @@
 import * as THREE from 'three'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
+import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import { ref, watch, reactive, onMounted, computed } from 'vue'
 const box = ref();
 
@@ -27,16 +34,26 @@ camera: any ='', // 相机对象
 cabinet: any = '../../public/glb/cabinet.glb',
 chair: any = '../../public/glb/Chair.glb',
 renderer: any = ''; // 创建渲染器对象
+let composer: any = undefined;
+
+//颜色：0xff0000，shininess（反射强度）roughness（粗糙度）metalness（金属性）Roughness（粗糙度）clearcoat(涂抹的清漆光亮层的程度) clearCoatRoughness(光泽层的粗糙程度)
+const bodyMaterial = new THREE.MeshPhysicalMaterial( {
+  color: 0x00ffff, metalness: 0.6, roughness: 0.4, clearcoat: 0.05, clearcoatRoughness: 0.05
+})
 
 const loadGlbModel = (url: string) => {
   return new Promise((reslove, reject) => {
     const loader = new GLTFLoader()
     loader.load(url, (gltf: any) => {
+      // const cabinetModel = gltf.scene.children[ 0 ]
+      // console.log(cabinetModel)
+      // cabinetModel.getObjectByName('mesh_0_1').material = bodyMaterial
+
       gltf.scene.scale.set(100,100,100)  //  设置模型大小缩放
       gltf.scene.position.set(0,0,0)
       let axis = new THREE.Vector3(0,1,0);//向量axis
       gltf.scene.rotateOnAxis(axis,Math.PI/2);
-      //绕axis轴逆旋转π/16
+      // //绕axis轴逆旋转π/16
       gltf.scene.rotateOnAxis(axis,Math.PI/-20);
       gltf.scene.rotateOnAxis(axis,Math.PI/50);
       gltf.scene.name = 'glbModule'
@@ -53,12 +70,26 @@ const loadGlbModel = (url: string) => {
   })
 }
 
+const changeMaterial = (type: number) => {
+  const bodyMesh = glbType.value == 1 ? 'mesh_0_1' : 'mesh_0'
+  let curMaterial = scene.getObjectByName('glbModule').getObjectByName(bodyMesh)
+  if (type == 1) {
+    // 修改材质
+    curMaterial.material = bodyMaterial
+  } else {
+    // 修改颜色
+    curMaterial.material.color.set('#ff00ff')
+  }
+  render()
+}
+
 const render = () => {
   // let T1 = new Date(); // 本次事件
   // let t = T1 - T0; // 时间差
   // T0 = T1; // 把本次时间赋值给上次时间
   // requestAnimationFrame(render);
-  renderer.render(scene, camera); // 执行渲染操作
+  composer.render();
+  // renderer.render(scene, camera); // 执行渲染操作
   // mesh.rotateZ(0.001 * t); // 旋转角速度0.001弧度每毫秒
 }
 
@@ -103,6 +134,16 @@ const init = async () => {
   box.value.appendChild(renderer.domElement); // body元素中插入canvas对象
   // 执行渲染操作 指定场景、相机作为参数
   // let T0 = new Date(); // 上次时间
+
+  composer = new EffectComposer(renderer);
+  let renderPass = new RenderPass(scene, camera);
+  composer.addPass(renderPass);
+  let outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+  composer.addPass(outlinePass);
+  outlinePass.visibleEdgeColor.set('#130AF2'); // 选中颜色
+  outlinePass.edgeStrength = 5;
+  outlinePass.edgeGlow = 1.5;
+
   render();
   let controls = new OrbitControls(camera, renderer.domElement); // 创建控件对象
   controls.addEventListener('change', render); // 监听鼠标、键盘事件
