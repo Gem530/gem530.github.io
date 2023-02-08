@@ -25,9 +25,13 @@ const routes = [
   //   hidden: true
   // },
   {
-    path: '',
+    path: '/',
     component: import (/* webpackChunkName: "home" */ '@/views/index.vue'),
-    redirect: '/home',
+    children: routeHome
+  },
+  {
+    path: '/house',
+    component: import (/* webpackChunkName: "home" */ '@/views/house.vue'),
     children: routeHome
   }
 ]
