@@ -13,6 +13,7 @@
     </g-form>
 
     <g-table
+      ref="tableRef"
       :total="total"
       :data="tableData"
       :columns="columns"
@@ -45,26 +46,28 @@ import {
   ref,
   watch,
   reactive,
+  onMounted,
   getCurrentInstance,
   ComponentInternalInstance
 } from 'vue'
 
+const tableRef = ref()
 const GFormRef = ref()
 const modalFormRef = ref()
 const { proxy } = getCurrentInstance() as ComponentInternalInstance as any
 
 const tableData = ref([])
 const columns: any[] = [
-  { sort: 1, attrs: {align:'center',type: 'selection'} },
-  { sort: 2, attrs: {align:'center',width: ''}, type: 'operId', label: `日志编号` },
-  { sort: 3, attrs: {align:'center',width: ''}, type: 'title', label: `系统模块` },
-  { sort: 4, attrs: {align:'center',width: ''}, type: 'businessType', label: `操作类型` },
-  { sort: 5, attrs: {align:'center',width: ''}, type: 'requestMethod', label: `请求方式` },
-  { sort: 6, attrs: {align:'center',width: ''}, type: 'operName', label: `操作人员` },
-  { sort: 6, attrs: {align:'center',width: ''}, type: 'operIp', label: `操作地址` },
-  { sort: 9, attrs: {align:'center',width: ''}, type: 'status', label: `操作状态` },
-  { sort: 8, attrs: {align:'center',width: '',sortable:true}, type: 'operTime', label: `操作日期` },
-  { sort: 8, slot: 'make' },
+  { visible: true, sort: 1, attrs: {align:'center',type: 'selection'} },
+  { visible: true, sort: 2, attrs: {align:'center',width: ''}, type: 'operId', label: `日志编号` },
+  { visible: true, sort: 3, attrs: {align:'center',width: ''}, type: 'title', label: `系统模块` },
+  { visible: true, sort: 4, attrs: {align:'center',width: ''}, type: 'businessType', label: `操作类型` },
+  { visible: true, sort: 5, attrs: {align:'center',width: ''}, type: 'requestMethod', label: `请求方式` },
+  { visible: true, sort: 6, attrs: {align:'center',width: ''}, type: 'operName', label: `操作人员` },
+  { visible: false, sort: 6, attrs: {align:'center',width: ''}, type: 'operIp', label: `操作地址` },
+  { visible: true, sort: 9, attrs: {align:'center',width: ''}, type: 'status', label: `操作状态` },
+  { visible: true, sort: 8, attrs: {align:'center',width: '',sortable:true}, type: 'operTime', label: `操作日期` },
+  { visible: true, sort: 8, slot: 'make' },
 ]
 
 const total = ref(0)
@@ -262,4 +265,9 @@ const confirm = (item: any) => {
   console.log(item)
   state.show = false
 }
+
+onMounted(() => {
+  // tableRef.value.hideTable(false,'title')
+  console.log(tableRef)
+})
 </script>

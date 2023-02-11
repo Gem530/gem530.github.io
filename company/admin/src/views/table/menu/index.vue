@@ -51,14 +51,14 @@ const modalFormRef = ref()
 const isExpandAll = ref(false)
 const tableData = ref<any[]>([])
 const columns: any[] = [
-  { sort: 2, attrs: {align:'left',width: ''}, type: 'menuName', label: `菜单名称` },
-  { sort: 3, attrs: {align:'center',width: ''}, type: 'icon', label: `图标` },
-  { sort: 4, attrs: {align:'center',width: ''}, type: 'orderNum', label: `排序` },
-  { sort: 5, attrs: {align:'center',width: ''}, type: 'perms', label: `权限标识` },
-  { sort: 6, attrs: {align:'center',width: ''}, type: 'component', label: `组件路径` },
-  { sort: 6, attrs: {align:'center',width: ''}, type: 'status', label: `状态` },
-  { sort: 9, attrs: {align:'center',width: ''}, type: 'createTime', label: `创建时间` },
-  { sort: 8, slot: 'make' },
+  { visible: true, sort: 2, attrs: {align:'left',width: ''}, type: 'menuName', label: `菜单名称` },
+  { visible: true, sort: 3, attrs: {align:'center',width: ''}, type: 'icon', label: `图标` },
+  { visible: true, sort: 4, attrs: {align:'center',width: ''}, type: 'orderNum', label: `排序` },
+  { visible: true, sort: 5, attrs: {align:'center',width: ''}, type: 'perms', label: `权限标识` },
+  { visible: true, sort: 6, attrs: {align:'center',width: ''}, type: 'component', label: `组件路径` },
+  { visible: true, sort: 6, attrs: {align:'center',width: ''}, type: 'status', label: `状态` },
+  { visible: true, sort: 9, attrs: {align:'center',width: ''}, type: 'createTime', label: `创建时间` },
+  { visible: true, sort: 8, slot: 'make' },
 ]
 const state = reactive({
   show: false,
