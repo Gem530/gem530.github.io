@@ -15,6 +15,7 @@ Since TypeScript cannot handle type information for `.vue` imports, they are shi
 
 You can learn more about Take Over mode [here](https://github.com/johnsoncodehk/volar/discussions/471).
 
+使用了接口，跨域了，所以只能在本地查看，并且只能使用ip打开查看，不能使用localhost查看
 短横线命名：
   文件名
   组件使用

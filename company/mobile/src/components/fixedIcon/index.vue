@@ -39,11 +39,11 @@ const point = ref({
   y: 0
 })
 
-const touchstart = (e) => {
+const touchstart = (e: Event) => {
   touchFlag.value = true
 }
 
-const touchmove = (e) => {
+const touchmove = (e: TouchEvent) => {
   e.stopPropagation()
   e.preventDefault()
   if (!touchFlag.value) return
@@ -53,7 +53,7 @@ const touchmove = (e) => {
   }
 }
 
-const touchend = (e) => {
+const touchend = (e: TouchEvent) => {
   touchFlag.value = false
   if (point.value.x > windowW.value / 2 - padding.value) {
     point.value.x = windowW.value - size.value - padding.value

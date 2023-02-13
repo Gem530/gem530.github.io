@@ -72,9 +72,11 @@ const props = withDefaults(defineProps<{
   cancelText: '取消',
   confirmText: '确认',
   showAllChoose: false,
-  dataFormat: {
-    text: 'text',
-    value: 'value'
+  dataFormat: () => {
+    return {
+      text: 'text',
+      value: 'value'
+    }
   }
 })
 
