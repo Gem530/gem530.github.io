@@ -12,7 +12,7 @@
     export default { name: 'chat' }
 </script>
 <script setup lang="ts">
-    import { onMounted, reactive } from 'vue'
+    import { onMounted, reactive, ref } from 'vue'
     import { useStore } from 'vuex'
     import { sendWs } from '@/util/ws.js'
     import GMessage from '@/components/g-message/index'

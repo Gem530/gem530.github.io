@@ -15,6 +15,8 @@
     const isMobile = /Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)
     isMobile && initScoket()
 
+    console.log(11)
+
     // 全局方法
     const app = getCurrentInstance()?.appContext.config.globalProperties
 

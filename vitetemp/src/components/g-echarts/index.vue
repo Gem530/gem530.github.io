@@ -6,8 +6,9 @@
     export default { name: 'drawBoard' }
 </script>
 <script setup lang="ts">
-    import * as echarts from 'echarts'
-    import { ref, nextTick, onMounted, defineProps } from 'vue'
+    // import * as echarts from 'echarts'
+    import echarts from '@/util/requestEachrts'
+    import { ref, nextTick, watch, onMounted, defineProps } from 'vue'
     
     const echartsDom = ref()
     const props = withDefaults(defineProps<{
