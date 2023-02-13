@@ -28,12 +28,12 @@ var textureLoader = new THREE.TextureLoader(); // 创建纹理
 var listener = new THREE.AudioListener();
 var audio = new THREE.Audio(listener);
 var texture = textureLoader.load( // 纹理加载
-  "../../public/00125.jpg",
+  "00125.jpg",
   function (obj: any) {
     // console.log(vm.loading);
     // vm.loading.close();
     var audioLoader = new THREE.AudioLoader();
-    audioLoader.load("../../public/琵琶语.mp3", function (AudioBuffer: any) {
+    audioLoader.load("琵琶语.mp3", function (AudioBuffer: any) {
       audio.setBuffer(AudioBuffer);
       audio.setLoop(true);
       audio.setVolume(0.3);
@@ -83,7 +83,7 @@ controls.addEventListener('change', render); // 监听鼠标、键盘事件
 
 function changeHouse () {
   changeFlag.value = !changeFlag.value
-  let url = changeFlag.value ? '../../public/00125.jpg' : '../../public/0011.jpg'
+  let url = changeFlag.value ? '00125.jpg' : '0011.jpg'
   texture = textureLoader.load(
     url,
     render()

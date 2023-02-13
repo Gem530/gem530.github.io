@@ -33,8 +33,8 @@ mesh: any = '', // 网格模型对象Mesh
 point: any = '', // 点光源
 ambient: any = '', // 环境光
 camera: any ='', // 相机对象
-cabinet: any = 'public/glb/cabinet.glb',
-chair: any = 'public/glb/Chair.glb',
+cabinet: any = 'glb/cabinet.glb',
+chair: any = 'glb/Chair.glb',
 renderer: any = ''; // 创建渲染器对象
 let composer: any = undefined;
 
