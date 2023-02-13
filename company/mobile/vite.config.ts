@@ -12,6 +12,7 @@ export default defineConfig(({ command, mode }) => {
   // 设置第三个参数位 '' 来加载所有环境变量，而不管是否有 'VITE_' 前缀
   const env = loadEnv(mode, process.cwd(), '')
   return {
+    base: './',
     // server: { // 本地跨域请求
     //   host: '0.0.0.0',
     //   port: 9000,

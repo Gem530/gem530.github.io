@@ -7,7 +7,7 @@
       <button @click="changeTab(2)">椅子</button>
       <div>
         <button @click="changeMaterial(1)">蓝色光滑材质</button>
-        <button @click="changeMaterial(2)">修改颜色</button>
+        <!-- <button @click="changeMaterial(2)">修改颜色</button> -->
       </div>
     </div>
     <div ref="box"></div>
@@ -33,8 +33,8 @@ mesh: any = '', // 网格模型对象Mesh
 point: any = '', // 点光源
 ambient: any = '', // 环境光
 camera: any ='', // 相机对象
-cabinet: any = '../../public/glb/cabinet.glb',
-chair: any = '../../public/glb/Chair.glb',
+cabinet: any = 'public/glb/cabinet.glb',
+chair: any = 'public/glb/Chair.glb',
 renderer: any = ''; // 创建渲染器对象
 let composer: any = undefined;
 
