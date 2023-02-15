@@ -1,6 +1,6 @@
 <template>
     <div class="contanir theme">
-        <!-- <g-wirless-list
+        <g-wirless-list
             :list="state.list"
             :showNum="state.showNum"
             :itemHeight="state.itemHeight"
@@ -8,7 +8,7 @@
             <template v-slot:default="slot">
                 <div style="color: red;box-sizing: border-box;border: 1px solid blue;">{{slot.item}}</div>
             </template>
-        </g-wirless-list> -->
+        </g-wirless-list>
     </div>
 </template>
 
@@ -16,8 +16,8 @@
 export default { name: 'wirlessList' }
 </script>
 <script setup lang="ts">
-    import { onMounted } from 'vue'
-    import gWirlessList from '@/components/g-wirlessList/index.vue'
+    import { reactive, onMounted } from 'vue'
+    import gWirlessList from '@/components/g-wirlessList/index1.vue'
 
     const state = reactive({
         list: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],

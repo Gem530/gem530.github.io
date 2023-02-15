@@ -15,7 +15,7 @@
 export default { name: 'g-wirless-list' }
 </script>
 <script setup lang="ts">
-    import { watch, onMounted, defineProps, defineEmits } from 'vue'
+    import { ref, watch, computed, reactive, nextTick, onMounted, defineProps, defineEmits } from 'vue'
     const list: any = ref()
     const listWrap: any = ref()
     const scrollBar: any = ref()
