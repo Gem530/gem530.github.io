@@ -1,6 +1,7 @@
 <template>
     <div class="contanir theme">
         <g-wirless-list
+            class="wirless-list"
             :list="state.list"
             :showNum="state.showNum"
             :itemHeight="state.itemHeight"
@@ -19,8 +20,8 @@ export default { name: 'wirlessList' }
     import { reactive, onMounted } from 'vue'
     import gWirlessList from '@/components/g-wirlessList/index1.vue'
 
-    const state = reactive({
-        list: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    const state = reactive<any>({
+        list: Array.from({length:2000}, (v,k) => k),
         showNum: 10,
         itemHeight: 30
     })
@@ -31,11 +32,14 @@ export default { name: 'wirlessList' }
     })
 
     const loadmore = (data: boolean) => {
-        state.list = [...state.list, ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]]
+        const arr = Array.from({length:2000}, (v,k) => k)
+        state.list = [...state.list, ...arr]
         // console.log(data, '0000', state.list)
     }
 </script>
 
 <style lang="scss" scoped>
-
+.wirless-list {
+    height: 220px;
+}
 </style>

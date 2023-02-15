@@ -1,11 +1,9 @@
 <template>
-    <div class="component theme">
-        <div class="list-wrap" ref="listWrap" @scroll="scroll">
-            <div class="scroll-bar" ref="scrollBar"></div>
-            <div class="list" ref="list">
-                <div v-for="(val, i) in showList" :key="i" :style="`width: 100%;height: ${props.itemHeight}px;`">
-                    <slot :item="val">{{val}}</slot>
-                </div>
+    <div class="list-wrap" ref="listWrap" @scroll="scroll">
+        <div class="scroll-bar" ref="scrollBar"></div>
+        <div class="list" ref="list">
+            <div v-for="(val, i) in showList" :key="i" :style="`width: 100%;height: ${props.itemHeight}px;`">
+                <slot :item="val">{{val}}</slot>
             </div>
         </div>
     </div>
@@ -22,16 +20,18 @@ export default { name: 'g-wirless-list' }
     const emits = defineEmits(['loadmore'])
     const props = withDefaults(defineProps<{
         list?: any[],
+        topNum?: number,
         showNum?: number,
         itemHeight?: number
     }>(), {
         list: () => [],
-        showNum: 10,
+        topNum: 5,
+        showNum: 15,
         itemHeight: 30
     })
     const state: any = reactive({
         start: 0, // 滚动过程显示的开始索引
-        end: props.showNum // 滚动过程显示的结束索引
+        end: props.showNum + props.topNum // 滚动过程显示的结束索引
     })
 
     watch(() => props.list, (val, old) => {
@@ -63,7 +63,8 @@ export default { name: 'g-wirless-list' }
         let scrollTop = listWrap.value.scrollTop
         // 开始的数组索引
         state.start = Math.floor(scrollTop / props.itemHeight)
-        state.end = state.start + props.showNum
+        state.end = state.start + props.showNum + props.topNum
+        state.start = state.start < props.topNum ? state.start : (state.start - props.topNum)
         // 绝对定位对相对定位的偏移量
         list.value.style.top = state.start * props.itemHeight + 'px'
     }
@@ -71,7 +72,7 @@ export default { name: 'g-wirless-list' }
     const init = () => {
         const dom = listWrap.value
         // 计算滚动容器高度
-        dom.style.height = props.itemHeight * props.showNum + 'px'
+        // dom.style.height = props.itemHeight * props.showNum + 'px'
         scrollBar.value.style.height = props.itemHeight * props.list.length + 'px'
         nextTick(() => {
             if (dom.scrollHeight - dom.scrollTop - 5 <= dom.clientHeight) {
@@ -82,21 +83,17 @@ export default { name: 'g-wirless-list' }
 </script>
 
 <style lang="scss" scoped>
-.component {
-    height: 100%;
+.list-wrap {
+    position: relative;
+    overflow-y: scroll;
+    box-sizing: border-box;
+    // @include overflowAutoHid();
+}
 
-    .list-wrap {
-        position: relative;
-        overflow-y: scroll;
-        box-sizing: border-box;
-        // @include overflowAutoHid();
-    }
-    
-    .list {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-    }
+.list {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
 }
 </style>
