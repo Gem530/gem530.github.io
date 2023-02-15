@@ -62,7 +62,7 @@ export default { name: 'g-wirless-list' }
         // 获取滚动高度
         let scrollTop = listWrap.value.scrollTop
         // 开始的数组索引
-        state.start = Math.round(scrollTop / props.itemHeight)
+        state.start = Math.floor(scrollTop / props.itemHeight)
         state.end = state.start + props.showNum
         // 绝对定位对相对定位的偏移量
         list.value.style.top = state.start * props.itemHeight + 'px'
