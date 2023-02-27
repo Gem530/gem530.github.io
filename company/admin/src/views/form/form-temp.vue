@@ -57,7 +57,7 @@ import { ref, reactive } from 'vue'
 import * as tsType from '@/api/type'
 import { areaList } from '@/config/addres'
 const GFormRef = ref()
-const req: tsType.baseAPI<any> = {
+const req: tsType.baseAPIType<any> = {
   url: '/v1/sms/page',
   method: 'get',
   params: {
@@ -96,9 +96,13 @@ const state = reactive({
     value: 1,
     prop: 'sex',
     label: '性别',
+    custom: {
+      label: 'name',
+      value: 'id'
+    },
     data: [
-      { label: '男', value: 1 },
-      { label: '女', value: 0 }
+      { name: '男', id: 1 },
+      { name: '女', id: 0 }
     ]
   },{
     col: 12,
@@ -106,9 +110,15 @@ const state = reactive({
     value: [1],
     prop: 'like',
     label: '爱好',
+    custom: {
+      label: 'link',
+      value: 'linkId'
+    },
     data: [
-      { label: '跑步', value: 1 },
-      { label: '游泳', value: 0 }
+      { link: '跑步', linkId: 0 },
+      { link: '篮球', linkId: 1 },
+      { link: '足球', linkId: 2 },
+      { link: '游泳', linkId: 3 }
     ]
   },{
     col: 12,
@@ -117,9 +127,13 @@ const state = reactive({
     prop: 'school',
     label: '学校',
     attrs: { clearable: true, placeholder: '请选择学校', style: 'width:100%;' },
+    custom: {
+      label: 'link',
+      value: 'linkId'
+    },
     data: [
-      { label: '祁阳二中', value: 1 },
-      { label: '祁阳一中', value: 0 }
+      { link: '祁阳二中', linkId: 1 },
+      { link: '祁阳一中', linkId: 5 }
     ]
   },{
     col: 12,
@@ -137,7 +151,7 @@ const state = reactive({
     type: 'time',
     prop: 'startTime',
     label: '上学时间',
-    attrs: { clearable: true, placeholder: '请选择上学时间', style: 'width:100%;',
+    attrs: { clearable: true, placeholder: '请选择上学时间', format: 'HH:mm', style: 'width:100%;',
       'onChange': () => GFormRef.value.searchHandle()
     }
   },{
@@ -153,7 +167,7 @@ const state = reactive({
     type: 'date',
     prop: 'createTime',
     label: '入学日期',
-    attrs: { clearable: true, placeholder: '请选择入学日期', style: 'width:100%;',
+    attrs: { clearable: true, placeholder: '请选择入学日期', format: 'YYYY-MM', style: 'width:100%;',
       'onChange': () => GFormRef.value.searchHandle()
     }
   },{
@@ -161,7 +175,7 @@ const state = reactive({
     type: 'date',
     prop: 'createTimeBetween',
     label: '入学日期范围',
-    attrs: { clearable: true, type: 'datetimerange', startPlaceholder: "开始时间", endPlaceholder: "结束时间" }
+    attrs: { clearable: true, type: 'datetimerange', format: 'YYYY-MM-DD HH:mm', startPlaceholder: "开始时间", endPlaceholder: "结束时间" }
   },{
     col: 12,
     type: 'switch',

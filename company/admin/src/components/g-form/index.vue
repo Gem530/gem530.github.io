@@ -20,9 +20,9 @@
             <el-radio-group v-model="state.data[item.prop]" :="{...item.attrs}">
               <el-radio
                 :key="i"
-                :label="subitem.value"
                 v-for="(subitem, i) in item.data"
-              >{{subitem.label}}</el-radio>
+                :label="subitem[item.custom?.value || 'value']"
+              >{{subitem[item.custom?.label || 'label']}}</el-radio>
             </el-radio-group>
           </el-form-item>
 
@@ -30,9 +30,9 @@
             <el-checkbox-group v-model="state.data[item.prop]" :="{...item.attrs}">
               <el-checkbox
                 :key="i"
-                :label="subitem.value"
                 v-for="(subitem, i) in item.data"
-              >{{subitem.label}}</el-checkbox>
+                :label="subitem[item.custom?.value || 'value']"
+              >{{subitem[item.custom?.label || 'label']}}</el-checkbox>
             </el-checkbox-group>
           </el-form-item>
 
@@ -47,10 +47,10 @@
           <el-form-item :="{...item}" v-if="item.type === 'select' && hideHandle(item.isHide)">
             <el-select v-model="state.data[item.prop]" :="{...item.attrs}">
               <el-option
-                v-for="(subitem, i) in item.data"
                 :key="i"
-                :label="subitem.label"
-                :value="subitem.value"
+                v-for="(subitem, i) in item.data"
+                :label="subitem[item.custom?.label || 'label']"
+                :value="subitem[item.custom?.value || 'value']"
               />
             </el-select>
           </el-form-item>
@@ -83,10 +83,11 @@
             <Body :="item"/>
           </slot>
 
-
           <el-form-item :="{...item}" v-if="item.type === 'btn' && hideHandle(item.isHide)">
             <el-button v-if="item.btn?.search" type="primary" @click="searchHandle">{{item.btn?.searchName || '提交'}}</el-button>
             <el-button v-if="item.btn?.reset" @click="resetHandle">{{item.btn?.resetName || '重置'}}</el-button>
+            <!-- 只在开发环境展示 -->
+            <el-button @click="autoHandle" v-if="isDev">自动填充表单</el-button>
             <slot name="make-btn"><Body/></slot>
           </el-form-item>
 
@@ -100,6 +101,7 @@
 import dayjs from 'dayjs'
 import { cloneDeep } from '@/utils'
 import { FormRules } from 'element-plus'
+import { createNumber, createChinese } from './autoValue'
 import {
   h,
   ref,
@@ -122,6 +124,10 @@ interface formItem {
   value?: string,
   label?: string,
   isHide?: boolean|Function,
+  custom?: {
+    label?: string,
+    value?: string
+  },
   btn?: {
     reset?: boolean,
     search?: boolean,
@@ -160,16 +166,15 @@ state.temp.forEach((item: formItem) => {
   }
 })
 
-console.log(attrs.slots)
+const isDev = ref(process.env.NODE_ENV === 'development')
+
 // const Body = (item: any) => {
 //   console.log('item', item)
 //   return h("div");
 // };
 const Body = (item: any) => {
-  console.log('item', item)
   if (item.type != 'slot') return
   let slotTemp = slots[item.prop] ?? attrs.slots[item.prop]
-  console.log('---', slotTemp)
   return h('div', {
     customSlot: () => [slotTemp()]
   })
@@ -189,45 +194,83 @@ const initData = (item: any) => {
   state.data = item
 }
 
-const resetHandle = () => {
-  clearValidte()
-  searchHandle()
-}
-
-const searchHandle = () => {
-  formRef.value.validate().then(() => {
-    emits('search', formData())
+const autoHandle = () => {
+  // console.log('自动填充表单')
+  // console.log(state.temp)
+  // console.log(state.data)
+  state.temp.forEach((item: any, index: number) => {
+    const type = item.type
+    switch (type) {
+      case 'input':
+        state.data[item.prop] = createChinese()
+        break;
+      case 'number':
+        state.data[item.prop] = createNumber(item?.attrs?.max || 100)
+        break;
+      case 'radio':
+      case 'select':
+      case 'checkbox':
+        if (item.data.length) {
+          const resultData = item?.data[createNumber(item?.data.length)][item?.custom?.value || 'value']
+          if (type === 'select') {
+            state.data[item.prop] = item?.attrs?.multiple ? [resultData] : resultData
+            return
+          }
+          state.data[item.prop] = type === 'checkbox' ? [resultData] : resultData
+        }
+        break;
+      case 'date':
+        const dateCurFormat = item?.attrs?.format || props.dateFormat
+        if (['datetimerange', 'daterange'].includes(item?.attrs?.type)) {
+          state.data[item.prop] = [dayjs().subtract(7, 'day').format(dateCurFormat), dayjs().format(dateCurFormat)]
+        } else if (['date', 'datetime'].includes(item?.attrs?.type) || !item?.attrs?.type) {
+          state.data[item.prop] = dayjs().format(dateCurFormat)
+        }
+        break;
+      case 'time':
+        // const timeCurFormat = item?.attrs?.format || props.timeFormat
+        if (item?.attrs?.isRange) {
+          state.data[item.prop] = [dayjs().subtract(30, 'minute').format('YYYY-MM-DD HH:mm:ss'), dayjs().format('YYYY-MM-DD HH:mm:ss')]
+        } else {
+          state.data[item.prop] = dayjs().format('YYYY-MM-DD HH:mm:ss')
+        }
+        break;
+      default:
+        break
+    }
   })
 }
 
 const formData = () => {
   // const newData = JSON.parse(JSON.stringify(state.data))
   const newData = cloneDeep(state.data)
-  Object.keys(newData).forEach((item: any) => {
-    const currentItem = props.formList.find((v: formItem) => v.prop === item)
+  Object.keys(newData).forEach((key: any) => {
+    const currentItem = props.formList.find((v: formItem) => v.prop === key)
     if (currentItem) {
-      if (newData[item] == undefined || newData[item] == null) return
+      if (newData[key] == undefined || newData[key] == null) return
       switch (currentItem.type) {
         case 'date':
-          if (['datetimerange', 'daterange'].includes(currentItem.attrs?.type)) {
-            if (newData[item].length < 2) return
-            newData['startDateRange'] = dayjs(newData[item][0]).format(props.dateFormat)
-            newData['endDateRange'] = dayjs(newData[item][1]).format(props.dateFormat)
-          } else if (['date', 'datetime'].includes(currentItem.attrs?.type) || !currentItem.attrs?.type) {
-            newData[item] = dayjs(newData[item]).format(props.dateFormat)
+          const dateCurFormat = currentItem?.attrs?.format || props.dateFormat
+          if (['datetimerange', 'daterange'].includes(currentItem?.attrs?.type)) {
+            if (newData[key].length < 2) return
+            newData[key][0] = dayjs(newData[key][0]).format(dateCurFormat)
+            newData[key][1] = dayjs(newData[key][1]).format(dateCurFormat)
+          } else if (['date', 'datetime'].includes(currentItem?.attrs?.type) || !currentItem?.attrs?.type) {
+            newData[key] = dayjs(newData[key]).format(dateCurFormat)
           }
           break;
         case 'time':
-          if (currentItem.attrs?.isRange) {
-            if (newData[item].length < 2) return
-            newData['startTimeRange'] = dayjs(newData[item][0]).format(props.timeFormat)
-            newData['endTimeRange'] = dayjs(newData[item][1]).format(props.timeFormat)
+          const timeCurFormat = currentItem?.attrs?.format || props.timeFormat
+          if (currentItem?.attrs?.isRange) {
+            if (newData[key].length < 2) return
+            newData[key][0] = dayjs(newData[key][0]).format(timeCurFormat)
+            newData[key][1] = dayjs(newData[key][1]).format(timeCurFormat)
           } else {
-            newData[item] = dayjs(newData[item]).format(props.timeFormat)
+            newData[key] = dayjs(newData[key]).format(timeCurFormat)
           }
           break;
         case 'upload':
-          newData[item] = newData[item].map((v: any) => v.response?.data ? v.response.data : v.url )
+          newData[key] = newData[key].map((v: any) => v.response?.data ? v.response.data : v.url )
           break;
         default:
           break
@@ -237,7 +280,18 @@ const formData = () => {
   return newData
 }
 
-defineExpose({ initData, clearValidte, resetHandle, searchHandle, hideHandle })
+const searchHandle = () => {
+  formRef.value.validate().then(() => {
+    emits('search', formData())
+  })
+}
+
+const resetHandle = () => {
+  clearValidte()
+  searchHandle()
+}
+
+defineExpose({ initData, clearValidte, resetHandle, searchHandle, hideHandle, autoHandle })
 </script>
 
 <style lang="scss" scoped>

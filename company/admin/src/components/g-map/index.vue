@@ -72,7 +72,10 @@ const getLocation = () => {
     geolocation.getCurrentPosition((r: any) => {
       // console.log('经纬度：', r.point)
       // console.log(geolocation.getStatus(), BMAP_STATUS_SUCCESS) // 0 0
-      if (geolocation.getStatus() == BMAP_STATUS_SUCCESS) {
+      
+      // BMAP_STATUS_SUCCESS 0
+      // if (geolocation.getStatus() == BMAP_STATUS_SUCCESS) {
+      if (geolocation.getStatus() == 0) {
         const gc = new BMap.Geocoder()
         gc.getLocation(r.point, (res: any) => {
           // console.log('address：', res.address)
@@ -179,7 +182,11 @@ const addMarker = (lng: number, lat: number) => {
   const point = new BMap.Point(lng, lat)
   const marker = new BMap.Marker(point)
   map.addOverlay(marker)
-  marker.setAnimation(BMAP_ANIMATION_BOUNCE) // 跳动的动画
+
+  // BMAP_ANIMATION_BOUNCE 2
+  // marker.setAnimation(BMAP_ANIMATION_BOUNCE) // 跳动的动画
+  marker.setAnimation(2) // 跳动的动画
+
   marker.enableDragging() // marker 可拖拽
   // marker.disableDragging() // marker 不可拖拽
 }

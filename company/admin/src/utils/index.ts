@@ -1,5 +1,16 @@
 import { nextTick } from 'vue'
 
+// 取两数之间的随机整数
+export const twoNumberBetween = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min) + min)
+}
+
+// 判断变量类型
+export const isType = (val: any) => {
+  let type = Object.prototype.toString.call(val).replace(']', '').split(' ')[1].toLocaleLowerCase()
+  return type
+}
+
 // 设置元素滚动位置
 export const toScrollTop = (dom: HTMLElement, top: number) => {
   nextTick(() => {
@@ -43,7 +54,8 @@ export const cloneDeep = (obj: any) => {
     //   newobj[k] = cloneDeep(obj[k])
     // }
     // 4.上面两个执行逻辑一样，进行合并
-    if (typeof obj[k] === 'object') {
+    if (['object', 'array'].includes(isType(obj[k]))) {
+    // if (typeof obj[k] === 'object') {
       newobj[k] = cloneDeep(obj[k])
     } else {
       // 5.如果数据为基本类型，则直接赋值

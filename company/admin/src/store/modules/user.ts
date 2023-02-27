@@ -2,7 +2,7 @@
 import { routesList } from '@/router/config'
 import { loginInfo, tagsView } from '@/api/type'
 import { getAddRoutes } from '@/router/add-routes'
-import { loginAPI, getInfoAPI, logoutAPI, getRoutersAPI } from '@/api/user'
+import { loginAPI, getInfoAPI, logoutAPI, getRoutersAPI } from '@/api/user/user'
 import { getItem, setItem, removeAllItem, getLocalItem, setLocalItem, removeLocalItem } from '@/utils/storage'
 
 export default {

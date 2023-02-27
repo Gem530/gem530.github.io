@@ -1,5 +1,5 @@
 // api接口
-export interface baseAPI<t> {
+export interface baseAPIType<t> {
   data?: t,
   params?: t,
   url: string,
@@ -51,8 +51,8 @@ export interface menuList {
 }
 
 // 新增菜单
-export interface addMenu {
-  children?: addMenu[],
+export interface addMenuType {
+  children?: addMenuType[],
   component?: string, // 组件路径
   createBy?: string, // 创建者
   createTime?: string, // 创建时间

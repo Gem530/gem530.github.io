@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import path from "path"
+import autoApi from './autoApi'
 import vue from '@vitejs/plugin-vue'
 import ViteImages from "vite-plugin-vue-images" //自动导入图片
 import compression from 'vite-plugin-compression' // gzip 压缩
@@ -37,6 +38,7 @@ export default defineConfig({
   },
   plugins: [
     vue(),
+    autoApi(),
     ViteImages({
       dirs: ["src/assets"], // 图像目录的相对路径
       extensions: ["jpg", "jpeg", "png", "svg", "webp"], // 有效的图像扩展
