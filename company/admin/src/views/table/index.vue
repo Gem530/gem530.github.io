@@ -24,7 +24,7 @@
       <template #column-status="scope">{{scope.row.status == 0 ? '正常' : '异常'}}</template>
       <template #table-column-make>
         <el-table-column fixed="right" label="操作" align="center">
-          <template #="scope"><el-button @click="editData(scope.row)">编辑</el-button></template>
+          <template #default="scope"><el-button @click="editData(scope.row)">编辑</el-button></template>
         </el-table-column>
       </template>
     </g-table>

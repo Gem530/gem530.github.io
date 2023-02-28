@@ -253,8 +253,7 @@ const formData = () => {
           const dateCurFormat = currentItem?.attrs?.format || props.dateFormat
           if (['datetimerange', 'daterange'].includes(currentItem?.attrs?.type)) {
             if (newData[key].length < 2) return
-            newData[key][0] = dayjs(newData[key][0]).format(dateCurFormat)
-            newData[key][1] = dayjs(newData[key][1]).format(dateCurFormat)
+            newData[key] = [dayjs(newData[key][0]).format(dateCurFormat), dayjs(newData[key][1]).format(dateCurFormat)]
           } else if (['date', 'datetime'].includes(currentItem?.attrs?.type) || !currentItem?.attrs?.type) {
             newData[key] = dayjs(newData[key]).format(dateCurFormat)
           }
@@ -263,8 +262,7 @@ const formData = () => {
           const timeCurFormat = currentItem?.attrs?.format || props.timeFormat
           if (currentItem?.attrs?.isRange) {
             if (newData[key].length < 2) return
-            newData[key][0] = dayjs(newData[key][0]).format(timeCurFormat)
-            newData[key][1] = dayjs(newData[key][1]).format(timeCurFormat)
+            newData[key] = [dayjs(newData[key][0]).format(timeCurFormat), dayjs(newData[key][1]).format(timeCurFormat)]
           } else {
             newData[key] = dayjs(newData[key]).format(timeCurFormat)
           }
