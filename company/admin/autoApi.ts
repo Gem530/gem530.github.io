@@ -79,7 +79,7 @@ export default function () {
   return {
     name: 'autoApiPlugin',
     options(res) {
-      createFile()
+      // createFile()
     },
     handleHotUpdate(data) {
       if (data.file.includes(filePath)) {

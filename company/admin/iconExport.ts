@@ -67,7 +67,7 @@ export default function () {
     name: 'iconExportPlugin',
     // 在服务器启动时被调用：获取、操纵Rollup选项，严格意义上来讲，它执行于属于构建阶段之前
     options(options) {
-      wirteClassList()
+      // wirteClassList()
     },
     // 热更新  执行自定义HMR更新，可以通过ws往客户端发送自定义的事件
     handleHotUpdate(ctx) {

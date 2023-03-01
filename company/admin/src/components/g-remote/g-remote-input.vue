@@ -26,7 +26,7 @@ const { proxy } = getCurrentInstance() as ComponentInternalInstance as any
 
 const props = withDefaults(defineProps<{
   modelValue: string|number,
-  req: tsType.baseAPI<tsType.channleList>
+  req: tsType.baseAPIType<tsType.channleList>
 }>(), {
   modelValue: undefined
 })

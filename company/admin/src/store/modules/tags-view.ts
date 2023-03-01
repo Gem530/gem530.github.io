@@ -2,11 +2,17 @@ import { tagsView } from '@/api/type'
 import router, { routeHome } from '@/router'
 import { getItem, setItem } from '@/utils/storage'
 
+const homeRoute = {
+  meta: {title: "首页", icon: "House", affix: true},
+  name: "Home",
+  path: "/home"
+}
+
 export default {
   namespaced: true,
   state: {
     // 存储状态 放置变量所用
-    tagsView: (getItem('tagsView') || []) as tagsView[]
+    tagsView: (getItem('tagsView') || [homeRoute]) as tagsView[]
   },
   getters: {
     // 派生状态 就和vue的computed差不多

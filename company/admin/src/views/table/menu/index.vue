@@ -15,7 +15,7 @@
       <template #column-icon="scope">{{scope.row.icon === '#' ? '' : scope.row.icon}}</template>
       <template #table-column-make>
         <el-table-column fixed="right" label="操作" align="center">
-          <template #="scope"><el-button @click="editData(scope.row)">编辑</el-button></template>
+          <template #default="scope"><el-button @click="editData(scope.row)">编辑</el-button></template>
         </el-table-column>
       </template>
     </g-table>

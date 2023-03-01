@@ -89,6 +89,14 @@ export const routesList = [
           hidden: false,
           alwaysShow: true,
           meta: { title: "表格", icon: "Grid" },
+        },
+        {
+          name: 'hook-table',
+          path: "table/hookTable",
+          component: "table/hookTable",
+          hidden: false,
+          alwaysShow: true,
+          meta: { title: "表格hook", icon: "Grid" },
         }
       ]
     },

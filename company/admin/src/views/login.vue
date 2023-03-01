@@ -36,6 +36,7 @@ import { useStore } from 'vuex'
 import * as tsType from '@/api/type'
 import { useRouter } from 'vue-router'
 import { encrypt } from '@/utils/jsencrypt'
+import { removeItem } from '@/utils/storage'
 const store = useStore()
 const router = useRouter()
 
@@ -60,6 +61,8 @@ const loginHandle = () => {
       }
       store.dispatch('login', params).then(() => {
         loading.value = false
+        removeItem('tagsView')
+        removeItem('defaultActive')
         router.replace('/')
       }).catch(() => {
         loading.value = false

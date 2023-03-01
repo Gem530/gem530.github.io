@@ -3,7 +3,8 @@
 </template>
 
 <script lang="ts" setup name="g-echart">
-import * as echarts from 'echarts'
+import echarts from './requestEachrts'
+// import * as echarts from 'echarts'
 // 在app.vue中导入echarts 当前组件接受，可以加快echarts加载速度，但会影响首页加载速度
 // import * as echarts from 'echarts'
 // provide("echarts", echarts)

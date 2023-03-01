@@ -82,11 +82,11 @@ const search = (item: any) => {
   emits('confirm', item)
 }
 
-const initModalData = (item: any, title: string = '新增') => {
+const initModalData = (item: any, title: string) => {
   setTimeout(()=> {
     // 使用nextTick获取到的GFormRef.value为undfined
-    titleR.value = title
-    GFormRef.value.initData(cloneDeep(item))
+    title && (titleR.value = title)
+    item && GFormRef.value.initData(cloneDeep(item))
   }, 0)
 }
 

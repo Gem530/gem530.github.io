@@ -1,7 +1,7 @@
 import axios from "axios"
 import router from "@/router"
 import cache from '@/utils/cache'
-import { getItem, setItem, getLocalItem } from '@/utils/storage'
+import { getItem, setItem, removeItem, getLocalItem } from '@/utils/storage'
 import { ElMessage, ElMessageBox } from "element-plus"
 
 // 使用联合类型验证请求方法
@@ -73,6 +73,8 @@ function request (config: any): Promise<unknown> {
           '登录已过期，是否重新登录?',
           '提示'
         ).then(() => {
+          removeItem('tagsView')
+          removeItem('defaultActive')
           router.push('/login')
         }).catch(() => {})
         reject(data)
@@ -81,6 +83,8 @@ function request (config: any): Promise<unknown> {
           '您的账号已在其他设备登录，请重新登录',
           '提示'
         ).then(() => {
+          removeItem('tagsView')
+          removeItem('defaultActive')
           router.push('/login')
         }).catch(() => {})
         reject(data)

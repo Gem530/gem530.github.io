@@ -41,6 +41,15 @@ export const handleTree = (data:any[], id:string='id', parentId:string='parentId
   return treeArr
 }
 
+// 一维数组变为二维数组 [1,2,3,4,5,6] => [[1,2,3], [4,5,6]]
+export const toArrayTwo = (arr: any[], num: number) => {
+  let newArr = []
+  for (let i = 0; i < arr.length; i+=num) {
+    newArr.push(arr.slice(i, i+3))
+  }
+  return newArr
+}
+
 // 深拷贝 https://www.cnblogs.com/kirkor-sort/p/13022427.html?ivk_sa=1024320u
 export const cloneDeep = (obj: any) => {
   // 3.根据obj为对象或者数组，产生一个空的对象或数组，存放数据

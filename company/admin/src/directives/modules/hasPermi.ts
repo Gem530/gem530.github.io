@@ -9,8 +9,8 @@ export default {
       created(el:any, binding:any, vnode:any, prevVnode:any) {}, 
       beforeMount() {},
       mounted (el: HTMLElement, binding: any) {
-        console.log(userStore)
-        console.log(el, binding)
+        // console.log(userStore)
+        // console.log(el, binding)
         const { value } = binding
         const all_permission = '*:*:*'
         const permissions = userStore.state.permissions

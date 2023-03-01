@@ -27,7 +27,7 @@ import { ref, watch } from 'vue'
 import * as tsType from '@/api/type'
 const remoteInput = ref('')
 const remoteSelect = ref('')
-const req: tsType.baseAPI<any> = {
+const req: tsType.baseAPIType<any> = {
   url: '/v1/sms/page',
   method: 'get',
   params: {
