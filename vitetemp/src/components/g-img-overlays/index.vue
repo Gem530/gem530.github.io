@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts" name="g-img-overlays">
-    import { ref, onMounted } from 'vue'
+    import { ref, reactive, nextTick, onMounted } from 'vue'
     import { fabric } from 'fabric'
     // import defaultImg from '@/assets/img/login.jpeg'
     const props: any = defineProps({
