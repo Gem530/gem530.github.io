@@ -23,7 +23,7 @@ import Layout from '@/layout/index.vue'
   }
  */
 
-export const routeHome = [{
+const routeHome = [{
   path: '/home',
   component: () => import(/* webpackChunkName: "home" */ '@/views/index.vue'),
   name: 'Home',

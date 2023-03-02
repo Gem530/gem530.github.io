@@ -5,7 +5,7 @@ export const twoNumberBetween = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min) + min)
 }
 
-// 判断变量类型
+// 判断变量类型 返回小写单词
 export const isType = (val: any) => {
   let type = Object.prototype.toString.call(val).replace(']', '').split(' ')[1].toLocaleLowerCase()
   return type
@@ -73,4 +73,30 @@ export const cloneDeep = (obj: any) => {
   }
   // 6.把存放了数据的新对象返回出去
   return newobj
+}
+
+
+/**
+ * 脱敏公用
+ * @param str 脱敏字符串
+ * @param begin 起始保留长度，从0开始
+ * @param end 结束保留长度，到str.length结束
+ * @returns {string}
+ */
+export const desensitizedCommon = (str: string, begin: number = 3, end: number = 4, symbol: string = '*') => {
+  if (!str || (begin + end) >= str.length) {
+      return "";
+  }
+  if(str.indexOf(symbol)!==-1){
+      return str;
+  }
+
+  let leftStr = str.substring(0, begin);
+  let rightStr = str.substring(str.length - end, str.length);
+
+  let strCon = ''
+  for (let i = 0; i < str.length - end - begin; i++) {
+      strCon += symbol;
+  }
+  return leftStr + strCon + rightStr;
 }

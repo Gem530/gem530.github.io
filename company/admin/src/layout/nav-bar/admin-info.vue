@@ -1,5 +1,5 @@
 <template>
-  <span class="admin-name">{{store.state.userInfo.nickName}}</span>
+  <span class="admin-name">{{userStore.userInfo?.nickName}}</span>
   <el-dropdown trigger="click">
     <img class="avatar" src="https://img1.baidu.com/it/u=2644452384,3800439215&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500" alt=""/>
     <template #dropdown>
@@ -12,16 +12,16 @@
 </template>
 
 <script lang="ts" setup name="admin-info">
-import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { useFullscreen } from '@vueuse/core'
-const store = useStore()
+import useUserStore from '@/store/modules/user'
+const userStore = useUserStore()
 const router = useRouter()
 
 const { isFullscreen, enter, exit, toggle } = useFullscreen();
 
 const loginOut = () => {
-  store.dispatch('loginOut').then(() => {
+  userStore.loginOut().then(() => {
     router.push('/login')
     location.reload()
   })

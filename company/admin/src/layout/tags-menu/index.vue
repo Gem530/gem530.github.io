@@ -17,13 +17,15 @@
 </template>
 
 <script lang="ts" setup name="tags-menu">
-import { useStore } from 'vuex'
+import useLayoutStore from '@/store/modules/layout'
+import useTagsStore from '@/store/modules/tags-view'
 import { ref, watch, computed, } from 'vue'
 import { useRoute, useRouter, RouteLocationNormalizedLoaded } from 'vue-router'
-const store = useStore()
+const tagsStore = useTagsStore()
+const layoutStore = useLayoutStore()
 const route = useRoute()
 const router = useRouter()
-const editableTabs = computed(() => store.state.tagsView )
+const editableTabs = computed(() => tagsStore.tagsView)
 const editableTabsValue = ref('')
 
 watch(() => route, (val: RouteLocationNormalizedLoaded) => {
@@ -32,12 +34,12 @@ watch(() => route, (val: RouteLocationNormalizedLoaded) => {
 
 const changeTab = (path: string) => {
   // console.log(i)
-  store.commit('setDefaultActive', path)
+  layoutStore.setDefaultActive(path)
   router.push(path)
 }
 const removeTab = (path: string) => {
   // console.log(path)
-  store.commit('delTagsView', path)
+  layoutStore.delTagsView(path)
 }
 </script>
 

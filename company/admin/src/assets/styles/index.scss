@@ -9,6 +9,48 @@ $baseSideBarWidth: var(--base-side-bar-width, 200px);
 $baseFixedHeaderHeight: var(--base-side-bar-height, 90px);
 @import './element.scss';
 
+/***
+ * px2rem 转换
+ */
+$base-font-size: 750;
+@function px2rem($px) {
+  @return calc($px / 75px) * 1rem;
+}
+@function rem($px) {
+  @return calc($px / $base-font-size) * 10rem;
+}
+@function vw($px) {
+  @return calc($px / $base-font-size) * 100vw;
+}
+// calc函数计算
+@function calcF($num1, $num2) {
+  @return calc($num1 - $num2)
+}
+ 
+// 元素宽高
+@mixin wh($w, $h, $varW: '', $varH: '') {
+  @if $varW == 'max' {
+    max-width: $w;
+  } @else if $varW == 'min' {
+    min-width: $w;
+  } @else {
+    width: $w;
+  }
+  @if $varH == 'max' {
+    max-height: $h;
+  } @else if $varH == 'min' {
+    min-height: $h;
+  } @else {
+    height: $h;
+  }
+}
+ 
+// 字体颜色
+@mixin fc ($size: 16px, $color: #000000) {
+  font-size: $size;
+  color: $color;
+}
+
 // flex
 @mixin flex($justify_content: center, $align_items: center, $dirction: row, $wrap: wrap) {
   display: flex;

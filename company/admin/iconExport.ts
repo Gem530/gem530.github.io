@@ -26,18 +26,20 @@ const rfHandle = (pathUrl: string, content: string, callBack?: Function) => {
   })
 }
 
-fs.watch(
-  filePath,
-  // {
-  //   recursive: true //是否连同其子文件一起监视
-  // },
-  (eventType, filename) => {
-    //第一个参数，文件是修改还是增加还是删除等，第二个是文件名
-    if (eventType == 'rename') {
-      wirteClassList()
-    }
-  }
-)
+// 会阻断node打包，导致打包成功后，命令不会结束
+// fs.watch(
+//   filePath,
+//   // {
+//   //   recursive: true //是否连同其子文件一起监视
+//   // },
+//   (eventType, filename) => {
+//     //第一个参数，文件是修改还是增加还是删除等，第二个是文件名
+//     if (eventType == 'rename') {
+//       wirteClassList()
+//     }
+//   }
+// )
+
 /**
  * @params {string} url --- url is a relative path string of a css file
  */

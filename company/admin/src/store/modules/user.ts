@@ -1,97 +1,98 @@
 // import { routes } from '@/router'
+import { defineStore } from 'pinia'
 import { routesList } from '@/router/config'
 import { loginInfo, tagsView } from '@/api/type'
 import { getAddRoutes } from '@/router/add-routes'
 import { loginAPI, getInfoAPI, logoutAPI, getRoutersAPI } from '@/api/user/user'
 import { getItem, setItem, removeAllItem, getLocalItem, setLocalItem, removeLocalItem } from '@/utils/storage'
 
-export default {
-  namespaced: true,
-  state: {
+const useUserStore = defineStore('userStore' , {
+  state: () => {return {
     // 存储状态 放置变量所用
     id: 0,
     name: '',
     user: '',
-    roles: [],
+    roles: <any>[],
     avator: '',
-    userInfo: undefined,
-    menus: [] as tagsView[],
+    avatar: '',
+    nodeRole: undefined,
+    menus: <tagsView[]>[],
+    userInfo: <any>undefined,
+    serverTime: <any>undefined,
     token: getLocalItem('token') || '',
     permissions: getItem('permissions') || [],
-  },
-  getters: {
-    // 派生状态 就和vue的computed差不多
-    user (state: any) {
-      return state
-    }
-  },
-  mutations: {
+  }},
+  // getters: {
+  //   // 派生状态 就和vue的computed差不多
+  //   user (state: any) {
+  //     return state
+  //   }
+  // },
+  actions: {
     // 获取set方法
     // 提交状态修改 不支持异步操作
-    setToken (state: any, token: any) {
-      state.token = token
+    setToken (token: any) {
+      this.token = token
       setLocalItem('token', token)
     },
-    setMenus (state: any, menus: tagsView[]) {
-      state.menus = menus
+    setMenus (menus: tagsView[]) {
+      this.menus = menus
       // setItem('menus', menus)
     },
-    setUserInfo (state: any, res: any) {
+    setUserInfo (res: any) {
       const user = res.user
 
       if (res.roles && res.roles.length > 0) { // 验证返回的roles是否是一个非空数组
-        state.roles = res.roles
-        state.permissions = res.permissions
+        this.roles = res.roles
+        this.permissions = res.permissions
         setItem('permissions', res.permissions)
       } else {
-        state.roles = ['ROLE_DEFAULT']
+        this.roles = ['ROLE_DEFAULT']
       }
-      state.userInfo = user
-      state.name = user.userName
-      state.nodeRole=res.nodeRole
-      state.serverTime = new Date(res.sysTime)
-      state.avatar = (user.avatar == "" || user.avatar == null) ? '' : user.avatar;
+      this.userInfo = user
+      this.name = user.userName
+      this.nodeRole=res.nodeRole
+      this.serverTime = new Date(res.sysTime)
+      this.avatar = (user.avatar == "" || user.avatar == null) ? '' : user.avatar;
       setItem('userInfo', user)
-    }
-  },
-  actions: {
-    login({ commit, state }: any, data: loginInfo) {
+    },
+    login(data: loginInfo) {
       // console.log('state', state)
       return new Promise((resolve, reject) => {
         loginAPI(data).then((res: any) => {
-          commit('setToken', res.token)
+          this.setToken(res.token)
           resolve(res)
         }).catch((err: Error) => {
           reject(err)
         })
       })
     },
-    getInfo({ commit, state }: any) {
+    getInfo() {
       return new Promise((resolve, reject) => {
         getInfoAPI().then((res: any) => {
-          commit('setUserInfo', res)
+          this.setUserInfo(res)
           resolve(res)
         }).catch((err: Error) => {
           reject(err)
         })
       })
     },
-    getRouters ({ commit, state }: any) {
+    getRouters () {
       return new Promise((resolve, reject) => {
         getRoutersAPI().then((res: any) => {
-          commit('setMenus', getAddRoutes(routesList || []))
+          this.setMenus(getAddRoutes(routesList || []))
           resolve(res)
         }).catch((err: Error) => {
           reject(err)
         })
       })
     },
-    loginOut ({ commit, state }: any) {
+    loginOut () {
       return new Promise((resolve, reject) => {
         logoutAPI().then(() => {
-          state.token = ''
-          state.roles = []
-          state.permissions = []
+          this.token = ''
+          this.roles = []
+          this.permissions = []
           removeLocalItem('token')
           removeAllItem()
           resolve(true)
@@ -99,10 +100,8 @@ export default {
           reject(err)
         })
       })
-    },
-    // 和mutations类似 支持异步操作
-    setUserAction ({ commit, state }: any, data: any) {
-      commit('setUserMutation', data)
     }
-  }
-}
+  },
+})
+
+export default useUserStore

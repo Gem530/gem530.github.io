@@ -12,26 +12,28 @@
     <g-sub-menu
       :route="item"
       :key="item.path"
-      v-for="item in store.state.menus"
+      v-for="item in userStore.menus"
     ></g-sub-menu>
   </el-menu>
 </template>
 
 <script lang="ts" setup name="g-menu">
 import { computed } from 'vue'
-import { useStore } from 'vuex'
-const store = useStore()
-const isCollapse = computed(() => store.state.isCollapse)
-const defaultActive = computed(() => store.state.defaultActive)
-const activeCollapse = computed(() => store.state.activeCollapse)
+import useUserStore from '@/store/modules/user'
+import useLayoutStore from '@/store/modules/layout'
+const userStore = useUserStore()
+const layoutStore = useLayoutStore()
+const isCollapse = computed(() => layoutStore.isCollapse)
+const defaultActive = computed(() => layoutStore.defaultActive)
+const activeCollapse = computed(() => layoutStore.activeCollapse)
 
 const openMenu = (index: any) => {
   // console.log(index)
-  store.commit('pushCollapse', index)
+  layoutStore.pushCollapse(index)
 }
 const closeMenu = (index: any) => {
   // console.log(index)
-  store.commit('removeCollapse', index)
+  layoutStore.removeCollapse(index)
 }
 </script>
 

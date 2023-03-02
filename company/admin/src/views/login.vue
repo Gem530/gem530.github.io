@@ -32,12 +32,12 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import Cookies from 'js-cookie'
-import { useStore } from 'vuex'
+import useUserStore from '@/store/modules/user'
 import * as tsType from '@/api/type'
 import { useRouter } from 'vue-router'
 import { encrypt } from '@/utils/jsencrypt'
 import { removeItem } from '@/utils/storage'
-const store = useStore()
+const userStore = useUserStore()
 const router = useRouter()
 
 const loginRef = ref()
@@ -59,7 +59,7 @@ const loginHandle = () => {
         username: form.value.username,
         password: encrypt(form.value.password) as string
       }
-      store.dispatch('login', params).then(() => {
+      userStore.login(params).then(() => {
         loading.value = false
         removeItem('tagsView')
         removeItem('defaultActive')

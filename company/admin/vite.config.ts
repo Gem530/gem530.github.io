@@ -10,7 +10,7 @@ import { AntDesignVueResolver, ElementPlusResolver } from "unplugin-vue-componen
 
 // https://vitejs.dev/config/
 export default defineConfig(({mode, command}) => {
-  console.log('command-----', command, command !== 'build')
+  // console.log('command-----', command, command !== 'build')
   return {
     base: './',
     server: { // 本地跨域请求
@@ -41,8 +41,8 @@ export default defineConfig(({mode, command}) => {
     },
     plugins: [
       vue(),
-      command !== 'build' && autoApi(),
-      command !== 'build' && iconExport(),
+      autoApi(),
+      iconExport(),
       ViteImages({
         dirs: ["src/assets"], // 图像目录的相对路径
         extensions: ["jpg", "jpeg", "png", "svg", "webp"], // 有效的图像扩展

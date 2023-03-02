@@ -26,11 +26,11 @@
 </template>
 
 <script lang="ts" setup name="g-sub-menu">
-import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ref, toRefs, defineProps } from 'vue'
-const store = useStore()
+import useLayoutStore from '@/store/modules/layout'
 const router = useRouter()
+const layoutStore = useLayoutStore()
 const props: any = defineProps({
   path: {
     type: String
@@ -42,7 +42,7 @@ const props: any = defineProps({
 const { route } = toRefs(props)
 
 const toPath = (path: string) => {
-  store.commit('setDefaultActive', path)
+  layoutStore.setDefaultActive(path)
   router.push(path)
 }
 </script>

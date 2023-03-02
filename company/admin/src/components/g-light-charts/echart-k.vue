@@ -11,7 +11,8 @@
 </template>
 
 <script lang="ts" setup name="g-echart-k">
-import * as echarts from 'echarts'
+// import * as echarts from 'echarts'
+import echarts from '../g-echart/requestEachrts'
 import { jsonList, jsonList1 } from '@/views/echart/config'
 import {
   ref,

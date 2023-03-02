@@ -18,15 +18,15 @@
 </template>
 
 <script lang="ts" setup name="nav-bar">
-import { useStore } from 'vuex'
 import { ref, computed } from 'vue'
+import useLayoutStore from '@/store/modules/layout'
 import { toggleTheme, changeScssData } from '@/utils/theme'
-const store = useStore()
-const isCollapse = computed(() => store.state.isCollapse)
+const layoutStore = useLayoutStore()
+const isCollapse = computed(() => layoutStore.isCollapse)
 const colorFlag = ref(false)
 
 const changeSide = () => {
-  store.commit('toggleCollapse')
+  layoutStore.toggleCollapse()
   changeScssData('--base-side-bar-width', isCollapse.value ? '64px' : '200px')
 }
 

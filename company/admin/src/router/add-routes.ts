@@ -1,10 +1,15 @@
 import layout from "@/layout/index.vue";
-import router, { routeHome } from "./index";
 import { defineAsyncComponent } from "vue";
+import router from "./index";
 const modules = import.meta.glob("../views/**/**.vue");
 
 // 公共路由表
-const publicRoutes = routeHome
+const publicRoutes = [{
+  path: '/home',
+  component: () => import(/* webpackChunkName: "home" */ '@/views/index.vue'),
+  name: 'Home',
+  meta: { title: '首页', icon: 'House', affix: true }
+}]
 
 // 递归处理菜单
 function filterAddRoutes(routes:any, parentName:any=null) {

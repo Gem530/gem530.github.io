@@ -1,7 +1,7 @@
 /**
- * v-hasPermi 触底加载
+ * v-hasPermi 权限
  */
-import userStore from '@/store/modules/user'
+import useUserStore from '@/store/modules/user'
 export default {
   name: 'hasPermi', // 自定义指令名称
   fn: {
@@ -9,11 +9,12 @@ export default {
       created(el:any, binding:any, vnode:any, prevVnode:any) {}, 
       beforeMount() {},
       mounted (el: HTMLElement, binding: any) {
-        // console.log(userStore)
+        const userStore = useUserStore()
+        console.log(userStore)
         // console.log(el, binding)
         const { value } = binding
         const all_permission = '*:*:*'
-        const permissions = userStore.state.permissions
+        const permissions = userStore.permissions
         if (value && value instanceof Array && value.length > 0) {
           const permissionFlag = value
     

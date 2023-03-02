@@ -1,8 +1,9 @@
-import userStore from '@/store/modules/user'
+import useUserStore from '@/store/modules/user'
 
 function authPermission(permission: any) {
+  const userStore = useUserStore()
   const all_permission = "*:*:*";
-  const permissions = userStore.state.permissions
+  const permissions = userStore.permissions
   if (permission && permission.length > 0) {
     return permissions.some((v: any) => {
       return all_permission === v || v === permission
