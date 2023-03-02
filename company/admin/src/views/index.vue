@@ -45,7 +45,7 @@
     ></GClipImg>
 
     <!-- 图形验证码 -->
-    <GCode num="2000" v-if="activeName == 4"/>
+    <GCode num="2357" v-if="activeName == 4"/>
 
     <template v-if="activeName == 5">
       <!-- 签字板 -->
@@ -115,8 +115,8 @@ interface imgInfo {
 
 const postImg = ref()
 const qrcodeImg = ref()
+const activeName = ref(4)
 const drawBoardImg = ref()
-const activeName = ref(1)
 const tabsList = ref([
   { id: 1, name: '海报' },
   { id: 2, name: '毛玻璃' },

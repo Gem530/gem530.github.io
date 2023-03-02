@@ -83,7 +83,7 @@ class poster {
       }
     })
   }
-  drawText (dom: string, x: number, y: number, color: number, font: string = '16px Arial') {
+  drawText (dom: string, x: number, y: number, color: string, font: string = '16px Arial') {
     return new Promise(resolve => {
       // 绘制文字
       this.ctx.beginPath()

@@ -5,6 +5,14 @@ export const twoNumberBetween = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min) + min)
 }
 
+// 返回随机颜色
+export const returnColor = (min: number = 0, max: number = 255, o: number = 1) => {
+    const r = twoNumberBetween(min, max)
+    const g = twoNumberBetween(min, max)
+    const b = twoNumberBetween(min, max)
+    return `rgba(${r},${g},${b},${o})`
+}
+
 // 判断变量类型 返回小写单词
 export const isType = (val: any) => {
   let type = Object.prototype.toString.call(val).replace(']', '').split(' ')[1].toLocaleLowerCase()
