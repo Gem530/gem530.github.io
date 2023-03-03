@@ -1,12 +1,13 @@
 @import './variables.module.scss';
 @import './iconfont.scss';
 
-$bgThemeWhite: var(--bg-theme-white, $bgThemeWhiteInit);
-$bgThemeGray: var(--bg-theme-gray, $bgThemeGrayInit);
 $textBlack: var(--text-theme-black, $textBlackInit);
-$borderThemeColor: var(--border-theme-gray, $borderThemeColorInit);
+$bgThemeGray: var(--bg-theme-gray, $bgThemeGrayInit);
 $baseSideBarWidth: var(--base-side-bar-width, 200px);
+$bgThemeWhite: var(--bg-theme-white, $bgThemeWhiteInit);
 $baseFixedHeaderHeight: var(--base-side-bar-height, 90px);
+$baseSideBarFixedWidth: var(--base-side-bar-fixed-width, 0px);
+$borderThemeColor: var(--border-theme-gray, $borderThemeColorInit);
 @import './element.scss';
 
 /***

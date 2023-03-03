@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia'
 import { tagsView } from '@/api/type'
+import { changeScssData } from '@/utils/theme'
 import { getItem, setItem } from '@/utils/storage'
 
 const useLayoutStore = defineStore('layoutStore', {
   state: () => {return {
     // 存储状态 放置变量所用
     isCollapse: false,
+    isMobileCollapse: true,
     defaultActive: (getItem('defaultActive') || ''),
     activeCollapse: (getItem('activeCollapse') || [])
   }},
@@ -17,10 +19,13 @@ const useLayoutStore = defineStore('layoutStore', {
   },
   actions: {
     // 获取set方法
-    // 提交状态修改 不支持异步操作
-    toggleCollapse () {
-      this.isCollapse = !this.isCollapse
-      // setItem('isCollapse', state.isCollapse)
+    changeCollapse (flag: boolean) {
+      this.isCollapse = flag
+      changeScssData('--base-side-bar-width', flag ? '64px' : '200px')
+    },
+    changeMobileCollapse (flag: boolean) {
+      this.isMobileCollapse = flag
+      changeScssData('--base-side-bar-fixed-width', flag ? '0px' : '200px')
     },
     setDefaultActive (path: string) {
       this.defaultActive = path

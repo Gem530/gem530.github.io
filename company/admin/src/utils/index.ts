@@ -6,6 +6,10 @@ import {
   onDeactivated,
 } from 'vue'
 
+// 判断是否为移动端
+export const isMobile = () => {
+  return /(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)
+}
 
 // 封装keep-alive缓存时，初始mounted
 export const mounted = (callback: Function) => {

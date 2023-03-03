@@ -4,6 +4,7 @@
       <el-button
         size="small"
         type="primary"
+        v-if="!isMobile()"
         :icon="isCollapse ? 'Expand' : 'Fold'"
         @click="changeSide"
       ></el-button>
@@ -11,24 +12,51 @@
     </div>
 
     <div class="nav-right">
-      <el-button size="small" type="primary" @click="changeColor">换肤</el-button>
+      <el-button
+        size="small"
+        type="primary"
+        v-if="isMobile()"
+        :icon="isCollapse ? 'Expand' : 'Fold'"
+        @click="changeSide"
+      ></el-button>
+      <el-button class="hidden-xs-only" size="small" type="primary" @click="changeColor">换肤</el-button>
       <admin-info></admin-info>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup name="nav-bar">
-import { ref, computed } from 'vue'
+import { isMobile } from '@/utils'
+import { useWindowSize } from '@vueuse/core'
+import { ref, computed, watchEffect } from 'vue'
 import useLayoutStore from '@/store/modules/layout'
 import { toggleTheme, changeScssData } from '@/utils/theme'
 const layoutStore = useLayoutStore()
 const isCollapse = computed(() => layoutStore.isCollapse)
+const isMobileCollapse = computed(() => layoutStore.isMobileCollapse)
 const colorFlag = ref(false)
 
 const changeSide = () => {
-  layoutStore.toggleCollapse()
-  changeScssData('--base-side-bar-width', isCollapse.value ? '64px' : '200px')
+  if (isMobile()) {
+    layoutStore.changeMobileCollapse(!isMobileCollapse.value)
+    return
+  }
+  layoutStore.changeCollapse(!isCollapse.value)
 }
+
+const { width, height } = useWindowSize();
+const minWIDTH = 992; // refer to Bootstrap's responsive design
+watchEffect(() => {
+  if (isMobile()) {
+    changeScssData('--base-side-bar-width', '0px')
+    return
+  }
+  if (minWIDTH < width.value) {
+    layoutStore.changeCollapse(false)
+  } else {
+    layoutStore.changeCollapse(true)
+  }
+})
 
 const changeColor = () => {
   const theme = {
@@ -43,7 +71,8 @@ const changeColor = () => {
 <style lang="scss" scoped>
 .nav-bar {
   @include flex(space-between);
-  padding: 5px 10px;
+  height: 40px;
+  padding: 5px 10px 0;
 
   .nav-left {
     @include flex(flex-start);

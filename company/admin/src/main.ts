@@ -6,11 +6,13 @@ import directives from './directives'
 import installPlugins from './plugins'
 import * as Icons from '@element-plus/icons-vue'
 
+import 'element-plus/theme-chalk/display.css'
 import 'element-plus/theme-chalk/el-input.css'
 import 'element-plus/theme-chalk/el-message.css'
 import 'element-plus/theme-chalk/el-loading.css'
 import 'element-plus/theme-chalk/el-message-box.css'
 import 'element-plus/theme-chalk/el-notification.css'
+
 
 import './router/permission'
 

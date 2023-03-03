@@ -10,7 +10,6 @@ export default {
       beforeMount() {},
       mounted (el: HTMLElement, binding: any) {
         const userStore = useUserStore()
-        console.log(userStore)
         // console.log(el, binding)
         const { value } = binding
         const all_permission = '*:*:*'

@@ -1,6 +1,6 @@
 <template>
-  <span class="admin-name">{{userStore.userInfo?.nickName}}</span>
-  <el-dropdown trigger="click">
+  <span class="admin-name hidden-xs-only">{{userStore.userInfo?.nickName}}</span>
+  <el-dropdown trigger="click" class="hidden-xs-only">
     <img class="avatar" src="https://img1.baidu.com/it/u=2644452384,3800439215&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500" alt=""/>
     <template #dropdown>
       <el-dropdown-menu>
@@ -8,7 +8,7 @@
       </el-dropdown-menu>
     </template>
   </el-dropdown>
-  <g-icon class="nav-icon" icon="Rank" :size="18" @click="toggle"></g-icon>
+  <g-icon class="nav-icon hidden-xs-only" icon="Rank" :size="18" @click="toggle"></g-icon>
 </template>
 
 <script lang="ts" setup name="admin-info">

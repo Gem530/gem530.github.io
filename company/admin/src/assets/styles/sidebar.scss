@@ -5,6 +5,16 @@
   transition: width 0.28s;
   // border: 1px solid $borderThemeColor;
 
+  &.fixed {
+    position: fixed;
+    width: $baseSideBarFixedWidth;
+    height: 100vh;
+    background: $bgThemeWhite;
+    z-index: 9999;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
   :deep(.el-menu) {
     border-right: none;
   }
