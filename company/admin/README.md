@@ -16,6 +16,7 @@ Since TypeScript cannot handle type information for `.vue` imports, they are shi
 You can learn more about Take Over mode [here](https://github.com/johnsoncodehk/volar/discussions/471).
 
 使用了接口，跨域了，所以只能在本地查看，并且只能使用ip打开查看，不能使用localhost查看
+https://57k67j9137.zicp.fun/#/  反向代理的地址，公司电脑启动了服务，nginx配置文件可以查看 ./nginx.conf
 短横线命名：
   文件名
   组件使用
@@ -28,3 +29,8 @@ scripts {
   build: 'vue-tsc --noEmit && vite build' // 打包时校验ts
   build: 'vite build' // 打包时不校验ts
 }
+
+实现vite小插件时，遇到的问题：
+  1.vite打包结束后，未结束命令行 https://segmentfault.com/q/1010000020963015与该链接中的问题类似
+  解决，注释fs.watch，不使用该方法监听文件，因为vite插件钩子函数handleHotUpdate能做到相似的效果，文件改变时也能监听到
+  2.热更新handleHotUpdate(ctx) ctx.file的路径是'/'，而通过path获取的地址是'\'，所以在匹配时，需要替换为一样的'/'

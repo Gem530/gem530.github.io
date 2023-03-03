@@ -12,9 +12,9 @@
 
     <template v-if="activeName == 1">
       <!-- 海报和二维码 -->
-      <img :src="postImg" title="海报" style="width: 300px;">
+      <img v-if="postImg" :src="postImg" title="海报" style="width: 300px;">
       <br/>
-      <img :src="qrcodeImg" title="二维码" style="width: 100px;">
+      <img v-if="qrcodeImg" :src="qrcodeImg" title="二维码" style="width: 100px;">
     </template>
 
     <!-- 毛玻璃 -->
@@ -50,7 +50,7 @@
     <template v-if="activeName == 5">
       <!-- 签字板 -->
       <GDrawBoard v-model:url="drawBoardImg" width="300px" height="300px"/>
-      <img :src="drawBoardImg" alt="">
+      <img v-if="drawBoardImg" :src="drawBoardImg" alt="">
     </template>
 
     <!-- 文字绘图 -->
@@ -59,7 +59,12 @@
     <!-- 网站摄像头 -->
     <template v-if="activeName == 7">
       只能在localhost或者https下才能使用该功能
-      <GFindFrame/>
+      <!-- <GFindFrame/> -->
+      
+      <GFindFrame :width="500" :height="300" @getPhotoBlob="getPhotoBlob">
+          <button style="width: 100px;height: 30px;text-align: center; line-height: 30px;color: red;">拍-拍-照</button>
+      </GFindFrame>
+      <img v-if="photoImg" :src="photoImg" title="照片">
     </template>
 
     <!-- 图片标注 -->
@@ -114,8 +119,9 @@ interface imgInfo {
 }
 
 const postImg = ref()
+const photoImg = ref()
 const qrcodeImg = ref()
-const activeName = ref(4)
+const activeName = ref(7)
 const drawBoardImg = ref()
 const tabsList = ref([
   { id: 1, name: '海报' },
@@ -191,5 +197,10 @@ const luckResult = (data: any) => {
 
 const getResult = (data: { currentArea: number, isSuccess: boolean }) => {
   console.log('getResult', data)
+}
+
+const getPhotoBlob = (data: { blob: Blob, baseUrl: string }) => {
+  console.log('blob----', data)
+  photoImg.value = data.baseUrl
 }
 </script>

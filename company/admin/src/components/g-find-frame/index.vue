@@ -44,7 +44,8 @@
 </template>
 
 <script setup lang="ts" name="g-find-frame">
-import { ref, reactive, onMounted, nextTick, onActivated, defineEmits, defineProps } from 'vue'
+import { mounted } from '@/utils'
+import { ref, reactive, nextTick, defineEmits, defineProps } from 'vue'
 
 const emits = defineEmits(['getPhotoBlob'])
 
@@ -71,19 +72,16 @@ const state: any = reactive({
 
 // https://zhuanlan.zhihu.com/p/481640259 解决给组件加name的方法
 // 因为使用auto-import插件，会自动导入onMounted等vue或vue-router的方法，所以不需要每次都导入
-onMounted(() => {
+mounted(() => {
     if (navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i)) {
         state.flag = true
     } else {
         state.flag = false
     }
-    // console.log('onMounted')
-})
-
-onActivated(() => {
     nextTick(() => {
         initPhoto()
     })
+    // console.log('onMounted')
 })
 
 
@@ -331,6 +329,19 @@ const convertBase64UrlToBlob = (urlData: string) => {
 </script>
 
 <style lang="scss" scoped>
+button {
+    min-width: 30px;
+    min-height: 30px;
+    background: skyblue;
+    border: none;
+    padding: 0 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    color: #ffffff;
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+}
 .g-find-frame {
     position: relative;
     overflow: hidden;

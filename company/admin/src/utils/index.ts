@@ -1,4 +1,29 @@
-import { nextTick } from 'vue'
+import {
+  nextTick,
+  onMounted,
+  onUnmounted,
+  onActivated,
+  onDeactivated,
+} from 'vue'
+
+
+// 封装keep-alive缓存时，初始mounted
+export const mounted = (callback: Function) => {
+  onMounted(() => {
+      callback && callback()
+  })
+  onActivated(() => {
+      callback && callback()
+  })
+}
+export const unMounted = (callback: Function) => {
+  onUnmounted(() => {
+      callback && callback()
+  })
+  onDeactivated(() => {
+      callback && callback()
+  })
+}
 
 // 取两数之间的随机整数
 export const twoNumberBetween = (min: number, max: number) => {
