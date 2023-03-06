@@ -8,7 +8,7 @@ import {
 
 // 判断是否为移动端
 export const isMobile = () => {
-  return /(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)
+  return navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i)
 }
 
 // 封装keep-alive缓存时，初始mounted

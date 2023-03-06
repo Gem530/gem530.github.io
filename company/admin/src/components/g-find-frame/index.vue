@@ -46,6 +46,7 @@
 <script setup lang="ts" name="g-find-frame">
 import { mounted } from '@/utils'
 import { ref, reactive, nextTick, defineEmits, defineProps } from 'vue'
+import { compressionImgToBlob, compressionImgToDataUrl } from '@/utils/canvas-make'
 
 const emits = defineEmits(['getPhotoBlob'])
 
@@ -218,8 +219,8 @@ const getPhoto = async () => {
         // canvas.height = (canvas.width * that.heightD) / that.widthD
         // tempW = that.heightD
         // tempH = (canvas.width * that.heightD) / that.widthD
-        canvas.width = state.widthD * 2
-        canvas.height = state.heightD * 2
+        canvas.width = state.widthD
+        canvas.height = state.heightD
         // canvas.width = that.photoW
         // canvas.height = that.heightD
     }
@@ -249,13 +250,21 @@ const fileChange = async () => {
     const inputFile: HTMLInputElement|any = document.getElementById('ground-push-image')
 
     const fileList = inputFile.files[0]
-
-    const img: any = await toImage(fileList)
-    const blob = await compressImgQuality(img)
+    const quilaty = 0.3
+    // const url = 'https://img1.baidu.com/it/u=2644452384,3800439215&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500'
+    const blob = await compressionImgToBlob(fileList, quilaty)
+    const baseUrl = await compressionImgToDataUrl(fileList, quilaty)
     emits('getPhotoBlob', {
-        blob: blob,
-        baseUrl: img.src
+        blob,
+        baseUrl
     })
+
+    // const img: any = await toImage(fileList)
+    // const blob = await compressImgQuality(img)
+    // emits('getPhotoBlob', {
+    //     blob: blob,
+    //     baseUrl: img.src
+    // })
 }
 
 /**
