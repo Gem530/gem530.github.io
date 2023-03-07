@@ -36,9 +36,11 @@
       </button>
     </div>
     <div class="btn-photo" @click="getPhoto">
+      <button @click.stop="resetPhoto('user')">前置摄像头</button>
       <slot>
         <button style="position: absolute; top: 0px; left: 0px">拍照</button>
       </slot>
+      <button @click.stop="resetPhoto('environment')">后置摄像头</button>
     </div>
   </div>
 </template>
@@ -80,14 +82,24 @@ mounted(() => {
         state.flag = false
     }
     nextTick(() => {
-        initPhoto()
+        initPhoto('environment')
     })
     // console.log('onMounted')
 })
 
+// 切换摄像头
+const resetPhoto = (face: string) => {
+    // 在切换摄像头前，需要先关闭运行的视频流
+    stopPhoto()
+    initPhoto(face)
+}
+
+const stopPhoto = () => {
+    return video.value.srcObject && video.value.srcObject.getTracks().map((t: any) => t.stop());
+}
 
 // 初始化 摄像头
-const initPhoto = () => {
+const initPhoto = (face: string) => {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     state.clientWidthD = document.body.clientWidth
     state.clientHeightD = document.body.clientHeight
@@ -137,7 +149,7 @@ const initPhoto = () => {
             video: {
                 // width: that.widthD,
                 // height: that.heightD,
-                facingMode: 'environment'
+                facingMode: face
             }
         })
         .then(function(stream: any) {
@@ -165,29 +177,6 @@ const initPhoto = () => {
                     if (state.heightD > state.photoH) {
                         state.heightD = (state.photoH * state.widthD) / state.photoW
                     }
-                    // that.widthD = that.video.videoWidth
-                    // that.heightD = that.video.videoHeight
-                    // if (that.$isPc) {
-                    //   that.widthD = that.video.videoWidth
-                    //   that.heightD = that.video.videoHeight
-                    // } else {
-                    //   that.widthD = that.video.videoHeight
-                    //   that.heightD = that.video.videoWidth
-                    //   // that.heightD = that.video.videoWidth
-                    //   // 移动端宽高对换
-                    // }
-                    // if (that.width) {
-                    //   // 如果有传值，就使用接受的值为显示宽度
-                    //   that.widthD = that.width
-                    // } else {
-                    //   that.widthD = that.video.videoWidth
-                    // }
-                    // if (that.height) {
-                    //   // 如果有传值，就使用接受的值为显示高度
-                    //   that.heightD = that.height
-                    // } else {
-                    //   that.heightD = that.video.videoHeight
-                    // }
                 })
             })
         })
@@ -204,25 +193,15 @@ const getPhoto = async () => {
         qrcodeImageDom.value.click()
         return
     }
-    // const video = video as any
-    // const canvas = this.canvas
     const canvas = document.createElement('canvas')
     const ctx: any = canvas.getContext('2d')
-    // let tempW = 0
-    // let tempH = 0
     if (!state.flag) {
         canvas.width = state.widthD
         canvas.height = state.heightD
     } else {
         // 移动端宽高对换
-        // canvas.width = that.heightD
-        // canvas.height = (canvas.width * that.heightD) / that.widthD
-        // tempW = that.heightD
-        // tempH = (canvas.width * that.heightD) / that.widthD
         canvas.width = state.widthD
         canvas.height = state.heightD
-        // canvas.width = that.photoW
-        // canvas.height = that.heightD
     }
     ctx.drawImage(video.value, 0, 0, state.photoW, state.photoW * (state.heightD / state.widthD), 0, 0, canvas.width, canvas.height)
     // console.log(state.photoW, state.photoW * (state.heightD / state.widthD), state.widthD, state.heightD)

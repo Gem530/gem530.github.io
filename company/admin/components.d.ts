@@ -81,6 +81,7 @@ declare module '@vue/runtime-core' {
     GTable: typeof import('./src/components/g-table/index.vue')['default']
     GTree: typeof import('./src/components/g-tree/index.vue')['default']
     GWangEditor: typeof import('./src/components/g-wang-editor/index.vue')['default']
+    'Index copy': typeof import('./src/components/g-find-frame/index copy.vue')['default']
     NavBar: typeof import('./src/layout/nav-bar/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

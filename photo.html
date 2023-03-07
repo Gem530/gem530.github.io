@@ -48,6 +48,8 @@
                 <button style="position: absolute;top: 0px;left: 0px;">拍照</button>
             </slot>
         </div>
+        <button @click="resetPhoto('user')">前置</button>
+        <button @click="resetPhoto('environment')">后置</button>
 
         <img :src="imgURL" alt="">
 
@@ -77,12 +79,19 @@
                 } else {
                     this.flag = false
                 }
-                this.initPhoto()
+                this.initPhoto('environment')
             },
             mounted() {},
             methods: {
+                resetPhoto(face) {
+                    this.stop()
+                    this.initPhoto(face)
+                },
+                stop() {
+                    return this.$refs.video.srcObject && this.$refs.video.srcObject.getTracks().map(t => t.stop());
+                },
                 // 初始化 摄像头
-                initPhoto() {
+                initPhoto(face) {
                     // eslint-disable-next-line @typescript-eslint/no-this-alias
                     const that = this
                     this.$nextTick(() => {
@@ -132,7 +141,7 @@
                                 video: {
                                     // width: that.widthD,
                                     // height: that.heightD,
-                                    facingMode: 'environment'
+                                    facingMode: face
                                 }
                             })
                             .then(function(stream) {
@@ -160,30 +169,13 @@
                                         if (that.heightD > that.photoH) {
                                             that.heightD = (that.photoH * that.widthD) / that.photoW
                                         }
-                                        // that.widthD = that.video.videoWidth
-                                        // that.heightD = that.video.videoHeight
-                                        // if (that.$isPc) {
-                                        //   that.widthD = that.video.videoWidth
-                                        //   that.heightD = that.video.videoHeight
-                                        // } else {
-                                        //   that.widthD = that.video.videoHeight
-                                        //   that.heightD = that.video.videoWidth
-                                        //   // that.heightD = that.video.videoWidth
-                                        //   // 移动端宽高对换
-                                        // }
-                                        // if (that.width) {
-                                        //   // 如果有传值，就使用接受的值为显示宽度
-                                        //   that.widthD = that.width
-                                        // } else {
-                                        //   that.widthD = that.video.videoWidth
-                                        // }
-                                        // if (that.height) {
-                                        //   // 如果有传值，就使用接受的值为显示高度
-                                        //   that.heightD = that.height
-                                        // } else {
-                                        //   that.heightD = that.video.videoHeight
-                                        // }
                                     })
+                                    // 获取摄像头列表
+                                    // navigator.mediaDevices.enumerateDevices().then((devices) => {
+                                    //     console.log(devices)
+                                    //     const videoList = devices.filter(v => v.kind === 'videoinput')
+                                    //     console.log(videoList)
+                                    // })
                                 })
                             })
                             .catch(function(err) {
