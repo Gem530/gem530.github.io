@@ -6,34 +6,60 @@
       :style="{
         // right: point.x || 0,
         padding: padding + 'px',
-        bottom: point.y ? undefined : '12%',
-        top: point.y ? point.y + 'px' : undefined,
+        top: point.y ? point.y + 'px' : '450px',
         left: point.x ? point.x + 'px' : undefined,
       }"
       @touchend="touchend"
       @touchmove="touchmove"
       @touchstart="touchstart">
-      <slot><van-icon name="fire" :size="size"/></slot>
+      <slot v-if="!showBox"><van-icon name="fire" :size="size" style="z-index: 1000;"/></slot>
+      <div
+        ref="FixedAllRef"
+        :class="{
+          'fixed-all-box': true,
+        }"
+        :style="{
+          'width': showBox ? '100vw' : size+'px',
+          'height': showBox ? '100vh' : size+'px',
+          'background': showBox ? '' : 'transparent',
+          'transform': `translate(${showBox ? `-${point.x + padding}px,-${(point.y || 450) + padding}px` : '0,0'})`,
+        }"
+        @touchend.stop="undefined"
+        @touchmove.stop="undefined"
+        @touchstart.stop="undefined">
+        <slot name="all-box" v-if="showBox"></slot>
+        <!-- <slot v-else><van-icon name="fire" :size="size"/></slot> -->
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup name="FixedIcon">
-import { ref, defineProps, withDefaults } from 'vue'
+import { ref, computed, defineProps, defineEmits, withDefaults } from 'vue'
 
 const props = withDefaults(defineProps<{
-    size?: number
+    size?: number,
+    show?: boolean
 }>(), {
-    size: 50
+    size: 50,
+    show: false
 })
 
+const emits = defineEmits(['update:show'])
 const fixedRef = ref()
+const FixedAllRef = ref()
 
 const size = ref(props.size)
 const padding = ref(10)
 const touchFlag = ref(false)
 const windowW = ref(document.body.clientWidth || 375)
 const windowH = ref(document.body.clientHeight || 667)
+const showBox = computed({
+  get: () => props.show,
+  set: (val: boolean) => {
+    return emits('update:show', !val)
+  }
+})
 const point = ref({
   x: windowW.value - size.value - padding.value,
   y: 0
@@ -78,5 +104,17 @@ const touchend = (e: TouchEvent) => {
 
 .animation-out {
   transition: all 0.2s;
+}
+
+.fixed-all-box {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba($color: #000000, $alpha: 0.6);
+  transition: all 0.2s linear;
+  z-index: 999;
 }
 </style>

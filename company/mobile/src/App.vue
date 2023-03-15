@@ -7,19 +7,28 @@
     </transition>
   </router-view>
 
-  <FixedIcon :size="30">
-    <van-icon name="gift-card" size="30" color="orange"/>
+  <FixedIcon :size="30" v-model:show="show">
+    <van-icon name="gift-card" size="30" color="orange" @click.stop="handle" style="z-index: 1000;"/>
+    <template #all-box>
+      <div class="gift-card-box" @click.stop="handle">666</div>
+    </template>
   </FixedIcon>
 
   <Footer></Footer>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const key = computed(() => route.path + '/' + (new Date()).getTime() + Math.random())
+
+const show = ref(false)
+const handle = () => {
+  show.value = !show.value
+  console.log('1212', show.value)
+}
 </script>
 
 <style lang="scss">
@@ -37,5 +46,13 @@ html,body {
 
 h1 {
   color: aqua;
+}
+</style>
+
+<style lang="scss" scoped>
+.gift-card-box {
+  width: 300px;
+  height: 500px;
+  background: #fff;
 }
 </style>
