@@ -9,7 +9,7 @@
 
   <FixedIcon :size="30" v-model:show="show">
     <van-icon name="gift-card" size="30" color="orange" @click.stop="handle" style="z-index: 1000;"/>
-    <template #all-box>
+    <template #pop-box>
       <div class="gift-card-box" @click.stop="handle">666</div>
     </template>
   </FixedIcon>

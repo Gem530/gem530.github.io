@@ -15,9 +15,7 @@
       <slot v-if="!showBox"><van-icon name="fire" :size="size" style="z-index: 1000;"/></slot>
       <div
         ref="FixedAllRef"
-        :class="{
-          'fixed-all-box': true,
-        }"
+        class="fixed-all-box"
         :style="{
           'width': showBox ? '100vw' : size+'px',
           'height': showBox ? '100vh' : size+'px',
@@ -27,8 +25,7 @@
         @touchend.stop="undefined"
         @touchmove.stop="undefined"
         @touchstart.stop="undefined">
-        <slot name="all-box" v-if="showBox"></slot>
-        <!-- <slot v-else><van-icon name="fire" :size="size"/></slot> -->
+        <slot name="pop-box" v-if="showBox"></slot>
       </div>
     </div>
   </div>
@@ -115,6 +112,7 @@ const touchend = (e: TouchEvent) => {
   align-items: center;
   background: rgba($color: #000000, $alpha: 0.6);
   transition: all 0.2s linear;
+  overflow: hidden;
   z-index: 999;
 }
 </style>
