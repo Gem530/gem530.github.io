@@ -50,6 +50,12 @@ const list = ref<tabbar[]>([
     inactive: 'home'
   },
   {
+    name: '名字',
+    path: '/name',
+    active: 'home-filling',
+    inactive: 'home'
+  },
+  {
     name: '我的',
     path: '/me',
     active: 'user-filling',

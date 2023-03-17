@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup name="GPicker">
-import { type } from '@/utils'
+import { isType } from '@/utils'
 import { PickerOption } from 'vant'
 import {
   ref,
@@ -45,7 +45,7 @@ watch(() => props.modelValue, (val) => {
 })
 
 const onConfirm = (val: PickerOption|any) => {
-  if (type(val) === 'object') {
+  if (isType(val) === 'object') {
     value.value = val[attrs.attrs.columnsFieldNames?.text as string]
     emits('update:modelValue', val[props?.valueKey as string])
   } else {

@@ -10,6 +10,12 @@ const routes: RouteRecordRaw[] = [
     meta:{ title: t('router.home.title') }
   },
   {
+    path: '/name',
+    name: 'CreateName',
+    component:()=>import(/* webpackChunkName: "home" */ '@/views/createName/index.vue'),
+    meta:{ title: t('router.name.title') }
+  },
+  {
     path: '/me',
     name: 'Me',
     component:()=>import(/* webpackChunkName: "me" */ '@/views/me/index.vue'),

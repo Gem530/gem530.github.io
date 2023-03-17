@@ -6,6 +6,9 @@ export default {
     me: {
       title: 'ME'
     },
+    name: {
+      title: 'Name'
+    },
     detail: {
       title: 'Form'
     },

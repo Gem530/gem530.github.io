@@ -6,6 +6,9 @@ export default {
     me: {
       title: '我的'
     },
+    name: {
+      title: '名字'
+    },
     detail: {
       title: '表单'
     },

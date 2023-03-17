@@ -14,7 +14,7 @@
 
 <script lang="ts" setup name="GPicker">
 import dayjs from 'dayjs'
-import { type } from '@/utils'
+import { isType } from '@/utils'
 import {
   ref,
   watch,
@@ -48,7 +48,7 @@ const onConfirm = (val: any) => {
 
 const dateFormat = (val: any) => {
   let res
-  if (type(val) === 'array') {
+  if (isType(val) === 'array') {
     let time = val.map((v: Date) => dayjs(new Date(v)).format(props.format))
     if (attrs.attrs?.type === 'range') {
       value.value = time.join(' - ')
