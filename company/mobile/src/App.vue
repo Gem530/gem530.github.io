@@ -7,7 +7,7 @@
     </transition>
   </router-view>
 
-  <FixedIcon :size="30" v-model:show="show">
+  <FixedIcon :size="30" v-model:show="open">
     <van-icon name="gift-card" size="30" color="orange" @click.stop="handle" style="z-index: 1000;"/>
     <template #pop-box>
       <div class="gift-card-box" @click.stop="handle">666</div>
@@ -24,10 +24,9 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 const key = computed(() => route.path + '/' + (new Date()).getTime() + Math.random())
 
-const show = ref(false)
+const open = ref(false)
 const handle = () => {
-  show.value = !show.value
-  console.log('1212', show.value)
+  open.value = !open.value
 }
 </script>
 

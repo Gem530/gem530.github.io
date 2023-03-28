@@ -7,6 +7,7 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    AnimationColumn: typeof import('./src/components/animationColumn/index.vue')['default']
     FixedIcon: typeof import('./src/components/fixedIcon/index.vue')['default']
     Footer: typeof import('./src/components/footer/index.vue')['default']
     GArea: typeof import('./src/components/gArea/index.vue')['default']

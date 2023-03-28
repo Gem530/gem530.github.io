@@ -93,6 +93,8 @@
         <div class="grid-border-item-bottom">bottom-content</div>
       </div>
     </div>
+
+    <AnimationColumn></AnimationColumn>
   </div>
 </template>
 
