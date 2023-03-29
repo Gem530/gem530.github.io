@@ -64,6 +64,10 @@ const list = ref([
     align-items: center;
     transform: translateX(-100%);
     animation: moveright 10s linear infinite;
+    animation-play-state: running !important;
+    &:hover {
+      animation-play-state: paused !important;
+    }
     &:not(:last-child) {
       margin-bottom: 5px;
     }
