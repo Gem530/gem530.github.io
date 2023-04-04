@@ -82,7 +82,7 @@ export const handleTree = (data:any[], id:string='id', parentId:string='parentId
 export const toArrayTwo = (arr: any[], num: number) => {
   let newArr = []
   for (let i = 0; i < arr.length; i+=num) {
-    newArr.push(arr.slice(i, i+3))
+    newArr.push(arr.slice(i, i+num))
   }
   return newArr
 }
