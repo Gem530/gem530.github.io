@@ -1,0 +1,21 @@
+{
+  "name": "monorepo-qiankun",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "main-dev": "pnpm --filter main dev",
+    "main-build:prod": "pnpm --filter main build:prod",
+    "child-dev": "pnpm --filter child dev",
+    "child-build:prod": "pnpm --filter child build:prod",
+    "dev:all": "pnpm --filter main dev && pnpm --filter child dev",
+    "build:all": "pnpm --filter main build:prod && pnpm --filter child build:prod"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^18.15.11",
+    "vue-router": "^4.1.6"
+  }
+}
