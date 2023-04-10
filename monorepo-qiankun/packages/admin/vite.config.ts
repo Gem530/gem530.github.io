@@ -14,7 +14,7 @@ export default defineConfig(({mode, command}) => {
   // console.log('command-----', command, command !== 'build')
   return {
     // base: 'http://192.168.2.103:9002/',
-    base: 'https://57k67j9137.zicp.fun/children/admin/',
+    base: command === 'build' ? 'https://57k67j9137.zicp.fun/children/admin/' : './',
     server: { // 本地跨域请求
       host: '0.0.0.0',
       port: 9002,

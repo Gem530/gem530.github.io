@@ -39,10 +39,21 @@ registerMicroApps(appList, {
 })
 
 start({
-  prefetch: 'all',
-  sandbox: true
+  prefetch: false,
+  sandbox: true,
   // sandbox: {
   //   // strictStyleIsolation: true,
   //   experimentalStyleIsolation: true // 样式隔离
+  // },
+  // excludeAssetFilter: (assetUrl: string) => {
+  //   const whiteList = ['https://api.map.baidu.com/api?v=3.0&ak=viZsULjRTV2XTd5bGXNLv2Gy9XnFUn3a']
+  //   // 白名单协议:子应用下如需要放行动态加载的css/js资源,可以在链接上带上参数 _custom-exclude_=MAIN ;该功能未测试过,不知效果如何
+  //   const whiteWords = ['_custom-exclude_=MAIN']
+  //   let flag = false
+  //   if (whiteList.includes(assetUrl)) {
+  //     flag =  true
+  //   }
+  //   // console.log(flag)
+  //   return flag
   // }
 })
