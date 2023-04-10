@@ -1,0 +1,44 @@
+.side-bar {
+  flex: none;
+  width: $baseSideBarWidth;
+  box-shadow: 2px 2px 5px $borderThemeColor;
+  transition: width 0.28s;
+  // border: 1px solid $borderThemeColor;
+
+  &.fixed {
+    position: fixed;
+    width: $baseSideBarFixedWidth;
+    height: 100vh;
+    background: $bgThemeWhite;
+    z-index: 9999;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  :deep(.el-menu) {
+    border-right: none;
+  }
+
+  .logo {
+    height: 45px;
+    @include flex();
+    padding: 5px 0;
+    overflow: hidden;
+    img {
+      width: 35px;
+      height: 35px;
+    }
+    span {
+      margin-left: 10px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+  }
+
+  :deep(.el-menu--collapse) {
+    .sub-menu-text,
+    .el-sub-menu__icon-arrow {
+      display: none !important;
+    }
+  }
+}

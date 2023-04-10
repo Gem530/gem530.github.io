@@ -22,6 +22,7 @@ export default defineConfig({
     // https://cn.vitejs.dev/config/#resolve-extensions
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
   },
+  base: 'https://57k67j9137.zicp.fun/children/child/',
   server: {
     hmr: true,
     // 服务器主机名，如果允许外部访问，可设置为0.0.0.0

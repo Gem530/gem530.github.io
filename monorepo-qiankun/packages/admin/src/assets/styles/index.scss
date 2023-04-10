@@ -1,0 +1,123 @@
+@import './variables.module.scss';
+@import './iconfont.scss';
+// @import './element-name.scss';
+
+$textBlack: var(--text-theme-black, $textBlackInit);
+$bgThemeGray: var(--bg-theme-gray, $bgThemeGrayInit);
+$baseSideBarWidth: var(--base-side-bar-width, 200px);
+$bgThemeWhite: var(--bg-theme-white, $bgThemeWhiteInit);
+$baseFixedHeaderHeight: var(--base-side-bar-height, 90px);
+$baseSideBarFixedWidth: var(--base-side-bar-fixed-width, 0px);
+$borderThemeColor: var(--border-theme-gray, $borderThemeColorInit);
+@import './element.scss';
+
+/***
+ * px2rem 转换
+ */
+$base-font-size: 750;
+@function px2rem($px) {
+  @return calc($px / 75px) * 1rem;
+}
+@function rem($px) {
+  @return calc($px / $base-font-size) * 10rem;
+}
+@function vw($px) {
+  @return calc($px / $base-font-size) * 100vw;
+}
+// calc函数计算
+@function calcF($num1, $num2) {
+  @return calc($num1 - $num2)
+}
+ 
+// 元素宽高
+@mixin wh($w, $h, $varW: '', $varH: '') {
+  @if $varW == 'max' {
+    max-width: $w;
+  } @else if $varW == 'min' {
+    min-width: $w;
+  } @else {
+    width: $w;
+  }
+  @if $varH == 'max' {
+    max-height: $h;
+  } @else if $varH == 'min' {
+    min-height: $h;
+  } @else {
+    height: $h;
+  }
+}
+ 
+// 字体颜色
+@mixin fc ($size: 16px, $color: #000000) {
+  font-size: $size;
+  color: $color;
+}
+
+// flex
+@mixin flex($justify_content: center, $align_items: center, $dirction: row, $wrap: wrap) {
+  display: flex;
+  flex-direction: $dirction;
+  justify-content: $justify_content;
+  align-items: $align_items;
+  flex-wrap: $wrap;
+}
+
+// 定位上下左右居中
+@mixin pcenter($top: 50%, $left: 50%, $translateY: -50%, $translateX: -50%, $position: absolute) {
+  position: $position;
+  top: $top;
+  left: $left;
+  transform: translate($translateX, $translateY);
+}
+
+// 文字垂直水平居中
+@mixin textcenter($height: 16px, $align: center) {
+  text-align: $align;
+  line-height: $height;
+}
+
+// 隐藏滚动条
+@mixin overflow-auto-hide {
+  &::-webkit-scrollbar {
+    width: 0px;
+  }
+}
+
+// 文字隐藏
+@mixin text-overflow($lines: 1) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: $lines;
+  -moz-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  @if $lines == 1 {
+    white-space: nowrap;
+    display: block;
+  } @else {
+    display: -webkit-box;
+  }
+}
+
+// 适用大部分组件主题色
+.theme {
+  background: $bgThemeWhite !important;
+  color: $textBlack !important;
+}
+
+// 富文本控制图片/视频宽度
+:deep(.rich-show-content) {
+  width: 100px;
+
+  img,
+  video {
+    max-width: 100% !important;
+  }
+}
+
+// 解决elemnt-plus图标与字体图标冲突
+.el-icon {
+  &.el-input__icon::before {
+    display: none;
+  }
+}

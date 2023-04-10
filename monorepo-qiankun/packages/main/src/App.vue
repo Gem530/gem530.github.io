@@ -2,6 +2,7 @@
   <div>
     <router-view></router-view>
     <div id="sub-child"></div>
+    <div id="sub-admin"></div>
   </div>
 </template>
 

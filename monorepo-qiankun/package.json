@@ -8,8 +8,10 @@
     "main-build:prod": "pnpm --filter main build:prod",
     "child-dev": "pnpm --filter child dev",
     "child-build:prod": "pnpm --filter child build:prod",
-    "dev:all": "pnpm --filter main dev && pnpm --filter child dev",
-    "build:all": "pnpm --filter main build:prod && pnpm --filter child build:prod"
+    "admin-dev": "pnpm --filter admin dev",
+    "admin-build:prod": "pnpm --filter admin build:prod",
+    "dev:all": "pnpm --filter main --filter child --filter admin dev",
+    "build:all": "pnpm --filter main --filter child --filter admin build:prod"
   },
   "keywords": [],
   "author": "",

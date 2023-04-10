@@ -16,7 +16,7 @@ const constantRoutes: any[] = [
 
 const router = createRouter({
   history: createWebHashHistory(
-    // qiankunWindow.__POWERED_BY_QIANKUN__ ? '/vue-child/' : '/'
+    qiankunWindow.__POWERED_BY_QIANKUN__ ? '/child/' : '/'
   ),
   routes: constantRoutes,
   scrollBehavior(to, from, savedPosition) {
