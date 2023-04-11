@@ -124,6 +124,14 @@ export const routesList = [
           hidden: false,
           alwaysShow: true,
           meta: { title: "k线图", icon: "DataLine" },
+        },
+        {
+          name: 'k-detail',
+          path: "echart/k-detail",
+          component: "echart/k-detail",
+          hidden: false,
+          alwaysShow: true,
+          meta: { title: "k线图-详情", icon: "icon-data-view" },
         }
       ]
     },

@@ -1,6 +1,7 @@
 <template>
   <el-menu
     mode="vertical"
+    class="menu-box"
     :unique-opened="false"
     :collapse="isCollapse"
     :collapse-transition="false"
@@ -37,5 +38,5 @@ const closeMenu = (index: any) => {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 </style>

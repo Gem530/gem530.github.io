@@ -22,7 +22,13 @@ export default defineConfig(({mode, command}) => {
           target: 'http://13.212.17.88:8085/prod-api',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/dev-api/, ""),
-        }
+        },
+        //火币api
+        "/huobi-api": {
+          target: "https://api.huobi.pro", //测试
+          changeOrigin: true,
+          rewrite: (p) => p.replace(/^\/huobi-api/, ""),
+        },
       }
     },
     resolve: {

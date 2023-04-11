@@ -1,8 +1,11 @@
 .side-bar {
   flex: none;
   width: $baseSideBarWidth;
+  height: 100vh;
   box-shadow: 2px 2px 5px $borderThemeColor;
   transition: width 0.28s;
+  overflow-x: hidden;
+  overflow-y: auto;
   // border: 1px solid $borderThemeColor;
 
   &.fixed {

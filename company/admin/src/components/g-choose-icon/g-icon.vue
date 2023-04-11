@@ -1,6 +1,6 @@
 <template>
   <template v-if="icon.indexOf(props.filter) !== -1">
-    <i :class="`iconfont ${icon}`" :style="`font-size: ${size}px`"></i>
+    <i :class="`iconfont ${icon}`" :style="`font-size: ${size}px;min-width: 24px;text-align: center;`"></i>
   </template>
   <template v-else>
     <el-icon :style="`font-size: ${size}px`"><component :is="icon"/></el-icon>

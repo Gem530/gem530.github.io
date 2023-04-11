@@ -23,7 +23,7 @@ const timeout = 10000
 // }
 function request (config: any): Promise<unknown> {
   config.timeout = config.timeout || timeout
-  config.url = BASE_URL + config.url
+  config.url = (config.baseUrl ? config.baseUrl : BASE_URL) + config.url
   // console.log('token--', getLocalItem('token'))
   config.headers = config.headers || { 'Authorization': getLocalItem('token') || '' }
 
@@ -66,34 +66,38 @@ function request (config: any): Promise<unknown> {
         return
       }
       const { status, data } = res
-      if (status === 200 && data.code === 200) {
-        resolve(data)
-      } else if (data.code === 401 || data.code === 403) {
-        ElMessageBox.confirm(
-          '登录已过期，是否重新登录?',
-          '提示'
-        ).then(() => {
-          removeItem('tagsView')
-          removeItem('defaultActive')
-          router.push('/login')
-        }).catch(() => {})
-        reject(data)
-      } else if (data.code === 409) {
-        ElMessageBox.confirm(
-          '您的账号已在其他设备登录，请重新登录',
-          '提示'
-        ).then(() => {
-          removeItem('tagsView')
-          removeItem('defaultActive')
-          router.push('/login')
-        }).catch(() => {})
-        reject(data)
+      if (!config.baseUrl) {
+        if (status === 200 && data.code === 200) {
+          resolve(data)
+        } else if (data.code === 401 || data.code === 403) {
+          ElMessageBox.confirm(
+            '登录已过期，是否重新登录?',
+            '提示'
+          ).then(() => {
+            removeItem('tagsView')
+            removeItem('defaultActive')
+            router.push('/login')
+          }).catch(() => {})
+          reject(data)
+        } else if (data.code === 409) {
+          ElMessageBox.confirm(
+            '您的账号已在其他设备登录，请重新登录',
+            '提示'
+          ).then(() => {
+            removeItem('tagsView')
+            removeItem('defaultActive')
+            router.push('/login')
+          }).catch(() => {})
+          reject(data)
+        } else {
+          ElMessage({
+            message: data.msg,
+            type: 'error'
+          })
+          reject(data)
+        }
       } else {
-        ElMessage({
-          message: data.msg,
-          type: 'error'
-        })
-        reject(data)
+        resolve(data)
       }
     }).catch(err => {
       ElMessage({

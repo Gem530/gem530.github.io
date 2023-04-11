@@ -3,12 +3,14 @@ import 'nprogress/nprogress.css'
 import NProgress from 'nprogress'
 import { getLocalItem } from '@/utils/storage'
 import useUserStore from '@/store/modules/user'
+import useWebSocket from '@/store/modules/socket'
 import useTagsStore from '@/store/modules/tags-view'
 
 let initRoute = false // 初始化动态路由
 router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
   const tagsStore = useTagsStore()
+  const useSocket = useWebSocket()
   NProgress.start()
   const token = getLocalItem('token')
   // console.log('beforeEach--', to, from)
@@ -22,6 +24,9 @@ router.beforeEach(async (to, from, next) => {
     next({ path: '/login' })
     return false
   } else {
+    if (!useSocket.$ws) {
+      useSocket.createWebSocket()
+    }
     if (userStore.roles.length === 0) {
       await userStore.getInfo()
     }

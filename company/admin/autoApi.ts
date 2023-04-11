@@ -86,7 +86,7 @@ export default function () {
     },
     handleHotUpdate(data) {
       const pathFormat = filePath.toString().replace(/\\/g,'/')
-      if (data.file.includes(pathFormat)) {
+      if (data.file.includes(pathFormat) && !data.file.includes('index.ts')) {
         createFile()
       }
     },

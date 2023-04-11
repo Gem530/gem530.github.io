@@ -19,7 +19,7 @@
     </el-sub-menu>
 
     <el-menu-item v-else :index="route.path" @click="toPath(route.path)">
-        <g-icon v-if="route.meta?.icon" :icon="route.meta?.icon"></g-icon>
+        <g-icon style="margin-right: 10px;" v-if="route.meta?.icon" :icon="route.meta?.icon"></g-icon>
         <template #title>{{route.meta?.title}}</template>
     </el-menu-item>
   </div>
@@ -47,5 +47,6 @@ const toPath = (path: string) => {
 }
 </script>
 
-<style lang="scss">
+
+<style lang="scss" scoped>
 </style>

@@ -27,7 +27,7 @@ const props = withDefaults(defineProps<{
     width?: string,
     height?: string
 }>(), {
-    width: '1000px',
+    width: '800px',
     height: '500px'
 })
 

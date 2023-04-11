@@ -73,3 +73,31 @@ export interface addMenuType {
   updateTime?: string, // 更新时间
   visible?: string // 菜单状态（0显示 1隐藏）
 }
+
+// 虚拟币基础类型
+export interface baseCurrency {
+  vol: number, // 交易量
+  low: number, // 最低价格
+  open: number, // 开盘价格
+  high: number, // 最高价格
+  close: number, // 收盘价格
+  count: number, // 交易次数（以滚动24小时计）
+  amount: number, // 以基础币种计量的交易量（以滚动24小时计）
+}
+
+// 虚拟币
+export interface currencyType extends baseCurrency {
+  symbol: string, // 名称
+}
+
+// 虚拟币
+export interface klineType extends baseCurrency {
+  id: number, // id
+}
+
+// 获取k线数据
+export interface klineParams {
+  size?: number, // 返回 K 线数据条数 [1-2000]
+  symbol: string, // 交易对 btcusdt, ethbtc等（如需获取杠杆ETP净值K线，净值symbol = 杠杆ETP交易对symbol + 后缀‘nav’，例如：btc3lusdtnav）
+  period: string, // 返回 据时间粒度，也就是每根蜡烛的时间区间	1min, 5min, 15min, 30min, 60min, 4hour, 1day, 1mon, 1week, 1year
+}

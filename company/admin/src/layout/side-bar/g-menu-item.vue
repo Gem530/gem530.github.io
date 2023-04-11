@@ -13,7 +13,7 @@ const props = defineProps({
 })
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .g-menu-item {
   @include flex();
 

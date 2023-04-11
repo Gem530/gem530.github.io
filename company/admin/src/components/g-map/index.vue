@@ -111,9 +111,8 @@ const init = () => {
 
   map.addEventListener('click', (e: any) => {
     const { lng, lat } = e.point
-    // addMarker(lng, lat)
+    addMarker(lng, lat, true)
     targetPoint.value = e.point
-    console.log(lng, lat)
   })
 }
 
@@ -177,7 +176,13 @@ const toAddress = (type: string) => {
 }
 
 // 添加marker
-const addMarker = (lng: number, lat: number) => {
+const addMarker = (lng: number, lat: number, showCurPoint: boolean = false) => {
+  if (showCurPoint) {
+    map.clearOverlays() // 清除地图上所有覆盖物
+    // lng经度 lat纬度
+    addMarker(localInfo.value.point.lng, localInfo.value.point.lat)
+  }
+
   // lng经度 lat纬度
   const point = new BMap.Point(lng, lat)
   const marker = new BMap.Marker(point)
