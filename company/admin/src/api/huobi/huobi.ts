@@ -13,6 +13,7 @@ export function getTimestamp(): Promise<unknown> {
       url: '/v1/common/timestamp'
   })
 }
+
 /**
  * @author hjj
  * @description 获取k线数据
@@ -27,5 +28,20 @@ export function getKline(params: tsType.klineParams): Promise<unknown> {
       method: 'get',
       url: '/market/history/kline',
       params
+  })
+}
+
+/**
+ * @author hjj
+ * @description 获取所有交易对(V2)
+ * https://huobiapi.github.io/docs/spot/v1/cn/#v2
+ * @param ts 增量时间戳 非必填
+ */
+export function getSymbolList(ts?: number): Promise<unknown> {
+  return request({
+      baseUrl,
+      method: 'get',
+      url: '/v2/settings/common/symbols',
+      params: { ts }
   })
 }

@@ -2,7 +2,7 @@
   <div class="switch-list">
     <div
       :key="item"
-      :class="{ 'switch-item':true, 'active':item===switchItem}"
+      :class="{ 'switch-item':true, 'active':item===curTime}"
       v-for="item in switchList"
       @click="switchTime(item)"
     >{{item}}</div>
@@ -13,49 +13,106 @@
 <script lang="ts" setup name="g-echart-k">
 // import * as echarts from 'echarts'
 import echarts from '../g-echart/requestEachrts'
-import { jsonList, jsonList1 } from '@/views/echart/config'
+// import { jsonList, jsonList1 } from '@/views/echart/config'
 import {
   ref,
-  onMounted,
+  watch,
+  nextTick,
   defineProps,
   withDefaults
 } from 'vue'
 import dayjs from 'dayjs'
+import { klineType, getKline } from '@/api'
+import { mounted, unMounted } from '@/utils'
+import useWebSocket from '@/store/modules/socket'
+const useSocket = useWebSocket()
 
 const echartsDom = ref()
 const props = withDefaults(defineProps<{
     width?: string,
-    height?: string
+    height?: string,
+    currency?: string,
 }>(), {
     width: '800px',
-    height: '500px'
+    height: '500px',
+    currency: 'btcusdt',
 })
 
 let myChart: any
 let upColor: any
 let downColor: any
-const switchItem: any = ref('1D')
-const rawDatas: any = ref(jsonList)
-const switchList = ref(['1D', '1Y'])
+const switchList = ref(['1min', '5min', '15min', '30min', '60min', '4hour', '1day', '1mon', '1week', '1year'])
+const kLine = ref<klineType[]>([])
+const curTime = ref<string>('1min')
 
-onMounted(() => {
-  // const options = {}
-  // if (!options) return
-  myChart = echarts.init(echartsDom.value, 'dark')
-  // myEcharts.setOption(options)
-  upColor = '#00c087';
-  downColor = '#ff7858';
-  init()
+watch(() => props.currency, (val, old) => {
+  if (old) {
+    // console.log(old)
+    unSendWsKline(old)
+  }
+  if (val) {
+    nextTick(() => {
+      getKlineAPI()
+    })
+  }
+}, { immediate: true })
+
+const getKlineAPI = () => {
+  const params = {
+    symbol: props.currency,
+    period: curTime.value,
+    size: 2000
+  }
+  getKline(params).then((res: any) => {
+    kLine.value = (res.data || []).sort((a: klineType, b: klineType) => {
+      return a.id - b.id
+    })
+
+    nextTick(() => {
+      myChart = echarts.init(echartsDom.value, 'dark')
+      upColor = '#00c087';
+      downColor = '#ff7858';
+      init()
+      unSendWsKline()
+      sendWsKline()
+    })
+    
+  })
+}
+
+// mounted(() => {
+// })
+
+unMounted(() => {
+  unSendWsKline()
 })
 
+const sendWsKline = () => {
+  useSocket.send(`market.${props.currency}.kline.${curTime.value}`, props.currency, (res: any) => {
+    // console.log(res.tick)
+    if (res.tick) {
+      const index = kLine.value.findIndex((v: klineType) => v.id === res.tick.id)
+
+      if (index === -1) kLine.value.push(res.tick)
+      else kLine.value.splice(index, 1, res.tick)
+
+      update()
+    }
+  })
+}
+
+const unSendWsKline = (val:string = props.currency) => {
+  useSocket.unSend(`market.${val}.kline.${curTime.value}`, props.currency)
+}
+
 const init = () => {
-  var data = splitData(JSON.parse(JSON.stringify(rawDatas.value)));
+  var data = splitData(JSON.parse(JSON.stringify(kLine.value)));
   myChart.setOption({
     animation: false,
     legend: {
       bottom: 30,
       left: 'center',
-      data: ['Dow-Jones index', 'MA5', 'MA10', 'MA20', 'MA30']
+      data: ['蜡烛图', 'MA5', 'MA10', 'MA20', 'MA30']
     },
     tooltip: {
       trigger: 'axis',
@@ -199,7 +256,7 @@ const init = () => {
     ],
     series: [
       {
-        name: 'Dow-Jones index',
+        name: '蜡烛图',
         type: 'candlestick',
         data: data.values,
         itemStyle: {
@@ -284,109 +341,49 @@ const init = () => {
 }
 
 const update = () => {
-  var data = splitData(JSON.parse(JSON.stringify(rawDatas.value)));
+  var data = splitData(JSON.parse(JSON.stringify(kLine.value)));
   myChart.setOption({
+    xAxis: [
+      {
+        data: data.categoryData,
+      },
+      {
+        data: data.categoryData,
+      }
+    ],
     series: [
       {
-        name: 'Dow-Jones index',
-        type: 'candlestick',
+        // name: '蜡烛图',
         data: data.values,
-        itemStyle: {
-          color: upColor,
-          color0: downColor,
-          borderColor: undefined,
-          borderColor0: undefined
-        },
       },
       {
-        name: 'MA5',
-        type: 'line',
+        // name: 'MA5',
         data: calculateMA(5, data),
-        smooth: true,
-        showSymbol: false,
-        lineStyle: {
-          opacity: 0.5
-        }
       },
       {
-        name: 'MA10',
-        type: 'line',
+        // name: 'MA10',
         data: calculateMA(10, data),
-        smooth: true,
-        showSymbol: false,
-        lineStyle: {
-          opacity: 0.5
-        }
       },
       {
-        name: 'MA20',
-        type: 'line',
+        // name: 'MA20',
         data: calculateMA(20, data),
-        smooth: true,
-        showSymbol: false,
-        lineStyle: {
-          opacity: 0.5
-        }
       },
       {
-        name: 'MA30',
-        type: 'line',
+        // name: 'MA30',
         data: calculateMA(30, data),
-        smooth: true,
-        showSymbol: false,
-        lineStyle: {
-          opacity: 0.5
-        }
       },
       {
-        name: 'Volume',
-        type: 'bar',
-        xAxisIndex: 1,
-        yAxisIndex: 1,
+        // name: 'Volume',
         data: data.volumes
       }
     ]
   })
 }
 
-let timer: any
-let count: number = 1
-const cricule = () => {
-  if (timer) {
-    count = 1
-    clearInterval(timer)
-    criculeHandle()
-    return
-  }
-  criculeHandle()
-}
-
-const criculeHandle = () => {
-  timer = setInterval(() => {
-    if (count > 10) {
-      clearInterval(timer)
-      return
-    }
-    count++
-    rawDatas.value = [...rawDatas.value, ["2016-06-22", 17832.67, 17780.83, 17770.36, 17920.16, 89440000]]
-    // console.log(rawDatas.value)
-    update()
-    // ["2016-06-22", 17832.67, 17780.83, 17770.36, 17920.16, 89440000]
-  }, 1000)
-}
-cricule()
-
 const switchTime = (type: string) => {
-  if (switchItem.value === type) return
-  switchItem.value = type
-  // initData()
-  if (switchItem.value === '1D') {
-    rawDatas.value = jsonList
-  } else {
-    rawDatas.value = jsonList1
-  }
-  init()
-  cricule()
+  if (curTime.value === type) return
+  curTime.value = type
+  getKlineAPI()
 }
 
 function splitData(rawData: any) {
@@ -394,9 +391,11 @@ function splitData(rawData: any) {
   let values = [];
   let volumes = [];
   for (let i = 0; i < rawData.length; i++) {
-    categoryData.push(rawData[i].splice(0, 1)[0]);
-    values.push(rawData[i]);
-    volumes.push([i, rawData[i][4], rawData[i][0] > rawData[i][1] ? 1 : -1]);
+    const item = rawData[i]
+    const time = dayjs(item.id * 1000).format('YYYY-MM-DD HH:mm:ss')
+    categoryData.push(time);
+    values.push([item.open, item.close, item.low, item.high, item.id]);
+    volumes.push([i, item.close, item.open > item.close ? 1 : -1]);
   }
   return {
     categoryData: categoryData,

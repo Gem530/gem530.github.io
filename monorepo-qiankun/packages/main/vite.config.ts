@@ -20,7 +20,7 @@ export default defineConfig({
     hmr: true,
     // 服务器主机名，如果允许外部访问，可设置为0.0.0.0
     host: "0.0.0.0",
-    port: 9000, //服务器端口号
+    port: 8999, //服务器端口号
     open: false, //是否自动打开浏览器
     proxy: {
       "/api": {

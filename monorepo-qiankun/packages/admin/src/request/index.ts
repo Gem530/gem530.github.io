@@ -8,7 +8,7 @@ import { ElMessage, ElMessageBox } from "element-plus"
 type method = 'get' | 'delete' | 'post' | 'put'
 // let loadingInstance: { close: () => void } | null = null
 const BASE_URL = import.meta.env.VITE_APP_BASE_URL
-const timeout = 10000
+const timeout = 120000
 
 /**
  * @author wenbin

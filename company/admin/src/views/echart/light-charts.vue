@@ -10,7 +10,11 @@
       <div class="list-price title">价格</div>
       <div class="list-vol title">交易量</div>
     </div>
-    <div class="list" v-for="item in liveList" :key="item.symbol">
+    <div
+      class="list"
+      :key="item.symbol"
+      v-for="item in liveList"
+      @click="toPath(item.symbol)">
       <div class="list-name">{{ item.symbol.toLocaleUpperCase().replace('USDT','') }}</div>
       <div class="list-price">{{ item.amount }}</div>
       <div class="list-vol">{{ item.vol }}</div>
@@ -20,10 +24,13 @@
 
 <script lang="ts" setup name="light-charts">
 import { ref } from 'vue'
-import { currencyType, getTimestamp } from '@/api'
+import { useRouter } from 'vue-router'
 import { mounted, unMounted } from '@/utils'
 import useWebSocket from '@/store/modules/socket'
+import { currencyType, getTimestamp } from '@/api'
 const useSocket = useWebSocket()
+
+const router = useRouter()
 
 const liveList = ref<currencyType[]>([])
 
@@ -33,6 +40,12 @@ const getTimestampAPI = () => {
   })
 }
 getTimestampAPI()
+
+const toPath = (id: string) => {
+  router.push({
+    path: `/echart/k-detail/${id}`,
+  })
+}
 
 mounted(() => {
   useSocket.send('market.overview', 'OVERVIEW', (res: any) => {

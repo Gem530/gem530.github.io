@@ -1,47 +1,43 @@
 <template>
   <div>
-    <h2>k线图/lightweight-charts</h2>
+    <h2>k线图-{{symbolName}}/echarts-kline</h2>
+    <!-- <el-input v-model="symbolName" placeholder="输入币种名称"></el-input> -->
+    <el-select
+      filterable
+      v-model="symbolName"
+      placeholder="输入币种名称">
+      <el-option
+        :key="item.sc"
+        :label="item.sc"
+        :value="item.sc"
+        v-for="item in symbolList"
+      />
+    </el-select>
     <!-- <g-light-charts></g-light-charts> -->
-    <echart-k></echart-k>
+    <echart-k :currency="symbolName"></echart-k>
   </div>
 </template>
 
-<script lang="ts" setup name="light-charts">
+<script lang="ts" setup name="k-detail">
 import { ref } from 'vue'
+import { getSymbolList } from '@/api'
 import { useRoute } from 'vue-router'
-import { klineType, getKline } from '@/api'
-import { mounted, unMounted } from '@/utils'
-import useWebSocket from '@/store/modules/socket'
-const useSocket = useWebSocket()
 
 const route = useRoute()
-const kLine = ref<klineType[]>([])
+const symbolList = ref<any[]>([])
 const symbolName = ref<string>('btcusdt')
-if (route.query.id) {
-  symbolName.value = route.query.id as string
+if (route.params.id) {
+  symbolName.value = route.params.id as string
 }
 
-const getKlineAPI = () => {
-  const params = {
-    symbol: symbolName.value,
-    period: '1min',
-    size: 2000
-  }
-  getKline(params).then((res: any) => {
-    console.log(res)
+const getSymbolListAPI = () => {
+  getSymbolList().then((res: any) => {
+    // console.log(res)
+    symbolList.value = res.data || []
+    symbolList.value = symbolList.value.filter((v: any) => v.state === 'online')
   })
 }
-getKlineAPI()
-
-// mounted(() => {
-//   useSocket.send('market.overview', 'OVERVIEW', (res: any) => {
-//     liveList.value = res.data || []
-//   })
-// })
-
-// unMounted(() => {
-//   useSocket.unSend('market.overview', 'OVERVIEW')
-// })
+getSymbolListAPI()
 </script>
 
 <style lang="scss">

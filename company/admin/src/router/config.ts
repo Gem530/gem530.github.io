@@ -127,9 +127,9 @@ export const routesList = [
         },
         {
           name: 'k-detail',
-          path: "echart/k-detail",
+          path: "echart/k-detail/:id",
           component: "echart/k-detail",
-          hidden: false,
+          hidden: true,
           alwaysShow: true,
           meta: { title: "k线图-详情", icon: "icon-data-view" },
         }
