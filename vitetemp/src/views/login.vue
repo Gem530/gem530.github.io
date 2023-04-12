@@ -77,34 +77,34 @@
             GMessage({message: checkHandle(), type: 'error', duration: 1500})
             return false
         }
-        if (reg) {
-            const param = {
-                name: state.name,
-                pass: state.pass
-            }
-            loginAPI(param).then((res) => {
-                GMessage({ message: '登录成功', type: 'success', duration: 2000 })
-                // if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
-                //     mobile
-                // } else {
-                //     pc
-                // }
-                console.log(res)
-                const data = res.data[0]
-                store.dispatch('setUserAction', { name: state.name, avator: data.avator, userId: data.Id })
-                initScoket()
-                sessionStorage.setItem('token', JSON.stringify(res.token))
-                // const pathUrl = !reg ? '/index' : '/chat'
-                router.push('/chat')
-            }).catch((err) => {
-                GMessage({ message: '登录失败：' + err.message, type: 'error', duration: 2000 })
-            })
-        } else {
+        // if (reg) {
+        //     const param = {
+        //         name: state.name,
+        //         pass: state.pass
+        //     }
+        //     loginAPI(param).then((res) => {
+        //         GMessage({ message: '登录成功', type: 'success', duration: 2000 })
+        //         // if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+        //         //     mobile
+        //         // } else {
+        //         //     pc
+        //         // }
+        //         console.log(res)
+        //         const data = res.data[0]
+        //         store.dispatch('setUserAction', { name: state.name, avator: data.avator, userId: data.Id })
+        //         initScoket()
+        //         sessionStorage.setItem('token', JSON.stringify(res.token))
+        //         // const pathUrl = !reg ? '/index' : '/chat'
+        //         router.push('/chat')
+        //     }).catch((err) => {
+        //         GMessage({ message: '登录失败：' + err.message, type: 'error', duration: 2000 })
+        //     })
+        // } else {
             store.dispatch('setUserAction', { name: 'admin', avator: '', userId: 0 })
             sessionStorage.setItem('token', 'is-token')
             // const pathUrl = !reg ? '/index' : '/chat'
             router.push('/index')
-        }
+        // }
     }
 
     // 注册方法

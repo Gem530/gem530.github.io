@@ -1,4 +1,5 @@
 <template>
+    <!-- 人脸识别 -->
   <div class="component theme"
       :style="`width: ${state.clientWidthD}px;height: ${state.heightD}px;`">
     <div
@@ -78,6 +79,7 @@ const state: any = reactive({
     photoH: 0, // 摄像头分辨率高度
     photoFlag: true
 })
+const windowDom: any = window
 
 // https://zhuanlan.zhihu.com/p/481640259 解决给组件加name的方法
 // 因为使用auto-import插件，会自动导入onMounted等vue或vue-router的方法，所以不需要每次都导入
@@ -118,57 +120,30 @@ const destoryTracking = () => {
 
 // 初始化 摄像头
 const initPhoto = (face: string) => {
+    state.widthD = props.width
+    state.heightD = props.height
+    state.clientWidthD = props.width
+    state.clientHeightD = props.height
+
+
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    state.clientWidthD = document.body.clientWidth
-    state.clientHeightD = document.body.clientHeight
+    // state.clientWidthD = document.body.clientWidth
+    // state.clientHeightD = document.body.clientHeight
 
-    if (props.width) {
-        // 如果有传值，就使用接受的值为显示宽度
-        state.widthD = props.width
-        state.clientWidthD = props.width
-    } else {
-        state.widthD = state.clientWidthD
-    }
-    if (props.height) {
-        // 如果有传值，就使用接受的值为显示高度
-        state.heightD = props.height
-        state.clientHeightD = props.height
-    } else {
-        state.heightD = state.clientHeightD
-    }
-
-    // -------------------------- tracking ---------------------------
-    const windowDom: any = window
-    console.log(windowDom.tracking)
-    // windowDom.tracking.initUserMedia_()
-    const canvas: any = document.getElementById('tempCanvas')
-    const videoDOMs: any = document.getElementById('videoDom')
-    const ctx: any = canvas.getContext('2d')
-    let tracker = new windowDom.tracking.ObjectTracker('face')
-    tracker.setInitialScale(4)
-    tracker.setStepSize(2)
-    tracker.setEdgesDensity(0.1)
-
-    trackerTask.value = windowDom.tracking.track('#videoDom', tracker, { camera: true })
-
-    tracker.on('track', (event: any) => {
-        console.log(event)
-        // ctx.clearRect(0, 0, canvas.width, canvas.height)
-        event.data.forEach((rect: any) => {
-            ctx.drawImage(videoDOMs, 0, 0, state.photoW, state.photoW * (state.heightD / state.widthD), 0, 0, canvas.width, canvas.height)
-            ctx.font = '16px Helvetica'
-            // ctx.fillText('12', 100, 100)
-            ctx.strokeStyle = '#1890ff'
-            ctx.strokeRect(rect.x, rect.y, rect.width, rect.height)
-        })
-
-        if (event.data.length !== 0) {
-            // 说明检测到人脸了，此时就可以截取图片上传给后端
-            // canvas.toDataURL('image/jpeg')
-        }
-    })
-
-    // -------------------------- tracking ---------------------------
+    // if (props.width) {
+    //     // 如果有传值，就使用接受的值为显示宽度
+    //     state.widthD = props.width
+    //     state.clientWidthD = props.width
+    // } else {
+    //     state.widthD = state.clientWidthD
+    // }
+    // if (props.height) {
+    //     // 如果有传值，就使用接受的值为显示高度
+    //     state.heightD = props.height
+    //     state.clientHeightD = props.height
+    // } else {
+    //     state.heightD = state.clientHeightD
+    // }
 
     const navigators: any = navigator
     // 老的浏览器可能根本没有实现 mediaDevices，所以我们可以先设置一个空的对象
@@ -196,8 +171,9 @@ const initPhoto = (face: string) => {
     navigators.mediaDevices.getUserMedia({
             audio: false,
             video: {
-                // width: that.widthD,
-                // height: that.heightD,
+                // 电脑端没问题,移动端会有问题
+                width: props.width,
+                height: props.height,
                 facingMode: face
             }
         })
@@ -231,6 +207,38 @@ const initPhoto = (face: string) => {
             state.photoFlag = false
             console.log(err.name + ': ' + err.message, err)
         })
+
+        // -------------------------- tracking ---------------------------
+        // console.log(windowDom.tracking)
+        // windowDom.tracking.initUserMedia_()
+        const canvas: any = document.getElementById('tempCanvas')
+        const videoDOMs: any = document.getElementById('videoDom')
+        const ctx: any = canvas.getContext('2d')
+        let tracker = new windowDom.tracking.ObjectTracker('face')
+        tracker.setInitialScale(4)
+        tracker.setStepSize(2)
+        tracker.setEdgesDensity(0.1)
+
+        trackerTask.value = windowDom.tracking.track('#videoDom', tracker, { camera: true })
+
+        tracker.on('track', (event: any) => {
+            // console.log(event)
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+            event.data.forEach((rect: any) => {
+                // ctx.drawImage(videoDOMs, 0, 0, state.photoW, state.photoW * (state.heightD / state.widthD), 0, 0, canvas.width, canvas.height)
+                ctx.drawImage(videoDOMs, 0, 0, canvas.width, canvas.height)
+                ctx.font = '16px Helvetica'
+                // ctx.fillText('12', 100, 100)
+                ctx.strokeStyle = '#1890ff'
+                ctx.strokeRect(rect.x, rect.y, rect.width, rect.height)
+            })
+
+            if (event.data.length !== 0) {
+                // 说明检测到人脸了，此时就可以截取图片上传给后端
+                // canvas.toDataURL('image/jpeg')
+            }
+        })
+        // -------------------------- tracking ---------------------------
 }
 
 // 拍照
@@ -251,14 +259,10 @@ const getPhoto = async () => {
         canvas.height = state.heightD
     } else {
         // 移动端宽高对换
-        // canvas.width = that.heightD
-        // canvas.height = (canvas.width * that.heightD) / that.widthD
-        // tempW = that.heightD
-        // tempH = (canvas.width * that.heightD) / that.widthD
-        canvas.width = state.widthD * 2
-        canvas.height = state.heightD * 2
-        // canvas.width = that.photoW
-        // canvas.height = that.heightD
+        // canvas.width = state.widthD * 2
+        // canvas.height = state.heightD * 2
+        canvas.width = state.widthD
+        canvas.height = state.heightD
     }
     ctx.drawImage(video.value, 0, 0, state.photoW, state.photoW * (state.heightD / state.widthD), 0, 0, canvas.width, canvas.height)
     // console.log(state.photoW, state.photoW * (state.heightD / state.widthD), state.widthD, state.heightD)
@@ -372,9 +376,15 @@ const convertBase64UrlToBlob = (urlData: string) => {
 
         .video-contain {
             // border: 1px solid #f00;
-            object-fit: cover;
-            object-position: 0 0;
+            // object-fit: cover;
+            // object-position: 0 0;
         }
+    }
+
+    #tempCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
     }
 
     .error {
