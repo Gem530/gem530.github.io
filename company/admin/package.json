@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vitejs/plugin-vue-jsx": "^3.0.1",
     "@vueuse/core": "^9.2.0",
     "@wangeditor/editor": "^5.1.15",
     "@wangeditor/editor-for-vue": "^5.1.12",

@@ -3,6 +3,7 @@ import path from "path"
 import autoApi from './autoApi'
 import vue from '@vitejs/plugin-vue'
 import iconExport from './iconExport'
+import vueJsx from '@vitejs/plugin-vue-jsx'
 import ViteImages from "vite-plugin-vue-images" //自动导入图片
 import compression from 'vite-plugin-compression' // gzip 压缩
 import Components from "unplugin-vue-components/vite" //自动导入组件
@@ -47,6 +48,7 @@ export default defineConfig(({mode, command}) => {
     },
     plugins: [
       vue(),
+      vueJsx(),
       autoApi(),
       iconExport(),
       ViteImages({

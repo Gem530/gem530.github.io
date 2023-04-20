@@ -1,6 +1,7 @@
 <template>
   <div class="app-main">
     <h1>首页</h1>
+    <GTsx v-model:text="gtsxText" :tsxList="tsxList" @getInfo="getTsxData"></GTsx>
     <el-tabs v-model="activeName">
       <el-tab-pane
         :key="item.id"
@@ -181,6 +182,16 @@ nextTick(async () => {
     qrcodeImg.value = res
   })
 })
+
+const gtsxText = ref('首页测试g-tsx组件')
+const tsxList = ref([
+  { type: 'p', value: '这里是p标签' },
+  { type: 'button', value: '这里是el-button标签', attrs: { type: 'primary' } },
+])
+
+const getTsxData = (val: string) => {
+  console.log('getTsxData:', val)
+}
 
 // 获取截取的图片
 const getImg = (item: imgInfo) => {

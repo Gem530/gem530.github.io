@@ -24,6 +24,8 @@ https://57k67j9137.zicp.fun/#/  反向代理的地址，公司电脑启动了服
 
 https://aitrade.ga/books/lightweight-charts-docs-cn/book/home.html k线图学习链接
 
+下载jsx  npx -p npm@6 npm i @vitejs/plugin-vue-jsx --force
+
 package.json
 scripts {
   build: 'vue-tsc --noEmit && vite build' // 打包时校验ts
