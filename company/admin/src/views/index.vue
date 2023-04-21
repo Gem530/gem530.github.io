@@ -1,7 +1,11 @@
 <template>
   <div class="app-main">
     <h1>首页</h1>
-    <GTsx v-model:text="gtsxText" :tsxList="tsxList" @getInfo="getTsxData"></GTsx>
+    <GTsx v-model:text="gtsxText" :tsxList="tsxList" @getInfo="getTsxData">
+      <template #form-slot="{item}">
+        <div>slot插槽--data:{{ item.value }}</div>
+      </template>
+    </GTsx>
     <el-tabs v-model="activeName">
       <el-tab-pane
         :key="item.id"
@@ -187,6 +191,7 @@ const gtsxText = ref('首页测试g-tsx组件')
 const tsxList = ref([
   { type: 'p', value: '这里是p标签' },
   { type: 'button', value: '这里是el-button标签', attrs: { type: 'primary' } },
+  { type: 'slot', value: '这里是slot标签', prop: 'form-slot' },
 ])
 
 const getTsxData = (val: string) => {

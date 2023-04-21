@@ -32,6 +32,7 @@ export default defineComponent({
       ctx.emit('update:text', '修改了text的文案')
     }
     const getInfoHandle = () => {
+      console.log(ctx)
       ctx.emit('getInfo', '666')
     }
     const createDom = (item: any) => {
@@ -45,6 +46,15 @@ export default defineComponent({
           return (
             <el-button {...item.attrs}>{item.value}</el-button>
           )
+        },
+        slot: () => {
+          let slot: any = ctx.slots[item.prop] ?? ctx.attrs.slots[item.prop]
+          if (!slot) {
+            return ''
+          }
+          return slot({
+            item
+          })
         }
       }
       return dom[item.type]()
