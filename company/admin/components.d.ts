@@ -10,7 +10,6 @@ declare module '@vue/runtime-core' {
     AdminInfo: typeof import('./src/layout/nav-bar/admin-info.vue')['default']
     AppMain: typeof import('./src/layout/app-main/index.vue')['default']
     Breadcrumb: typeof import('./src/layout/nav-bar/breadcrumb.vue')['default']
-    copy: typeof import('./src/components/g-find-frame/index copy.vue')['default']
     EchartK: typeof import('./src/components/g-light-charts/echart-k.vue')['default']
     ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
     ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']

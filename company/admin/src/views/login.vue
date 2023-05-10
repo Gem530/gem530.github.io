@@ -19,6 +19,12 @@
               <template #prefix><g-icon icon="Lock"></g-icon></template>
             </el-input>
           </el-form-item>
+          <el-form-item prop="code">
+            <el-input v-model="form.code" placeholder="验证码" @keyup.enter="loginHandle">
+              <template #prefix><g-icon icon="Lock"></g-icon></template>
+            </el-input>
+            <img :src="codeUrl" @click="getCodeImgAPI"/>
+          </el-form-item>
           <el-button :loading="loading" type="primary" @click="loginHandle">
             <span v-if="!loading">登录</span>
             <span v-else>登录中...</span>
@@ -32,30 +38,45 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import Cookies from 'js-cookie'
-import useUserStore from '@/store/modules/user'
 import * as tsType from '@/api/type'
 import { useRouter } from 'vue-router'
+import { getCodeImg } from '@/api/user'
 import { encrypt } from '@/utils/jsencrypt'
 import { removeItem } from '@/utils/storage'
+import useUserStore from '@/store/modules/user'
 const userStore = useUserStore()
 const router = useRouter()
 
+const codeUrl = ref('')
 const loginRef = ref()
 const loading = ref(false)
 const form = ref<tsType.loginInfo>({
+  uuid: '',
+  code: '',
+  password: '123456',
   username: 'superadmin',
-  password: '123456'
 })
 const rules = ref({
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
 })
 
+const getCodeImgAPI = () => {
+  getCodeImg().then((res: any) => {
+    // console.log(res.img)
+    codeUrl.value = "data:image/gif;base64," + res.img
+    form.value.uuid = res.uuid
+  })
+}
+getCodeImgAPI()
+
 const loginHandle = () => {
   loginRef.value.validate((val: Boolean) => {
     if (val) {
       loading.value = true
       const params = {
+        uuid: form.value.uuid,
+        code: form.value.code,
         username: form.value.username,
         password: encrypt(form.value.password) as string
       }

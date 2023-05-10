@@ -48,3 +48,11 @@ export function getRoutersAPI () {
     method: 'get'
   })
 }
+
+// 获取验证码
+export function getCodeImg() {
+  return request({
+    url: '/captchaImage',
+    method: 'get',
+  })
+}
