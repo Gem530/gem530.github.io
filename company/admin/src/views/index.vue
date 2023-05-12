@@ -106,6 +106,11 @@
       url="https://d1.faiusr.com/4/AAEIABAEGAAgtZ-56QUoufyr5gQw9gE4kwM.png"
       @getResult="getResult"
     ></GScrapeMusic>
+
+    <!-- 视频播放 -->
+    <GVideoPlay
+      v-if="activeName == 13"
+    ></GVideoPlay>
   </div>
 </template>
 
@@ -126,7 +131,7 @@ interface imgInfo {
 const postImg = ref()
 const photoImg = ref()
 const qrcodeImg = ref()
-const activeName = ref(7)
+const activeName = ref(13)
 const drawBoardImg = ref()
 const tabsList = ref([
   { id: 1, name: '海报' },
@@ -141,6 +146,7 @@ const tabsList = ref([
   { id: 10, name: '梅花背景' },
   { id: 11, name: '九宫格抽奖' },
   { id: 12, name: '刮刮乐' },
+  { id: 13, name: '视频播放' },
 ])
 const state = reactive({
   gift: 5,
