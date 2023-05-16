@@ -1,9 +1,32 @@
 <template>
-  <div class="g-video-play" ref="videoPlay">
+  <div
+    ref="videoPlay"
+    class="g-video-play"
+    :style="{width: w+'px',height: h+'px'}"
+    @click="playVideo">
+
+    <div class="g-paused" v-show="videoStatus === 0">
+      <!-- 暂停中 -->
+    </div>
+
+    <div class="g-progress" v-if="duration">
+      <div class="g-progress-bar" :style="{width: ((progress/duration) * 100)+'%'}"></div>
+      <div class="g-progress-time">{{ getVideoFormat(progress)+'/'+getVideoFormat(duration) }}</div>
+    </div>
+
     <!-- <div>视频播放</div> -->
     <!-- {{ fixedDom }} -->
     <!-- {{ videoUrl }} -->
-    <!-- <video :src="videoUrl" class="video-dom" muted autoplay></video> -->
+    <!-- <video
+      ref="videoRef"
+      :src="videoUrl"
+      class="video-dom"
+      muted
+      controls
+      playsinline
+      webkit-playsinline
+      x5-video-player-fullscreen
+    ></video> -->
     <!-- <canvas ref="myCanvas"></canvas> -->
   </div>
 </template>
@@ -15,13 +38,21 @@ import { mounted } from '@/utils'
 let ctx: any;
 let video: any;
 let canvas: any;
-let videoStatus: number = 1; // 1播放 0暂停
+const w = ref(0)
+const h = ref(0)
 const myCanvas = ref()
+const videoRef = ref()
+const duration = ref(0) // 视频总长
+const progress = ref(0) // 视频进度
 const videoPlay = ref()
+const videoStatus = ref<number>(1); // 1播放 0暂停
 // const fixedDom = ref<any>([])
 
 // https://m.v.qq.com/z/msite/play-short/index.html?cid=&vid=x351296fzuj&share_from=&ptag=v_qq_com#v.play.adaptor#3
-const videoUrl = ref('https://aced65762f2d918ad0fef321e79c4605.v.smtcdns.com/om.tc.qq.com/ABFv5tqlQWkm7qXaHwu5XtFRaX8EnqyIBMeZqS5kPpIc/B_9LhzPzw8agpeEeKUHV_JXlpNAIah7_7nm6yMlHSb0JQ/svp_50001/szg_8366_50001_0bc3smai4aaawmafv7suursfde6dr2jqbdsa.f622.mp4?sdtfrom=v3010&guid=407e3348668b70395a298bbbd7fe3b3f&vkey=36F7732A85D96F21ADEE2A20AA001F05AB9E0784A51D1B6171F8A0FC38FBCCF385FA3033398B539D5B4D198FD5D70C05B44446FABD04D0C6ABEF62E6207794B0EF3922364C8AD91BAC880AA5788AECE03A7D411F96D54E3F55EE15474C92DF283C2758BC2DF1AEFB660CE0BA966F42C2443C53ED72CB79F1D79E52651BE836940CF2E099AE23D585')
+const videoUrl = ref('https://gem530.github.io/img/testVideo.mp4')
+
+// // video 标签播放
+// let sym: number = 0,maxTime: number = 0,totalDuration: number = 0;
 
 mounted(() => {
   canvas = document.createElement('canvas')
@@ -33,14 +64,17 @@ mounted(() => {
   // video.autoplay = true
 
   video.play()
-  videoStatus = 1
+  videoStatus.value = 1
   // video.volume = 0.9
   
   video.addEventListener('canplay', function (e: any) {
-    console.log(e.target.videoWidth)
+    w.value = e.target.videoWidth
+    h.value = e.target.videoHeight
 
-    canvas.width = e.target.videoWidth
-    canvas.height = e.target.videoHeight
+    canvas.width = w.value
+    canvas.height = h.value
+
+    duration.value = video.duration
 
     getVideoToCanvas()
 
@@ -54,13 +88,65 @@ mounted(() => {
   //     fixedDom.value.push(elems[i].classList.value)
   //   }
   // }
+
+  // let video = videoRef.value
+  // video.onloadedmetadata = function () {
+  //   totalDuration = video.duration; // 获取视频时长
+  //   if (video.duration) { // 如果有视频就自动播放
+  //     video.play();
+  //   }
+  // };
+  // let nIntervId: any = setInterval(function () { // 每 200 毫秒监听一次
+  //   let time = video.currentTime; 
+  //   if (time - maxTime > 1) {
+  //     video.currentTime = sym; // 如果播放时间突然超过了最大播放时间，就退回去
+  //   }
+  //   sym = video.currentTime; 
+  //   if (sym > maxTime) { 
+  //     maxTime = sym; // 记录最大播放
+  //   }
+  //   video.playbackRate = 1; // 限制不能调倍速
+  //   // 播放结束，停止定时器
+  //   if (video.duration && video.currentTime >= video.duration) {
+  //     clearInterval(nIntervId)
+  //     nIntervId = null
+  //   }
+  //   console.log(video, video.currentTime, sym, maxTime, video.playbackRate, video.duration)
+  // }, 200);
 })
+
+const twoNumberString = (val: number) => {
+  return val < 10 ? '0' + val : val
+}
+const getVideoFormat = (val: number) => {
+  type numOrStr = number|string
+
+  let hh = twoNumberString(parseInt((val/3600)+''))
+  let mm = twoNumberString(parseInt(((val%3600)/60)+''))
+  let ss = twoNumberString(parseInt((val%60)+''))
+
+  return val > 3600 ? `${hh}:${mm}:${ss}` : `${mm}:${ss}`
+}
+
+const playVideo = () => {
+  if (!video && !canvas) return
+  if (videoStatus.value === 1) {
+    video.pause()
+    videoStatus.value = 0
+  } else {
+    video.play()
+    videoStatus.value = 1
+    getVideoToCanvas()
+  }
+}
 
 const getVideoToCanvas = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+  progress.value = video.currentTime
+  video.playbackRate = 1 // 限制不能调倍速
  
-  if (videoStatus === 1) {
+  if (videoStatus.value === 1) {
     requestAnimationFrame(getVideoToCanvas)
   }
 }
@@ -68,8 +154,45 @@ const getVideoToCanvas = () => {
 
 <style lang="scss" scoped>
 .g-video-play {
+  position: relative;
+  overflow: hidden;
+
+  .g-paused {
+    @include pcenter();
+    @include wh(50px, 50px);
+    background: rgba($color: #fff, $alpha: 0.3);
+    border-radius: 50%;
+    z-index: 2;
+
+    &::after {
+      content: '';
+      @include pcenter(50%, 70%);
+      border: 15px solid #fff;
+      border-right-color: transparent;
+      border-bottom-color: transparent;
+      border-top-color: transparent;
+    }
+  }
+
+  .g-progress {
+    @include pcenter(100%, 0, -100%, 0);
+    @include wh(100%, 8px);
+    background: #ededed;
+    z-index: 2;
+
+    .g-progress-bar {
+      @include pcenter(0, 0, 0, 0);
+      height: 100%;
+      background: orangered;
+    }
+
+    .g-progress-time {
+      @include pcenter(0, 100%, -100%, -100%);
+    }
+  }
+
   .video-dom {
-    width: 100%;
+    width: 300px;
   }
 }
 </style>
