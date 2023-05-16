@@ -29,6 +29,18 @@ export const unMounted = (callback: Function) => {
   })
 }
 
+// 获取页面中某一css属性的元素类名 例子：getStyleTypeElement('position', 'fixed')
+export const getStyleTypeElement = (cssType: string, cssValue: string) => {
+  const list = []
+  const elems: any = document.body.getElementsByTagName("*")
+  for (let i = 0; i < elems.length; i++) {
+    if (window.getComputedStyle(elems[i], null).getPropertyValue('position') == 'fixed') {
+      list.push(elems[i].classList.value)
+    }
+  }
+  return list
+}
+
 // 取两数之间的随机整数
 export const twoNumberBetween = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min) + min)
