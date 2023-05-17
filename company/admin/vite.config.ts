@@ -7,6 +7,7 @@ import vueJsx from '@vitejs/plugin-vue-jsx'
 import ViteImages from "vite-plugin-vue-images" //自动导入图片
 import compression from 'vite-plugin-compression' // gzip 压缩
 import Components from "unplugin-vue-components/vite" //自动导入组件
+// import AutoImport from 'unplugin-auto-import/vite';  //自动导入api vue文件中可以不用手动导入ref等属性
 import { AntDesignVueResolver, ElementPlusResolver } from "unplugin-vue-components/resolvers"; //按需加载ant/elementplus
 
 // https://vitejs.dev/config/
