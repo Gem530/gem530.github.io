@@ -49,6 +49,7 @@ const duration = ref(0) // 视频总长
 const progress = ref(0) // 视频进度
 const videoPlay = ref()
 const loading = ref(true)
+const firstPlay = ref(true)
 const videoStatus = ref<number>(0); // 1播放 0暂停
 // const fixedDom = ref<any>([])
 
@@ -105,47 +106,41 @@ const initVideo = () => {
 
   video = document.createElement('video')
   video.src = props.url
-  // video.muted = true
   
   canvas.width = w.value
   canvas.height = h.value
   video.addEventListener('canplay', function (e: any) {
-    // w.value = e.target.videoWidth
-    // h.value = e.target.videoHeight
     const vWidth = e.target.videoWidth
     const vHeight = e.target.videoHeight
-    console.log(vWidth, vHeight)
+    // console.log(vWidth, vHeight)
     // 视频宽高限制，不超出canvas范围，并计算出居中位置的xy坐标
     if (vWidth > canvas.width || vHeight > canvas.height) {
-      // const wDifference = vWidth - canvas.width
-      // const hDifference = vHeight - canvas.height
-      // console.log(wDifference, hDifference)
-      // if (wDifference > hDifference) {
-      //   h.value = (w.value * vHeight) / vWidth
-      // } else {
-      //   w.value = (vWidth * h.value) / vHeight
-      // }
       const canvaWH = canvas.width / canvas.height // <1：高长于宽 =1:正方形 >1：宽长于高
       const videoWH = vWidth / vHeight // <1：高长于宽 =1:正方形 >1：宽长于高
       console.log(canvaWH, videoWH)
-      if (canvaWH <= 1) {
-        if (videoWH <= 1 && videoWH > canvaWH) {
+      if ((canvaWH <= 1 && videoWH <= 1) || (canvaWH >= 1 && videoWH >= 1)) {
+        // 一  canvaWH <= 1 && videoWH <= 1
+        //  1  竖直视频，竖直视频播放器
+        // 二  canvaWH >= 1 && videoWH >= 1
+        //  1  横向视频，横向视频播放器
+        if (canvaWH <= videoWH) {
+          // 一1 播放器宽高比 大于 视频宽高比，即视频的高度没有播放器高
+          // 二1 播放器宽高比 大于 视频宽高比，即视频的宽度没有播放器宽
           h.value = (w.value * vHeight) / vWidth
         } else {
           w.value = (vWidth * h.value) / vHeight
         }
-      } else {
-        if (videoWH <= 1 && videoWH < canvaWH) {
-          w.value = (vWidth * h.value) / vHeight
-        } else {
-          h.value = (w.value * vHeight) / vWidth
-        }
+      } else if (canvaWH <= 1 && videoWH >= 1) {
+        // 竖直视频，横向视频播放器，即只需要计算出视频高度
+        h.value = (w.value * vHeight) / vWidth
+      } else if (canvaWH >= 1 && videoWH <= 1) {
+        // 横向视频，竖直视频播放器，即只需要计算出视频宽度
+        w.value = (vWidth * h.value) / vHeight
       }
-      // if (vWidth > vHeight) {
-      //   h.value = (w.value * vHeight) / vWidth
-      // } else {
-      //   w.value = (vWidth * h.value) / vHeight
-      // }
+      else {
+        // 兼容未考虑的情况，至少显示出来
+        h.value = (w.value * vHeight) / vWidth
+      }
     } else {
       // // 原大小播放
       // w.value = vWidth
@@ -188,6 +183,10 @@ const playVideo = () => {
   } else {
     video.play()
     videoStatus.value = 1
+    // if (firstPlay.value) {
+    //   video.volume = 0.3 // 开启声音
+    // }
+    // firstPlay.value = false
     getVideoToCanvas()
   }
 }
@@ -234,7 +233,7 @@ const getVideoToCanvas = () => {
   .g-paused {
     @include pcenter();
     @include wh(50px, 50px);
-    background: rgba($color: #fff, $alpha: 0.3);
+    background: rgba($color: #000, $alpha: 0.3);
     border-radius: 50%;
     z-index: 2;
 
@@ -251,13 +250,13 @@ const getVideoToCanvas = () => {
   .g-progress {
     @include pcenter(100%, 0, -100%, 0);
     @include wh(100%, 8px);
-    background: #ededed;
+    background: rgba($color: #000, $alpha: 0.3);
     z-index: 2;
 
     .g-progress-bar {
       @include pcenter(0, 0, 0, 0);
       height: 100%;
-      background: orangered;
+      background: rgba($color: #fff, $alpha: 0.9);
     }
 
     .g-progress-time {

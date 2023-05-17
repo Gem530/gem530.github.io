@@ -110,9 +110,15 @@
     <!-- 视频播放 -->
     <GVideoPlay
       v-if="activeName == 13"
-      width="250px"
+      width="350px"
       height="500px"
       url="https://gem530.github.io/img/testVideo.mp4"
+    ></GVideoPlay>
+    <GVideoPlay
+      v-if="activeName == 13"
+      width="550px"
+      height="300px"
+      url="https://gem530.github.io/img/testVideo2.mp4"
     ></GVideoPlay>
   </div>
 </template>
