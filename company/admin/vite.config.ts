@@ -4,11 +4,12 @@ import autoApi from './autoApi'
 import vue from '@vitejs/plugin-vue'
 import iconExport from './iconExport'
 import vueJsx from '@vitejs/plugin-vue-jsx'
-import ViteImages from "vite-plugin-vue-images" //自动导入图片
+import ViteImages from "vite-plugin-vue-images" // 自动导入图片
 import compression from 'vite-plugin-compression' // gzip 压缩
-import Components from "unplugin-vue-components/vite" //自动导入组件
-// import AutoImport from 'unplugin-auto-import/vite';  //自动导入api vue文件中可以不用手动导入ref等属性
-import { AntDesignVueResolver, ElementPlusResolver } from "unplugin-vue-components/resolvers"; //按需加载ant/elementplus
+import Components from "unplugin-vue-components/vite" // 自动导入组件
+import { Plugin as importToCdn } from 'vite-plugin-cdn-import' // cdn导入依赖插件
+// import AutoImport from 'unplugin-auto-import/vite';  // 自动导入api vue文件中可以不用手动导入ref等属性
+import { AntDesignVueResolver, ElementPlusResolver } from "unplugin-vue-components/resolvers"; // 按需加载ant/elementplus
 
 // https://vitejs.dev/config/
 export default defineConfig(({mode, command}) => {
@@ -75,7 +76,17 @@ export default defineConfig(({mode, command}) => {
         disable: false,
         threshold: 10240,
         algorithm: 'gzip',
-      })
+      }),
+      // importToCdn({
+      //   modules: [
+      //     {
+      //       name: 'element-plus',
+      //       var: 'ElementPlus',
+      //       path: 'https://unpkg.com/element-plus',
+      //       css: 'https://unpkg.com/element-plus/dist/index.css'
+      //     }
+      //   ]
+      // })
     ],
     build: {
       chunkSizeWarningLimit: 1500, //单个模块文件超过了默认块儿限制，超过1500k时，提示建议进行代码分块儿后进行动态导入可以加速页面加载速度

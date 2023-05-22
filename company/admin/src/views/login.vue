@@ -19,7 +19,7 @@
               <template #prefix><g-icon icon="Lock"></g-icon></template>
             </el-input>
           </el-form-item>
-          <el-form-item prop="code">
+          <el-form-item prop="code" v-if="codeShow">
             <el-input v-model="form.code" placeholder="验证码" @keyup.enter="loginHandle">
               <template #prefix><g-icon icon="Lock"></g-icon></template>
             </el-input>
@@ -50,6 +50,7 @@ const router = useRouter()
 const codeUrl = ref('')
 const loginRef = ref()
 const loading = ref(false)
+const codeShow = ref(false)
 const form = ref<tsType.loginInfo>({
   uuid: '',
   code: '',
@@ -64,6 +65,9 @@ const rules = ref({
 const getCodeImgAPI = () => {
   getCodeImg().then((res: any) => {
     // console.log(res.img)
+    if (res.captchaEnabled) {
+      codeShow.value = res.captchaEnabled
+    }
     codeUrl.value = "data:image/gif;base64," + res.img
     form.value.uuid = res.uuid
   })
