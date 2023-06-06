@@ -1,0 +1,17 @@
+/* 主题色 */
+:root {
+	--theme-body-bg: #fff;
+	--theme-text-color: #333;
+	--theme-primary: #358eef;
+	--theme-gray: #ededed;
+}
+
+.light {
+	background: #fff;
+	color: #333;
+}
+
+.dark {
+	background: #333;
+	color: #fff;
+}
