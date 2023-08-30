@@ -29,6 +29,11 @@ export const unMounted = (callback: Function) => {
   })
 }
 
+// 指定位置插入字符 source源字符串 start要插入的位置 newStr插入的字符串
+export const insertStr = (source: string, start: number, newStr: string) => {
+  return source.slice(0, start) + newStr + source.slice(start)
+}
+
 // 取两数之间的随机整数
 export const twoNumberBetween = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min) + min)

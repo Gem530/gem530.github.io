@@ -1,0 +1,1 @@
+const o=(t,e,r)=>t.slice(0,e)+r+t.slice(e),a=(t,e)=>Math.floor(Math.random()*(e-t)+t),s=t=>Object.prototype.toString.call(t).replace("]","").split(" ")[1].toLocaleLowerCase();export{o as a,s as i,a as t};
