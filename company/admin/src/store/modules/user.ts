@@ -59,46 +59,115 @@ const useUserStore = defineStore('userStore' , {
     login(data: loginInfo) {
       // console.log('state', state)
       return new Promise((resolve, reject) => {
-        loginAPI(data).then((res: any) => {
-          this.setToken(res.token)
-          resolve(res)
-        }).catch((err: Error) => {
+        // loginAPI(data).then((res: any) => {
+        //   this.setToken(res.token || '')
+        //   resolve(res)
+        // }).catch((err: Error) => {
+        //   reject(err)
+        // })
+        try {
+          const token = "eyJhbGciOiJIUzUxMiJ9.eyJsb2dpbl91c2VyX2tleSI6ImY2MmQ3ZGNlLWU4OTQtNGUyNi1iMGJmLTYxY2IzMWNhZWUwZSJ9.2d7A6S0c_8KamzTwPoYmnVZ9uUT1I1x9iDhmFkOBC6fkIId8dbSpMXSQIdi7lvhpa2YacTXaleXbLVMXig7w_Q"
+          this.setToken(token)
+          resolve(true)
+        } catch(err) {
           reject(err)
-        })
+        }
       })
     },
     getInfo() {
       return new Promise((resolve, reject) => {
-        getInfoAPI().then((res: any) => {
+        // getInfoAPI().then((res: any) => {
+        //   this.setUserInfo(res)
+        //   resolve(res)
+        // }).catch((err: Error) => {
+        //   reject(err)
+        // })
+        try {
+          const res = {
+              "msg": "操作成功",
+              "code": 200,
+              "permissions": [
+                  "*:*:*"
+              ],
+              "roles": [
+                  "superadmin"
+              ],
+              "nodeRole": {
+                  "roleId": 2,
+                  "parentId": 1,
+                  "roleName": "管理员",
+                  "roleKey": "admin",
+                  "roleSort": 2,
+                  "dataScope": "1",
+                  "menuCheckStrictly": true,
+                  "deptCheckStrictly": true,
+                  "status": "0",
+                  "delFlag": "0",
+                  "createBy": "supadmin",
+                  "createTime": "2022-08-10 14:31:21",
+                  "updateBy": "superadmin",
+                  "updateTime": "2022-09-04 16:35:37",
+                  "remark": "管理员",
+                  "menuIds": null,
+                  "admin": false
+              },
+              "sysTime": "2023-09-07 14:49:01",
+              "user": {
+                  "userId": 10001,
+                  "userName": "superadmin",
+                  "nickName": "超级管理员",
+                  "avatar": "",
+                  "password": "",
+                  "roleId": null,
+                  "isSimulation": 0,
+                  "isPromoter": 0
+              }
+          }
           this.setUserInfo(res)
           resolve(res)
-        }).catch((err: Error) => {
+        } catch (err) {
           reject(err)
-        })
+        }
       })
     },
     getRouters () {
       return new Promise((resolve, reject) => {
-        getRoutersAPI().then((res: any) => {
+        // getRoutersAPI().then((res: any) => {
+        //   this.setMenus(getAddRoutes(routesList || []))
+        //   resolve(res)
+        // }).catch((err: Error) => {
+        //   reject(err)
+        // })
+        try {
           this.setMenus(getAddRoutes(routesList || []))
-          resolve(res)
-        }).catch((err: Error) => {
+          resolve(true)
+        } catch(err) {
           reject(err)
-        })
+        }
       })
     },
     loginOut () {
       return new Promise((resolve, reject) => {
-        logoutAPI().then(() => {
+        // logoutAPI().then(() => {
+        //   this.token = ''
+        //   this.roles = []
+        //   this.permissions = []
+        //   removeLocalItem('token')
+        //   removeAllItem()
+        //   resolve(true)
+        // }).catch((err: Error) => {
+        //   reject(err)
+        // })
+        try {
           this.token = ''
           this.roles = []
           this.permissions = []
           removeLocalItem('token')
           removeAllItem()
           resolve(true)
-        }).catch((err: Error) => {
+        } catch(err) {
           reject(err)
-        })
+        }
       })
     }
   },

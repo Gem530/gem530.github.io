@@ -39,7 +39,7 @@ const getTimestampAPI = () => {
     console.log(res)
   })
 }
-getTimestampAPI()
+// getTimestampAPI()
 
 const toPath = (id: string) => {
   router.push({

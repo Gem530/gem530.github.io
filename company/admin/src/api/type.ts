@@ -10,8 +10,8 @@ export interface baseAPIType<t> {
 
 // 登录信息
 export interface loginInfo {
-  uuid?: string, // 验证码唯一标识
-  code?: string, // 验证码
+  uuid?: string|undefined, // 验证码唯一标识
+  code?: string|undefined, // 验证码
   username: string, // 用户名
   password: string, // 密码
 }

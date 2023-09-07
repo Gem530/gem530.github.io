@@ -52,8 +52,8 @@ const loginRef = ref()
 const loading = ref(false)
 const codeShow = ref(false)
 const form = ref<tsType.loginInfo>({
-  uuid: '',
-  code: '',
+  uuid: undefined,
+  code: undefined,
   password: '123456',
   username: 'superadmin',
 })
@@ -72,7 +72,7 @@ const getCodeImgAPI = () => {
     form.value.uuid = res.uuid
   })
 }
-getCodeImgAPI()
+// getCodeImgAPI()
 
 const loginHandle = () => {
   loginRef.value.validate((val: Boolean) => {

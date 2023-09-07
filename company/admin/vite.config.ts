@@ -22,7 +22,7 @@ export default defineConfig(({mode, command}) => {
       open: true, // 是否自动打开浏览器
       proxy: {
         '/dev-api': {
-          target: 'http://13.212.17.88:8085/prod-api',
+          target: 'http://13.214.183.145:10285/prod-api',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/dev-api/, ""),
         },

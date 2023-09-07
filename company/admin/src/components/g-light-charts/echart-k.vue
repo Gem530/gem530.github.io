@@ -44,6 +44,7 @@ let downColor: any
 const switchList = ref(['1min', '5min', '15min', '30min', '60min', '4hour', '1day', '1mon', '1week', '1year'])
 const kLine = ref<klineType[]>([])
 const curTime = ref<string>('1min')
+const oldTime = ref<string>('1min')
 
 watch(() => props.currency, (val, old) => {
   if (old) {
@@ -102,7 +103,7 @@ const sendWsKline = () => {
 }
 
 const unSendWsKline = (val:string = props.currency) => {
-  useSocket.unSend(`market.${val}.kline.${curTime.value}`, props.currency)
+  useSocket.unSend(`market.${val}.kline.${oldTime.value}`, props.currency)
 }
 
 const init = () => {
@@ -382,6 +383,7 @@ const update = () => {
 
 const switchTime = (type: string) => {
   if (curTime.value === type) return
+  oldTime.value = JSON.parse(JSON.stringify(curTime.value))
   curTime.value = type
   getKlineAPI()
 }
