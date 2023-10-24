@@ -12,6 +12,232 @@
     <script>
         const htmlLen = document.querySelectorAll('*')
         console.log(htmlLen)
+        // function fn() {
+        //     console.log('1');
+        //     let promise = new Promise((resolve, reject) => {
+        //         console.log('2');
+        //         resolve('3');
+        //     });
+        //     setTimeout(() =>{
+        //         console.log('4')
+        //     });
+        //     promise.then(res =>{
+        //         console.log('5');
+        //         console.log(res);
+        //         return '6';
+        //     }).then(res1 =>{
+        //         console.log(res1);
+        //     }).then(res2 =>{
+        //         console.log(res2);
+        //     });
+        // }
+        // fn()
+
+        // const temp = [
+        //     {
+        //     "type": "inline",
+        //     "columns": [
+        //         {
+        //         "type": "subform",
+        //         "label": "子表单",
+        //         "list": [
+        //             [
+        //             {
+        //                 "type": "inline",
+        //                 "columns": [
+        //                 {
+        //                     "type": "radio",
+        //                     "label": "单选框",
+        //                     "componentAttrs": {
+        //                     "width": "50%",
+        //                     "options": [
+        //                         { "label": "选项一", "value": "1" },
+        //                         { "label": "选项二", "value": "2" },
+        //                         { "label": "选项三", "value": "3" }
+        //                     ]
+        //                     },
+        //                     "formItemAttrs": { "label": "单选框" }
+        //                 },
+        //                 {
+        //                     "type": "checkbox",
+        //                     "label": "复选框",
+        //                     "componentAttrs": {
+        //                     "width": "50%",
+        //                     "options": [
+        //                         { "label": "option1", "value": "option1" },
+        //                         { "label": "option2", "value": "option2" }
+        //                     ]
+        //                     },
+        //                     "formItemAttrs": { "label": "复选框" }
+        //                 }
+        //                 ]
+        //             },
+        //             {
+        //                 "type": "inline",
+        //                 "columns": [
+        //                 {
+        //                     "type": "select",
+        //                     "label": "下拉框",
+        //                     "componentAttrs": {
+        //                     "width": "100%",
+        //                     "options": [
+        //                         { "label": "选项一", "value": "1" },
+        //                         { "label": "选项二", "value": "2" },
+        //                         { "label": "选项三", "value": "3" }
+        //                     ]
+        //                     },
+        //                     "formItemAttrs": { "label": "下拉框" },
+        //                 }
+        //                 ]
+        //             },
+        //             {
+        //                 "type": "inline",
+        //                 "columns": [
+        //                 {
+        //                     "type": "radio",
+        //                     "label": "单选框",
+        //                     "componentAttrs": {
+        //                     "width": "50%",
+        //                     "options": [
+        //                         { "label": "选项一", "value": "1" },
+        //                         { "label": "选项二", "value": "2" },
+        //                         { "label": "选项三", "value": "3" }
+        //                     ]
+        //                     },
+        //                     "formItemAttrs": { "label": "单选框" }
+        //                 },
+        //                 {
+        //                     "type": "select",
+        //                     "label": "下拉框",
+        //                     "componentAttrs": {
+        //                     "width": "50%",
+        //                     "options": [
+        //                         { "label": "选项一", "value": "1" },
+        //                         { "label": "选项二", "value": "2" },
+        //                         { "label": "选项三", "value": "3" }
+        //                     ]
+        //                     },
+        //                     "formItemAttrs": { "label": "下拉框" },
+        //                 }
+        //                 ]
+        //             }         
+        //             ]
+        //         ]
+        //         }
+        //     ]
+        //     },
+        //     {
+        //     "type": "inline",
+        //     "columns": [
+        //         {
+        //         "type": "subform",
+        //         "label": "子表单",
+        //         "list": [
+        //             [
+        //             {
+        //                 "type": "inline",
+        //                 "columns": [
+        //                 {
+        //                     "type": "radio",
+        //                     "label": "单选框",
+        //                     "componentAttrs": {
+        //                     "width": "50%",
+        //                     "options": [
+        //                         { "label": "选项一", "value": "1" },
+        //                         { "label": "选项二", "value": "2" },
+        //                         { "label": "选项三", "value": "3" }
+        //                     ]
+        //                     },
+        //                     "formItemAttrs": { "label": "单选框" }
+        //                 },                
+        //                 {
+        //                     "type": "checkbox",
+        //                     "label": "复选框",
+        //                     "componentAttrs": {
+        //                     "width": "50%",
+        //                     "options": [
+        //                         { "label": "option1", "value": "option1" },
+        //                         { "label": "option2", "value": "option2" }
+        //                     ]
+        //                     },
+        //                     "formItemAttrs": { "label": "复选框" }
+        //                 }
+        //                 ]
+        //             },
+        //             {
+        //                 "type": "inline",
+        //                 "columns": [
+        //                 {
+        //                     "type": "checkbox",
+        //                     "label": "复选框",
+        //                     "componentAttrs": {
+        //                     "width": "100%",
+        //                     "options": [
+        //                         { "label": "option1", "value": "option1" },
+        //                         { "label": "option2", "value": "option2" }
+        //                     ]
+        //                     },
+        //                     "formItemAttrs": { "label": "复选框" }
+        //                 }
+        //                 ]
+        //             },
+        //             {
+        //                 "type": "inline",
+        //                 "columns": [
+        //                 {
+        //                     "type": "checkbox",
+        //                     "label": "复选框",
+        //                     "componentAttrs": {
+        //                     "width": "100%",
+        //                     "options": [
+        //                         { "label": "option1", "value": "option1" },
+        //                         { "label": "option2", "value": "option2" }
+        //                     ]
+        //                     },
+        //                     "formItemAttrs": { "label": "复选框" }
+        //                 }
+        //                 ]
+        //             }
+        //             ]
+        //         ]
+        //         }
+        //     ]
+        //     }
+        // ]
+        // const result = []
+
+        // function formatData(arr) {
+        //     let list = [
+        //     ]
+        //     arr.forEach((item) => {
+        //         let obj = {
+        //             title: '',
+        //             list: []
+        //         }
+        //         let subobj
+        //         item.columns.forEach((el) => {
+        //             el.list.forEach((li) => {
+        //                 li.forEach((v) => {
+        //                     v.columns.forEach((val) => {
+        //                         subobj = {
+        //                             component: val.type,
+        //                             componentAttrs: {
+        //                                 width: val.componentAttrs.width,
+        //                                 options: val.componentAttrs.options
+        //                             },
+        //                             formItemAttrs: val.formItemAttrs
+        //                         }
+        //                         obj.list.push(subobj)
+        //                     })
+        //                 })
+        //             })
+        //             obj.title = el.label
+        //         })
+        //         list.push(obj)
+        //     })
+        //     return list
+        // }
+        // console.log(formatData(temp))
     </script>
 </body>
 </html>
