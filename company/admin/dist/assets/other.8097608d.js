@@ -1,0 +1,1 @@
+import{r as e}from"./index.b0f22997.js";function r(r){return e({url:"/app/operLog/page",method:"get",params:r})}function t(r){return e({url:`/app/operLog/del/${r}`,method:"delete"})}function o(r){return e({url:"/system/menu/list",method:"get",params:r})}export{t as d,o as l,r as s};
