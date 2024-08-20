@@ -1,0 +1,10 @@
+version: "3"
+services:
+  pcb-web:
+    build: .
+    container_name: pcb-web
+    restart: always
+    ports:
+      - "9000:80"
+    environment:
+      - TZ=Asia/Shanghai
