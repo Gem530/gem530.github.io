@@ -2,7 +2,7 @@
   <div class="p-2 xtable-page">
     <transition :enter-active-class="proxy?.animate.searchAnimate.enter"
                 :leave-active-class="proxy?.animate.searchAnimate.leave">
-      <div class="search" v-show="showSearch">
+      <!-- <div class="search" v-show="showSearch"> -->
         <el-form :model="queryParams" ref="queryFormRef" size="small" label-width="80px"
                  class="demo-form-inline">
           <el-row>
@@ -19,17 +19,17 @@
                                 placeholder="选择结束时间" value-format="YYYY-MM-DD HH:mm:ss" format="YYYY-MM-DD HH:mm:ss"/>
               </el-form-item>
             </el-col>
-            <el-col :span="3">
+            <el-col :span="5">
               <el-form-item label="产品编码" prop="commodityCode">
                 <el-input v-model="queryParams.commodityCode" clearable @keyup.enter="handleQuery"/>
               </el-form-item>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="5">
               <el-form-item label="产品名称" prop="commodityName">
                 <el-input v-model="queryParams.commodityName" clearable @keyup.enter="handleQuery"/>
               </el-form-item>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="5">
               <el-form-item label="物料编码" prop="materialNumber">
                 <el-input v-model="queryParams.materialNumber" clearable @keyup.enter="handleQuery"/>
               </el-form-item>
@@ -46,9 +46,9 @@
 <!--                <el-input v-model="queryParams.code" clearable @keyup.enter="handleQuery"/>-->
 <!--              </el-form-item>-->
 <!--            </el-col>-->
-            <el-col :span="3">
+            <el-col :span="6">
               <el-form-item label="业务员" prop="cusExchangeRate">
-                <el-select v-model="queryParams.cusSaleUserId" clearable :collapse-tags="true" filterable
+                <el-select class="width-100" v-model="queryParams.cusSaleUserId" clearable :collapse-tags="true" filterable
                            placeholder="请选择业务员">
                   <el-option
                     v-for="item in salerOptions"
@@ -59,7 +59,7 @@
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col :span="3">
+            <el-col :span="5">
               <el-form-item label="客户PO" prop="customerPo">
                 <el-input v-model="queryParams.customerPo" clearable @keyup.enter="handleQuery"/>
               </el-form-item>
@@ -81,33 +81,22 @@
                 </el-select>
               </el-form-item>
             </el-col> -->
-            <el-col :span="4">
-              <el-radio-group size="small"
-                              v-model="queryParams.finishType"
-                              type="vertical"
-                              @change="handleQuery"
-                              style="vertical-align: middle; padding-left: 15px; float: right"
-              >
-                <el-radio-button label="1">全部</el-radio-button>
-                <el-radio-button label="2">未完成</el-radio-button>
-                <el-radio-button label="3">已完成</el-radio-button>
-              </el-radio-group>
-            </el-col>
-            <el-col :span="3"></el-col>
-            <el-col :span="6" class="global-flex flex-end" style="height: 24px;">
-              <div style="float: right">
-                <div style="display:flex;line-height: 24px;font-size: 14px">
-                  <div style="width: 110px;background-color: #F2FFEB;text-align: center;">库存发货</div>
-                  <div style="width: 110px;background-color: #ECB0B1;text-align: center;">订单已撤回</div>
-                </div>
-              </div>
-            </el-col>
             <el-col :span="5">
-              <el-button @click="exportExcelBefore" style="float: right">导出</el-button>
+              <el-form-item label="">
+                <el-radio-group size="small"
+                                v-model="queryParams.finishType"
+                                type="vertical"
+                                @change="handleQuery"
+                >
+                  <el-radio-button label="1">全部</el-radio-button>
+                  <el-radio-button label="2">未完成</el-radio-button>
+                  <el-radio-button label="3">已完成</el-radio-button>
+                </el-radio-group>
+              </el-form-item>
             </el-col>
           </el-row>
         </el-form>
-      </div>
+      <!-- </div> -->
     </transition>
 
 
@@ -124,9 +113,9 @@
           </template>
         </XTable>
       </el-col>
-        <div class="text-center" style="margin-top: 5px;">
-          <el-button @click="cancelCotractUpload">取 消</el-button>
+        <div class="text-right" style="margin-top: 5px;">
           <el-button :loading="buttonLoading" type="primary" @click="submitFormUpload">确 定</el-button>
+          <el-button @click="cancelCotractUpload">取 消</el-button>
         </div>
       </el-form>
     </el-dialog>
@@ -171,33 +160,51 @@
           </XTable>
         </el-col>
         </el-row>
-        <div class="text-center" style="margin-top: 5px;">
-          <el-button @click="cancelCotractCompleted">取 消</el-button>
+        <div class="text-right" style="margin-top: 5px;">
           <el-button :loading="buttonLoading" type="primary" @click="submitFormComplete">确 定</el-button>
+          <el-button @click="cancelCotractCompleted">取 消</el-button>
         </div>
       </el-form>
     </el-dialog>
 
-    <XTable
-      :showRefresh="true"
+    <ETable
+      style="height: 100%;" :showRefresh="true"
       ref="detailListTable" idField="id" border
       :lazy="true" :pagination="true" :toolId="mainTableToolId"
-      :page-params="{ perfect: true, total: total }" 
-      class="xtable-content" height="100%"
-      v-model:page-size="queryParams.pageSize" v-model:current-page="queryParams.pageNum" 
+      pagePosition="bottom" class="kingzon-page-table"  :footerData="footerData" :showFooter="true"
+      :total="total"
       :data="orderList"
       :loading="loading"
       :columnList="columnList"
       :intervalCondition="['placeOrderTime','dispatchTime','deliveryTime','quantity']"
-      :row-style="setRowStyle"
-      :scroll-x="{enabled: true,gt: 0}"
-      :scroll-y="{enabled: true,gt: 0}"
-      @cell-click="rowClick"
-      @cell-dblclick="cellDBLClickEvent"
-      :menu-config="menuConfig"
-      @menu-click="contextMenuClickEvent"
+      :pageNumber="queryParams.pageNum"
+      :pageSize="queryParams.pageSize"
+      :rowCss="setRowStyle"
+      @rowClick="rowClick"
+      @rowDblClick="cellDBLClickEvent"
+      @rowContextMenu="rowContextMenu"
       @searchChange="searchChange"
     >
+
+    <template #header-tool>
+      <ColorRule :list="[
+        { title: '库存发货', color: '#F2FFEB' },
+        { title: '订单已撤回', color: '#ECB0B1' },
+      ]"></ColorRule>
+      <el-button @click="exportExcelBefore" style="float: right">导出</el-button>
+    </template>
+    <template #header-eqHours="scope">
+      EQ时长(H)
+      <el-tooltip
+        class="box-item"
+        effect="dark"
+        raw-content
+        :content="`累计的EQ时长`"
+      >
+        <el-icon class="tooltip-width-auto" ><QuestionFilled /></el-icon>
+      </el-tooltip>
+    </template>
+
       <template #default-status="{row}">
         <!-- <div>{{ statusOptions.find(v => v.value == row.status)?.label }}</div> -->
         <el-tag :type="row.status=='1'?'info':''" size="small">{{ statusOptions.find(v => v.value == row.status)?.label }}</el-tag>
@@ -230,30 +237,6 @@
       <template #default-model="{ row }">
         <el-tag :type="row.model=='1'?'':'success'" size="small">{{ resDictData?.order_model.find(v => v.dictValue == row.model)?.dictLabel }}</el-tag>
       </template>
-<!--      <template #default-materialQuality="{ row }">
-        <div>{{ resDictData?.order_material_quality.find(v => v.dictValue == row.materialQuality)?.dictLabel }}</div>
-      </template>-->
-<!--      <template #default-commodityThickness="{ row }">-->
-<!--        <div>{{ resDictData?.finish_plate_thickness.find(v => v.dictValue == row.commodityThickness)?.dictLabel }}</div>-->
-<!--      </template>-->
-<!--      <template #default-materialCopperInside="{ row }">-->
-<!--        <div>{{ resDictData?.order_material_copperinside.find(v => v.dictValue == row.materialCopperInside)?.dictLabel}}-->
-<!--        </div>-->
-<!--      </template>-->
-<!--      <template #default-materialCopperOutside="{ row }">-->
-<!--        <div>{{ resDictData?.order_material_copperoutside.find(v => v.dictValue == row.materialCopperOutside)?.dictLabel-->
-<!--          }}-->
-<!--        </div>-->
-<!--      </template>-->
-<!--      <template #default-surfaceTreatment="{ row }">
-        <div>{{ resDictData?.order_surface_treatment.find(v => v.dictValue == row.surfaceTreatment)?.dictLabel }}</div>
-      </template>-->
-<!--      <template #default-commoditySolder="{ row }">-->
-<!--        <div>{{ resDictData?.order_commodity_solder.find(v => v.dictValue == row.commoditySolder)?.dictLabel }}</div>-->
-<!--      </template>-->
-<!--      <template #default-characterColor="{ row }">-->
-<!--        <div>{{ resDictData?.order_character.find(v => v.dictValue == row.characterColor)?.dictLabel }}</div>-->
-<!--      </template>-->
       <template #default-unit="{ row }">
         <span>PCS</span>
       </template>
@@ -264,50 +247,23 @@
       <template #default-cusCurrency="{ row }">
         <div>{{ resDictData?.currency_type.find(v => v.dictValue == row.cusCurrency)?.dictLabel }}</div>
       </template>
-<!--      <template #default-packRequirement="{ row }">
-        <div>{{ resDictData?.order_packaging_requirements.find(v => v.dictValue == row.packRequirement)?.dictLabel }}
-        </div>
-      </template>-->
       <template #default-cusPaymentMethod="{ row }">
         <div>{{ resDictData?.payment_method.find(v => v.dictValue == row.cusPaymentMethod)?.dictLabel}}</div>
       </template>
       <template #default-deliveryMethod="{ row }">
         <span>自动</span>
       </template>
-<!--      <template #default-cusTransStyle="{ row }">
-        <div>{{ resDictData?.shipping_type.find(v => v.dictValue == row.cusTransStyle)?.dictLabel}}</div>
-      </template>-->
-<!--      <template #default-materialBrand="{ row }">
-        <div>{{ resDictData?.order_plate_brand.find(v => v.dictValue == row.materialBrand)?.dictLabel}}</div>
-      </template>-->
-<!--      <template #default-materialLevel="{ row }">
-        <div>{{ resDictData?.order_material_level.find(v => v.dictValue == row.materialLevel)?.dictLabel}}</div>
-      </template>-->
-<!--      <template #default-commoditySolderCount="{ row }">
-        <div>{{ resDictData?.order_commodity_solder_count.find(v => v.dictValue == row.commoditySolderCount)?.dictLabel}}
-        </div>
-      </template>-->
-<!--      <template #default-commoditySolderGloss="{ row }">
-        <div>{{ resDictData?.order_commodity_solder_gloss.find(v => v.dictValue == row.commoditySolderGloss)?.dictLabel}}
-        </div>
-      </template>-->
-<!--      <template #default-characterCount="{ row }">
-        <div>{{ resDictData?.order_character_count.find(v => v.dictValue == row.characterCount)?.dictLabel }}</div>
-      </template>-->
-<!--      <template #default-commodityForm="{ row }">
-        <div>{{ resDictData?.order_commodity_form.find(v => v.dictValue == row.commodityForm)?.dictLabel }}</div>
-      </template>-->
-<!--      <template #default-commodityTestWay="{ row }">
-        <div>{{ resDictData?.order_commodity_testway.find(v => v.dictValue == row.commodityTestWay)?.dictLabel }}</div>
-      </template>-->
-<!--      <template #default-holeRequirement="{ row }">
-        <div>{{ resDictData?.order_hole_requirement.find(v => v.dictValue == row.holeRequirement)?.dictLabel }}</div>
-      </template>-->
-<!--      <template #default-inspectionStandard="{ row }">
-        <div>{{ resDictData?.order_inspection_standard.find(v => v.dictValue == row.inspectionStandard)?.dictLabel }}
-        </div>
-      </template>-->
-    </XTable>
+      <template #default-eqStatus="{ row }">
+        <el-switch
+              v-model="row.eqStatus"
+              disabled
+              size="small"
+              style="--el-switch-on-color: #13ce66;"
+              active-value="1"
+              inactive-value="0"
+            />
+      </template>
+    </ETable>
 
     <!-- 右键菜单 -->
     <div class="context-box" ref="contextBoxRef" v-click-outside="clickOutside">
@@ -325,11 +281,19 @@
     <el-drawer
       v-model="drawer.visible"
       :title="drawer.title"
-      size="850px"
       :direction="drawer.direction"
       :destroy-on-close="true"
-      modal-class="detail-prod-drawder"
+      size="45%"
+      :modal-class="`add-prod-drawder ${ownerId == '101' && 'normal-prod-drawder'}`"
     >
+      <template #header>
+        <span class="el-drawer__title no-wrap">{{drawer.title}}</span>
+        <TotalTitle :start="true" :firstBorder="true" :list="[
+          { title: `总价：${ currentInfo?.totalOrderPrice||0 }元` },
+          { title: `税金：${ currentInfo?.tax||0 }元` },
+          { title: `总金额：${ currentInfo?.totalPrice||0 }元` },
+        ]"></TotalTitle>
+      </template>
       <SaleDescriptions v-if="currentInfo" :currentInfo="currentInfo" :customerList="customerList"
                         :resDictData="resDictData" :quotationShow="quotationShow" :orderEtrShow="orderEtrShow"></SaleDescriptions>
     </el-drawer>
@@ -338,11 +302,11 @@
       <template #header>
         <div style="text-align: center">{{outsourceDialog.title}}</div>
       </template>
-      <SendOutSource ref="costRef" :orderInfo="currentInfo"></SendOutSource>
-      <div class="text-center">
-        <el-button :loading="buttonLoading" @click="cancelOtherCost">取 消</el-button>
+      <SendOutSource ref="costRef" :orderInfo="currentInfo" :isShowOrderPrice="true"></SendOutSource>
+      <div class="text-right">
         <el-button style="margin-left: 100px" :loading="buttonLoading" type="primary" @click="submitOtherCost">确 定
         </el-button>
+        <el-button :loading="buttonLoading" @click="cancelOtherCost">取 消</el-button>
       </div>
     </el-dialog>
     <el-dialog
@@ -357,10 +321,10 @@
       </span>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="exportVisible = false">取消</el-button>
           <el-button type="primary" @click="exportExcel">
             确认
           </el-button>
+          <el-button @click="exportVisible = false">取消</el-button>
         </span>
       </template>
     </el-dialog>
@@ -389,7 +353,7 @@
     <OperatRecord v-model:show="operatInfo.show" :title="operatInfo.title" :data="operatInfo.data"></OperatRecord>
 
     <!-- 进度查询 -->
-    <ProgressCheck v-model:show="progressInfo.show" :id="progressInfo.id" :title="progressInfo.title" :data="progressInfo.data" :loading="progressInfo.loading" @confirm="progressConfirm"></ProgressCheck>
+    <ProgressCheck v-model:show="progressInfo.show" :id="progressInfo.id" :title="progressInfo.title" :data="progressInfo.data" :codeUrl="codeUrl" :loading="progressInfo.loading" @confirm="progressConfirm"></ProgressCheck>
   </div>
 </template>
 
@@ -411,7 +375,7 @@ import {
   getLoggerById,
   getOrderProcess,
   setInventoryShippedBack,
-  setInventoryShipped
+  setInventoryShipped, checkBeforeOutSource
 } from "@/api/order/directOrder";
 import {OrderForm, OrderQuery, OrderVO} from '@/api/order/directOrder/types';
 import {computed, ref} from "vue";
@@ -421,7 +385,7 @@ import {CustomerVO} from "@/api/basedata/customer/types";
 import {getListCustomer} from "@/api/basedata/customer";
 import {UserVO} from "@/api/system/user/types";
 import {getDicts} from "@/api/system/dict/data";
-import {listUserByRoleKey} from "@/api/system/user";
+import {generateUrlLink, listUserByRoleKey} from "@/api/system/user";
 import {useRouter} from 'vue-router'
 import {sortBy} from "@/utils/dict";
 import {downloadUrl, listContractFiles} from "@/api/upload";
@@ -432,6 +396,11 @@ import useTagsViewStore from '@/store/modules/tagsView';
 import {checkPermi} from "@/utils/permission";
 import OperatRecord from './components/operatRecord'
 import ProgressCheck from './components/progressCheck'
+import * as QRCode from "qrcode";
+
+import useUserStore from '@/store/modules/user';
+
+const { ownerId } = useUserStore();
 
 /**
  * 销售下单文件
@@ -486,7 +455,7 @@ let formInline = ref({
     show: false,
     id: undefined,
     loading: false,
-    title: '开放进度查询',
+    title: '生产进度设置',
   })
 
   /*外协提交*/
@@ -570,7 +539,8 @@ const dialogCotractCompleted = reactive<DialogOption>({
     {value: "6", label: "已完成"},
     {value: "7", label: "外协完成"},
     {value: "8", label: "外协"},
-    {value: "-1", label: "库存发货"},
+    {value: "9", label: "库存发货"},
+    {value: "10", label: "库存发货完成"},
 
   ])
 
@@ -1077,7 +1047,6 @@ const dialogCotractCompleted = reactive<DialogOption>({
   const beforeFeed = ref(['2','21','22','23','24','3'])
 
   const menuConfig = reactive<VxeTablePropTypes.MenuConfig<OrderVO>>({
-    trigger: 'cell',
     body: {
       options: [
         [
@@ -1099,7 +1068,7 @@ const dialogCotractCompleted = reactive<DialogOption>({
           // {code: 'contractUpload', name: '合同回签查看上传', prefixIcon: 'vxe-icon-edit', visible: true, disabled: false},
           {code: 'contractPrint', name: '报价单打印', prefixIcon: 'vxe-icon-edit', visible: true, disabled: false},
           {code: 'operatRecord', name: '查看操作记录', prefixIcon: 'vxe-icon-file-txt', visible: true, disabled: false},
-          {code: 'progressCheck', name: '开放进度查询', prefixIcon: 'vxe-icon-file-txt', visible: true, disabled: false},
+          {code: 'progressCheck', name: '生产进度设置', prefixIcon: 'vxe-icon-file-txt', visible: true, disabled: false},
         ],
       ]
     },
@@ -1126,7 +1095,7 @@ const dialogCotractCompleted = reactive<DialogOption>({
               }
             }
             if (item.code === 'closeInventoryShipped') {
-              if (beforeFeed.value.includes(row.flowStatus) && row.flowStatus != '8' && row.isInventoryShipped != '0') {
+              if (beforeFeed.value.includes(row.preInventoryShippedStatus) && row.flowStatus != '10' && row.isInventoryShipped != '0') {
                 item.visible = true
               } else {
                 item.visible = false
@@ -1266,7 +1235,9 @@ const quotationDialog = reactive<DialogOption>({
     switch (menu.code) {
       case 'outsource':
         if (row && column) {
-          outsourceDialog.visible = true;
+          checkBeforeOutSource({id: row.id}).then(() => {
+            outsourceDialog.visible = true;
+          })
         }
         break;
       case 'back':
@@ -1593,17 +1564,31 @@ const quotationDialog = reactive<DialogOption>({
               //   })
               // })
               progressInfo.value.data = res.data
-              progressInfo.value.title = `${row.code}-${row.commodityCode} 开放进度查询`
+              progressInfo.value.title = `${row.code}-${row.commodityCode} 生产进度设置`
             }
           }).finally(() => {
             progressInfo.value.loading = false
+          })
+          generateUrlLink({
+            path: 'pages/index/index',
+            query: `url=/pages/saleContract/index&id=${id}`,
+          }).then((res) => {
+            if (res.code == 200) {
+              QRCode.toDataURL(res.data, {errorCorrectionLevel: 'H'}, (err: any, url: string) => {
+                if (err) {
+                  console.log('Error: ' + err);
+                } else {
+                  codeUrl.value = url;
+                }
+              });
+            }
           })
         }
         break;
       default:
     }
   }
-
+  const codeUrl = ref('')
   const clickOutside = () => {
     contextBoxRef.value.style = 'display: none;'
   }
@@ -1630,7 +1615,7 @@ const quotationDialog = reactive<DialogOption>({
     })
   }
 
-  const setRowStyle = ({row}: any) => {
+  const setRowStyle = (row: any) => {
     if ('1' == row.isInventoryShipped){
       return {
         background: '#F2FFEB!important',
@@ -1653,14 +1638,14 @@ const quotationDialog = reactive<DialogOption>({
   }
 
   // 选中单行并高亮
-  const rowClick = ({row}: any) => {
+  const rowClick = (row: any) => {
     orderList.value.map((v: any) => {
       v.isSelected = false
     })
     row.isSelected = true
   }
 
-  const cellDBLClickEvent: VxeTableEvents.CellDblclick<OrderVO> = ({row}) => {
+  const cellDBLClickEvent: VxeTableEvents.CellDblclick<OrderVO> = (row) => {
     console.log("双击事件");
     orderEtrShow.value = true
 
@@ -1809,8 +1794,8 @@ const customerCodeList = ref();
 const customerNameList = ref();
 
   const columnList = ref([
-    {title: "序号", fixed: 'left', type: 'seq', align: 'center', width: '60'},
-    // {title: "序号", field: 'index', type: 'index', align: 'center', width: '60' },
+    // {title: "序号", fixed: 'left', type: 'seq', align: 'center', width: '60'},
+    {title: "序号", field: 'index', type: 'index', align: 'center', width: '60' },
     {
       width: '90',
       title: '客户名称',
@@ -1844,7 +1829,7 @@ const customerNameList = ref();
       align: 'center',
       filterType: 'checkboxButton',
       filterParam: {placeholder: '请输入合同状态'},
-      filterData: () => [...resDictData.value.order_flow_status,{dictLabel:"库存发货",dictValue:"-1"}],
+      filterData: () => [...resDictData.value.order_flow_status],
       filterCustom: {label: 'dictLabel', value: 'dictValue'}
     },
     {
@@ -1945,6 +1930,18 @@ const customerNameList = ref();
       width: '110',
       title: '客户物料编码',
       field: 'materialNumber',
+      align: 'center',
+    },
+    {
+      width: '100',
+      title: 'EQ时长(H)',
+      field: 'eqHours',
+      align: 'center',
+    },
+    {
+      width: '60',
+      title: 'EQ确认',
+      field: 'eqStatus',
       align: 'center',
     },
     {
@@ -2868,33 +2865,6 @@ const progressConfirm = (item: any) => {
   });
 </script>
 
-<style>
-
-  .el-select {
-    width: 100%;
-  }
-
-  .el-input__wrapper {
-    width: 100%;
-  }
-
-  .vxe-table--fixed-left-wrapper {
-    z-index: 2 !important;
-    height: calc(100% - 10px) !important;
-  }
-
-  .vxe-table--fixed-right-wrapper {
-    z-index: 2 !important;
-    height: calc(100% - 10px) !important;
-  }
-
-  /* .el-drawer__header {
-    padding: 0px 20px;
-    height: 40px;
-    margin-bottom: 0px;
-  } */
-
-</style>
 <style lang="scss" scoped>
 :deep(.detail-prod-drawder) {
   .el-drawer__header {
@@ -2907,10 +2877,6 @@ const progressConfirm = (item: any) => {
     padding: 5px 5px;
   }
 }
-</style>
-
-
-<style lang="scss" scoped>
 :deep(.kingzon-page-table) {
   .datagrid-row-over {
     // background: transparent;
@@ -2920,13 +2886,13 @@ const progressConfirm = (item: any) => {
   }
 }
 
-:deep(.el-select) {
-  width: 100%;
-}
+// :deep(.el-select) {
+//   width: 100%;
+// }
 
-:deep(.el-input__wrapper) {
-  width: 100%;
-}
+// :deep(.el-input__wrapper) {
+//   width: 100%;
+// }
 
 :deep(.vxe-table--fixed-left-wrapper) {
   z-index: 2 !important;
@@ -2942,115 +2908,5 @@ const progressConfirm = (item: any) => {
   padding: 0px 20px;
   height: 40px;
   margin-bottom: 0px;
-}
-
-:deep(.add-prod-drawder) {
-  .el-drawer__header {
-    height: auto;
-    padding: 5px !important;
-    margin-bottom: 5px !important;
-  }
-  .el-drawer__body {
-    padding: 5px 5px !important;
-
-    .el-divider {
-      margin: 0 0 6px 0 !important;
-    }
-    .error-left {
-      .el-form-item__error {
-        left: -20px;
-      }
-    }
-    .error-left-one {
-      .el-form-item__error {
-        left: -30px;
-      }
-    }
-
-    .el-form-item {
-      margin-bottom: 6px !important;
-
-      .el-form-item__label {
-        padding-right: 3px !important;
-      }
-
-      .el-form-item__content {
-        .el-form-item {
-          margin-bottom: 0 !important;
-        }
-        .el-textarea,
-        .el-input__wrapper,
-        .el-textarea__inner {
-          background-color: #FDFFE1 !important;
-          color: #000000 !important;
-        }
-        .el-input__inner {
-          color: #000000 !important;
-        }
-        .height-light .el-input__wrapper {
-          background-color: #FED547 !important;
-        }
-        .el-input-group__prepend,
-        .el-input-group__append {
-          padding: 0 2px !important;
-        }
-        .el-input-number {
-          width: 100% !important;
-          .el-input__wrapper {
-            padding: 1px 7px !important;
-            .el-input__inner {
-              width: 100% !important;
-              text-align: left !important;
-            }
-          }
-        }
-
-        .el-input__inner {
-          // 去除 数字表单 上下按钮
-          &::-webkit-outer-spin-button,
-          &::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-          }
-          &[type="number"] {
-            -moz-appearance: textfield;
-            appearance: textfield;
-          }
-          border: none;
-        }
-      }
-
-      &.is-error .el-input__wrapper {
-        box-shadow: 0 0 0 2px var(--el-color-danger) inset;
-      }
-      .el-form-item__error {
-        display: none;
-        // margin-top: -2px;
-        // white-space: nowrap !important;
-        // font-size: 12px !important;
-        // transform: scale(0.9) !important;
-        // z-index: 10 !important;
-      }
-      .error-right {
-        .el-form-item__error {
-          /* text-align: right; */
-          left: 105px !important;
-        }
-        z-index: 10 !important;
-      }
-    }
-  }
-  /* .el-drawer__footer {
-    padding: 5px;
-  } */
-  .flex-start {
-    .el-form-item__content {
-      justify-content: flex-start !important;
-      align-items: center;
-      .el-input-number {
-        flex:1 !important;
-        width: auto;
-      }
-    }
-  }
 }
 </style>

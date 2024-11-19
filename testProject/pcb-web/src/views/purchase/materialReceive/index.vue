@@ -1,14 +1,57 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
-      <el-tabs type="border-card" v-model="editableTabsValue" @tab-change="getVoidedList()" class="xtable-tab">
+    <!-- <el-card shadow="never" class="xtable-card"> -->
+      <el-tabs v-if="checkPermi(['inventory:material:list'])" v-model="editableTabsValue" @tab-change="getVoidedList()" class="xtable-tab">
+        <el-tab-pane label="实时库存" width="100%" :name="2">
+          <TotalTitle :list="[
+            { title: `当前库存总数：${outTotal2?outTotal2:0}` },
+            { title: `在途库存总数：${inTransitTotal?inTransitTotal:0}` },
+            { title: `可用库存总数：${inTotal2?inTotal2:0}` },
+          ]"></TotalTitle>
+          <div class="head-btn-flex" v-if="checkPermi(['inventory:material:list']) || checkPermi(['inventory:material:export'])">
+            <!-- <div style="float: right">
+              <div style="display:flex;line-height: 24px;font-size: 14px">
+                <div style="width: 110px;background-color: #ECB0B1;text-align: center; margin-right: 8px;">库存告警</div>
+              </div>
+            </div>
+            <p class="totalTitle">当前库存总数：{{outTotal2?outTotal2:0}}&nbsp;&nbsp;&nbsp;&nbsp; 在途库存总数：{{inTransitTotal?inTransitTotal:0}}&nbsp;&nbsp;&nbsp;&nbsp; 可用库存总数：{{inTotal2?inTotal2:0}}  </p> -->
+            <el-button v-if="checkPermi(['inventory:material:list'])" style="margin-left: 20px" type="primary" @click="handlePrint">批量打印标签</el-button>
+            <el-button v-if="checkPermi(['inventory:material:export'])" :loading="buttonLoading" type="primary" @click="exportExcelBefore">导出</el-button>
+          </div>
+<!--          <div class="p-2" style="text-align: right;width: 100%">
+            <el-checkbox v-model="queryParamsLive.checked" @change="getList2">只显示在库物料</el-checkbox>
+          </div>-->
+          <XTable toolId="purchaseMaterialReceiveShow" v-model:page-size="queryParamsLive.pageSize" v-model:current-page="queryParamsLive.pageNum" height="100%" class="xtable-content"
+                  :page-params="{ perfect: true, total: total }" :data="materialInventoryList" :columnList="columnList2" ref="materialTableRef"
+                  @toggle-row-expand="toggleExpandChangeEvent" size="mini" :intervalCondition="intervalCondition"
+                  :scroll-x="true" :showRefresh="true" :loading="loading" :checkbox-config="{  reserve: true }"
+                  border @searchChange="searchMaterialChange" :column-config="{ resizable: true }" @checkbox-all="selectionChange"
+                  @checkbox-change="selectionChange" :row-style="setRowStyle" :row-config="{ keyField: 'id' }">
+            <template #header-tool>
+              <ColorRule :list="[{ title: '库存告警', color: '#ECB0B1' }]"></ColorRule>
+            </template>
+            <template #default-inOutRecordType="scope">
+              <!-- <dict-tag :options="material_in_out_record_type" :value="scope.row.inOutRecordType"/> -->
+              {{ typeStrings[scope.row.inOutRecordType as keyof typeof InOutTypeEnum] }}
+            </template>
+            <!--            <template #default-make="scope">-->
+            <!-- 收货列表点击详情可以看到物料收货单详情 -->
+            <!--              <el-button link type="primary" v-if="scope.row.quantity != 0" @click="updatePeriodical(scope.row)">修改保质期</el-button>-->
+            <!--              <el-button link type="primary" v-if="scope.row.quantity != 0 && checkPermi(['inOut:inventory:out'])"  @click="updateOutBound(scope.row)">出库</el-button>-->
+            <!--              <el-button link type="primary" @click="updateGoodsRejected(scope.row)">退货</el-button>-->
+            <!--              <el-button link type="primary" v-if="scope.row.quantity != 0" @click="updateRoll(scope.row)">转仓</el-button>-->
+            <!--            </template>-->
+          </XTable>
+        </el-tab-pane>
         <el-tab-pane label="出入库记录" :name="1">
-          <el-row :gutter="10" class="mb8" style="width:100%;margin:0;display:flex;justify-content: end;">
-            <el-col :span="20" style="width:100%;margin:0;display:flex;justify-content: end;">
-              <p class="totalTitle">出库数量：{{outTotal?outTotal:0}}&nbsp;&nbsp;|&nbsp;&nbsp; 入库数量：{{inTotal?inTotal:0}}  </p>
-              <el-button style="margin-left:5px" :loading="buttonLoading" type="primary" @click="exportExcelReceiveRecord">导出</el-button>
-            </el-col>
-          </el-row>
+          <TotalTitle :list="[
+            { title: `出库总数量：${outTotal?outTotal:0}` },
+            { title: `入库总数量：${inTotal?inTotal:0}` },
+          ]"></TotalTitle>
+          <div class="head-btn-flex" v-if="checkPermi(['inventory:material:inout:export'])">
+            <!-- <p class="totalTitle">出库总数量：{{outTotal?outTotal:0}}&nbsp;&nbsp;&nbsp;&nbsp; 入库总数量：{{inTotal?inTotal:0}}  </p> -->
+            <el-button v-if="checkPermi(['inventory:material:inout:export'])" style="margin-left: 20px" :loading="buttonLoading" type="primary" @click="exportExcelReceiveRecord">导出</el-button>
+          </div>
           <XTable toolId="purchaseMaterialReceiveRecord" v-model:page-size="queryParams.pageSize" v-model:current-page="queryParams.pageNum" height="100%" class="xtable-content"
             :page-params="{ perfect: true, total: total }" :data="materialOrderList" :columnList="columnList" ref="tableRef"
             @toggle-row-expand="toggleExpandChangeEvent"
@@ -23,37 +66,49 @@
           </XTable>
 
         </el-tab-pane>
-        <el-tab-pane label="实时库存展示" width="100%" :name="2">
-          <el-row style="width:100%;margin:0;display:flex;justify-content: end;">
-            <el-col :span="20" style="width:100%;margin:0;display:flex;justify-content: end;">
-              <p class="totalTitle">库存数量：{{outTotal2?outTotal2:0}}&nbsp;&nbsp;|&nbsp;&nbsp; 可用数量：{{inTotal2?inTotal2:0}}  </p>
-              <el-button style="margin-left:5px" :loading="buttonLoading" type="primary"  v-if="checkPermi(['inOut:inventory:out'])" @click="handleOutbound()">出库</el-button>
-              <el-button :loading="buttonLoading" type="primary" @click="exportExcelBefore">导出</el-button>
-            </el-col>
-          </el-row>
-          <div class="p-2" style="text-align: right;width: 100%">
-            <el-checkbox v-model="queryParamsLive.checked" @change="getList2">只显示在库物料</el-checkbox>
-          </div>
-          <XTable toolId="purchaseMaterialReceiveShow" v-model:page-size="queryParamsLive.pageSize" v-model:current-page="queryParamsLive.pageNum" height="100%" class="xtable-content"
-            :page-params="{ perfect: true, total: total }" :data="materialInventoryList" :columnList="columnList2" ref="xTable"
-            @toggle-row-expand="toggleExpandChangeEvent" size="mini"
-            :scroll-x="true" :showRefresh="true" :loading="loading" :checkbox-config="{  reserve: true }"
-            border @searchChange="searchMaterialChange" :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }">
+        <el-tab-pane v-if="checkPermi(['inventory:material:month'])" label="库存结存" width="100%" :name="3">
+          <el-form class="width-100" :model="monthQueryParams" ref="queryFormRef" :inline="true">
+            <el-row>
+              <el-col :span="8">
+                <el-form-item label="结存年月:" prop="yearMonth">
+                  <el-date-picker
+                    v-model="monthQueryParams.yearMonth" type="month"
+                    value-format="YYYY-MM"
+                    @change="handleMonthQuery"
+                    placeholder="请选择年月"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="16" class="global-flex flex-end align-start">
+                <el-button v-if="checkPermi(['inventory:material:month:export'])" style="margin-left: 20px" type="primary" @click="exportMonthExcelBefore">导出</el-button>
+              </el-col>
+            </el-row>
+          </el-form>
+          <!--          <div class="p-2" style="text-align: right;width: 100%">
+                      <el-checkbox v-model="queryParamsLive.checked" @change="getList2">只显示在库物料</el-checkbox>
+                    </div>-->
+          <XTable :toolId="rawMaterialMonthToolId" v-model:page-size="monthQueryParams.pageSize" v-model:current-page="monthQueryParams.pageNum" height="100%" class="xtable-content"
+                  :page-params="{ perfect: true, total: totalMonth }" :data="materialMonthInventoryList" :columnList="columnList4" ref="materialMonthTableRef"
+                  @toggle-row-expand="toggleExpandChangeEvent" size="mini" :intervalCondition="intervalCondition"
+                  :scroll-x="true" :showRefresh="true" :loading="loading" :checkbox-config="{  reserve: true }"
+                  border @searchChange="monthSearchChange" :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }">
             <template #default-inOutRecordType="scope">
               <!-- <dict-tag :options="material_in_out_record_type" :value="scope.row.inOutRecordType"/> -->
               {{ typeStrings[scope.row.inOutRecordType as keyof typeof InOutTypeEnum] }}
             </template>
-<!--            <template #default-make="scope">-->
-              <!-- 收货列表点击详情可以看到物料收货单详情 -->
-<!--              <el-button link type="primary" v-if="scope.row.quantity != 0" @click="updatePeriodical(scope.row)">修改保质期</el-button>-->
-<!--              <el-button link type="primary" v-if="scope.row.quantity != 0 && checkPermi(['inOut:inventory:out'])"  @click="updateOutBound(scope.row)">出库</el-button>-->
-<!--              <el-button link type="primary" @click="updateGoodsRejected(scope.row)">退货</el-button>-->
-<!--              <el-button link type="primary" v-if="scope.row.quantity != 0" @click="updateRoll(scope.row)">转仓</el-button>-->
-<!--            </template>-->
+            <!--            <template #default-make="scope">-->
+            <!-- 收货列表点击详情可以看到物料收货单详情 -->
+            <!--              <el-button link type="primary" v-if="scope.row.quantity != 0" @click="updatePeriodical(scope.row)">修改保质期</el-button>-->
+            <!--              <el-button link type="primary" v-if="scope.row.quantity != 0 && checkPermi(['inOut:inventory:out'])"  @click="updateOutBound(scope.row)">出库</el-button>-->
+            <!--              <el-button link type="primary" @click="updateGoodsRejected(scope.row)">退货</el-button>-->
+            <!--              <el-button link type="primary" v-if="scope.row.quantity != 0" @click="updateRoll(scope.row)">转仓</el-button>-->
+            <!--            </template>-->
           </XTable>
         </el-tab-pane>
+
+
       </el-tabs>
-    </el-card>
+    <!-- </el-card> -->
     <!--保质期 -->
     <el-dialog v-model="dialogPeriodical.visible"  title="保质期修改" center width="30%" draggable>
       <!-- 主体 -->
@@ -235,7 +290,7 @@
         destroy-on-close
     >
       <span>
-        没有设置起始时间，将默认导出30天内的数据
+        没有设置查询条件，将默认导出30天内的数据
       </span>
       <template #footer>
         <span class="dialog-footer">
@@ -318,7 +373,7 @@
           </el-col>
         </el-row>
       </el-form>
-      <vxe-table
+      <XTable
           border
           keep-source
           size="mini"
@@ -333,8 +388,10 @@
           :column-config="{resizable: true}"
           :data="otherReceiptList"
           :edit-config="{trigger: 'click', mode: 'row', autoClear: true, showStatus: true}"
+          :pageShow="false"
+          :columnList="columnListReturnGoods"
       >
-        <vxe-column type="seq" title="序号"></vxe-column>
+        <!-- <vxe-column type="seq" title="序号"></vxe-column>
         <vxe-column field="materialCode" title="物料编码">
           <template #edit="{ row }">
             <el-input v-model="row.materialCode"></el-input>
@@ -370,22 +427,22 @@
             <el-input v-model="row.quantity"></el-input>
           </template>
         </vxe-column>
-        <vxe-column field="returnOfGoodsQuantity" title="退货数" :edit-render="{placeholder: '请点击输入'}">
-          <template #edit="{ row }">
+        <vxe-column field="returnOfGoodsQuantity" title="退货数" :edit-render="{placeholder: '请点击输入'}"> -->
+          <template #edit-returnOfGoodsQuantity="{ row }">
             <el-input v-model="row.returnOfGoodsQuantity"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="remark" title="备注" sort-type="string" :edit-render="{placeholder: '请点击输入'}">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="remark" title="备注" sort-type="string" :edit-render="{placeholder: '请点击输入'}"> -->
+          <template #edit-remark="{ row }">
             <el-input v-model="row.remark"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column title="操作" width="200">
-          <template #default="{ row,rowIndex}">
+        <!-- </vxe-column>
+        <vxe-column title="操作" width="200"> -->
+          <template #default-make="{ row,rowIndex}">
             <el-button size="small" text="plain" @click="deleteRowEvent(row,rowIndex)">删除</el-button>
           </template>
-        </vxe-column>
-      </vxe-table>
+        <!-- </vxe-column> -->
+      </XTable>
       <template #footer>
         <div style="display: flex; justify-content: center;">
           <span class="dialog-footer">
@@ -396,6 +453,8 @@
         </div>
       </template>
     </el-dialog>
+
+    <materialPrint ref="materialPrintRef"/>
   </div>
 </template>
 
@@ -426,7 +485,7 @@ import {
   updateMaterialInventory,
   updateMaterialInventoryInOutRecord,
   updateMaterialRollInventoryInOutRecord,
-  listCountMaterialInventory
+  listCountMaterialInventory, listCountV2, printMaterialList
 } from "@/api/purchase/materialInventory";
 import {MaterialInventoryVO} from "@/api/purchase/materialInventory/types";
 import {UserVO} from "@/api/system/user/types";
@@ -435,14 +494,21 @@ import {MaterialStorageVO} from "@/api/purchase/materialStorage/types";
 import {listMaterialStorage} from "@/api/purchase/materialStorage";
 import {DirectMaterialReceipt, DirectMaterialReceive} from "@/api/purchase/materialReceive/types";
 import { getBaseStorage } from "@/api/system/config";
-import { typeStrings,InOutTypeEnum } from "@/api/basedata/rawMaterial/types";
+import {typeStrings, InOutTypeEnum, typeList} from "@/api/basedata/rawMaterial/types";
 import {checkPermi} from "@/utils/permission";
 import {MaterialApplyVO} from "@/api/purchase/materialApply/types";
+import {
+  MaterialMonthInventoryForm,
+  MaterialMonthInventoryQuery,
+  MaterialMonthInventoryVO
+} from "@/api/purchase/materialMonthInventory/types";
+import {listMaterialMonthInventory} from "@/api/purchase/materialMonthInventory";
 
 const outTotal = ref(0);
 const inTotal = ref(0);
 const outTotal2 = ref(0);
 const inTotal2 = ref(0);
+const inTransitTotal = ref(0);
 
 const baseStorage = ref<any[]>([]);
 
@@ -459,6 +525,10 @@ const outBoundTable = ref<VxeTableInstance<MaterialOrderDetailVO>>();
 
 
 const materialInventoryList = ref<MaterialInventoryVO[]>([]);
+
+const materialMonthInventoryList = ref<MaterialMonthInventoryVO[]>([]);
+
+const selectMaterialList = ref<MaterialInventoryVO[]>([]);
 
 const materialInventoryWaitList = ref<MaterialInventoryVO[]>([]);
 
@@ -482,7 +552,7 @@ const ids = ref<Array<string | number>>([]);
 const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
-
+const totalMonth = ref(0);
 const totalWait = ref(0);
 
 const queryFormRef = ref<ElFormInstance>();
@@ -629,29 +699,76 @@ const data = reactive<PageData<MaterialOrderForm, MaterialOrderQuery>>({
 
 const {queryParams, queryParamsLive, queryParamsWait, form, rules} = toRefs(data);
 
+const monthData = reactive<PageData<MaterialMonthInventoryForm, MaterialMonthInventoryQuery>>({
+  form: {...initFormData},
+  queryParams: {
+    pageNum: 1,
+    pageSize: 20,
+    version:undefined,
+    rawMaterialId: undefined,
+    quantity: undefined,
+    price: undefined,
+    yearMonth: undefined,
+    outQuantity: undefined,
+    inQuantity: undefined,
+    outTotal: undefined,
+    inTotalPrice: undefined,
+    ownerId: undefined,
+    params: {
+    }
+  },
+  rules: {
+    id: [
+      { required: true, message: "$comment不能为空", trigger: "blur" }
+    ],
+    rawMaterialId: [
+      { required: true, message: "物料ID不能为空", trigger: "blur" }
+    ],
+    quantity: [
+      { required: true, message: "数量不能为空", trigger: "blur" }
+    ],
+    price: [
+      { required: true, message: "单价不能为空", trigger: "blur" }
+    ],
+    yearMonth: [
+      { required: true, message: "年月不能为空", trigger: "blur" }
+    ],
+    outQuantity: [
+      { required: true, message: "出库数量不能为空", trigger: "blur" }
+    ],
+    inQuantity: [
+      { required: true, message: "入库数量不能为空", trigger: "blur" }
+    ],
+    outTotal: [
+      { required: true, message: "出库金额不能为空", trigger: "blur" }
+    ],
+    inTotalPrice: [
+      { required: true, message: "入库金额不能为空", trigger: "blur" }
+    ],
+    ownerId: [
+      { required: true, message: "所属单位ID不能为空", trigger: "blur" }
+    ]
+  }
+});
+
+const { queryParams: monthQueryParams, form: monthForm } = toRefs(monthData);
+
+
 const inOutOptions = ref([
   {value: "1", label: "出库"},
   {value: "2", label: "入库"},
 ])
 
-const getTypeMainInfo =(_obj: any) => {
-  let newArr=[];
-    for (const [key, value] of Object.entries(_obj)) {
-      newArr.push({ label: `${value}`, value: `${key}` })
-    }
-    return newArr;
-}
-const typeMainInfo = getTypeMainInfo(typeStrings);
+const typeMainInfo = typeList;
 
-console.log("material_in_out_record_type.value ",material_in_out_record_type.value )
 const columnList = ref([
   { title: "序号", type: 'seq', align: 'center', field: 'index', width: '60' },
-  { title: '出入库类型', field: 'inOutType', align: 'center', width: '90',filterType: 'radio',
-    filterParam: { placeholder: '' }, filterData: () => inOutOptions.value },
-  { title: '操作类型', field: 'inOutRecordType', align: 'center', width: '90'
+  { title: '来源', field: 'inOutRecordType', align: 'center', width: '90'
     ,filterType: 'checkboxButton'
     , filterParam: { placeholder: '请选择操作类型' },
     filterData:()=>typeMainInfo},
+  { title: '类型', field: 'inOutType', align: 'center', width: '90',filterType: 'radio',
+    filterParam: { placeholder: '' }, filterData: () => inOutOptions.value },
     //{{ typeStrings[scope.row.inOutRecordType as keyof typeof InOutTypeEnum] }}
   { title: '供应商编码', field: 'supplierCode', align: 'center', width: '80', filterType: 'input', filterParam: { placeholder: '' }},
   { title: '供应商名称', field: 'supplierName', align: 'center', width: '100', filterType: 'input', filterParam: { placeholder: '' }},
@@ -672,10 +789,16 @@ const columnList = ref([
   /*{ title: '生产日期', field: 'productionDate', align: 'center', width: '80', showOverflow: false },
   { title: '保质期（天）', field: 'expirationDays', align: 'center', width: '80', showOverflow: false },
   { title: '过期日期', field: 'expirationDate', align: 'center', width: '80', showOverflow: false},*/
-  { title: '存货仓',width:'120', field: 'storageName', align: 'center', filterType: 'radioButton',
+  { title: '所属仓库',width:'120', field: 'storageName', align: 'center', filterType: 'radioButton',
           filterData: () => baseStorage.value,
           filterCustom: {label: 'name', value: 'id'}  },
   { title: '库存单位', field: 'unit', align: 'center', width: '80', filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '操作前库存', field: 'beforeQuantity',width:'100', align: 'center', showOverflow: false },
+  { title: '出/入库数量', field: 'opQuantity',width:'100', align: 'center', showOverflow: false },
+  { title: '单价(元)',width:'80', field: 'price', align: 'center', showOverflow: false, isPermi: () => checkPermi(['inventory:material:cost'])  },
+  { title: '出/入库金额',width:'120', field: 'totalAmount', align: 'center', showOverflow: false, isPermi: () => checkPermi(['inventory:material:cost'])  },
+  { title: '备注',width:'80', field: 'remark', align: 'center',  filterType: 'input',},
+  { title: '操作人',width:'120', field: 'createByName', align: 'center',filterType: 'input' },
   { title: '操作时间',width:'120', field: 'createTime',
     align: 'center',
     filterType: 'intervalDate',
@@ -684,23 +807,23 @@ const columnList = ref([
       endParams: {placeholder: '请输入结束时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
     }
   },
-  { title: '单价',width:'80', field: 'price', align: 'center', showOverflow: false },
-  { title: '总金额',width:'120', field: 'totalAmount', align: 'center', showOverflow: false },
-  { title: '操作人',width:'120', field: 'createByName', align: 'center',filterType: 'input' },
-  { title: '领用人',width:'120', field: 'receiveUserName', align: 'center', filterType: 'input', },
-  { title: '备注',width:'80', field: 'remark', align: 'center',  filterType: 'input',},
+  // { title: '领用人',width:'120', field: 'receiveUserName', align: 'center', filterType: 'input', },
   // { title: '操作数量', field: 'quantity',width:'100', align: 'center', showOverflow: false },
-  { title: '操作数量', field: 'opQuantity',width:'100', align: 'center', showOverflow: false },
-  { title: '操作前库存数量', field: 'beforeQuantity',width:'100', align: 'center', showOverflow: false },
+
 ]);
+
+const intervalCondition = ['quantity', 'price', 'inQuantity', 'inTotalPrice', 'outQuantity', 'outTotal', 'inventoryWarningQuantity'];
+
 const columnList2 = ref([
   // { type: 'checkbox', align: 'center', field: "checkbox", width: '40',fixed: 'left' , isPermi: () => checkPermi(['inOut:inventory:out'])},
+  {type: 'checkbox', width: '40', align: "center",fixed: 'left',},
   { title: "序号", type: 'seq', field: 'index', align: 'center', width: '60',fixed: 'left' },
   { title: '物料类别',width:'80', field: 'categoryName',fixed: 'left', align: 'center',showOverflow: false, filterType: 'input', filterParam: { placeholder: '' }},
   /*{ title: '供应商编码', width:'100', field: 'supplierCode', align: 'center', filterType: 'input', filterParam: { placeholder: '' }},
   { title: '供应商名称', width:'120', field: 'supplierName', align: 'center', filterType: 'input', filterParam: { placeholder: '' }},*/
   { title: '物料编码', width:'80',field: 'materialCode', fixed: 'left',align: 'center', filterType: 'input', filterParam: { placeholder: '' }},
-  { title: '物料名称', width:'120', field: 'name', align: 'center',fixed: 'left', filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '物料名称', width:'160', field: 'name', align: 'center',fixed: 'left', filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '单位', field: 'unit', align: 'center',width: '60' , filterType: 'input', filterParam: { placeholder: '' }},
   { title: '材质牌号',width:'100', field: 'materialQuality', align: 'center', filterType: 'input', filterParam: { placeholder: '' }},
   { title: '板厚',width:'70', field: 'boardThickness', align: 'center', filterType: 'input', filterParam: { placeholder: '' } },
   { title: '铜厚',width:'70', field: 'copperThickness', align: 'center', filterType: 'input', filterParam: { placeholder: '' }},
@@ -715,14 +838,21 @@ const columnList2 = ref([
  /* { title: '生产日期', width:'120', field: 'productionDate', align: 'center', showOverflow: false },
   { title: '保质期（天）',width:'80', field: 'expirationDays', align: 'center', showOverflow: false },
   { title: '过期日期',width:'120', field: 'expirationDate', align: 'center', showOverflow: false},*/
-  { title: '仓库位',width:'120', field: 'storageName', align: 'center',filterType: 'radioButton',
+  { title: '所属仓库',width:'120', field: 'storageName', align: 'center',filterType: 'radioButton',
           filterData: () => baseStorage.value,
           filterCustom: {label: 'name', value: 'id'} },
-  { title: '库存单位', field: 'unit', align: 'center',width: '60' , filterType: 'input', filterParam: { placeholder: '' }},
-  { title: '库存数',width:'120', field: 'quantity', align: 'center' , showOverflow: false},
-  { title: '可用库存数',width:'120', field: 'quantity', align: 'center', showOverflow: false },
-  { title: '在途数',width:'120', field: 'inTransitNumber', align: 'center', showOverflow: false },
- // { title: '操作', field: 'make', align: 'center', width: '240', fixed: 'right', showOverflow: false, isPermi: () => checkPermi(['inOut:inventory:out']) },
+  { title: '库存预警值', field: 'inventoryWarningQuantity', width: '90', align: 'center' , filterType: 'intervalNumber', },
+  // { title: '结存数量',width:'120', field: 'monthQuantity', align: 'center', filterType: "intervalNumber", showOverflow: false },
+  // { title: '结存成本价(元)',width:'120', field: 'monthPrice', align: 'center', filterType: "intervalNumber", showOverflow: false, isPermi: () => checkPermi(['inventory:material:cost']) },
+  // { title: '结存总金额(元)',width:'120', field: 'monthTotalPrice', align: 'center', showOverflow: false, isPermi: () => checkPermi(['inventory:material:cost']) },
+  // { title: '结存入库数',width:'120', field: 'inQuantity', align: 'center', filterType: "intervalNumber", showOverflow: false },
+  // { title: '结存入库金额(元)',width:'120', field: 'inTotalPrice', align: 'center', filterType: "intervalNumber", showOverflow: false },
+  // { title: '结存出库数',width:'120', field: 'outQuantity', align: 'center', filterType: "intervalNumber", showOverflow: false },
+  // { title: '结存出库金额',width:'120', field: 'outTotal', align: 'center', filterType: "intervalNumber", showOverflow: false },
+  { title: '在途库存',width:'120', field: 'inTransitNumber', align: 'center', fixed: 'right', showOverflow: false },
+  { title: '当前库存',width:'120', field: 'quantity', align: 'center', filterType: "intervalNumber", fixed: 'right', showOverflow: false},
+  { title: '当前成本价(元)',width:'140', field: 'price', align: 'center', fixed: 'right', showOverflow: false, isPermi: () => checkPermi(['inventory:material:cost'])},
+  // { title: '操作', field: 'make', align: 'center', width: '240', fixed: 'right', showOverflow: false, isPermi: () => checkPermi(['inOut:inventory:out']) },
 ]);
 
 const columnList3 = ref([
@@ -781,10 +911,45 @@ const outColumnList = ref([
   { title: '备注',fixed:'right',width:'120', field: 'remark', align: 'center',  editRender:{} },
   // { title: '操作',fixed:'right', field: 'make',width:'100', align: 'center', showOverflow: false },
 ]);
+// 退货弹框
+const columnListReturnGoods = ref([
+{ type: 'seq',title: '序号',align: 'center',  },
+{ title: '物料编码',field: 'materialCode',align: 'center',  },
+{ title: '物料名称',field: 'name',align: 'center',  },
+{ title: '材质牌号',field: 'materialQuality',align: 'center',  },
+{ title: '生产日期',field: 'productionDate',align: 'center',  },
+{ title: '保质期（天）',field: 'expirationDays',align: 'center',  },
+{ title: '过期日期',field: 'expirationDate',align: 'center',  },
+{ title: '库存数',field: 'quantity',align: 'center',  },
+{ title: '退货数',field: 'returnOfGoodsQuantity',editRender: {},align: 'center',  },
+{ type: 'string',title: '备注',field: 'remark',editRender: {},align: 'center',  },
+{ width: '200',title: '操作',align: 'center',  },
+]);
 
+const columnList4 = ref([
+  { title: "序号", type: 'seq', field: 'index', align: 'center', width: '60',fixed: 'left' },
+  { title: '物料类别',minWidth:'80', field: 'categoryName',fixed: 'left', align: 'center',showOverflow: false, filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '物料编码', minWidth:'80',field: 'materialCode', fixed: 'left',align: 'center', filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '物料名称', minWidth:'140', field: 'materialName', align: 'center',fixed: 'left', filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '材质牌号',width:'100', field: 'materialQuality', align: 'center', filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '长（mm）',width:'80', field: 'length', align: 'center', showOverflow: false , filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '宽（mm）', width:'80',field: 'width', align: 'center', filterType: 'input', filterParam: { placeholder: '' } },
+  { title: '规格型号', field: 'specification',minWidth: '120', align: 'center', filterType: 'input', filterParam: { placeholder: '' } },
+  // { title: '所属仓库',width:'120', field: 'storageName', align: 'center',filterType: 'radioButton',
+  //   filterData: () => baseStorage.value,
+  //   filterCustom: {label: 'name', value: 'id'} },
+  { title: '结存数量',width:'120', field: 'quantity', align: 'center', filterType: "intervalNumber", showOverflow: false },
+  { title: '结存成本价(元)',width:'120', field: 'price', align: 'center', filterType: "intervalNumber", showOverflow: false, },
+  { title: '结存总金额(元)',width:'120', field: 'totalAmount', align: 'center', showOverflow: false,},
+  { title: '结存入库数',width:'120', field: 'inQuantity', align: 'center', filterType: "intervalNumber", showOverflow: false },
+  { title: '结存入库金额(元)',width:'120', field: 'inTotalPrice', align: 'center', filterType: "intervalNumber", showOverflow: false },
+  { title: '结存出库数',width:'120', field: 'outQuantity', align: 'center', filterType: "intervalNumber", showOverflow: false },
+  { title: '结存出库金额(元)',width:'120', field: 'outTotal', align: 'center', filterType: "intervalNumber", showOverflow: false },
+   // { title: '操作', field: 'make', align: 'center', width: '240', fixed: 'right', showOverflow: false, isPermi: () => checkPermi(['inOut:inventory:out']) },
+]);
 
 // 新增属性
-const editableTabsValue = ref(1);
+const editableTabsValue = ref(2);
 
 // 获取 搜索条件
 const searchMaterialChange = (params: any) => {
@@ -792,8 +957,8 @@ const searchMaterialChange = (params: any) => {
   queryParamsLive.value = params
   queryParamsLive.value.status = editableTabsValue.value
   queryParamsLive.value.checked = tempCheck
-  console.log(queryParamsLive.value)
   getList2()
+  setSelect
 }
 const searchChange = (params: any) => {
   queryParams.value = params
@@ -826,9 +991,11 @@ const getVoidedList = async () => {
   queryParams.value.status = editableTabsValue.value
   if (1 == editableTabsValue.value) {
     getList();
-  } else {
+  } else if (2 == editableTabsValue.value) {
 
     getList2();
+  } else {
+    getMonthList();
   }
 
 }
@@ -1039,13 +1206,12 @@ const getList2 = async () => {
   if(queryParamsLive.value.storageName){
     queryParamsLive.value.storageId = queryParamsLive.value.storageName;
   }
-  console.log('AAA',queryParamsLive.value.checked);
   //queryParamsLive.value.checked
   const res = await listMaterialInventory(queryParamsLive.value);
   materialInventoryList.value = res.rows;
   total.value = res.total;
   loading.value = false;
-  await getListCount2();
+  getListCount2();
 }
 
 /**
@@ -1091,9 +1257,10 @@ const getListCount2 = async () => {
     queryParamsLive.value.storageId = queryParamsLive.value.storageName;
   }
   //queryParamsLive.value.checked
-  const res = await listCountMaterialInventory(queryParamsLive.value);
+  const res = await listCountV2(queryParamsLive.value);
   outTotal2.value= res.data.availableInvQuantity;
   inTotal2.value= res.data.inventoryQuantity;
+  inTransitTotal.value = res.data.inTransitQuantity;
 }
 
 interface RowVO {
@@ -1217,6 +1384,15 @@ const updatePeriodical = async (row?: MaterialInventoryVO) => {
   dialogExamine.title = "保质期修改";
 }
 
+
+// 设置库存预警行样式背景
+const setRowStyle = (scope: any) => {
+  if (scope.row.warningQuantity) {
+    return {
+      background: 'rgb(236,176,177)',
+    }
+  }
+}
 /**
  * 物料出库
  * @param row
@@ -1635,12 +1811,23 @@ const statementOfAccount = async (row?: MaterialOrderDetailVO) => {
 const exportVisible = ref(false);
 const mainTableToolId = ref('purchaseMaterialReceiveShow');
 const mainTableReceiveToolId = ref('purchaseMaterialReceiveRecord');
+const rawMaterialMonthToolId = ref('rawMaterialMonthToolId');
 /** 导出前操作 */
 const exportExcelBefore = async () => {
-  //先看看有没有给起始时间，没有要给出提示
-  //if (!queryParamsLive.value.createTime) {
-//    exportVisible.value = true;
-//  } else {
+  // 先看看有没有查询条件，没有要给出提示
+  // let count = 0;
+  // for(let key in queryParamsLive.value) {
+  //   if (key!='pageNum'&&key!='pageSize'&&key!='sorts'&&key!='status'&&key!='checked'&&key!='params'&&key!='isExistQuery'
+  //     && queryParamsLive.value[key] !== null && queryParamsLive.value[key] !== undefined) {
+  //     count++;
+  //   }
+  // }
+  //
+  // if (count <= 0) {
+  //   exportVisible.value = true;
+  //   queryParamsLive.value.isExistQuery = '0';
+  // } else {
+  //   queryParamsLive.value.isExistQuery = '1';
     proxy?.download('system/materialInventory/export', {
       ...queryParamsLive.value, tableName: mainTableToolId.value
     }, `实时库存_${new Date().getTime()}.xlsx`);
@@ -1668,10 +1855,14 @@ const exportExcel = async () => {
     proxy?.download('purchase/materialInOutRecord/export', {
       ...queryParams.value, tableName: mainTableReceiveToolId.value
     }, `出入库记录_${new Date().getTime()}.xlsx`);
-  } else {
+  } else if(2 == editableTabsValue.value){
     proxy?.download('system/materialInventory/export', {
       ...queryParamsLive.value, tableName: mainTableToolId.value
     }, `实时库存_${new Date().getTime()}.xlsx`);
+  } else {
+    proxy?.download('system/materialMonthInventory/export', {
+      ...queryParams.value, tableName: rawMaterialMonthToolId.value
+    }, `物料结存_${new Date().getTime()}.xlsx`);
   }
 }
 
@@ -1740,8 +1931,84 @@ const getListBaseStorage = async () => {
   baseStorage.value = res.data;
 };
 
+const materialPrintRef = ref();
+
+const materialTableRef = ref()
+
+/** 打印标签按钮操作 */
+const handlePrint = async () => {
+  // 没有勾选查询所有数据
+  if (!selectMaterialList.value || selectMaterialList.value.length == 0) {
+    proxy?.$modal.msgError("请选择需要打印标签的的数据项");
+    return;
+  }
+  proxy?.$modal.loading("加载中...");
+  materialPrintRef.value.doPrint(selectMaterialList.value);
+  proxy?.$modal.closeLoading()
+}
+
+/** 选择产品 */
+const selectionChange = () => {
+  const $table = materialTableRef.value.xTableRef
+  if ($table) {
+    // 获取翻页保留的列表数据和选择的行数据列表
+    const selectRecords = $table.getCheckboxReserveRecords().concat($table.getCheckboxRecords())
+    selectMaterialList.value = selectRecords.map(item => item);
+  }
+}
+
+/** 设置表格列表选中 */
+const setSelect = () => {
+  const $table = materialTableRef.value.xTableRef
+  if ($table) {
+    //过滤materialList中id在alreadySelectMaterial中的数据，
+    let st = inventoryList.value.filter(item => {
+      return selectMaterialList.value.some(item2 => item.id == item2.id);
+    });
+
+    //先为materialList中所有数据取消选中
+    $table.setCheckboxRow(inventoryList, false);
+    $table.setCheckboxRow(st, true);
+  }
+}
+
+/** 结存查询操作 */
+const handleMonthQuery = () => {
+  monthQueryParams.value.pageNum = 1;
+  getMonthList();
+}
+
+/** 查询物料月度结存列表 */
+const getMonthList = async () => {
+  loading.value = true;
+  const res = await listMaterialMonthInventory(monthQueryParams.value);
+  materialMonthInventoryList.value = res.rows;
+  totalMonth.value = res.total;
+  loading.value = false;
+}
+
+// 获取 搜索条件
+const monthSearchChange = (params: any) => {
+  params.yearMonth = monthQueryParams.value.yearMonth;
+  monthQueryParams.value = params;
+  getMonthList()
+}
+
+/** 导出前操作 */
+const exportMonthExcelBefore = async () => {
+  //先看看有没有给起始时间，没有要给出提示
+  if (!monthQueryParams.value.yearMonth) {
+    exportVisible.value = true;
+  } else {
+    proxy?.download('system/materialMonthInventory/export', {
+      ...monthQueryParams.value, tableName: rawMaterialMonthToolId.value
+    }, `物料结存_${new Date().getTime()}.xlsx`);
+  }
+}
+
 onMounted(() => {
-  getList();
+  monthQueryParams.value.yearMonth = dayjs(new Date()).subtract(1, 'month').format("YYYY-MM");
+  getList2();
   getListBaseStorage();
 });
 </script>

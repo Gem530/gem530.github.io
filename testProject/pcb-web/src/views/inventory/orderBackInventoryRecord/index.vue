@@ -48,40 +48,22 @@
         </el-row>
       </template>
 
-      <el-table v-loading="loading" :data="orderBackInventoryRecordList" @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="${comment}" align="center" prop="id" v-if="true" />
-        <el-table-column label="出库编码" align="center" prop="inventoryNo" />
-        <el-table-column label="出库类型" align="center" prop="sourceType" />
-        <el-table-column label="处理数量" align="center" prop="handleQuantity" />
-        <el-table-column label="操作人" align="center" prop="operatorId" />
-        <el-table-column label="订单详情id" align="center" prop="saleOrderDetailId" />
-        <el-table-column label="库位信息" align="center" prop="positionMes" />
-        <el-table-column label="报废工序名" align="center" prop="scrapNodeName" />
-        <el-table-column label="报废责任人" align="center" prop="scrapUser" />
-        <el-table-column label="报废数量" align="center" prop="scrapOutQuantity" />
-        <el-table-column label="0正常品 1报废 2重新发货" align="center" prop="status" />
-        <el-table-column label="退货单id" align="center" prop="returnOrderId" />
-        <el-table-column label="备注" align="center" prop="remark" />
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-          <template #default="scope">
-            <el-tooltip content="修改" placement="top">
-              <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" ></el-button>
-            </el-tooltip>
-            <el-tooltip content="删除" placement="top">
-              <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" ></el-button>
-            </el-tooltip>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <pagination
-          v-show="total>0"
-          :total="total"
-          v-model:page="queryParams.pageNum"
-          v-model:limit="queryParams.pageSize"
-          @pagination="getList"
-      />
+      <XTable v-loading="loading" :columnList="columnList" :data="orderBackInventoryRecordList" class="xtable-content" height="100%"
+      v-model:page-size="queryParams.pageSize"
+      v-model:current-page="queryParams.pageNum"
+      :page-params="{ perfect: true, total: total }"
+      @search-change="getList"
+      @checkbox-change="handleSelectionChange" ref="xtableRef"
+      @checkbox-all="handleSelectionChange">
+        <template #default-make="scope">
+          <el-tooltip content="修改" placement="top">
+            <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" ></el-button>
+          </el-tooltip>
+          <el-tooltip content="删除" placement="top">
+            <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" ></el-button>
+          </el-tooltip>
+        </template>
+      </XTable>
     </el-card>
     <!-- 添加或修改退货产品处理记录对话框 -->
     <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px">
@@ -121,6 +103,7 @@ import { OrderBackInventoryRecordVO, OrderBackInventoryRecordQuery, OrderBackInv
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
+const xtableRef = ref()
 const orderBackInventoryRecordList = ref<OrderBackInventoryRecordVO[]>([]);
 const buttonLoading = ref(false);
 const loading = ref(true);
@@ -216,6 +199,23 @@ const data = reactive<PageData<OrderBackInventoryRecordForm, OrderBackInventoryR
 });
 
 const { queryParams, form, rules } = toRefs(data);
+const columnList = ref([
+{ width: '55',type: 'checkbox',align: 'center',  },
+{ title: '${comment}',field: 'id',align: 'center',  },
+{ title: '出库编码',field: 'inventoryNo',align: 'center',  },
+{ title: '出库类型',field: 'sourceType',align: 'center',  },
+{ title: '处理数量',field: 'handleQuantity',align: 'center',  },
+{ title: '操作人',field: 'operatorId',align: 'center',  },
+{ title: '订单详情id',field: 'saleOrderDetailId',align: 'center',  },
+{ title: '库位信息',field: 'positionMes',align: 'center',  },
+{ title: '报废工序名',field: 'scrapNodeName',align: 'center',  },
+{ title: '报废责任人',field: 'scrapUser',align: 'center',  },
+{ title: '报废数量',field: 'scrapOutQuantity',align: 'center',  },
+{ title: '0正常品 1报废 2重新发货',field: 'status',align: 'center',  },
+{ title: '退货单id',field: 'returnOrderId',align: 'center',  },
+{ title: '备注',field: 'remark',align: 'center',  },
+{ title: '操作',field: 'make',align: 'center',  },
+]);
 
 /** 查询退货产品处理记录列表 */
 const getList = async () => {
@@ -252,9 +252,16 @@ const resetQuery = () => {
 
 /** 多选框选中数据 */
 const handleSelectionChange = (selection: OrderBackInventoryRecordVO[]) => {
-  ids.value = selection.map(item => item.id);
-  single.value = selection.length != 1;
-  multiple.value = !selection.length;
+  // ids.value = selection.map(item => item.id);
+  // single.value = selection.length != 1;
+  // multiple.value = !selection.length;
+  const $table = xtableRef.value.xTableRef
+  if ($table) {
+    const selection = $table.getCheckboxReserveRecords().concat($table.getCheckboxRecords()) // 获取选择的行数据列表
+    ids.value = selection.map((item: any) => item.id);
+    single.value = selection.length != 1;
+    multiple.value = !selection.length;
+  }
 }
 
 /** 新增按钮操作 */

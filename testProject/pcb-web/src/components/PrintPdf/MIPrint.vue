@@ -1,5 +1,5 @@
 <template>
-  <div class="p-2 xtable-page">
+  <div class="">
 
     <MIPrintPdf ref="cardRef" :allData="allData" :scrapped="scrapped" :printType="printType" :drillInfos="drillInfos"
       :qcCodeImage="qcCodeImage" :drillTitles="drillTitles" :laminateInfo="laminateInfo" :n_drillInfos="n_drillInfos"
@@ -13,6 +13,7 @@
 import { getPlanPrintInfo } from '@/api/production/production';
 import { ref } from "vue";
 import { loadFile } from '@/utils/pdfToImg'
+import { sortRequirment } from '@/components/ProductionPlanDrawer/util'
 
 const printType = ref("noOutsideImages");
 const productionDetails = ref<any>([]);
@@ -109,8 +110,9 @@ const buildProductionInfos = async (result: any) => {
       if (req.differPNL && req.differPNL.length > 0) {
 
         req.differPNL.forEach((diff: any) => {
-          let val = diff.parameterValue ? diff.parameterValue : diff.defaultValue;
-          let showVal=val + unit;
+          let pnlName = (req.differPNL.length > 1 && diff.pnlName) ? (diff.pnlName + ":") : '';
+          let val = diff.defaultValue;
+          let showVal = pnlName + val + unit;
           if(val==null||val==undefined||val=='null'){
             showVal='';
           }
@@ -152,14 +154,15 @@ const buildProductionInfos = async (result: any) => {
     })
     return detail;
   })
-   //sort
-   productionDetailsObj.forEach((pd:any)=>{
-    pd.params=pd.params.sort((a: any, b: any) => {
-      let nameA = a.name.toUpperCase(); // 转换为大写以忽略大小写
-      let nameB = b.name.toUpperCase();
-      return nameA.localeCompare(nameB);
-    });
-  });
+  // 在前面使用 sortRequirment 排过序了，这里不需要了
+  //  //sort
+  //  productionDetailsObj.forEach((pd:any)=>{
+  //   pd.params=pd.params.sort((a: any, b: any) => {
+  //     let nameA = a.name.toUpperCase(); // 转换为大写以忽略大小写
+  //     let nameB = b.name.toUpperCase();
+  //     return nameA.localeCompare(nameB);
+  //   });
+  // });
   console.log('productionDetails', productionDetailsObj);
   console.log('laminateInfo', laminateInfo.value);
   productionDetails.value = productionDetailsObj;
@@ -392,7 +395,10 @@ const doPrint = async (planId: any, type: string) => {
   let res = await getPlanPrintInfo(planId).catch((err: any) => {
     proxy?.$modal.closeLoading();
   });
-  let result = res;
+  let result: any = res;
+  (result?.miNodeInfoVoList || []).map((item: any) => {
+    sortRequirment(item?.requirement)
+  })
   console.log('allData', result);
   allData.value = result;
   commodityInfos.value = result.commodityInfos;

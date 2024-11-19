@@ -67,7 +67,7 @@ export const listContractFiles = (id: any): AxiosPromise<FileItemVO> => {
 };
 
 // 上传图片时，获取系统时间，绘制水印
-export const getSystemTime = (params:any) => {
+export const getSystemTime = (params?:any) => {
   return request({
     url: '/auth/getSystemTime',
     method: 'get',
@@ -94,6 +94,15 @@ export const addBatchFile = (data:any) => {
 export const getFileList = (data:any) => {
   return request({
     url: '/system/file/getFileList',
+    method: 'post',
+    data:data
+  });
+};
+
+
+export const getFileListAndOssUrl = (data:any) => {
+  return request({
+    url: '/system/file/getFileListAndOssUrl',
     method: 'post',
     data:data
   });

@@ -58,7 +58,7 @@
               <span style="color: #5D7DB3;">{{scope.row.currentNode?.craftName||""}}</span>
             </template>
             <template #default-scrapRate="scope">
-              {{(scope.row.scrapPcsQuantity / scope.row.bundlePcsQuantity *100).toFixed(2)}}
+              {{ BigNumber(scope.row.scrapPcsQuantity / scope.row.bundlePcsQuantity *100).dp(2)}}
             </template>
             <template #default-make="scope">
               <el-button link type="primary" @click="handleUpdate(scope.row)"
@@ -125,6 +125,14 @@
             <!--              {{(scope.row.bundlePnlQuantity * scope.row.miProductionPlanPnlVo?.pnlWidth *-->
             <!--              scope.row.miProductionPlanPnlVo?.pnlLength / 1000000).toFixed(4)}}-->
             <!--            </template>-->
+            <template #default-productionStatus="scope">
+              <el-tag v-if="scope.row.isSuspend=='1'" type="danger">暂停</el-tag>
+              <span type="primary" v-else>
+                <el-tag v-if="scope.row.isComplete=='1'">已完成</el-tag>
+                <el-tag v-if="scope.row.productionVo?.productionStatus=='10'&&scope.row.isComplete!='1'">未开始</el-tag>
+                <el-tag v-if="scope.row.productionVo?.productionStatus!='10'&&scope.row.isComplete!='1'">进行中</el-tag>
+              </span>
+            </template>
             <template #default-isRemediation="scope">
               <el-tag v-if="scope.row.isRemediation == '是'" type="danger">{{scope.row.isRemediation}}</el-tag>
               <el-tag v-else type="success">{{ scope.row.isRemediation}}</el-tag>
@@ -134,7 +142,7 @@
             <!--              <el-tag v-if="scope.row.isComplete=='1'" type="success">已完成</el-tag>-->
             <!--            </template>-->
             <template #default-scrapRate="scope">
-              {{(scope.row.scrapPcsQuantity / scope.row.bundlePcsQuantity *100).toFixed(2)}}
+              {{BigNumber(scope.row.scrapPcsQuantity / scope.row.bundlePcsQuantity *100).dp(2)}}
             </template>
             <!--            <template #default-bundleCode="scope">-->
             <!--              {{scope.row.bundleCount}}-{{scope.row.bundleCode}}-->
@@ -197,7 +205,7 @@
       </el-tabs>
     </el-card>
     <!-- 调整时间对话框 -->
-    <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px" append-to-body>
+    <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px" >
       <el-form ref="cardFormRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="排产单号：">
           <div>{{form.code}}</div>
@@ -333,39 +341,24 @@
           </div>
           <el-row style="text-align:left;" :gutter="5" class="words">
             <el-divider content-position="left">操作详情</el-divider>
-            <el-table :data="optionList" style="width: 100%">
-              <el-table-column prop="name" label="操作人" width="80"/>
-              <el-table-column prop="type" label="操作类型" width="80"/>
-              <el-table-column prop="quantity" label="操作数量" width="100"/>
-              <el-table-column prop="time" :show-overflow-tooltip="true"  label="操作时间"/>
-            </el-table>
+            <XTable :showHead="false" :pageShow="false" :columnList="columnListMakeDetail" :data="optionList" style="width: 100%">
+            </XTable>
             <el-divider content-position="left">报废记录</el-divider>
-            <el-table :data="scrapList" style="width: 100%">
-              <el-table-column prop="responsible" label="责任人" width="120">
-                <template #default="scope">
+            <XTable :showHead="false" :pageShow="false" :columnList="columnListScrapRecord" :data="scrapList" style="width: 100%">
+                <template #default-responsible="scope">
                   <span v-if="scope.row.type=='1'">{{scope.row.responsibleUserName}}</span>
                   <span v-if="scope.row.type=='2'">{{scope.row.supplierName}}</span>
                 </template>
-              </el-table-column>
-              <el-table-column prop="type" label="报废对象" width="120">
-                <template #default="scope">
+                <template #default-type="scope">
                   {{currentInfo.saleOrderVoList.find(v=>v.id == scope.row.saleOrderId)?.commodityCode}}
                 </template>
-              </el-table-column>
-              <el-table-column prop="createTime" label="报废时间" width="150"/>
-              <el-table-column prop="reasonId" label="报废原因" width="100">
-                <template #default="scope">
+                <template #default-reasonId="scope">
                   {{scrapReasonList.find(v=>v.id ==scope.row.reasonId)?.discardReason}}
                 </template>
-
-              </el-table-column>
-              <el-table-column prop="quantity" label="报废数量" width="100"/>
-              <el-table-column prop="unit" label="报废单位" width="100">
-                <template #default="scope">
+                <template #default-unit="scope">
                   {{unitOption.find(v => v.value == scope.row.unit)?.label}}
                 </template>
-              </el-table-column>
-            </el-table>
+            </XTable>
           </el-row>
         </el-col>
       </el-row>
@@ -459,11 +452,6 @@
 <script setup name="ProductionCard" lang="ts">
   import {
     listCard,
-    getCard,
-    delCard,
-    addCard,
-    updateCard,
-    getPrintOrder,
     getCardSum,
     stopProduction,
     restartProduction,
@@ -472,28 +460,23 @@
     mergeCard
   } from '@/api/production/card';
   import {CardVO, CardQuery, CardForm} from '@/api/production/card/types';
-  import {VxeTableEvents} from 'vxe-table'
   import {
     listCardNode,
     saveCardNode,
     returnCardNode,
-    startCardNode,
-    updateProduction, updateAllNode, getPercentateValue
+    updateProduction, updateAllNode, getPercentateValue, updateProductionCheckPer
   } from "@/api/production/production";
   import {checkPermi} from "@/utils/permission";
   import {deepClone} from "@/utils";
-  import {updateOrder} from "@/api/order/directOrder";
   import {getScrapListByCard} from "@/api/production/scrap";
   import {ref} from "vue";
   import {getListDiscardReason} from "@/api/basedata/discardReason";
   import dayjs from 'dayjs';
   import {getDicts} from "@/api/system/dict/data";
   import {sortBy} from "@/utils/dict";
-  import {savePrediction} from "@/api/project/productionPlan";
-  import { log } from 'console';
-  import {getSumSet} from "@/api/project/assignTask";
   import {getCraftsInProduction} from "@/api/production/cardNode";
   import { Decimal } from 'decimal.js'
+  import { BigNumber } from 'bignumber.js';
 
   const exportVisible = ref(false);
   const countVisible = ref(false);
@@ -578,16 +561,17 @@
   let initQueryParams = {
     pageNum: 1,
     pageSize: 20,
-    isAsc: "desc",
-    orderByColumn: "code",
+    //isAsc: "desc",
+    //orderByColumn: "code",
     isComplete: '0',
+    isSuspend : '0'
   }
 
   let initHistoryQueryParams = {
     pageNum: 1,
     pageSize: 20,
-    isAsc: "desc",
-    orderByColumn: "code",
+    //isAsc: "desc",
+    //orderByColumn: "code",
   }
 
   const data = reactive<PageData<CardForm, CardQuery>>({
@@ -746,7 +730,7 @@
   ]);
 
   const statusOptions = ref([
-    { value: "40", label: "暂停" },
+    //{ value: "40", label: "暂停" },
     { value: "10", label: "未开始" },
     { value: "20", label: "进行中" },
   ])
@@ -790,7 +774,20 @@
     })
     craftOptions.value = craftList;
   }
-
+  const columnListMakeDetail = ref([
+  { width: '80',title: '操作人',field: 'name',align: 'center',  },
+  { width: '80',title: '操作类型',field: 'type',align: 'center',  },
+  { width: '100',title: '操作数量',field: 'quantity',align: 'center',  },
+  { minWidth: '130',title: '操作时间',field: 'time',align: 'center',  },
+  ]);
+  const columnListScrapRecord = ref([
+  { width: '120',title: '责任人',field: 'responsible',align: 'center',  },
+  { width: '120',title: '报废对象',field: 'type',align: 'center',  },
+  { width: '150',title: '报废时间',field: 'createTime',align: 'center',  },
+  { width: '100',title: '报废原因',field: 'reasonId',align: 'center',  },
+  { width: '100',title: '报废数量',field: 'quantity',align: 'center',  },
+  { width: '100',title: '报废单位',field: 'unit',align: 'center',  },
+  ]);
   const recordCondition = ['startTime', 'planStartTime', 'planCompleteTime','createTime'];
   const columnList = ref([
     {title: "序号", type: 'seq',field:'index', fixed: "left", align: 'center', width: '60'},
@@ -963,6 +960,12 @@
       align: 'center',
     },
     {
+      title: '生产面积(PNL)',
+      field: 'pnlArea',
+      width: '100',
+      align: 'center',
+    },
+    {
       title: 'PNL名称',
       field: 'miProductionPlanPnlName',
       width: '100',
@@ -1081,6 +1084,13 @@
     },
     {title: '操作', field: 'make', showOverflow: false, align: 'center', width: '320', fixed: 'right',},
   ]);
+
+  const columnFinfishedStatusOptions = ref([
+    { value: "40", label: "暂停" },
+    { value: "10", label: "未开始" },
+    { value: "20", label: "进行中" },
+    { value: "30", label: "已完成" },
+  ])
   const columnFinfishedList = ref([
     {title: "序号", type: 'seq', fixed: "left",field:'index', align: 'center', width: '60'},
     {
@@ -1091,6 +1101,20 @@
       align: 'center',
       filterType: 'input',
       filterParam: {placeholder: '请输入产品编码'}
+    },
+    {
+      title: '状态',
+      field: 'productionStatus',
+      width: '80',
+      fixed: "left",
+      align: 'center',
+      filterType: 'radioButton',
+      filterParam: {
+        placeholder: '请选择状态',
+      },
+      filterData: () => columnFinfishedStatusOptions.value,
+      filterCustom: {label: 'label', value: 'value'}
+
     },
     // {
     //   title: '状态',
@@ -1227,6 +1251,12 @@
     {
       title: '报废率(%)',
       field: 'scrapRate',
+      width: '100',
+      align: 'center',
+    },
+    {
+      title: '生产面积(PNL)',
+      field: 'pnlArea',
       width: '100',
       align: 'center',
     },
@@ -1429,6 +1459,7 @@
   /** 查询进行中流转卡列表 */
   const getList = async () => {
     loading.value = true;
+    queryParams.value.isSuspend = '0';
     const res = await listCard(queryParams.value);
     cardList.value = res.rows;
     dealData(cardList.value);
@@ -1587,7 +1618,7 @@
       const data = deepClone(row.productionVo);
       data.isFinish = isFinish;
       loading.value = true;
-      updateProduction(data).then(res => {
+      updateProductionCheckPer(data).then(res => {
         ElMessage.success("操作成功");
         loading.value = false;
         type.value == 0 ? getList() : getFinishedList();
@@ -1659,7 +1690,7 @@
       Object.assign(form.value, row.productionVo);
       form.value.startTime = dayjs(new Date()).format("YYYY-MM-DD HH:mm:ss");
       form.value.productionStatus = '20';
-      await updateProduction(form.value)
+      await updateProductionCheckPer(form.value)
       proxy?.$modal.msgSuccess("操作成功");
       type.value == 0 ? getList() : getFinishedList();
     })

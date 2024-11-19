@@ -1,8 +1,8 @@
 <template>
   <div class="p-2 xtable-page">
-    <transition :enter-active-class="proxy?.animate.searchAnimate.enter" :leave-active-class="proxy?.animate.searchAnimate.leave">
-      <div class="search" v-show="showSearch">
-        <el-form :model="mainQueryParams" ref="queryFormRef" :inline="true" label-width="68px">
+    <!-- <transition :enter-active-class="proxy?.animate.searchAnimate.enter" :leave-active-class="proxy?.animate.searchAnimate.leave">
+      <div class="search" v-show="showSearch"> -->
+        <el-form class="global-flex flex-start" :model="mainQueryParams" ref="queryFormRef" :inline="true" label-width="68px">
           <el-form-item label="结存年月" prop="yearMonth">
             <el-date-picker clearable
               v-model="mainQueryParams.yearMonth" type="month"
@@ -14,17 +14,20 @@
             <el-input type="number" v-model="mainQueryParams.version" placeholder="" clearable @keyup.enter="handleQuery" />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-            <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+            <!--  class="flex-grow" style="margin-right: 0;" -->
+            <!-- <div class="global-flex flex-end align-start flex-grow"> -->
+              <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+              <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+            <!-- </div> -->
           </el-form-item>
         </el-form>
-      </div>
-    </transition>
+      <!-- </div>
+    </transition> -->
 
-    <el-card shadow="never" class="xtable-card">
-      <el-tabs type="border-card" v-model="editableTabsValue" @tab-change="getVoidedList()" class="xtable-tab">
+    <!-- <el-card shadow="never" class="xtable-card"> -->
+      <el-tabs v-model="editableTabsValue" @tab-change="getVoidedList()" class="xtable-tab only-one-tab">
       <el-tab-pane label="物料结存" :name="1">
-        <div class="p-2" style="text-align: right;width: 100%">
+        <div class="head-btn-flex">
           <el-button @click="handleImport">导入结存</el-button>
           <el-button :loading="buttonLoading" type="primary" @click="exportExcelBefore">导出</el-button>
         </div>
@@ -43,8 +46,9 @@
                 :row-config="{ keyField:'id' }" >
         </XTable>
       </el-tab-pane>
+      <el-tab-pane label="占位tab" name="占位tab"></el-tab-pane>
       </el-tabs>
-    </el-card>
+    <!-- </el-card> -->
 
     <el-dialog
         v-model="exportVisible"
@@ -112,20 +116,23 @@
 
     <el-dialog :title="upload.title" v-model="upload.open" width="550px">
       <el-row>
-        <el-form-item label="结存年月" prop="yearMonth">
-          <el-date-picker
-          v-model="upload.yearMonth" type="month" value-format="YYYY-MM" :disabled-date="disabledDate"
-          placeholder="请选择年月" style="width: 100%" :clearable="false"
-        />
-          </el-form-item>
+        <el-form-item label="结存时间节点" prop="yearMonth">
+          <el-date-picker v-model="upload.yearMonth" type="datetime" placeholder="请选择结存时间" style="width: 100%" :clearable="false"/>
+        </el-form-item>
       </el-row>
-      
+      <div class="el-upload__tip">
+        <span>提示：请按照实际情况录入结存时间节点。例如：时间节点选择2024-04-01 00:00:00（结存月份会按照结存时间前一秒所在月份显示，即2024-04-01 00:00:00的结存月份为2024-03），导入结存后，后续物料的平均单价均以此时间之后的进出库记录计算。</span>
+      </div>
+      <div class="el-upload__tip">
+        <span> </span>
+      </div>
+
       <el-upload
         ref="uploadRef"
         :limit="1"
         accept=".xlsx, .xls"
         :headers="upload.headers"
-        :action="upload.url + '?yearMonth=' + upload.yearMonth"
+        :action="upload.url + '?yearMonth=' + dayjs(upload.yearMonth).format('YYYY-MM-DD HH:mm:ss')"
         :disabled="upload.isUploading"
         :on-progress="handleFileUploadProgress"
         :on-success="handleFileSuccess"
@@ -140,15 +147,11 @@
           </div>
         </template>
       </el-upload>
-      <el-table :data="tableData" style="width: 100%" border>
-        <el-table-column prop="seq" label="序号" width="50" />
-        <el-table-column prop="name" label="重要列名" width="120" />
-        <el-table-column prop="remark" label="说明" width="350">
-          <template #default="scope">
+      <XTable :showHead="false" :pageShow="false" :columnList="columnListExport" :data="tableData" style="width: 100%">
+          <template #default-remark="scope">
            <span style="color:red">【必填项】</span> {{ scope.row.remark }}
           </template>
-        </el-table-column>
-      </el-table>
+      </XTable>
       <template #footer>
         <div class="dialog-footer">
           <el-button type="primary" @click="submitFileForm">确 定</el-button>
@@ -181,9 +184,9 @@ import dayjs from "dayjs";
 
   /*** 导入参数 */
 const upload = reactive<ImportOption>({
-  // 是否显示弹出层 
+  // 是否显示弹出层
   open: false,
-  // 弹出层标题 
+  // 弹出层标题
   title: "",
   // 是否禁用上传
   isUploading: false,
@@ -319,7 +322,11 @@ const mainData = reactive<PageData<MaterialMonthInventoryForm, MaterialMonthInve
 });
 
 const XTableRef = ref()
-
+const columnListExport = ref([
+{ width: '50',title: '序号',field: 'seq',align: 'center',  },
+{ width: '120',title: '重要列名',field: 'name',align: 'center',  },
+{ minWidth: '345',title: '说明',field: 'remark',align: 'center',  },
+]);
 const columnList = ref([
 
   {title: "序号", type: 'seq', align: 'center', field: 'index', width: '60'},
@@ -370,7 +377,7 @@ const searchChange = (params: any) => {
 
     //删除原本不属于queryParams的属性
     for (const key in queryParams.value) {
-      if (queryParamsCopy && queryParamsCopy.value && typeof queryParamsCopy.value === 'object' 
+      if (queryParamsCopy && queryParamsCopy.value && typeof queryParamsCopy.value === 'object'
         && !queryParamsCopy.value.hasOwnProperty(key)) {
         delete queryParams.value[key];
       }

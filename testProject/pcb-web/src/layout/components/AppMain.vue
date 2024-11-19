@@ -40,9 +40,13 @@ watch(()=> useSettingsStore().animationEnable, (val) => {
   width: 100%;
   position: relative;
   overflow: hidden;
+  padding: 8px 8px 0 !important;
+  // background: #f2f3f5;
+  box-sizing: border-box;
 
   & > .p-2 {
     height: 100%;
+    padding: 0;
     overflow-y: auto;
   }
 }
@@ -53,12 +57,12 @@ watch(()=> useSettingsStore().animationEnable, (val) => {
 
 .hasTagsView {
   .app-main {
-    /* 84 = navbar + tags-view = 50 + 34 */
-    height: calc(100vh - 84px);
+    /* 76 = navbar + tags-view = 24 + 40 */
+    height: calc(100vh - 64px);
   }
 
   .fixed-header+.app-main {
-    padding-top: 84px;
+    padding-top: 64px;
   }
 }
 </style>
@@ -71,16 +75,16 @@ watch(()=> useSettingsStore().animationEnable, (val) => {
 }
 
 ::-webkit-scrollbar {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: #f1f1f1;
+  background-color: #ffffff;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #c0c0c0;
-  border-radius: 12px;
+  background-color: #E9E9E9;
+  border-radius: 3px;
 }
 </style>

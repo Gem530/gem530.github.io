@@ -50,7 +50,7 @@
       </el-col>
     </el-row>
   </el-form>
-  <div class="text-center" style="margin-top: 10px">
+  <div class="text-right" style="margin-top: 10px">
     <el-button type="primary" @click="submitForm(formRef)" :loading="submitLoading">确 定</el-button>
     <el-button @click="cancel" :loading="submitLoading">关 闭</el-button>
   </div>

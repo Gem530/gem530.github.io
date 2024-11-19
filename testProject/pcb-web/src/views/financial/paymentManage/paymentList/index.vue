@@ -105,15 +105,16 @@
         border :showRefresh="true"
         @searchChange="searchChange"
         :column-config="{ resizable: true }"
+        ref="XTableRef"
       >
         <template #default-payCode="scope">
           <span>{{ scope.row.payCode?scope.row.payCode:'--' }}</span>
         </template>
         <template #default-transferredAmount="scope">
-          <span>{{ scope.row.transferredAmount==='0.0000'?'':Number(scope.row.transferredAmount).toFixed(2) }}</span>
+          <span>{{ scope.row.transferredAmount==='0.0000'?'':Number(parseFloat(scope.row.transferredAmount).toString()) }}</span>
         </template>
         <template #default-totalPrice="scope">
-          <span>{{ scope.row.totalPrice?Number(scope.row.totalPrice).toFixed(2):'0.00' }}</span>
+          <span>{{ scope.row.totalPrice?Number(parseFloat(scope.row.totalPrice).toString()):'0' }}</span>
         </template>
 
         <template #default-status="scope">
@@ -131,7 +132,11 @@
           <dict-tag :options="optionPayWayList" :value="scope.row.payWay" />
         </template>
         <template #default-payAccount="scope">
-          <dict-tag :options="payAccountList" :value="scope.row.payAccount" />
+          <span v-if="['1','2'].includes(scope.row.payWay)">--</span>
+          <dict-tag
+            v-if="!['1','2'].includes(scope.row.payWay)&&payAccountList&&payAccountList.length>0&&payAccountList.find((vo:any) => vo.id == scope.row.payAccount)"
+            :options="payAccountList" :value="scope.row.payAccount"
+          />
         </template>
         <template #default-createTime="scope">
           <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
@@ -238,15 +243,11 @@
           </div>
         </template>
       </el-upload>
-      <el-table :data="tableData" style="width: 100%" border>
-        <el-table-column prop="seq" label="序号" width="50" />
-        <el-table-column prop="name" label="重要列名" width="120" />
-        <el-table-column prop="remark" label="说明" width="350">
-          <template #default="scope">
-           <span style="color:red">【必填项】</span> {{ scope.row.remark }}
-          </template>
-        </el-table-column>
-      </el-table>
+      <XTable :pageShow="false" :showHead="false" :columnList="columnListPaymentHistory" :data="tableData" style="width: 100%">
+        <template #default-remark="scope">
+          <span style="color:red">【必填项】</span> {{ scope.row.remark }}
+        </template>
+      </XTable>
       <template #footer>
         <div class="dialog-footer">
           <el-button type="primary" @click="submitFileForm">确 定</el-button>
@@ -266,36 +267,24 @@
     getRepaymentRecord,
     delRepaymentRecord,
     addPaymentRecord,
-    getWriteOffAllListByPayId,
     queryPayRecordListByCustSup,
     updateRepaymentRecord,
-    updatePaymentStatus,
-    uploadReceipt,
     submitPaymentAccount,
     getPaymentAccountList,
-    approvePaymentAccount,
-    rejectPaymentAccount,
     reUpdatePaymentAccount,
     addSubmitPaymentWriteOff,
     deletePaymentAccount,
-    validatePaymentAccount,
-    validatePaymentAccountDetail
+    validatePaymentAccountDetail, rejectPaymentCheckPer, approvePaymentCheckPer
   } from '@/api/financial/repaymentRecord';
-import { RepaymentRecordVO, RepaymentRecordQuery, RepaymentRecordForm , InvoiceQuery, InvoiceForm } from '@/api/financial/repaymentRecord/types';
+import { RepaymentRecordVO, RepaymentRecordForm , InvoiceForm } from '@/api/financial/repaymentRecord/types';
 import { InvoiceVO} from "@/api/financial/invoice/types";
 import { listOwnerSupplier } from '@/api/basedata/supplier';
-import { listInvoice } from "@/api/financial/invoice";
-import { VxeTableInstance, VxeTableEvents } from 'vxe-table'
-import { OssForm, OssQuery, OssVO } from "@/api/system/oss/types";
-import { SupplierVO } from "@/api/basedata/supplier/types";
 import { OrderWriteOffRecordVO } from '@/api/financial/orderWriteOffRecord/types';
-import { listDept } from "@/api/system/dept";
 import { listCompany } from '@/api/basedata/customer';
 import { deepClone } from '@/utils';
 import {ref} from "vue";
 import {AccountOrderForm, AccountOrderQuery, AccountOrderVO} from "@/api/financial/accountOrder/types";
 import {getAccountOrder} from "@/api/financial/accountOrder";
-import { BigNumber } from 'bignumber.js';
 import {parseTime} from "@/utils/ruoyi";
 import { listOrderBack } from '@/api/order/orderBack/index';
 import {
@@ -317,6 +306,8 @@ import {OrderFilinOutDetailForm, OrderFilinOutDetailQuery} from "@/api/financial
 
 import { globalHeaders } from "@/utils/request";
 import dayjs from "dayjs";
+import { decryptBase64ByStr } from '@/utils/crypto'
+import { listDeptBank } from "@/api/system/dept"
 
 let customerList:any = [];
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
@@ -386,14 +377,14 @@ const payWayList = ref([
 {label: '委托书', value: '10', elTagType: 'default', elTagClass: ''},
 ]);
 
-const payAccountList = ref([
-  {label: '中国工商银行信丰县支行', value: '1',bankNo:'1510201009000106395',account:'，行号：102428410247',type:'基本户，'},
-  {label: '江西信丰农村商业银行股份有限公司', value: '2',bankNo:'134649700000002476',account:'，行号：402428499993',type:'一般户，'},
-  {label: '赣州银行信丰支行', value: '3',bankNo:'2863000103000000896',account:'，行号：313428428636',type:'一般户，'},
-  {label: 'The Hongkong and Shanghai Banking Corporation Limited', value: '4',bankNo:'053-484846-838',account:'，编号：004,代码：HSBCHKHHHKH',type:'香港公司美金账户，'},
-  // {label: '企业微信', value: '5',account:'',bankNo:'1647640640',type:''},
-  // {label: '企业支付宝', value: '6',account:'',bankNo:'jx13316990051@sina.com',type:''},
-]);
+// const payAccountList = ref([
+//   {label: '中国工商银行信丰县支行', value: '1',bankNo:'1510201009000106395',account:'，行号：102428410247',type:'基本户，'},
+//   {label: '江西信丰农村商业银行股份有限公司', value: '2',bankNo:'134649700000002476',account:'，行号：402428499993',type:'一般户，'},
+//   {label: '赣州银行信丰支行', value: '3',bankNo:'2863000103000000896',account:'，行号：313428428636',type:'一般户，'},
+//   {label: 'The Hongkong and Shanghai Banking Corporation Limited', value: '4',bankNo:'053-484846-838',account:'，编号：004,代码：HSBCHKHHHKH',type:'香港公司美金账户，'},
+//   // {label: '企业微信', value: '5',account:'',bankNo:'1647640640',type:''},
+//   // {label: '企业支付宝', value: '6',account:'',bankNo:'jx13316990051@sina.com',type:''},
+// ]);
 
 // 文件 列表
 const fileList = ref([
@@ -432,6 +423,21 @@ const columnList = ref([
   { title: '操作', field: 'make',  align: 'center', fixed: 'right', width: '220' },
 ])
 
+const columnListPaymentHistory = ref([
+{ width: '50',title: '序号',field: 'seq',align: 'center',  },
+{ width: '120',title: '重要列名',field: 'name',align: 'center',  },
+{ maxWidth: '350',title: '说明',field: 'remark',align: 'center',  },
+]);
+const XTableRef = ref();
+const route = useRoute();
+/**
+ * 进入页面次数
+ */
+const isFirst = ref(0)
+/**
+ * 待办跳转参数
+ */
+const pendingParams = ref()
 
 const recordList = ref<OrderWriteOffRecordVO[]>([]);
   // 获取 搜索条件
@@ -634,7 +640,7 @@ const paymentId = ref<number|string>("");
         getList();
       })
     } else {
-      submitPaymentAccount({id: row.id}).then(res => {
+      submitPaymentAccount({id: row.id, isSup: false}).then(res => {
         proxy?.$modal.msgSuccess("操作成功");
         getList();
         paymentTable.visible = false;
@@ -657,9 +663,9 @@ const submit = (row: any) => {
 }
 
   /*审核通过*/
-  const submitPass = (id: any) => {
+  const submitPass = (id: any, isSup: boolean) => {
     buttonLoading.value = true;
-    approvePaymentAccount({id: id}).then(res => {
+    approvePaymentCheckPer({id: id, isSup: isSup}).then(res => {
       proxy?.$modal.msgSuccess("操作成功");
       paymentTable.visible = false;
       getList();
@@ -671,7 +677,7 @@ const submit = (row: any) => {
   /*审核驳回*/
   const submitReject = (id: any) => {
     buttonLoading.value = true;
-    rejectPaymentAccount(id).then(res => {
+    rejectPaymentCheckPer(id).then(res => {
       proxy?.$modal.msgSuccess("操作成功");
       paymentTable.visible = false;
       getList();
@@ -1582,11 +1588,43 @@ function submitFileForm() {
   proxy?.$modal.loading("正在上传");
   uploadRef.value?.submit();
 }
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      queryParams.value.code = params.bizNo
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
+
+const payAccountList = ref();
+const getAccountTableData = async () => {
+  const bank = await listDeptBank();
+  payAccountList.value =  deepClone( bank.data);
+  if(payAccountList.value&&payAccountList.value.length>0){
+    payAccountList.value.forEach(item=>{
+      item.value=item.id;
+    })
+  }
+  console.log("...............payAccountList.value",payAccountList.value);
+}
 
 onMounted(() => {
   getList();
   getSupplierList();
   getCustomerList();
+  getAccountTableData();
 });
 </script>
 

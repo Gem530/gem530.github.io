@@ -284,11 +284,8 @@
     <el-dialog v-model="relatedInvoiceDialog.visible" :title="relatedInvoiceDialog.title" width="90%" draggable>
       <el-row>
         <el-col :span="6">
-          <el-table size="small" :data="selectInvoiceVOList" height="470" :border="true">
-            <el-table-column property="code" fixed />
-            <el-table-column v-show="false" property="amount" label="已选发票" />
-            <el-table-column align="center">
-              <template #default="scope">
+          <XTable :pageShow="false" :columnList="columnListChooseInvoice" :data="selectInvoiceVOList" height="440" :border="true">
+              <template #default-make="scope">
                 <el-tooltip content="删除" placement="top">
                   <el-button
                     link
@@ -299,8 +296,7 @@
                   ></el-button>
                 </el-tooltip>
               </template>
-            </el-table-column>
-          </el-table>
+          </XTable>
         </el-col>
         <el-col :span="18">
           <XTable
@@ -404,7 +400,7 @@ const dialogOSS = reactive<DialogOption>({
 });
 
 const relatedInvoiceDialog = reactive<DialogOption>({
-  visible: false,
+  visible: true,
   title: ''
 });
 
@@ -529,6 +525,11 @@ const paymentColumnList = ref([
     { width: '120', title: '对账单号', field: 'accountOrderCode', align: 'center', },
     { width: '100', title: '对账日期', field: 'accountTime', align: 'center', },
     {               title: '备注', field: 'remark', align: 'center', },
+]);
+const columnListChooseInvoice = ref([
+{ title: '',field: 'code',align: 'center', },
+{ title: '已选发票',field: 'amount',align: 'center',  },
+{ title: '',field: 'make',align: 'center',  },
 ]);
 // 上传文件
 const craftFileChange = (val:any) => {

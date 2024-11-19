@@ -61,6 +61,15 @@ export const getSourceHalfProcessOrder = (id: string | number): AxiosPromise<Sou
   });
 };
 /**
+ * 查询外协加工收货记录详细
+ */
+export const getSourceHalfProcessOrderByCode = (code: any) => {
+  return request({
+    url: '/outsource/sourceHalfProcessReceive/orderByCode/' + code,
+    method: 'get'
+  });
+};
+/**
  * 供应商发货单处 --> 通过工序外协单id查询单位数据
  * @param id 工序外协单id
  * @param deliveryId 需要过滤的发货单id
@@ -80,6 +89,18 @@ export const getDeliveryUnit = (id: string | number,deliveryId: string | number)
 export const addSourceHalfProcessReceive = (data: SourceHalfProcessReceiveForm) => {
   return request({
     url: '/outsource/sourceHalfProcessReceive/add',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
+ * 批量新增外协加工收货记录
+ * @param data
+ */
+export const addBatchSourceHalfProcessReceive = (data: any) => {
+  return request({
+    url: '/outsource/sourceHalfProcessReceive/addBatch',
     method: 'post',
     data: data
   });

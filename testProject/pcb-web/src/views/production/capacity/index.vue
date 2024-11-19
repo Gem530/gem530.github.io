@@ -86,7 +86,7 @@
         </XTable>
     </el-card>
     <!-- 添加或修改个人产能上报记录对话框 -->
-    <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px" append-to-body>
+    <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px" >
       <el-form ref="capacityFormRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="单位ID" prop="ownerId">
           <el-input v-model="form.ownerId" placeholder="请输入单位ID" />

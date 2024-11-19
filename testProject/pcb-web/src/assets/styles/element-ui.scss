@@ -65,9 +65,9 @@
     .el-dialog {
       margin: 0 auto !important;
 
-      .el-dialog__body {
-        padding: 15px !important;
-      }
+      // .el-dialog__body {
+      //   padding: 15px !important;
+      // }
     }
   }
 }
@@ -113,4 +113,30 @@
 
 .el-dropdown .el-dropdown-link {
   color: var(--el-color-primary) !important;
+}
+
+// el-badge 徽标
+.el-badge {
+  .el-badge__content {
+    top: 13px !important;
+    right: calc(-3px + var(--el-badge-size) / 2) !important;
+    // left: 3px;
+    // transform: translate(-100%,-50%) !important;
+    max-width: 27px;
+    height: 14px;
+    border: none !important;
+    border-radius: 14px;
+    font-size: 12px;
+    line-height: 14px;
+    padding: 0 3px 0 4px;
+
+    &.is-dot {
+      top: 14px !important;
+      // right: auto !important;
+      // left: 0px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+  }
 }

@@ -35,6 +35,7 @@ export interface RoleQuery extends PageQuery {
   roleName: string;
   roleKey: string;
   status: string;
+  ownerId: string;
 }
 
 export interface RoleForm {
@@ -48,6 +49,7 @@ export interface RoleForm {
   remark: string;
   dataScope?: string;
   roleId: string | undefined;
+  ownerId: string | undefined;
   menuIds: Array<string | number>;
   deptIds: Array<string | number>;
 }

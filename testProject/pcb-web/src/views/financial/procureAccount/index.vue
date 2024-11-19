@@ -1,11 +1,11 @@
 <template>
   <div class="p-2 xtable-page">
-    <supplierAccountTable
+    <supplierAccountTable2 v-if="checkPermi(['financial:procureAccount:listView'])"
       ref="accountTableRef"
       :writeOffType="writeOffType"
       :tableColumnList="columnList"
-      :tableColumnList1="columnList1"
-      :tableColumnList2="columnList2"
+      :tableColumnList1="columnList"
+      :tableColumnList2="columnList"
       toolId1="purAccountToolId1"
       toolId2="purAccountToolId12"
       toolId3="purAccountToolId13"
@@ -21,69 +21,469 @@
     />
 
     <el-drawer v-model="drawerBorrow.visible" :title="drawerBorrow.title" size="90%" draggable destroy-on-close modal-class="padding-drawer">
-      <!-- <div class="ptable-card"> -->
-      <el-card shadow="never" class="ptable-card">
-        <accountForm
-          ref="accountFormRef"
-          v-if="drawerBorrow.visible"
-          :row="formInfo"
-          :showCategorySelect="showCategorySelect"
-          :showCurrency="true"
-          :showSupplierSelect="true"
-          :showCustomerSelect="false"
-          @handleSearch="handleInOrOutQuery"
-          :type="formType"
-          :isEdit="isEdit"
-        />
-        <RawAccountTabSupplier
-          tabToolId1="supProcureToolId1"
-          tabToolId2="supProcureToolId2"
-          ref="rawAccountTabRef"
-          :allData="allData"
-          :tabColumnList="tabColumnList"
-          :editOtherList="tabOtherList"
-          :tabQuantity1="2"
-          :tabName1="'送货单'"
-          :tabName2="'退货单'"
-          :tabName3="true"
-          :drawerBorrow="drawerBorrow"
-          :tabColumnList2="backTabColumnList"
-          @getCheckFunction="false"
-          @refreshFunction="deliverSearchChange"
-          :footLabel="footLabel"
-          :tabFormRef="accountFormRef"
-          :isEdit="isEdit"
-          :deduction="true"
-          :otherAmountBtn="true"
-          :supplierQuery="supplierQuery"
-          @doSaveBack="doSave"
-          :row="formInfo"
-        />
-      </el-card>
+      <template #header="{ close, titleId, titleClass }">
+        <h4 :id="titleId" :class="titleClass">
+          {{drawerBorrow.title}}
+          <el-tag type="primary" style="margin-left:5px" v-if="purAccountForm&&purAccountForm.supplierSwitch=='1'">协同</el-tag>
+          <el-tag type="primary" style="margin-left:5px" v-if="purAccountForm&&purAccountForm.supplierSwitch=='0'">普通</el-tag>
+          <el-tag type="danger" style="margin-left:5px" v-if="purAccountForm&&purAccountForm.accountStatus=='1'">未对账</el-tag>
+          <el-tag type="success" style="margin-left:5px" v-if="purAccountForm&&purAccountForm.accountStatus=='2'">对账完成</el-tag>
+          <el-tag type="warning" style="margin-left:5px" v-if="purAccountForm&&purAccountForm.accountStatus=='9'">调整中</el-tag>
+        </h4>
+      </template>
+
+      <div >
+      <el-form style="width:100%" v-if="drawerBorrow.title?.includes('采购对账确认')||drawerBorrow.title?.includes('申请修改')" label-width="110px" label-position="right">
+        <el-row>
+          <el-col :span="6">
+            <el-form-item size="small" label="对账单号:" >
+              <span>{{purAccountForm.code}}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item size="small" label="供应商名称:" >
+              <span>{{supplierForm&&supplierForm.supplierName}}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item size="small" label="对账月份:" >
+              <span>{{purAccountForm.accountMonth}}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item size="small" label="账单周期:" >
+              <span>{{purAccountForm.accountPeriod}}</span>
+            </el-form-item>
+          </el-col>
+
+        </el-row>
+        <el-row>
+          <el-col :span="6">
+            <el-form-item size="small" label="付款截止日:" >
+              <el-date-picker v-model="purAccountForm.endTime" style="width: 100%;" type="date" placeholder="选择日期时间"
+                  value-format="YYYY-MM-DD 23:59:59"  :disabled="drawerBorrow.title?.includes('申请修改')" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item size="small" label="是否含税:" >
+              <span>{{purAccountForm.isTax=='1'?'是':'否'}}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item size="small" label="备注:" >
+              <el-input v-model="purAccountForm.remark" :disabled="drawerBorrow.title?.includes('申请修改')"
+              maxLength="1000" :rows="2" type="textarea" placeholder="请输入备注" />
+            </el-form-item>
+          </el-col>
+
+        </el-row>
+      </el-form>
+
+
+      <el-form  style="width:100%" v-if="drawerBorrow.title?.includes('详情')" label-width="150px" label-position="right">
+        <el-row>
+          <el-col :span="12">
+            <el-form-item size="small" label="供应商名称" >
+              <span>{{supplierForm&&supplierForm.supplierName}}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item size="small" label="结算方式" >
+              <span>{{purAccountForm.monthlyMethod}}</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item size="small" label="对账月份" >
+              <span>{{purAccountForm.accountMonth}}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item size="small" label="账单周期" >
+              <span>{{purAccountForm.accountPeriod}}</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+
+      <el-collapse v-if="drawerBorrow.title?.includes('申请修改')" v-model="activeNames">
+        <el-collapse-item title="账单明细" name="账单明细">
+          <template #title>
+            <span style="color: #5b7ebe;font-size: 16px;font-weight: bold;">账单明细</span>
+          </template>
+          <RawAccountTabSupplierV2
+            tabToolId1="supProcureToolId1"
+            tabToolId2="supProcureToolId2"
+            ref="rawAccountTabRef"
+            :allData="allData"
+            :tabColumnList="changeTabColumnList"
+            :editOtherList="tabOtherList"
+            :tabQuantity1="2"
+            :tabName1="'采购送货'"
+            :tabName2="'采购退货'"
+            :tabName4="'申请记录'"
+            :drawerBorrow="drawerBorrow"
+            :tabColumnList2="changeBackTabColumnList"
+            :tabColumnList4="adjustColumnList2"
+            @getCheckFunction="false"
+            @refreshFunction1="deliverSearchChange1"
+            @refreshFunction2="deliverSearchChange2"
+            @refreshFunction3="deliverSearchChange3"
+            @refreshFunction4="deliverSearchChange44"
+            :footLabel="footLabel"
+            :tabFormRef="accountFormRef"
+            :isEdit="isEdit"
+            :deduction="true"
+            :otherAmountBtn="true"
+            :supplierQuery="supplierQuery"
+            @doSaveBack="doSave"
+            :row="formInfo"
+          />
+        </el-collapse-item>
+      </el-collapse>
+
+
+      <el-collapse v-if="drawerBorrow.title?.includes('采购对账确认')"  v-model="activeNames">
+        <el-collapse-item title="账单明细" name="账单明细">
+          <template #title>
+            <span style="color: #5b7ebe;font-size: 16px;font-weight: bold;">账单明细</span>
+          </template>
+          <RawAccountTabSupplierV2
+            tabToolId1="supProcureToolId1"
+            tabToolId2="supProcureToolId2"
+            ref="rawAccountTabRef"
+            :allData="allData"
+            :tabColumnList="tabColumnList"
+            :editOtherList="tabOtherList"
+            :tabQuantity1="2"
+            :tabName1="'采购送货'"
+            :tabName2="'采购退货'"
+            :tabName3="'扣款单'"
+            :tabName4="'调整记录'"
+            :drawerBorrow="drawerBorrow"
+            :tabColumnList2="backTabColumnList"
+            @getCheckFunction="false"
+            @refreshFunction1="deliverSearchChange1"
+            @refreshFunction2="deliverSearchChange2"
+            @refreshFunction3="deliverSearchChange3"
+            @refreshFunction4="deliverSearchChange4"
+            :footLabel="footLabel"
+            :tabFormRef="accountFormRef"
+            :isEdit="isEdit"
+            :deduction="true"
+            :otherAmountBtn="true"
+            :supplierQuery="supplierQuery"
+            @doSaveBack="doSave"
+            :row="formInfo"
+            :deductionSupplierName="supplierForm?.supplierName"
+          />
+        </el-collapse-item>
+        <el-collapse-item title="凭证信息" name="凭证信息">
+          <el-row>
+            <XUpload   model="download" :show-file-list="false"
+               @fileChange="fileChange"></XUpload>
+          </el-row>
+          <XTable  :pageShow="false"
+                  class="xtable-content" :loading="fileLoading" :data="purAccountForm.fileList" :show-footer="false"
+                  :columnList="fileColumnList" ref="fileleteTableRef1" border :column-config="{ resizable: true }"
+                  :row-config="{ keyField: 'id' }" :page-params="{ perfect: true,  }">
+              <template #default-fileName="scope">
+                <XUpload v-model:model-value="scope.row" model="download" :limit="1" readOnly></XUpload>
+              </template>
+              <template #default-src="scope">
+                <ImagePreview
+                  v-if="scope.row"
+                  :width="100"
+                  :height="100"
+                  :src="scope.row.url"
+                  :type="scope.row.type"
+                  :preview-src-list="[scope.row.url]"
+                />
+              </template>
+              <template #default-make="scope">
+                <el-button link type="primary" @click="downLoadHandle(scope.row.key)">下载</el-button>
+                <el-button link type="primary" v-if="scope.row.createByName.includes('需方')" @click="delFile(scope.row.id)">删除</el-button>
+              </template>
+          </XTable>
+        </el-collapse-item>
+      </el-collapse>
+
+
+        <el-tabs v-if="drawerBorrow.title?.includes('详情')" @tab-change="void(0)" v-model="radioTable">
+          <el-tab-pane label="基本信息" name="基本信息">
+            <el-row style="width: 100%;height: 100%;overflow-y: auto;" >
+              <el-col :span="15">
+                <el-card style="height: 100%;">
+                  <el-form  label-width="150px" label-position="right">
+                    <el-row>
+                      <el-col :span="12">
+                        <el-form-item size="small" label="对账单号" >
+                          <span>{{purAccountForm.code}}</span>
+                        </el-form-item>
+                      </el-col>
+                      <el-col :span="12">
+                        <el-form-item size="small" label="出账日" >
+                          <span>{{purAccountForm.accountDay}}</span>
+                        </el-form-item>
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="12">
+                        <el-form-item size="small" label="对账完成日">
+                            <span>{{ parseTime(purAccountForm.accountCompleteTime, '{y}-{m}-{d}')}}</span>
+                        </el-form-item>
+                      </el-col>
+                      <el-col :span="12">
+                        <el-form-item size="small" label="付款截止日">
+                          <span>{{ parseTime(purAccountForm.endTime, '{y}-{m}-{d}')}}</span>
+                        </el-form-item>
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="12">
+                        <el-form-item size="small" label="是否含税">
+                          <span>{{purAccountForm.isTax=='1'?'是':'否'}}</span>
+                        </el-form-item>
+                      </el-col>
+                      <el-col :span="12">
+                        <el-form-item size="small" label="币种" >
+                          <span>{{supplierForm.currency}}</span>
+                        </el-form-item>
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="12">
+                        <el-form-item size="small" label="账单金额(元)" prop="accountDay">
+                          <span>{{purAccountForm.payPayablePrice}}</span>
+                        </el-form-item>
+                      </el-col>
+                      <el-col :span="12">
+                        <el-form-item size="small" label="采购收货金额(元)" prop="accountPeriod">
+                          <span>{{purAccountForm.accountPrice}}</span>
+                        </el-form-item>
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="12">
+                        <el-form-item size="small" label="采购退货金额(元)" prop="accountDay">
+                          <span>{{purAccountForm.backPrice}}</span>
+                        </el-form-item>
+                      </el-col>
+                      <el-col :span="12">
+                        <el-form-item size="small" label="扣款金额(元)" prop="accountPeriod">
+                          <span>{{purAccountForm.otherPrice}}</span>
+                        </el-form-item>
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="12">
+                        <el-form-item size="small" label="应付金额(元)" prop="accountDay">
+                          <span>{{purAccountForm.payPayablePrice}}</span>
+                        </el-form-item>
+                      </el-col>
+                      <el-col :span="12">
+                        <el-form-item size="small" label="已付金额(元)" prop="accountPeriod">
+                          <span>{{purAccountForm.payWriteOffPrice}}</span>
+                        </el-form-item>
+                      </el-col>
+                    </el-row>
+                    <el-row>
+                      <el-col :span="12">
+                        <el-form-item size="small" label="未付金额(元)" prop="accountDay">
+                          <span>{{purAccountForm.payRemainPrice}}</span>
+                        </el-form-item>
+                      </el-col>
+                    </el-row>
+
+                  </el-form>
+                </el-card>
+              </el-col>
+              <el-col :span="8"  style="margin-left: 5px;">
+                <el-form label-width="90px" label-position="right">
+                  <el-card style="height: 100%;">
+                    <el-row ><span style="color:#4b6da0;font-weight: bold;">供应商资料</span></el-row>
+                    <el-form-item size="small" label="供应商名称" >
+                      <span>{{supplierForm.supplierName}}</span>
+                    </el-form-item>
+                    <el-form-item size="small" label="供应商编码" >
+                      <span>{{supplierForm.supplierCode}}</span>
+                    </el-form-item>
+                    <el-form-item size="small" label="出账日" >
+                      <span>{{'每月'+supplierForm.accountDay+'日'}}</span>
+                    </el-form-item>
+                    <el-form-item size="small" label="账单周期" >
+                      <span>{{supplierForm.accountPeriod}}</span>
+                    </el-form-item>
+                    <el-form-item size="small" label="纳税人识别号" >
+                      <span>{{supplierForm.taxpayerIdentification}}</span>
+                    </el-form-item>
+                    <el-form-item size="small" label="可供物料" >
+                      <span>{{ categorys.filter(c=>supplierForm?.categoryIds.includes(c.id)).map(c => c.name).join(",")}}</span>
+                    </el-form-item>
+                    <el-form-item size="small" label="可做工艺" >
+                      <span>{{ craftListVos.filter(c=>supplierForm?.craftIds.includes(c.id)).map(c => c.craftName).join(",")}}</span>
+                    </el-form-item>
+                    <el-form-item size="small" style="flex: 1;" label="供应商负责人" prop="isTax">
+                      <span>{{supplierForm.companyManager}}</span>
+                    </el-form-item>
+                    <el-form-item size="small" label="负责人电话" >
+                      <span>{{supplierForm.companyManagerPhone}}</span>
+                    </el-form-item>
+                    <el-form-item size="small" label="公司电话" >
+                      <span>{{supplierForm.companyPhone}}</span>
+                    </el-form-item>
+                    <el-form-item size="small" label="公司地址" >
+                      <span>{{supplierForm.companyAddress}}</span>
+                    </el-form-item>
+                    <el-form-item size="small" label="结算方式" >
+                      <span>{{supplierForm.monthlyMethod}}</span>
+                    </el-form-item>
+                    <el-form-item size="small" label="是否含税" >
+                      <span>{{supplierForm.isTax=='1'?'是':'否'}}</span>
+                    </el-form-item>
+                    <el-form-item size="small" label="币种" >
+                      <span>{{supplierForm.currency}}</span>
+                    </el-form-item>
+                    <el-form-item size="small" label="供应商类型" >
+                      <span>{{ types.filter(c=>supplierForm?.type.includes(c.value)).map(c => c.label).join(",")}}</span>
+                    </el-form-item>
+                    <el-form-item size="small" label="开启协同模块" >
+                      <span>{{ modules.filter(c=>supplierForm?.module.includes(c.value)).map(c => c.label).join(",")}}</span>
+                    </el-form-item>
+
+                  </el-card>
+                </el-form>
+              </el-col>
+            </el-row>
+
+          </el-tab-pane>
+          <el-tab-pane label="对账明细" name="对账明细">
+            <RawAccountTabSupplierV2
+              tabToolId1="supProcureToolId1"
+              tabToolId2="supProcureToolId2"
+              ref="rawAccountTabRef"
+              :allData="allData"
+              :tabColumnList="tabColumnList"
+              :tabColumnList2="backTabColumnList"
+              :editOtherList="tabOtherList"
+              :tabQuantity1="2"
+              :tabName1="'采购收货'"
+              :tabName2="'采购退货'"
+              :tabName3="'扣款单'"
+              :tabName4="'调整记录'"
+              :drawerBorrow="drawerBorrow"
+              @getCheckFunction="false"
+              @refreshFunction1="deliverSearchChange1"
+              @refreshFunction2="deliverSearchChange2"
+              @refreshFunction3="deliverSearchChange3"
+              @refreshFunction4="deliverSearchChange4"
+              :footLabel="footLabel"
+              :tabFormRef="accountFormRef"
+              :isEdit="isEdit"
+              :deduction="true"
+              :otherAmountBtn="true"
+              :supplierQuery="supplierQuery"
+              @doSaveBack="doSave"
+              :row="formInfo"
+            />
+          </el-tab-pane>
+          <el-tab-pane label="附件" name="附件">
+            <XTable  :pageShow="false"
+                   height="50%" class="ptable-content" :loading="fileLoading" :data="purAccountForm.fileList" :show-footer="false"
+                   :columnList="fileColumnList" ref="fileleteTableRef1" border :column-config="{ resizable: true }"
+                   :row-config="{ keyField: 'id' }" :page-params="{ perfect: true,  }">
+                <template #default-fileName="scope">
+                  <XUpload v-model:model-value="scope.row.sysFileVo" model="download" :limit="1" readOnly></XUpload>
+                </template>
+                <template #default-src="scope">
+                  <ImagePreview
+                    v-if="scope.row.sysFileVo?.length"
+                    :width="100"
+                    :height="100"
+                    :src="scope.row.url"
+                    :type="scope.row.type"
+                    :preview-src-list="[scope.row.url]"
+                  />
+                </template>
+                <template #default-make="scope">
+                  <el-button link type="primary" @click="downLoadHandle(scope.row.key)">下载</el-button>
+                </template>
+            </XTable>
+            <el-row v-if="purAccountForm?.accountStatus=='2'">
+              <XUpload   model="download" :show-file-list="false"
+                 @fileChange="fileChange2"></XUpload>
+            </el-row>
+            <XTable v-if="purAccountForm?.accountStatus=='2'"  :pageShow="false"
+                  height="50%" class="ptable-content" :loading="fileLoading" :data="purAccountForm.fileList2" :show-footer="false"
+                  :columnList="fileColumnList" ref="fileleteTableRef2" border :column-config="{ resizable: true }"
+                  :row-config="{ keyField: 'id' }" :page-params="{ perfect: true,  }">
+              <template #default-fileName="scope">
+                <XUpload v-model:model-value="scope.row" model="download" :limit="1" readOnly></XUpload>
+              </template>
+              <template #default-src="scope">
+                <ImagePreview
+                  v-if="scope.row"
+                  :width="100"
+                  :height="100"
+                  :src="scope.row.url"
+                  :type="scope.row.type"
+                  :preview-src-list="[scope.row.url]"
+                />
+              </template>
+              <template #default-make="scope">
+                <el-button link type="primary" @click="downLoadHandle(scope.row.key)">下载</el-button>
+                <el-button link type="primary" v-if="scope.row.createByName.includes('需方')" @click="delFile(scope.row.id)">删除</el-button>
+              </template>
+          </XTable>
+          </el-tab-pane>
+          <el-tab-pane v-if="purAccountForm?.accountStatus=='2'" label="付款信息" name="付款信息">
+            <XTable
+              toolId="accountPaymentRecord"
+              height="100%" class="ptable-content"
+              :pageShow="false"
+              :page-params="{ perfect: true }"
+              :data="repaymentRecordList"
+              :columnList="accountPaymentRecordColumnList"
+              border :showRefresh="true"
+              @searchChange="accountSearchChange"
+              :column-config="{ resizable: true }" >
+              <template #default-make="scope">
+                <el-button link type="primary" @click="handleDetail(scope.row.id)" >查看详情</el-button>
+              </template>
+            </XTable>
+
+          </el-tab-pane>
+          <el-tab-pane v-if="purAccountForm?.accountStatus=='2'" label="发票信息" name="发票信息">
+            <XTable
+              toolId="invoiceRecord"
+              height="100%" class="ptable-content"
+              :pageShow="false"
+              :page-params="{ perfect: true }"
+              :data="invoiceRecordList"
+              :columnList="invoiceRecordColumnList"
+              border :showRefresh="true"
+              @searchChange="invoiceRecordSearchChange"
+              :column-config="{ resizable: true }" >
+              <template #default-accountMonth="scope">
+                <span>{{ parseTime(scope.row.accountMonth, '{y}-{m}') }}</span>
+              </template>
+            </XTable>
+          </el-tab-pane>
+        </el-tabs>
+      </div>
+
       <!-- </div> -->
       <template #footer>
         <div style="display: flex; justify-content: center;">
           <span class="dialog-footer">
-            <el-button :loading="buttonLoading" @click="drawerBorrow.visible = false">取消</el-button>
-            <el-button
-              :loading="buttonLoading"
-              type="danger"
-              v-show="drawerBorrow.title?.includes('修改') || drawerBorrow.title?.includes('添加')"
-              @click="handleSave"
-            >
-              保存
-            </el-button>
-            <el-button
-              :loading="buttonLoading"
-              type="primary"
-              v-show="drawerBorrow.title?.includes('修改') || drawerBorrow.title?.includes('添加')"
-              @click="handleSubmit"
-            >
-              提交
-            </el-button>
-            <el-button :loading="buttonLoading" type="primary" v-show="drawerBorrow.title?.includes('确认')" @click="handleConfirm"> 确认 </el-button>
-            <el-button :loading="buttonLoading" type="danger" v-show="drawerBorrow.title?.includes('审核')" @click="reject"> 驳回 </el-button>
-            <el-button :loading="buttonLoading" type="primary" v-show="drawerBorrow.title?.includes('审核')" @click="examinePass"> 通过 </el-button>
+            <el-button v-if="checkPermi(['financial:procureAccount:acount'])&& purAccountForm?.accountStatus!=2" :loading="buttonLoading" v-show="drawerBorrow.title?.includes('采购对账确认')" @click="handleSave" >暂存</el-button>
+            <el-button v-if="checkPermi(['financial:procureAccount:share'])&& purAccountForm?.accountStatus!=2" command="link"  v-show="!drawerBorrow.title?.includes('申请修改') && !drawerBorrow.title?.includes('详情')" @click="generateUrlLink(purAccountForm)">分享账单</el-button>
+            <el-button v-if="checkPermi(['financial:procureAccount:acount'])&&purAccountForm?.accountStatus!=2" :loading="buttonLoading" type="primary" v-show="drawerBorrow.title?.includes('确认')" @click="handleConfirm"> 确认对账 </el-button>
+
+            <el-button type="primary" v-if="checkPermi(['financial:procureAccount:reAdult']) && purAccountForm?.accountStatus == '2'" @click="reverseAudit(purAccountForm)">反审核</el-button>
+            <el-button @click="drawerBorrow.visible=false"  v-show="drawerBorrow.title?.includes('申请修改')">取消</el-button>
+            <el-button @click="drawerBorrow.visible=false"   >关闭</el-button>
           </span>
         </div>
       </template>
@@ -91,21 +491,55 @@
     <el-drawer destroy-on-close v-model="reportDrawer.visible" :title="reportDrawer.title" size="70%" visible.sync="false" draggable>
       <iframe :src="reportUrl" style="width: 100%; height: 100%; border: none;"></iframe>
     </el-drawer>
+
+        <!-- 签名列表 -->
+        <signDialog v-if="signVisible" v-model:show="signVisible" @submit="submitSign" @cancel="cancelSign" />
+
+      <el-drawer v-model="paymentTable.visible" :title="paymentTable.title" destroy-on-close  size="80%" draggable>
+        <template #header="{ close, titleId, titleClass }">
+          <div>
+            <span>{{paymentTable.title}}</span>
+            <span style="margin-left: 2px" v-for="(item,index) in statusFilterData">
+              <el-tag :key="index" :type="item.type" size="small" v-if="item.value == paymentForm?.status">{{item.label}}</el-tag>
+            </span>
+          </div>
+        </template>
+        <Payment @getDetail="getDetail" :loading="buttonLoading" :isUpdate="isUpdate" :readOnly="isReadOnly"
+           :form="paymentForm" type="1" ></Payment>
+      </el-drawer>
+      <el-drawer v-model="paymentTableDetail.visible" :title="paymentTableDetail.title" destroy-on-close  size="80%" draggable>
+        <template #header="{ close, titleId, titleClass }">
+          <div>
+            <span>{{paymentTableDetail.title}}</span>
+            <span style="margin-left: 2px" v-for="(item,index) in statusFilterData">
+              <el-tag :key="index" :type="item.type" size="small" v-if="item.value == detailInfo.status">{{item.label}}</el-tag>
+            </span>
+            <el-tag style="margin-left: 2px" type="success" size="small" v-if="detailInfo?.businessType=='1'">手动新增</el-tag>
+            <el-tag style="margin-left: 2px" type="success" size="small" v-if="detailInfo?.businessType=='2'">付款转存</el-tag>
+            <el-tag style="margin-left: 2px" type="success" size="small" v-if="detailInfo?.businessType=='3'">账单转存</el-tag>
+          </div>
+        </template>
+        <Payment :isOpen="true" :loading="buttonLoading" :form="detailInfo" :isUpdate="true" :readOnly="true" type="1" ></Payment>
+      </el-drawer>
+
   </div>
 </template>
 
 <script setup name="ProcureAccount" lang="ts">
-import supplierAccountTable from '../components/supplierAccountTable.vue';
-import accountForm from '../components/supplierAccountForm.vue';
+import supplierAccountTable2 from '../components/supplierAccountTableV2.vue';
 import { listAccountOrderOther } from '@/api/financial/accountOrderOther';
 import {
   getAccountOrder,
-  addSupplierAccountOrder,
-  updateSupplierAccountOrder,
+  updateAutoSupplierAccount,
   updateAccountOrderStatus,
   listSupplierDeliveryRecord,
   listSupplierBackRecord,
-  getSignPdf
+  getSignPdf,
+  getAdjustList,
+  updateApplyAutoSupplierAccount,
+  listApplyList,
+  accountPayList,
+  accountInvoiceList, autoAccountSign
 } from '@/api/financial/accountOrder';
 import { AccountOrderVO, AccountOrderQuery, AccountOrderForm, TypeEnum, StatusEnum, statusStrings, HandleEnum } from '@/api/financial/accountOrder/types';
 import { deepClone } from '@/utils';
@@ -113,7 +547,21 @@ import { InOutTypeEnum, typeStrings } from '@/api/basedata/rawMaterial/types';
 import { parseTime } from "@/utils/ruoyi";
 /**对账预览 */
 import { getReportUrl } from '@/utils/report';
+import fileSaver from "file-saver";
+import {downloadUrl} from '@/api/upload/index';
+import { getSupplier } from '@/api/basedata/supplier';
+import {addFile, deleteFile, getFileListAndOssUrl} from '@/api/upload';
+import useUserStore from '@/store/modules/user';
 import {ref} from "vue";
+import clipboard3 from "vue-clipboard3";
+import { getUrlLink } from "@/api/purchase/materialOrder";
+import {checkPermi} from "@/utils/permission";
+import { getCraftList } from '@/api/basedata/craft';
+import { listRawMaterialCategory } from '@/api/basedata/rawMaterialCategory';
+import {queryUseModule} from "@/api/basedata/sign";
+import {  getRepaymentRecord,getPaymentAccountList  } from '@/api/financial/repaymentRecord';
+const { nickname } = useUserStore();
+
 /** 对账单按钮操作 */
 let reportUrl = ref("");
 const reportDrawer = reactive<DrawerOption>({
@@ -125,7 +573,7 @@ const reportDrawer = reactive<DrawerOption>({
 const accountUReportHandle = async (row: any) => {
   reportDrawer.title = "对账单报表预览";
   reportDrawer.visible = true;
-  if(row.confirmStatus=="3"){
+  if(row.confirmStatus=="3"&&row.accountStatus=="2"){
     getSignPdf({bizId:row.id,bizCode:row.code}).then(res=>{
       let vo = res.data;
       if (vo.url) {
@@ -152,8 +600,16 @@ const firstInitEditPrice = ref(true);
 const showCategorySelect = ref(true);
 const rawAccountTabRef = ref();
 const buttonLoading = ref(false);
+const purAccountForm =ref();
+const supplierForm = ref();
+const radioTable = ref('基本信息');
+const fileLoading = ref(false);
+const activeNames = ref(['账单明细','凭证信息']);
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
+
+//含税
+const { monthly_method, currency_type: currencyTypeList} = toRefs<any>(proxy?.useDict( 'monthly_method','currency_type'));
 const taxRate = ref(0);
 //首次查询，或者重置查询条件
 const firstSearch = ref(true);
@@ -171,9 +627,27 @@ const writeOffType = ref("1");
 */
 const supplierQuery = ref(false);
 
-const footLabel = {
+const types = ref([
+  { value: "1", label: "物料供应商" },
+  { value: "2", label: "外协加工供应商" },
+  { value: "3", label: "订单外协供应商" },
+  { value: "4", label: "综合供应商" },
+]);
 
-  label5:"应付总金额",
+const modules = ref([
+  { value: "1", label: "采购合同确认" },
+  { value: "2", label: "物料送货" },
+  { value: "3", label: "物料退货确认" },
+  { value: "4", label: "采购对账" },
+]);
+const categorys = ref([]);
+
+/** 工艺列表 */
+let craftListVos = ref([]);
+const footLabel = {
+  label1: "采购收货合计(元)",
+  label2: "采购退货合计(元)",
+  label5:"账单金额(元)",
 }
 const titleLabel={
   label1:"应付金额汇总",
@@ -184,128 +658,117 @@ const titleLabel={
 //冲销defin start
 //编辑和查看详情选择的对账单
 const currentAccountOrderId = ref(undefined);
+const isTaxOptions = ref([
+  {value: "1", label: "是"},
+  {value: "0", label: "否"}
+])
+const accountStatusOptions = ref([
+  {value: "1", label: "未对账"},
+  {value: "2", label: "对账完成"},
+  {value: "9", label: "调整中"}
+])
+const supplierSwitchOptions = ref([
+  {value: "1", label: "协同对账"},
+  {value: "0", label: "普通对账"}
+])
 
 const columnList = ref([
   { title: '序号',field: "index", width: '50', type: 'seq', visible: true, align: 'center' },
-  { title: '单据状态', width: '80', field: 'status', align: 'center', },
+  { title: '对账单号', width: '140', field: 'code', align: 'center', filterType: 'input' },
+  { title: '供应商名称', width: '160', field: 'supplierName', align: 'center', filterType: 'input' },
+  { title: '账单状态', width: '80', field: 'accountStatus', align: 'center', filterType: 'radio', filterData: () => accountStatusOptions.value  },
+  { title: '对账方式', width: '80', field: 'supplierSwitch', align: 'center',  filterType: 'radio', filterData: () => supplierSwitchOptions.value },
   { title: '对账月份', width: '100', field: 'accountMonth', align: 'center', filterType: 'intervalDate', filterParam: { placeholder: '请选择对账月份', startParams: { type: 'month' }, endParams: { type: 'month' }, valueFormat: 'YYYY-MM' } },
-  { title: '对账单号', width: '140', field: 'code', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入对账单号' } },
-  { title: '供应商名称', width: '160', field: 'supplierName', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入供应商名称' } },
-  { title: '含税', width: '80', field: 'isTax', align: 'center' },
-  { title: '月结方式', width: '90', field: 'monthlyMethod', align: 'center' },
-  { title: '币种', width: '90', field: 'currency', align: 'center' },
-  { title: '回款截止日期', sortable: true, width: '140', field: 'endTime', align: 'center', filterType: 'intervalDate', filterParam: { valueFormat: 'YYYY-MM-DD HH:mm:ss' } },
-  { title: '对账日期', sortable: true, width: '140', field: 'accountTime', align: 'center', filterType: 'intervalDate', filterParam: { valueFormat: 'YYYY-MM-DD HH:mm:ss' } },
-  { title: '对账金额', sortable: true, width: '140', field: 'accountPrice', align: 'center', },
-  { title: '其他金额', sortable: true, width: '140', field: 'otherPrice', align: 'center', },
-  { title: '退货金额', sortable: true, width: '140', field: 'backPrice', align: 'center', },
-  { title: '应付金额', sortable: true, width: '140', field: 'payPayablePrice', align: 'center', },//receivablePrice
-  { title: '付款金额', sortable: true, width: '140', field: 'payWriteOffPrice', align: 'center', },
-  { title: '剩余应付金额', sortable: true, width: '140', field: 'payRemainPrice', align: 'center', },
-  { title: '对账人', width: '140', field: 'accountUserName', align: 'center', filterType: 'input' },
-  { title: '备注', width: '240', field: 'remark', align: 'center', },
-  { title: '操作', field: 'make', align: 'center', width: '280', fixed: 'right', showOverflow: false },
-]);
-const statusList = ref([
-  { label: '待提交', value: "1" },
-  { label: '待审核', value: "2" },
-  { label: '驳回', value: "3" },
-  { label: '审核通过', value: "4" },
-  { label: '取消', value: "5" }
-]);
-const confirmStatusList = ref([
-  { type:"warning", label: '待确认', value: "2" },
-  { type:"primary", label: '待对方确认', value: "1" },
-  { type:"success", label: '已确认', value: "3" }
-]);
-const columnList1 = ref([
-  { title: '序号',field: "index", width: '50', type: 'seq', visible: true, align: 'center' },
-  { title: '单据状态', width: '80', field: 'status', align: 'center', filterType: 'radio', filterParam: { placeholder: '请输入状态' }, filterData: () => statusList.value },
-  { title: '对账月份', width: '100', field: 'accountMonth', align: 'center', filterType: 'intervalDate', filterParam: { placeholder: '请选择对账月份', startParams: { type: 'month' }, endParams: { type: 'month' }, valueFormat: 'YYYY-MM' } },
-  { title: '对账单号', width: '140', field: 'code', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入对账单号' } },
-  { title: '供应商名称', width: '140', field: 'supplierName', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入供应商名称' } },
-  { title: '含税', width: '80', field: 'isTax', align: 'center' },
-  { title: '月结方式', width: '90', field: 'monthlyMethod', align: 'center' },
-  { title: '币种', width: '90', field: 'currency', align: 'center' },
-  { title: '回款截止日期', sortable: true, width: '140', field: 'endTime', align: 'center', filterType: 'intervalDate', filterParam: { valueFormat: 'YYYY-MM-DD HH:mm:ss' } },
-  { title: '对账日期', sortable: true, width: '140', field: 'accountTime', align: 'center', filterType: 'intervalDate', filterParam: { valueFormat: 'YYYY-MM-DD HH:mm:ss' } },
-  { title: '对账金额', sortable: true, width: '140', field: 'accountPrice', align: 'center', },
-  { title: '其他金额', sortable: true, width: '140', field: 'otherPrice', align: 'center', },
-  { title: '退货金额', sortable: true, width: '140', field: 'backPrice', align: 'center', },
-  { title: '应付金额', sortable: true, width: '140', field: 'payPayablePrice', align: 'center', },//receivablePrice
-  { title: '付款金额', sortable: true, width: '140', field: 'payWriteOffPrice', align: 'center', },
-  { title: '剩余应付金额', sortable: true, width: '140', field: 'payRemainPrice', align: 'center', },
-  { title: '对账人', width: '140', field: 'accountUserName', align: 'center', filterType: 'input' },
-  { title: '备注', width: '240', field: 'remark', align: 'center', },
-  { title: '操作', field: 'make', align: 'center', width: '330', fixed: 'right', showOverflow: false },
-]);
-const columnList2 = ref([
-  { title: '序号',field: "index", width: '50', type: 'seq', visible: true, align: 'center' },
-  { title: '单据状态', width: '80', field: 'status', align: 'center', filterType: 'radio', filterParam: { placeholder: '请输入状态' }, filterData: () => statusList.value },
-  { title: '对账月份', width: '100', field: 'accountMonth', align: 'center', filterType: 'intervalDate', filterParam: { placeholder: '请选择对账月份', startParams: { type: 'month' }, endParams: { type: 'month' }, valueFormat: 'YYYY-MM' } },
-  { title: '对账单号', width: '140', field: 'code', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入对账单号' } },
-  { title: '供应商名称', width: '140', field: 'supplierName', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入供应商名称' } },
-  { title: '含税', width: '80', field: 'isTax', align: 'center' },
-  { title: '月结方式', width: '90', field: 'monthlyMethod', align: 'center' },
-  { title: '币种', width: '90', field: 'currency', align: 'center' },
-  { title: '回款截止日期', sortable: true, width: '140', field: 'endTime', align: 'center', filterType: 'intervalDate', filterParam: { valueFormat: 'YYYY-MM-DD HH:mm:ss' } },
-  { title: '对账日期', sortable: true, width: '140', field: 'accountTime', align: 'center', filterType: 'intervalDate', filterParam: { valueFormat: 'YYYY-MM-DD HH:mm:ss' } },
-  { title: '对账金额', sortable: true, width: '140', field: 'accountPrice', align: 'center', },
-  { title: '其他金额', sortable: true, width: '140', field: 'otherPrice', align: 'center', },
-  { title: '退货金额', sortable: true, width: '140', field: 'backPrice', align: 'center', },
-  { title: '应付金额', sortable: true, width: '140', field: 'payPayablePrice', align: 'center', },//receivablePrice
-  { title: '付款金额', sortable: true, width: '140', field: 'payWriteOffPrice', align: 'center', },
-  { title: '剩余应付金额', sortable: true, width: '140', field: 'payRemainPrice', align: 'center', },
-  { title: '对账人', width: '140', field: 'accountUserName', align: 'center', filterType: 'input' },
-  { title: '是否开票', width: '80', field: 'isInvoice', align: 'center', },
-  { title: '开票日期', width: '80', field: 'invoiceTime', align: 'center', },
-  { title: '开票金额', width: '80', field: 'invoicePrice', align: 'center', },
-  { title: '发票号码', width: '80', field: 'invoiceCode', align: 'center', },
-  { title: '备注', width: '240', field: 'remark', align: 'center', },
-  { title: '操作', field: 'make', align: 'center', width: '330', fixed: 'right', showOverflow: false },
+  { title: '出账日', width: '80', field: 'accountDay', align: 'center', filterType: 'intervalDate', filterParam: { placeholder: '请选择出账日', startParams: { type: 'date' }, endParams: { type: 'date' }, valueFormat: 'YYYY-MM-DD' } },
+  { title: '账单周期', width: '80', field: 'accountPeriod', align: 'center' },
+  { title: '结算方式', width: '90', field: 'monthlyMethod', align: 'center', filterType: 'input' },
+  { title: '是否含税', width: '80', field: 'isTax', align: 'center', filterType: 'radio', filterData: () => isTaxOptions.value },
+  { title: '付款截止日期', sortable: true, width: '140', field: 'endTime', align: 'center', filterType: 'intervalDate', filterParam: { valueFormat: 'YYYY-MM-DD HH:mm:ss' } },
+  { title: '账单金额(元)', sortable: true, width: '140', field: 'payPayablePrice', align: 'center' },
+  { title: '收货金额(元)', sortable: true, width: '140', field: 'accountPrice', align: 'center', filterType: "intervalNumber"},
+  { title: '退货金额(元)', sortable: true, width: '140', field: 'backPrice', align: 'center',filterType: "intervalNumber" },
+  { title: '扣款金额(元)', sortable: true, width: '140', field: 'otherPrice', align: 'center', filterType: "intervalNumber"},
+  { title: '应付金额(元)', sortable: true, width: '140', field: 'payPayablePrice', align: 'center',filterType: "intervalNumber" },
+  { title: '已付金额(元)', sortable: true, width: '140', field: 'payWriteOffPrice', align: 'center', filterType: "intervalNumber"},
+  { title: '未付金额(元)', sortable: true, width: '140', field: 'payRemainPrice', align: 'center', filterType: "intervalNumber"},
+  { title: '备注', width: '160', field: 'remark', align: 'center', },
+  { title: '对账人', width: '80', field: 'accountUserName', align: 'center', filterType: 'input' },
+  { title: '对账完成日', width: '80', field: 'accountCompleteTime', align: 'center', filterType: 'intervalDate', filterParam: { valueFormat: 'YYYY-MM-DD HH:mm:ss' }  },
+  { title: '是否回票', width: '80', field: 'isInvoice', align: 'center'  },
+  { title: '回票金额', width: '80', field: 'invoicePrice', align: 'center' },
+  { title: '回票时间', width: '80', field: 'invoiceTime', align: 'center'  },
+  { title: '发票号码', width: '80', field: 'invoiceCode', align: 'center' },
+  { title: '操作', field: 'make', align: 'center', width: '300', fixed: 'right', showOverflow: false },
 ]);
 const tabColumnList = ref([
-  { width: '40', type: 'checkbox', align: 'center', field: "checkbox", visible: true, },
+  { width: '40', type: 'checkbox', align: 'center', field: "checkbox", visible: false, },
   { width: '40', title: '序号', type: 'seq', align: 'center' },
-
-  { width: '120', title: '采购单号', field: 'purchaseCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入采购单号' } },
-  { width: '120', title: '送货单号', field: 'code', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入采购单号' } },
-   { title: '入库日期', sortable: true, width: '140', field: 'createTime', align: 'center' },
-  { width: '160', title: '供应商名称', field: 'supplierName', align: 'center' },
-  // { width: '80', title: '是否含税', field: 'supplierIsTax', align: 'center' },
-  { width: '100', title: '物料编码', field: 'materialCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料编码' } },
-  { width: '120', title: '物料名称', field: 'name', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料名称' } },
-  { width: '160', title: '规格参数', field: 'specificationAll', align: 'center', },
-    { width: '80', title: '单位', field: 'units', align: 'center', },
-  { width: '80', title: '采购单价', field: 'inOutPrice', align: 'center', },
-  { width: '80', title: '采购数', field: 'detailQuantity', align: 'center', },
-  { width: '80', title: '送货数', field: 'inOutQuantity', align: 'center', },
-
-  { width: '80', title: '核对数量', field: 'quantity', align: 'center', fixed: 'right', editRender: {} },
-  { width: '100', title: '核对单价', field: 'price', align: 'center', fixed: 'right', editRender: {} },
-  { width: '100', title: '折扣金额', field: 'discountPrice', align: 'center', fixed: 'right', editRender: {} },
-  { width: '120', title: '总金额', field: 'totalPrice', align: 'center', fixed: 'right', },
+  { width: '120', title: '送货单号', field: 'code', align: 'center', filterType: 'input' },
+  { width: '120', title: '关联采购单', field: 'purchaseCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入采购单号' } },
+   { title: '入库日期', sortable: true, width: '140', field: 'deliveryTime', align: 'center', filterType: 'intervalDate', filterParam: { valueFormat: 'YYYY-MM-DD HH:mm:ss' } },
+   { width: '100', title: '物料编码', field: 'materialCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料编码' } },
+   { width: '120', title: '物料名称', field: 'name', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料名称' } },
+   { width: '160', title: '规格参数', field: 'specificationAll', align: 'center',filterType:'input' },
+   { width: '160', title: '送货备注', field: 'accountDeliveryRemark', align: 'center' },
+   { width: '80', title: '采购总数', field: 'detailQuantity', align: 'center',filterType: "intervalNumber" },
+   { width: '80', title: '本次送货', field: 'inOutQuantity', align: 'center',filterType: "intervalNumber" },
+   { width: '80', title: '采购单价', field: 'inOutPrice', align: 'center', },
+   { width: '100', title: '折扣金额', field: 'discountPrice', align: 'center', fixed: 'right', editRender: {} },
+   { width: '120', title: '总金额', field: 'totalPrice', align: 'center', fixed: 'right', },
   { width: '220',title: '备注', field: 'remark', align: 'center', fixed: 'right', editRender: {} },
 ]);
-const backTabColumnList = ref([
+
+const changeTabColumnList = ref([
   { width: '40', type: 'checkbox', align: 'center', field: "checkbox", visible: true, },
   { width: '40', title: '序号', type: 'seq', align: 'center' },
-  { width: '120', title: '退货单号', field: 'code', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入采购单号' } },
-  { width: '120', title: '采购单号', field: 'purchaseCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入采购单号' } },
-  { title: '退货日期', sortable: true, width: '140', field: 'createTime', align: 'center' },
-  { width: '160', title: '责任供应商', field: 'supplierName', align: 'center' },
+  { width: '120', title: '送货单号', field: 'code', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入采购单号' } },
+  { width: '120', title: '关联采购单', field: 'purchaseCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入采购单号' } },
+   { title: '入库日期', sortable: true, width: '140', field: 'createTime', align: 'center' },
+   { width: '100', title: '物料编码', field: 'materialCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料编码' } },
+   { width: '120', title: '物料名称', field: 'name', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料名称' } },
+   { width: '160', title: '规格参数', field: 'specificationAll', align: 'center',filterType:'input' },
+   { width: '80', title: '采购总数', field: 'detailQuantity', align: 'center', filterType: "intervalNumber" },
+  //  { width: '80', title: '本次送货', field: 'inOutQuantity', align: 'center', },
+  //  { width: '80', title: '采购单价', field: 'inOutPrice', align: 'center', },
+   { width: '100', title: '折扣金额', field: 'discountPrice', align: 'center', fixed: 'right', editRender: {} },
+   { width: '120', title: '总金额', field: 'totalPrice', align: 'center', fixed: 'right', },
+  { width: '80', title: '本次送货', field: 'quantity', align: 'center', fixed: 'right', editRender: {} },
+  { width: '100', title: '采购单价', field: 'price', align: 'center', fixed: 'right', editRender: {} },
+  { width: '220',title: '备注', field: 'remark', align: 'center', fixed: 'right', editRender: {} },
+]);
+
+const backTabColumnList = ref([
+  { width: '40', type: 'checkbox', align: 'center', field: "checkbox", visible: false, },
+  { width: '40', title: '序号', type: 'seq', align: 'center' },
+  { width: '120', title: '退货单号', field: 'code', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入退货单号' } },
+  { width: '120', title: '关联采购单号', field: 'purchaseCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入采购单号' } },
+  { title: '退货日期', sortable: true, width: '140', field: 'backTime', align: 'center',filterType: 'intervalDate', filterParam: { valueFormat: 'YYYY-MM-DD HH:mm:ss' }  },
   { width: '100', title: '物料编码', field: 'materialCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料编码' } },
   { width: '120', title: '物料名称', field: 'name', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料名称' } },
-  { width: '160', title: '规格参数', field: 'specificationAll', align: 'center', },
-    { width: '80', title: '单位', field: 'units', align: 'center', },
-  { width: '80', title: '退货数', field: 'inOutQuantity', align: 'center', },
-  { width: '120', title: '供应商退货确认数量', field: 'inOutQuantity', align: 'center', },
+  { width: '260', title: '规格参数', field: 'specificationAll', align: 'center', filterType: 'input'},
+  { width: '160', title: '退货备注', field: 'accountDeliveryRemark', align: 'center' },
+  { width: '80', title: '本次退货', field: 'inOutQuantity', align: 'center',filterType: "intervalNumber" },
   { width: '80', title: '退货单价', field: 'inOutPrice', align: 'center', },
-  { width: '100', title: '核对数量', field: 'quantity', align: 'center', fixed: 'right', editRender: {} },
-  { width: '100', title: '核对单价', field: 'price', align: 'center', fixed: 'right', editRender: {} },
-
+  //{ width: '100', title: '核对数量', field: 'quantity', align: 'center', fixed: 'right', editRender: {} },
+  //{ width: '100', title: '核对单价', field: 'price', align: 'center', fixed: 'right', editRender: {} },
   { width: '120', title: '总金额', field: 'totalPrice', align: 'center', fixed: 'right', },
-  { width: '220', title: '备注', field: 'remark', align: 'center', fixed: 'right', editRender: {} },
+  { width: '320', title: '备注', field: 'remark', align: 'center', fixed: 'right', editRender: {} },
+]);
+const changeBackTabColumnList = ref([
+  { width: '40', type: 'checkbox', align: 'center', field: "checkbox", visible: true, },
+  { width: '40', title: '序号', type: 'seq', align: 'center' },
+  { width: '120', title: '退货单号', field: 'code', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入退货单号' } },
+  { width: '120', title: '关联采购单号', field: 'purchaseCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入采购单号' } },
+  { title: '退货日期', sortable: true, width: '140', field: 'createTime', align: 'center' },
+  { width: '100', title: '物料编码', field: 'materialCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料编码' } },
+  { width: '120', title: '物料名称', field: 'name', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料名称' } },
+  { width: '260', title: '规格参数', field: 'specificationAll', align: 'center', },
+  // { width: '80', title: '退货数量', field: 'inOutQuantity', align: 'center', },
+  // { width: '80', title: '退货单价', field: 'inOutPrice', align: 'center', },
+  { width: '100', title: '本次退货', field: 'quantity', align: 'center', fixed: 'right', editRender: {} },
+  { width: '100', title: '退货单价', field: 'price', align: 'center', fixed: 'right', editRender: {} },
+  { width: '120', title: '总金额', field: 'totalPrice', align: 'center', fixed: 'right', },
+  { width: '320', title: '备注', field: 'remark', align: 'center', fixed: 'right', editRender: {} },
 ]);
 const drawerBorrow = reactive<DialogOption>({
   visible: false,
@@ -320,6 +783,7 @@ const backQueryParams = ref({
   pageSize: 20
 });
 const handle = async (handleType: HandleEnum, row?: AccountOrderVO) => {
+  useUserStore().setSupplier({supplierId:row.supplierId});
   if (handleType == HandleEnum.ADD) {
     showCategorySelect.value=true;
     formType.value = HandleEnum.ADD;
@@ -336,9 +800,17 @@ const handle = async (handleType: HandleEnum, row?: AccountOrderVO) => {
     backQueryParams.value = { pageNum: 1, pageSize: 20 };
     isEdit.value = true;
     const _id = row?.id;
-    drawerBorrow.title = "修改对账单";
+    drawerBorrow.title = "采购对账确认";
     const res = await getAccountOrder(_id);
     formInfo.value = res.data;
+
+    purAccountForm.value = res.data;
+    const fileData=await getFileListAndOssUrl({ bizId: purAccountForm.value.id,bizType: "42"});
+    purAccountForm.value.fileList = fileData.data;
+
+    const supRes = await getSupplier(formInfo.value.supplierId);
+    supplierForm.value = supRes.data;
+
     currentAccountOrderId.value = _id;
     handleUpdate(row);
   } else if (handleType == HandleEnum.EXAMINE) {
@@ -347,9 +819,17 @@ const handle = async (handleType: HandleEnum, row?: AccountOrderVO) => {
     backQueryParams.value = { pageNum: 1, pageSize: 20 };
     isEdit.value = true;
     const _id = row?.id;
-    drawerBorrow.title = "审核对账单";
+    drawerBorrow.title = "申请修改";
     const res = await getAccountOrder(_id);
     formInfo.value = res.data;
+
+    purAccountForm.value = res.data;
+    const fileData=await getFileListAndOssUrl({ bizId: purAccountForm.value.id,bizType: "42"});
+    purAccountForm.value.fileList = fileData.data;
+
+    const supRes = await getSupplier(formInfo.value.supplierId);
+    supplierForm.value = supRes.data;
+
     currentAccountOrderId.value = _id;
     handleUpdate(row);
   } else if (handleType == HandleEnum.INFO) {
@@ -360,8 +840,23 @@ const handle = async (handleType: HandleEnum, row?: AccountOrderVO) => {
     isEdit.value = true;
     const _id = row?.id;
     drawerBorrow.title = "对账单详情";
+    radioTable.value = '基本信息';
     const res = await getAccountOrder(_id);
     formInfo.value = res.data;
+    purAccountForm.value = res.data;
+
+    const fileData=await getFileListAndOssUrl({ bizId: purAccountForm.value.id,bizType: "42"});
+    purAccountForm.value.fileList = fileData.data;
+
+    const fileData2=await getFileListAndOssUrl({ bizId: purAccountForm.value.id,bizType: "31"});
+    purAccountForm.value.fileList2 = fileData2.data;
+
+    const supRes = await getSupplier(formInfo.value.supplierId);
+    supplierForm.value = supRes.data;
+
+    await accountSearchChange();
+    await invoiceRecordSearchChange();
+
     currentAccountOrderId.value = _id;
     handleUpdate(row);
   }else if (handleType == HandleEnum.CONFIRM) {
@@ -390,7 +885,8 @@ const handleAdd = async () => {
 const handleUpdate = async () => {
   drawerBorrow.visible = true;
   allData.value.inOrOutLoading = true;
-  await handleInOrOutQuery({accountTime:formInfo.value.accountTime});
+
+  await handleInOrOutQuery({accountTime:formInfo.value.accountTime,monthlyMethod:formInfo.value.monthlyMethod,isTax:formInfo.value.isTax});
   allData.value.inOrOutLoading = false;
 }
 
@@ -409,29 +905,167 @@ const deliverSearchChange = async() => {
   allData.value.inOrOutLoading = false;
 }
 
+const deliverSearchChange1 = async() => {
+
+  allData.value.inOrOutLoading = true;
+  rQueryParams.value = JSON.parse(JSON.stringify(rawAccountTabRef.value.tabQueryParams));
+  rQueryParams.value = { ...rQueryParams.value, ...headerForm.value }
+  await getAddListRecord1();
+  allData.value.inOrOutLoading = false;
+}
+
+const deliverSearchChange2 = async() => {
+  allData.value.inOrOutLoading = true;
+  backQueryParams.value = JSON.parse(JSON.stringify(rawAccountTabRef.value.tabQueryParams2));
+  backQueryParams.value = { ...backQueryParams.value, ...headerForm.value }
+  await getAddListRecord2();
+  allData.value.inOrOutLoading = false;
+}
+
+
+const deliverSearchChange3 = async() => {
+  allData.value.inOrOutLoading = true;
+  let otherQueryParams = JSON.parse(JSON.stringify(rawAccountTabRef.value.tabQueryParams3));
+  otherQueryParams.accountOrderId = currentAccountOrderId.value;
+  otherQueryParams.onlyDeduction = '1'
+  listAccountOrderOther(otherQueryParams).then(res => {
+    tabOtherList.value = res.data;
+  });
+  allData.value.inOrOutLoading = false;
+}
+
+//成本调整记录
+const deliverSearchChange4 = async() => {
+  allData.value.inOrOutLoading = true;
+  //成本调整单
+  console.log("allData.value.checkedTabList1",allData.value.checkedTabList1);
+  console.log("allData.value.checkedTabList2",allData.value.checkedTabList2);
+  const res22 = allData.value.checkedTabList1&&deepClone(allData.value.checkedTabList1);
+  const res33 = allData.value.checkedTabList2&&deepClone(allData.value.checkedTabList2);
+  const changeOrder1 = res22&&res22.map(item=>item.id);
+  const changeOrder2 = res33&&res33.map(item=>item.id);
+  const changeOrder11 = res22&&res22.map(item=>item.accountDetailId);
+  const changeOrder22 = res33&&res33.map(item=>item.accountDetailId);
+
+  let allList=<any>[];
+  let allDetailList=<any>[];
+  if(changeOrder2&&changeOrder2.length>0){
+    allList=allList.concat(changeOrder2);
+  }
+  if(changeOrder1&&changeOrder1.length>0){
+    allList=allList.concat(changeOrder1);
+  }
+  if(changeOrder11&&changeOrder11.length>0){
+    allDetailList = allDetailList.concat(changeOrder11);
+  }
+  if(changeOrder22&&changeOrder22.length>0){
+    allDetailList =allDetailList.concat(changeOrder22);
+  }
+
+  let queryParams4 = rawAccountTabRef.value.tabQueryParams4&&deepClone(rawAccountTabRef.value.tabQueryParams4);
+  queryParams4 = { ...queryParams4, ...headerForm.value }
+
+  let obj = {accountOrderId : currentAccountOrderId.value,
+    accountDetailIds: allDetailList,
+    bizIds:allList };
+  obj = { ...queryParams4, ...obj }
+    //由于太慢，异步获取
+  getAdjustList(obj).then(tabList4=>{
+      if(tabList4.data){
+        allData.value.tabList4 = tabList4.data;
+        allData.value.tabTotal4 = tabList4.data.length;
+      }
+  });
+  allData.value.inOrOutLoading = false;
+}
+
+//申请记录
+const deliverSearchChange44 = async() => {
+  allData.value.inOrOutLoading = true;
+
+  let queryParams4 = rawAccountTabRef.value.tabQueryParams4&&deepClone(rawAccountTabRef.value.tabQueryParams4);
+  let obj = {accountOrderId : currentAccountOrderId.value };
+  obj = { ...queryParams4, ...obj }
+    //由于太慢，异步获取
+  listApplyList(obj).then(tabList4=>{
+      if(tabList4.code=='200'){
+        allData.value.tabList4 = tabList4.rows;
+        allData.value.tabTotal4 = tabList4.total;
+
+        console.log("========================allData.value.tabList4",allData.value.tabList4)
+      }
+  });
+  allData.value.inOrOutLoading = false;
+}
+
+/** 查询tab记录 */
+const getAddListRecord1 = async () => {
+  //查询类型为view
+  allData.value.accountOrderId = currentAccountOrderId.value;
+  rQueryParams.value.hasAccountOrder = "1";
+  rQueryParams.value.supplierId = formInfo.value.supplierId;
+  //审核不需要未对账数据
+  rQueryParams.value.onlyAccountOrder = "1";
+  //采购入库、 库存退货
+   if(currentAccountOrderId.value){
+    let rQueryParams2 = { pageNum: 1, pageSize: 9999,accountTime:rQueryParams.value.accountTime,accountOrderId:currentAccountOrderId.value,onlyAccountOrder : "1",hasAccountOrder:"1" };
+    rQueryParams2.type=InOutTypeEnum.PURCHASE_IN;
+    rQueryParams2.supplierQuery='0';
+    const res22 = await listSupplierDeliveryRecord(rQueryParams2);
+    allData.value.checkedTabList1 = res22.rows;
+  }
+  rQueryParams.value.type = InOutTypeEnum.PURCHASE_IN;
+  rQueryParams.value.supplierQuery='0';
+  console.log("getAddListRecord getAddListRecord======", rQueryParams.value)
+  const res2 = await listSupplierDeliveryRecord({ ...rQueryParams.value, accountOrderId: currentAccountOrderId.value });
+  allData.value.tabList1 = res2.rows;
+  allData.value.tabTotal1 = res2.total;
+  inOrOutLoading.value = false
+}
+
+/** 查询tab记录 */
+const getAddListRecord2 = async () => {
+  //查询类型为view
+  allData.value.accountOrderId = currentAccountOrderId.value;
+  backQueryParams.value.supplierId = formInfo.value.supplierId;
+  backQueryParams.value.hasAccountOrder = "1";
+  backQueryParams.value.onlyAccountOrder = "1";
+  //采购入库、 库存退货
+   if(currentAccountOrderId.value){
+    let backQueryParams2 = { pageNum: 1, pageSize: 9999,accountTime:backQueryParams.value.accountTime,accountOrderId:currentAccountOrderId.value,onlyAccountOrder : "1",hasAccountOrder:"1" };
+    backQueryParams2.type = InOutTypeEnum.STOCK_RETURN;
+    backQueryParams2.supplierQuery='0';
+
+    const res33 = await listSupplierBackRecord(backQueryParams2);
+    allData.value.checkedTabList2 = res33.rows;
+  }
+
+  backQueryParams.value.supplierQuery='0';
+  backQueryParams.value.type = InOutTypeEnum.STOCK_RETURN;
+  console.log("getAddListRecord getAddListRecord======", rQueryParams.value)
+  const res3 = await listSupplierBackRecord({ ...backQueryParams.value, accountOrderId: currentAccountOrderId.value });
+  allData.value.tabList2 = res3.rows;
+  allData.value.tabTotal2 = res3.total;
+  inOrOutLoading.value = false
+}
+
 
 /** 查询tab记录 */
 const getAddListRecord = async () => {
   //查询类型为view
-  if (isEdit.value) {
-    allData.value.accountOrderId = currentAccountOrderId.value;
-    let otherQueryParams = { accountOrderId: currentAccountOrderId.value };
-    listAccountOrderOther(otherQueryParams).then(res => {
-      tabOtherList.value = res.data;
-    });
-    backQueryParams.value.supplierId = formInfo.value.supplierId;
-    backQueryParams.value.hasAccountOrder = "1";
-    rQueryParams.value.hasAccountOrder = "1";
-    rQueryParams.value.supplierId = formInfo.value.supplierId;
-    //审核不需要未对账数据
-    if (drawerBorrow.title?.includes('详情') || drawerBorrow.title?.includes('审核')) {
-      rQueryParams.value.onlyAccountOrder = "1";
-      backQueryParams.value.onlyAccountOrder = "1";
-    }
-  } else {
-    backQueryParams.value.hasAccountOrder = "0";
-    rQueryParams.value.hasAccountOrder = "0";
-  }
+  allData.value.accountOrderId = currentAccountOrderId.value;
+  let otherQueryParams = { accountOrderId: currentAccountOrderId.value, onlyDeduction : '1' };
+  listAccountOrderOther(otherQueryParams).then(res => {
+    tabOtherList.value = res.data;
+  });
+  backQueryParams.value.supplierId = formInfo.value.supplierId;
+  backQueryParams.value.hasAccountOrder = "1";
+  rQueryParams.value.hasAccountOrder = "1";
+  rQueryParams.value.supplierId = formInfo.value.supplierId;
+  //审核不需要未对账数据
+  rQueryParams.value.onlyAccountOrder = "1";
+  backQueryParams.value.onlyAccountOrder = "1";
+
   //采购入库、 库存退货
    if(currentAccountOrderId.value){
     let rQueryParams2 = { pageNum: 1, pageSize: 9999,accountTime:rQueryParams.value.accountTime,accountOrderId:currentAccountOrderId.value,onlyAccountOrder : "1",hasAccountOrder:"1" };
@@ -445,6 +1079,13 @@ const getAddListRecord = async () => {
     const res33 = await listSupplierBackRecord(backQueryParams2);
     allData.value.checkedTabList1 = res22.rows;
     allData.value.checkedTabList2 = res33.rows;
+
+    //成本调整单
+    if(drawerBorrow.title?.includes('申请修改')){
+      deliverSearchChange44();
+    }else{
+      deliverSearchChange4();
+    }
   }
 
   rQueryParams.value.type = InOutTypeEnum.PURCHASE_IN;
@@ -488,25 +1129,59 @@ const handleSubmit = () => {
 }
 
 const handleSave = () => {
-  let tempForm = accountFormRef.value.form;
+  let tempForm = purAccountForm.value;
   if (!tempForm.status || tempForm.status != StatusEnum.REJECTED) {
     tempForm.status = StatusEnum.BE_SUBMITTED;
   }
   rawAccountTabRef.value.doSave(tempForm);
 }
-const handleConfirm = () => {
-  let tempForm = accountFormRef.value.form;
+
+const handleSaveClose =async ()=>{
+  let tempForm = purAccountForm.value;
+  if (!tempForm.status || tempForm.status != StatusEnum.REJECTED) {
+    tempForm.status = StatusEnum.BE_SUBMITTED;
+  }
+  await rawAccountTabRef.value.doSave(tempForm);
+
+  drawerBorrow.visible = false;
+  currentAccountOrderId.value = undefined;
+}
+
+const handleSaveUpdate =async ()=>{
+  let tempForm = purAccountForm.value;
+  if (!tempForm.status || tempForm.status != StatusEnum.REJECTED) {
+    tempForm.status = StatusEnum.BE_SUBMITTED;
+  }
+  await rawAccountTabRef.value.doSave(tempForm);
+
+  drawerBorrow.visible = false;
+  currentAccountOrderId.value = undefined;
+}
+
+const handleConfirm = async() => {
+  //协同客户侧仅提示
+  if(purAccountForm.value.supplierSwitch=="1"){
+    proxy?.$modal.msgError("该账单为协同账单，请通知供应商进行账单的核对与确认");
+    return;
+  }
+  await proxy?.$modal.confirm('是否确认完成对账？');
+
+  let tempForm = purAccountForm.value;
   tempForm.isConfirm='1';
-  rawAccountTabRef.value.doSave(tempForm);
+
+    // 查询是否存在默认签章
+    const res = await queryUseModule({useModule: '4'});
+    // 存在则自动签名
+    if(res.data) {
+      submitSign(res.data.key, res.data.signType);
+    } else {
+      signVisible.value = true;
+    }
+
 }
 
 const doSave = async (resForm: any) => {
   // todo 保存前的验证
-   const vad = await accountFormRef.value.validateForm();
-   if (!vad) {
-    console.log("主单校验不通过");
-    return;
-  }
   //得到供应商id
   let addForm = deepClone(resForm);
   //类型
@@ -516,36 +1191,10 @@ const doSave = async (resForm: any) => {
   addForm.purchaseDetailBoList.forEach((it: any) => {
     it.purchaseMaterialOrderDetailId = it.bizId;
     it.rawMaterialInOutRecordId = it.id;
-    it.id = undefined;
+    it.id = it.accountDetailId;
   })
 
   if (addForm.id == undefined) {
-    // addForm.status = StatusEnum.BE_SUBMITTED;
-    if (addForm.otherOrderBoList && addForm.otherOrderBoList.length > 0) {
-      addForm.otherOrderBoList = addForm.otherOrderBoList.map((item: any) => {
-        item.oldId = item.id;
-        item.id = undefined;
-        return item;
-      })
-    }
-
-    console.log(" doSave inOutForm.add", addForm);
-    buttonLoading.value = true;
-    addSupplierAccountOrder(addForm).then(res => {
-     proxy?.$modal.msgSuccess("操作成功");
-      drawerBorrow.visible = false;
-      currentAccountOrderId.value = undefined;
-      //table组件刷新
-      getAllList();
-    }).catch(err => {
-      addForm.otherOrderBoList = addForm.otherOrderBoList.map(item => {
-        if (item.id.indexOf("row") > -1) {
-          item.id = item.oldId;
-          item.oldId = undefined;
-        }
-        return item;
-      })
-    }).finally(() => { buttonLoading.value = false; });
   } else {
     if (addForm.otherOrderBoList && addForm.otherOrderBoList.length > 0) {
       addForm.otherOrderBoList = addForm.otherOrderBoList.map(item => {
@@ -559,20 +1208,44 @@ const doSave = async (resForm: any) => {
     console.log(" doSave inOutForm.update", addForm);
     // addForm.status = StatusEnum.BE_AUDITED;
     buttonLoading.value = true;
-    updateSupplierAccountOrder(addForm).then(res => {
-      proxy?.$modal.msgSuccess("修改成功");
-      drawerBorrow.visible = false;
-      currentAccountOrderId.value = undefined;
-      getAllList();
-    }).catch(err => {
-      addForm.otherOrderBoList = addForm.otherOrderBoList.map(item => {
-        if (item.id.indexOf("row") > -1) {
-          item.id = item.oldId;
-          item.oldId = undefined;
-        }
-        return item;
-      })
-    }).finally(() => { buttonLoading.value = false; });
+    if(drawerBorrow.title?.includes('申请修改')){
+      addForm.status=undefined;
+      updateApplyAutoSupplierAccount(addForm).then(res => {
+        proxy?.$modal.msgSuccess("申请成功");
+        getAllList();
+      }).catch(err => {
+        addForm.otherOrderBoList = addForm.otherOrderBoList.map(item => {
+          if (item.id.indexOf("row") > -1) {
+            item.id = item.oldId;
+            item.oldId = undefined;
+          }
+          return item;
+        })
+      }).finally(() => { 
+        buttonLoading.value = false; 
+        deliverSearchChange3();
+      });
+
+    }else{
+      addForm.status=undefined;
+      updateAutoSupplierAccount(addForm).then(res => {
+        proxy?.$modal.msgSuccess("修改成功");
+        // drawerBorrow.visible = false;
+        // currentAccountOrderId.value = undefined;
+        getAllList();
+      }).catch(err => {
+        addForm.otherOrderBoList = addForm.otherOrderBoList.map(item => {
+          if (item.id.indexOf("row") > -1) {
+            item.id = item.oldId;
+            item.oldId = undefined;
+          }
+          return item;
+        })
+      }).finally(() => { 
+        buttonLoading.value = false; 
+        deliverSearchChange3();
+        });
+    }
   }
 }
 
@@ -597,8 +1270,8 @@ const updateStatus = (id: any, status: string) => {
   }).finally(() => { buttonLoading.value = false; });
 }
 
-const getAllList = () => {
-  accountTableRef.value?.radioTableHandle();
+const getAllList = async() => {
+  await accountTableRef.value?.radioTableHandle();
 }
 
 /************aduit 审核操作 end ***********/
@@ -610,8 +1283,271 @@ const getTaxRate = async () => {
   }
 }
 
+const fileColumnList = ref([
+    {title: "序号", type: 'seq', field: 'index', align: 'center', width: '60'},
+    {title: '附件名称', field: 'name', align: 'center'},
+    {title: '缩略图', field: 'src', align: 'center', showOverflow: false},
+    {title: '文件大小', width: '80', field: 'size', align: 'center'},
+    {title: '上传人', width: '80', field: 'createByName', align: 'center'},
+    {title: '上传时间', width: '140', field: 'createTime', align: 'center'},
+    {title: '操作', width: '100', field: 'make', align: 'center'},
+  ]);
+  // 文件下载
+  const downLoadHandle = (key: string) => {
+    let loadingBox = ElLoading.service({ text: '文件下载中...', background: 'rgba(0, 0, 0, 0.7)' });
+    console.log(key)
+    downloadUrl(key).then(res => {
+      loadingBox.close()
+      if (res.code == 200) {
+        const { data } = res
+        // window.open(data[key])
+        fileSaver.saveAs(data[key])
+      }
+    }).catch((err) => {
+      loadingBox.close()
+    })
+  }
+
+  const delFile = async (_ids: any) => {
+    await proxy?.$modal.confirm('是否删除文件？');
+    await deleteFile(_ids);
+    const fileData=await getFileListAndOssUrl({ bizId: purAccountForm.value.id,bizType: "42"});
+    purAccountForm.value.fileList = fileData.data;
+
+    const fileData2=await getFileListAndOssUrl({ bizId: purAccountForm.value.id,bizType: "31"});
+    purAccountForm.value.fileList2 = fileData2.data;
+  }
+
+  const fileChange = async (value: any) => {
+    let lastFile = value.find(vo => vo.key == value[value.length - 1].key);
+    var data = {
+      bizId: purAccountForm.value.id,
+      moduleCode: "8",
+      bizType: "42",
+      type: lastFile.type,
+      size: lastFile.size,
+      name: lastFile.name,
+      key: lastFile.key,
+      createByName: nickname+'(需方)'
+    }
+    console.log(data);
+    await addFile(data);
+
+    const fileData=await getFileListAndOssUrl({ bizId: purAccountForm.value.id,bizType: "42"});
+    purAccountForm.value.fileList = fileData.data;
+  }
+
+  const fileChange2 = async (value: any) => {
+    let lastFile = value.find(vo => vo.key == value[value.length - 1].key);
+    var data = {
+      bizId: purAccountForm.value.id,
+      moduleCode: "8",
+      bizType: "31",
+      type: lastFile.type,
+      size: lastFile.size,
+      name: lastFile.name,
+      key: lastFile.key,
+      createByName: nickname+'(需方)'
+    }
+    console.log(data);
+    await addFile(data);
+
+    const fileData=await getFileListAndOssUrl({ bizId: purAccountForm.value.id,bizType: "31"});
+    purAccountForm.value.fileList2 = fileData.data;
+  }
+
+  /** 生成分享账单并复制 */
+  //解构出复制方法
+const { toClipboard } = clipboard3();
+const { userId } = useUserStore();
+const generateUrlLink = async (row: any) => {
+  let path = 'pages/reviewPdf/index';
+  let query = 'companyId=' + row.companyId + '&shareUserId=' + userId + '&id=' + row.id + '&type=4&isReview=2&code=' + '';
+  const res = await getUrlLink({ path: path, query: query });
+  console.log(res)
+  try {
+    await toClipboard(res.data);
+    proxy?.$modal.msgSuccess("复制成功!");
+  } catch (error) {
+    alert("复制失败!请重试!")
+  }
+  return res.data || '';
+}
+
+//明细成本调整
+const changeAdjust = async (row: any) => {
+  accountTableRef.value.changeAdjust(row);
+}
+
+const adjustTypeOption = ref([
+    {label: "送货", value: "1"},
+    {label: "退货", value: "2"},
+  ])
+const adjustPriceTypeOption = ref([
+  {label: "单价", value: "1"},
+  {label: "数量", value: "2"},
+  {label: "折扣金额", value: "3"},
+])
+const adjustColumnList2 = ref([
+  { title: "序号", fixed: 'left', type: 'seq', align: 'center', width: '60' },
+  { title: '单据类型', width: '80', field: 'orderType', align: 'center',filterType:'radioButton',  filterData:()=>adjustTypeOption.value },
+  { title: '单据编码', width: '140', field: 'code', align: 'center',filterType:'input' },
+  { title: '关联采购单', width: '140', field: 'purchaseCode', align: 'center',filterType:'input' },
+  { title: '收货/退货日期', width: '120', field: 'operateTime', align: 'center', filterType: 'intervalDate', filterParam: {   valueFormat: 'YYYY-MM-DD HH:mm:ss' }},
+  { title: '物料编码', width: '120', field: 'materialCode', align: 'center',filterType:'input' },
+  { title: '物料名称', width: '160', field: 'materialName', align: 'center',filterType:'input' },
+  { title: '规格参数', width: '300', field: 'specification', align: 'center',filterType:'input' },
+  { title: '申请备注', width: '180', field: 'remark', align: 'center' },
+  { title: '调整项目',fixed: 'right', width: '80', field: 'type', align: 'center',filterType:'radioButton',  filterData:()=>adjustPriceTypeOption.value},
+  { title: '调整前', fixed: 'right',width: '80', field: 'oldValue', align: 'center' },
+  { title: '申请调整', fixed: 'right',width: '80', field: 'modifyValue', align: 'center' },
+  { title: '申请时间', fixed: 'right',width: '80', field: 'createTime', align: 'center' },
+]);
+
+const getCraftLists = async () => {
+  let queryParams:CraftQuery = {
+    isOpen: "1"
+  }
+  await getCraftList(queryParams)
+    .then(res => {
+      craftListVos.value = res.data;
+    });
+}
+
+const getCategoryList = async () => {
+  await listRawMaterialCategory()
+    .then(res => {
+      categorys.value = res.rows.map(item => {
+        return {
+          id: item.id,
+          name: item.name
+        }
+      })
+    });
+}
+const signVisible = ref(false);
+
+const submitSign = async (key : any, signType : any) => {
+  proxy?.$modal.loading("加载中...");
+  autoAccountSign({ id:currentAccountOrderId.value, status:StatusEnum.AUDITED, imageKey: key, signType: signType }).then(res => {
+    proxy?.$modal.msgSuccess("操作成功");
+    getAllList();
+    drawerBorrow.visible = false;
+    currentAccountOrderId.value = undefined;
+  }).finally(() => {proxy?.$modal.closeLoading()});
+}
+
+const cancelSign = async () => {
+  signVisible.value = false;
+}
+
+//
+let repaymentRecordList = ref();
+const accountPaymentRecordColumnList = ref([
+  { width: '40', title: '序号', type: 'seq', align: 'center' },
+  { width: '220', title: '（预）付款单号', field: 'code', align: 'center' },
+  { width: '200', title: '付款金额（元）', field: 'totalPrice', align: 'center'},
+  { width: '120', title: '付款人', field: 'paymentUser', align: 'center'},
+  { title: '付款时间',field: 'createTime', align: 'center' },
+  { width: '100', title: '审核人', field: 'updateByName', align: 'center' },
+  { width: '250', title: '审核时间', field: 'passTime', align: 'center' },
+  { width: '100', title: '操作', field: 'make', align: 'center', fixed: 'right' },
+]);
+
+const accountSearchChange = async() => {
+  repaymentRecordList.value = await accountPayList({accountOrderId:purAccountForm.value.id,type:'1'});
+}
+
+const isCust =ref(false);
+const dialogTableLoading = ref(false);
+// 新增/编辑
+let isUpdate = ref(false);
+let isReadOnly = ref(false);
+const paymentTable = reactive<DialogOption>({
+  visible: false,
+  title: ''
+});
+
+//状态: 1待提交、2待审核、3驳回、4审核通过
+const statusFilterData =ref( [
+  { label: '待提交', value: "1",type:"info"},
+  { label: '待审核', value: "2",type:"warning" },
+  { label: '审批驳回', value: "3" ,type:"danger"},
+  { label: '审核通过', value: "4" ,type:"success"},
+])
+
+const paymentForm =ref();
+const detailInfo = ref({});
+/** 详情按钮操作 */
+const handleDetail = async (_id?: any) => {
+  dialogTableLoading.value = true
+  const res = await getRepaymentRecord(_id);
+  console.log("======================",res);
+  paymentForm.value = deepClone(res.data);
+  isUpdate.value = true;
+  isReadOnly.value = true;
+  // confirmSelectList.value = res.data.invoiceVoList;
+  const res2 = await getPaymentAccountList({paymentId: _id, onlyPayment:'1',});
+  paymentForm.value.confirmSelectList = res2.rows;
+  paymentTable.visible = true;
+  paymentTable.title = "付款单详情";
+  dialogTableLoading.value = false
+
+}
+
+/*详情*/
+const paymentTableDetail = reactive<DialogOption>({
+  visible: false,
+  title: ''
+});
+const getDetail = async (id:any) =>{
+    const _id = id ;
+    dialogTableLoading.value = true
+    const res = await getRepaymentRecord(_id);
+    detailInfo.value = deepClone(res.data);
+    // isUpdate.value = true;
+    // isReadOnly.value = true;
+    // confirmSelectList.value = res.data.invoiceVoList;
+    const res2 = await getPaymentAccountList({paymentId: _id, onlyPayment:'1',});
+    detailInfo.value.confirmSelectList = res2.rows;
+    paymentTableDetail.visible = true;
+    paymentTableDetail.title = "预付款单详情";
+    dialogTableLoading.value = false
+}
+
+/**
+ * 发票
+ **/
+let invoiceRecordList = ref();
+const invoiceRecordColumnList = ref([
+  { width: '40', title: '序号', type: 'seq', align: 'center' },
+  { width: '220', title: '关联账单月份', field: 'accountMonth', align: 'center' },
+  { width: '200', title: '发票/数电票号码', field: 'number', align: 'center'},
+  { width: '120', title: '销方名称', field: 'sellerName', align: 'center'},
+  { width: '120', title: '销方识别号', field: 'sellerIdentifier', align: 'center'},
+  { width: '120', title: '金额（元）', field: 'amount', align: 'center'},
+  { width: '120', title: '税额（元）', field: 'tax', align: 'center'},
+  { width: '120', title: '价税合计（元）', field: 'amountTax', align: 'center'},
+  { width: '120', title: '发票类型', field: 'typeStr', align: 'center'},
+  { width: '100', title: '备注', field: 'remark', align: 'center' },
+  { width: '250', title: '回票日期', field: 'invoiceTime', align: 'center' },
+  { width: '250', title: '创建人', field: 'createByName', align: 'center' },
+  { width: '250', title: '创建时间', field: 'createTime', align: 'center' },
+]);
+const invoiceRecordSearchChange = async() => {
+  invoiceRecordList.value = await accountInvoiceList({accountId:purAccountForm.value.id,type:'1'});
+}
+//反审核
+const reverseAudit = async (row: any) => {
+  await proxy?.$modal.confirm('启动反审核后，账单会重新进入"未对账"状态，请及时联系供应商进行账单的核对与确认');
+  await doReverseAudit({id:row.id});
+  await getAllList();
+}
+
 onMounted(() => {
   getTaxRate();
+  getCraftLists();
+  getCategoryList();
 });
 </script>
 <style lang="scss" scoped>

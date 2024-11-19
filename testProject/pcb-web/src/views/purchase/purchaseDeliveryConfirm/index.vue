@@ -1,12 +1,11 @@
 <template>
   <div class="p-2 xtable-page customer-complaint">
-    <el-card shadow="never" class="xtable-card">
 
-      <el-tabs type="border-card" class="xtable-tab" @tab-change="changeTab">
+      <el-tabs v-model="editableTabsValue" class="xtable-tab" @tab-change="changeTab">
 
         <el-tab-pane label="待确认列表" name="0">
 
-          <div class="global-flex flex-end" style="width: 100%;margin-bottom: 10px;">
+          <div class="head-btn-flex">
             <el-button plain icon="Download" @click="deliveryWaitConfirmExport">导出</el-button>
           </div>
 
@@ -53,7 +52,7 @@
 
         <el-tab-pane label="已确认列表" name="1">
 
-          <div class="global-flex flex-end" style="width: 100%;margin-bottom: 10px;">
+          <div class="head-btn-flex" >
             <el-button plain icon="Download" @click="deliveryConfirmedExport">导出</el-button>
           </div>
 
@@ -65,7 +64,7 @@
                   :data="deliveryConfirmedTableData"
                   :columnList="deliveryConfirmedColumnList"
                   :span-method="mergeCells"
-                  ref="XTableRef"
+                  ref="XTableRef2"
                   border
                   :showRefresh="true"
                   @searchChange="deliveryConfirmedSearchChange"
@@ -99,7 +98,6 @@
 
       </el-tabs>
 
-    </el-card>
 
     <!-- 送货单抽屉-->
     <el-drawer
@@ -110,6 +108,7 @@
       destroy-on-close
       @close="resetReceiveForm()"
     >
+      <div class="ptable-card">
       <el-form
         :model="receiveFromData"
         ref="receiveFormRef"
@@ -162,6 +161,11 @@
               />
             </el-form-item>
           </el-col>
+          <el-col :span="12">
+            <el-form-item label="收货手机号" prop="createDeptName">
+              <el-input v-model="receiveFromData.phoneNumber" disabled />
+            </el-form-item>
+          </el-col>
 
           <el-col :span="24" style="margin-top: 0px" v-if="isEdit">
             <el-form-item label="确认备注" prop="confirmRemark">
@@ -170,54 +174,46 @@
             </el-form-item>
           </el-col>
 
-          <el-col :span="24" style="margin-top: 20px">
-            <XTable :pageShow="false"
-                    toolId="deliveryConfirmCustomer"
-                    ref="confirmTable"
-                    :data="confirmSelectInventoryList"
-                    border
-                    :columnList="confirmSelectInventoryColumnList"
-                    max-height="450px"
-                    :loading="deliveryLoading"
-                    :edit-rules="validRules"
-            >
-
-              <template #default-deliveryQuantity="scope">
-                <el-input-number style="width: 99%;" :controls="false" :precision="2"
-                                 v-model="scope.row.deliveryQuantity" :min="0.01"
-                                 :max="scope.row.canDeliveryQuantity ? scope.row.canDeliveryQuantity :scope.row.oweQuantity" />
-              </template>
-              <template #default-sparePartsQuantity="scope">
-                <el-input-number disabled style="width: 99%;" :controls="false" :precision="0"
-                                 v-model="scope.row.sparePartsQuantity" :min="1" :max="999999999" />
-              </template>
-              <template #default-boxCount="scope">
-                <el-input-number disabled style="width: 99%;" :controls="false" :precision="0"
-                                 v-model="scope.row.boxCount" :min="1" :max="99999999" />
-              </template>
-              <template #default-remark="scope">
-                <el-input style="width: 99%;" disabled :controls="false" v-model="scope.row.remark" maxlength="100" />
-              </template>
-              <template #default-make="scope">
-                <el-button link type="primary" @click="handleDelete(scope.row)">删除</el-button>
-              </template>
-
-            </XTable>
-
-          </el-col>
-
-
         </el-row>
       </el-form>
+      <XTable :pageShow="false"
+              toolId="deliveryConfirmCustomer"
+              ref="confirmTable"
+              :data="confirmSelectInventoryList"
+              border
+              :columnList="confirmSelectInventoryColumnList"
+              height="100%" class="ptable-content"
+              :loading="deliveryLoading"
+              :edit-rules="validRules"
+      >
+
+        <template #default-deliveryQuantity="scope">
+          <el-input-number style="width: 99%;" :controls="false" :precision="2"
+                            v-model="scope.row.deliveryQuantity" :min="0.01"
+                            :max="scope.row.oweQuantity <0 ? scope.row.canDeliveryQuantity - scope.row.oweQuantity :scope.row.canDeliveryQuantity ? scope.row.canDeliveryQuantity :scope.row.oweQuantity" />
+        </template>
+        <template #default-sparePartsQuantity="scope">
+          <el-input-number disabled style="width: 99%;" :controls="false" :precision="0"
+                            v-model="scope.row.sparePartsQuantity" :min="1" :max="999999999" />
+        </template>
+        <template #default-boxCount="scope">
+          <el-input-number disabled style="width: 99%;" :controls="false" :precision="0"
+                            v-model="scope.row.boxCount" :min="1" :max="99999999" />
+        </template>
+        <template #default-remark="scope">
+          <el-input style="width: 99%;" disabled :controls="false" v-model="scope.row.remark" maxlength="100" />
+        </template>
+        <template #default-make="scope">
+          <el-button link type="primary" @click="handleDelete(scope.row)">删除</el-button>
+        </template>
+
+      </XTable>
+      </div>
 
       <template #footer>
-        <div style="display: flex; justify-content: center;">
-          <span class="dialog-footer">
-            <el-button @click="resetReceiveForm">取消</el-button>
-            <!--            <el-button type="info" @click="stagingDeliveryOrder" v-if="editStatus&&isEdit">暂存</el-button>-->
-            <el-button type="primary" @click="editDeliveryOrder" v-if="editStatus">确认</el-button>
-          </span>
-        </div>
+        <!--            <el-button type="info" @click="stagingDeliveryOrder" v-if="editStatus&&isEdit">暂存</el-button>-->
+        <el-button type="primary" @click="editDeliveryOrder" v-if="editStatus">确认</el-button>
+        <el-button @click="resetReceiveForm">取消</el-button>
       </template>
 
     </el-drawer>
@@ -252,6 +248,9 @@
 
     <!-- 签名列表 -->
     <signDialog v-if="signVisible" v-model:show="signVisible" @submit="submitSign" @cancel="cancelSign"></signDialog>
+
+    <!-- 库存锁定提示框 -->
+    <InventoryLock title="物料盘点提示" inventoryType="2" v-model:show="inventoryCheck" :data="inventoryRes" @close="inventoryCheck = false"/>
   </div>
 </template>
 
@@ -279,29 +278,38 @@ import dayjs from "dayjs";
 import { getUrlLink } from "@/api/purchase/materialOrder";
 import clipboard3 from "vue-clipboard3";
 import useUserStore from "@/store/modules/user";
+import {listMaterialInventoryInfo} from "@/api/purchase/materialApply";
+import { decryptBase64ByStr } from '@/utils/crypto'
 
+const editableTabsValue = ref('0');
+const route = useRoute();
+/**
+ * 进入页面次数
+ */
+const isFirst = ref(0)
+/**
+ * 待办跳转参数
+ */
+const pendingParams = ref()
+const XTableRef = ref();
+const XTableRef2 = ref();
 /** 报表预览地址 */
 let reportUrl = ref("");
 const uReportHandle = async (row) => {
   reportUrl.value = "";
   reportDrawer.title = "采购送货单预览";
   reportDrawer.visible = true;
-  if (row.status === "3") {
-    getSignPdf({ bizId: row.bizId, bizType: "17" }).then(res => {
-      let vo = res.data;
-      if (vo !== null && vo.url) {
-        reportUrl.value = "/web/viewer.html?file=" + encodeURIComponent(vo.url + "#" + vo.name);
-      } else {
-        // ElMessage.info("查询不到对应的签名文件");
-        reportUrl.value = getReportUrl() + `&_n=采购送货单&_u=file:purchaseDelivery.ureport.xml&url=purchase/materialDelivery/reportHeard/${row.id}&listUrl=purchase/materialDelivery/reportExcel/${row.id}`;
-        // reportDrawer.visible = false;
-      }
-    });
-    return;
-  }
-  reportUrl.value = getReportUrl() + `&_n=采购送货单&_u=file:purchaseDelivery.ureport.xml&url=purchase/materialDelivery/reportHeard/${row.id}&listUrl=purchase/materialDelivery/reportExcel/${row.id}`;
-  // reportUrl.value = reportUrl.value.replace("1,4,6","2,4,6");
 
+  getSignPdf({bizId: row.bizId, bizType: "17"}).then(res => {
+    let vo = res.data;
+    if (vo !== null && vo.url) {
+      reportUrl.value = "/web/viewer.html?file=" + encodeURIComponent(vo.url + "#" + vo.name);
+    } else {
+      // ElMessage.info("查询不到对应的签名文件");
+      reportUrl.value = getReportUrl() + `&_n=采购送货单&_u=file:purchaseDelivery.ureport.xml&url=purchase/materialDelivery/reportHeard/${row.id}&listUrl=purchase/materialDelivery/reportExcel/${row.id}`;
+      // reportDrawer.visible = false;
+    }
+  });
 };
 const reportDrawer = reactive({
   direction: "left",
@@ -567,6 +575,8 @@ const validRules = ref({
     { required: true, message: "发货数量不能为空" }
   ]
 });
+const inventoryCheck = ref(false);
+const inventoryRes = ref([]);
 /**
  * 新建送货单
  */
@@ -642,8 +652,21 @@ const editDeliveryOrder = async () => {
             })
               .then(async (res) => {
                   if (res.data === true) {
+                    // 查询是否存在盘点中物料
+                    let ids = receiveFromData.value.purchaseMaterialDeliveryList.map(item => item.rawMaterialId);
+                    let query = {
+                      pageNum: 1,
+                      pageSize: 20,
+                      idList: ids,
+                      isCheck: '1'
+                    }
+                    const res = await listMaterialInventoryInfo(query);
+                    if (res.rows && res.rows.length > 0) {
+                      inventoryRes.value = res.rows;
+                      inventoryCheck.value = true;
+                      return;
+                    }
                     signVisible.value = true;
-
                   } else {
                     ElMessage({
                       type: "success",
@@ -1496,12 +1519,42 @@ const changeTab = (name) => {
     refreshConfirmedTableData();
   }
 };
-
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      let tab = !isNaN(Number(params.tab)) ? params.tab : '0';
+      editableTabsValue.value = tab
+      let tempColumnList = [{field: 'code', defaultValue: params.bizNo}]
+      if (tab === '0') {
+        deliveryWaitConfirmQueryParams.value.code = params.bizNo
+        setTimeout(() => {
+          XTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === '1') {
+        deliveryConfirmedQueryParams.value.code = params.bizNo
+        setTimeout(() => {
+          XTableRef2.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      }
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
 /** 渲染完页面后刷新页面数据 */
 onMounted(async () => {
-  deliveryWaitConfirmTableData.value = [];
-  refreshWaitConfirmTableData();
-
+    deliveryWaitConfirmTableData.value = [];
+    refreshWaitConfirmTableData();
 });
 
 </script>

@@ -24,29 +24,16 @@
       </el-col>
       <el-col :span="8" v-if="props.isShow">
         <el-form-item label="外协单价" label-width="100" prop="price">
-          <el-input v-model.number="outsourceForm.price" type="number"   >
+          <el-input v-model="outsourceForm.price" type="number"   >
             <template #append>元/PCS</template>
           </el-input>
         </el-form-item>
       </el-col>
-      <el-col v-if="checkAddress" :span="8">
-        <el-form-item label="" label-width="20">
-          <el-radio-group v-model="outsourceForm.addressType" @change="addressChange" class="ml-4">
-            <el-radio label="1">发给客户</el-radio>
-            <el-radio label="2">发回本厂</el-radio>
-          </el-radio-group>
-        </el-form-item>
-      </el-col>
-      <el-col :span="8">
-        <el-form-item label="发货地址" label-width="100" prop="addressId">
-          <el-select v-model="outsourceForm.addressId" :disabled="props.isConfirm" :collapse-tags="true" filterable placeholder="请选择地址">
-            <el-option v-for="item in addressList"
-            :key="item.id"
-            :label="`${item.status==0?'(已禁用)-':''}${item.address}`"
-            :value="item.id"
-            :disabled="item.status==0"
-            />
-          </el-select>
+      <el-col :span="8" v-if="props.isShow && props.isShowOrderPrice">
+        <el-form-item label="订单单价" label-width="100" prop="orderPrice">
+          <el-input v-model.number="outsourceForm.orderPrice" type="number"  disabled >
+            <template #append>元/PCS</template>
+          </el-input>
         </el-form-item>
       </el-col>
        <el-col :span="8">
@@ -63,6 +50,26 @@
             />
         </el-form-item>
       </el-col>
+      <el-col v-if="checkAddress" :span="8">
+        <el-form-item label="" label-width="60">
+          <el-radio-group v-model="outsourceForm.addressType" @change="addressChange" class="ml-4">
+            <el-radio label="1">发给客户</el-radio>
+            <el-radio label="2">发回本厂</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-col>
+      <el-col :span="8">
+        <el-form-item label="发货地址" label-width="100" prop="addressId">
+          <el-select v-model="outsourceForm.addressId" :disabled="props.isConfirm" :collapse-tags="true" filterable placeholder="请选择地址">
+            <el-option v-for="item in addressList"
+                       :key="item.id"
+                       :label="`${item.status==0?'(已禁用)-':''}${item.address}`"
+                       :value="item.id"
+                       :disabled="item.status==0"
+            />
+          </el-select>
+        </el-form-item>
+      </el-col>
       <el-col :span="24">
         <el-form-item label="备注" label-width="100" prop="remark">
           <el-input v-model="outsourceForm.remark" maxlength="400" type="textarea" />
@@ -76,56 +83,70 @@
     </el-row>
     <el-divider content-position="left" v-if="props.isShow">其他费用</el-divider>
     <el-row v-if="props.isShow">
-      <el-col :span="4">
-        <el-form-item label="模具费" label-width="50" prop="mouldCost">
+      <el-col :span="8">
+        <el-form-item label="模具费" label-width="100" prop="mouldCost">
           <el-input :class="{'inputSmallFont': outsourceForm.mouldCost?.length > numMax}" v-model.number="outsourceForm.mouldCost" type="number" />
         </el-form-item>
       </el-col>
-      <el-col :span="4">
-        <el-form-item label="测试架费" label-width="65" prop="testFrameCost">
+      <el-col :span="8">
+        <el-form-item label="测试架费" label-width="100" prop="testFrameCost">
           <el-input :class="{'inputSmallFont': outsourceForm.testFrameCost?.length > numMax}" v-model.number="outsourceForm.testFrameCost" type="number" />
         </el-form-item>
       </el-col>
-      <el-col :span="4">
-        <el-form-item label="飞针费" label-width="50" prop="flyProbeCost">
+      <el-col :span="8">
+        <el-form-item label="飞针费" label-width="100" prop="flyProbeCost">
           <el-input :class="{'inputSmallFont': outsourceForm.flyProbeCost?.length > numMax}" v-model.number="outsourceForm.flyProbeCost" type="number" />
         </el-form-item>
       </el-col>
-      <el-col :span="4">
-        <el-form-item label="工程费" label-width="50" prop="engineeringCost">
+      <el-col :span="8">
+        <el-form-item label="工程费" label-width="100" prop="engineeringCost">
           <el-input :class="{'inputSmallFont': outsourceForm.engineeringCost?.length > numMax}" v-model.number="outsourceForm.engineeringCost" type="number" />
         </el-form-item>
       </el-col>
-      <el-col :span="4">
-        <el-form-item label="样板费" label-width="50" prop="sampleCost">
+      <el-col :span="8">
+        <el-form-item label="样板费" label-width="100" prop="sampleCost">
           <el-input :class="{'inputSmallFont': outsourceForm.sampleCost?.length > numMax}" v-model.number="outsourceForm.sampleCost" type="number" />
         </el-form-item>
       </el-col>
-      <el-col :span="4">
-        <el-form-item label="加急费" label-width="50" prop="expeditedCost">
+      <el-col :span="8">
+        <el-form-item label="加急费" label-width="100" prop="expeditedCost">
           <el-input :class="{'inputSmallFont': outsourceForm.expeditedCost?.length > numMax}" v-model.number="outsourceForm.expeditedCost" type="number" />
         </el-form-item>
       </el-col>
 
-      <el-col :span="6" style="text-align:center">
-        <span>其他费用</span>
-        <el-button type="text" icon="Plus" @click.prevent="addOtherCost()"></el-button>
-      </el-col>
-      <el-col :span="6" v-for="(item, index) in outsourceForm.otherCostList" :key="item.title+index">
-        <el-form-item label-width="0">
-          <div style="display:flex; width: 100%;">
-            <el-input v-model="item.title" style="width:85px;display:inline-block"></el-input>
-
-            <el-input-number
-              style="flex:1;padding-left: 5px;"
-              class="inputSmallFont2"
-              v-model.number="item.price"
-              type="number"
-              :precision="2"
-              :controls="false"
-            ></el-input-number>
-            <el-button type="text" icon="Close" @click.prevent="removeotherCost(item)"></el-button>
-          </div>
+      <el-col :span="24" >
+        <el-form-item label="" label-width="100">
+          <template #label>
+            <el-row>
+              <el-col :span="20">
+                <div style="line-height:28px;">其他费用</div>
+              </el-col>
+              <el-col :span="4">
+                <el-button class="pointer" link type="primary" icon="Plus" @click.prevent="addOtherCost()"></el-button>
+              </el-col>
+            </el-row>
+          </template>
+          <el-row style="width: 100%;">
+            <el-col :span="6" v-for="(item, index) in outsourceForm.otherCostList" :key="index">
+              <el-row>
+                <el-col :span="10" class="flex flex-center">
+                  <el-input v-model="item.title"></el-input>
+                </el-col>
+                <el-col :span="10">
+                  <el-input-number
+                    class="inputSmallFont2 width-100"
+                    v-model.number="item.price"
+                    type="number"
+                    :precision="2"
+                    :controls="false"
+                  ></el-input-number>
+                </el-col>
+                <el-col :span="4" style="text-align: center;" class="pointer" >
+                  <el-button link type="primary" icon="Close" @click.prevent="removeotherCost(item)"></el-button>
+                </el-col>
+              </el-row>
+            </el-col>
+          </el-row>
         </el-form-item>
       </el-col>
     </el-row>
@@ -134,7 +155,7 @@
 
 <script setup name="SendOutSource" lang="ts">
 import {ref} from "vue";
-import {listOutSourceAddressList, listOutSourceSupplierList} from "@/api/outsource/sourceFullProcessOrder";
+import {listOutSourceAddressList, listOutSourceSupplierTypeList} from "@/api/outsource/sourceFullProcessOrder";
 
 const numMax = 10;
 const props = withDefaults(defineProps<{
@@ -143,6 +164,8 @@ const props = withDefaults(defineProps<{
   outSourceOrder:any,
   disabled: any,
    isShow: boolean,
+  isShowOrderPrice: boolean,
+  orderPrice: number,
   isConfirm: any,
   mustInt?: boolean,
 
@@ -152,6 +175,8 @@ const props = withDefaults(defineProps<{
   outSourceOrder:{},
   disabled: false,
    isShow: true,
+  isShowOrderPrice: false,
+  orderPrice: undefined,
   isConfirm:false,
   mustInt: false,
 })
@@ -162,6 +187,7 @@ const outsourceForm = ref({
   quantity: undefined,
   areaPrice: undefined,
   price: undefined,
+  orderPrice: undefined,
   addressId:undefined,
   addressType: '1',
   mouldCost: undefined,
@@ -176,11 +202,28 @@ const outsourceForm = ref({
   otherCostList: [] as any[]
 });
 
+
+
+const nullOrPositiveNumberWithTwoDecimalsHandle = (rule: any, value: any, callback: any) => {
+  callback(nullOrPositiveNumberWithTwoDecimals(value))
+}
+
+// 0+正数且小数点后最多4位校验
+const nullOrPositiveNumberWithTwoDecimals = (cellValue: any) => {
+  // console.log('cellValue----', cellValue)
+  if (cellValue && !/^(0|[1-9]\d*)(\.\d{1,4})?$/.test(cellValue)) {
+    return new Error('请输入数字、最多四位小数点')
+  }
+}
+
 const rules = reactive({
   supplierId: [{ required: true, message: '请选择外协供应商', trigger: 'change' }],
   quantity: [{ required: true, message: '请输入外协数量', trigger: 'blur' }],
   areaPrice: [{ required: true, message: '请输入外协平米价', trigger: 'blur' }],
-  price: [{ required: true, message: '请输入外协单价', trigger: 'blur' }],
+  price: [
+    {required: true,message: "请输入外协单价", trigger: 'change'},
+    { validator: nullOrPositiveNumberWithTwoDecimalsHandle, trigger: 'change'},
+  ],
   addressId: [{ required: true, message: '请选择发货地址', trigger: 'change' }],
   deliverTime: [{ required: true, message: '请选择要求交期', trigger: 'change' }],
 })
@@ -197,7 +240,7 @@ const disabledDate = (date:any) => {
 }
 /** 查询外协供应商列表 */
 const queryOutSourceSupplierList = async () => {
-  const res = await listOutSourceSupplierList();
+  const res = await listOutSourceSupplierTypeList();
   supplierList.value = res.data
 }
 
@@ -279,16 +322,18 @@ const submitOtherCost = (fn: Function) => {
 const initForm = () => {
 
 
-  if(Object.keys(props.outSourceOrder).length != 0){
+  if (Object.keys(props.outSourceOrder).length != 0) {
     outsourceForm.value = props.outSourceOrder
-      console.log("outsourceForm:",outsourceForm.value)
-  }else{
- outsourceForm.value.price = props.orderInfo.price? props.orderInfo.price:0;
-  outsourceForm.value.quantity = props.orderInfo.selfQuantity? props.orderInfo.selfQuantity:0;
-  outsourceForm.value.area = props.orderInfo.area? props.orderInfo.area:0;
-    outsourceForm.value.areaPrice =  props.orderInfo.areaPrice? props.orderInfo.areaPrice:0;
+    console.log("outsourceForm:", outsourceForm.value)
+  } else {
+    // outsourceForm.value.price = props.orderInfo.price? props.orderInfo.price:0;
+    // 赋值订单单价
+    outsourceForm.value.orderPrice = props.orderInfo.price ?  Number(parseFloat(props.orderInfo.price).toString()) : 0;
+    outsourceForm.value.quantity = props.orderInfo.selfQuantity ? props.orderInfo.selfQuantity : 0;
+    outsourceForm.value.area = props.orderInfo.area ? props.orderInfo.area : 0;
+    outsourceForm.value.areaPrice = props.orderInfo.areaPrice ? Number(parseFloat(props.orderInfo.areaPrice).toString()) : 0;
   }
-  console.log("props.outSourceOrder",props.orderInfo)
+  console.log("props.outSourceOrder", props.orderInfo)
 
   // if(outsourceForm.value.price && outsourceForm.value.quantity){
   //   const price=outsourceForm.value.price*10000;
@@ -299,6 +344,19 @@ const initForm = () => {
 
   disabled.value = props.disabled
   getAddressList();
+
+  // 如果订单单价不为空,赋值订单单价
+  if (props.orderPrice){
+    outsourceForm.value.orderPrice = props.orderPrice;
+  }
+
+  // 将订单单价和外协单价去末尾无效零
+  if (outsourceForm.value.orderPrice) {
+    outsourceForm.value.orderPrice = Number(parseFloat(outsourceForm.value.orderPrice).toString());
+  }
+  if (outsourceForm.value.price) {
+    outsourceForm.value.price = Number(parseFloat(outsourceForm.value.price).toString());
+  }
 
 }
 

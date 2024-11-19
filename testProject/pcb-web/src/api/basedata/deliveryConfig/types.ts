@@ -76,6 +76,7 @@ export interface DeliveryConfigForm extends BaseEntity {
 
   waitCheck?:[]
   showType?:string
+  reportName?:string
 }
 
 export interface DeliveryConfigQuery extends PageQuery {

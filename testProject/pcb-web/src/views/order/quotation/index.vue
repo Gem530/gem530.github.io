@@ -1,9 +1,9 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
-      <el-tabs type="border-card" v-model="editableTabsValue" @tab-change="getVoidedList()" class="xtable-tab">
+    <!-- <el-card shadow="never" class="xtable-card"> -->
+      <el-tabs v-model="editableTabsValue" @tab-change="getVoidedList()" class="xtable-tab">
         <el-tab-pane label="待报价" name="1">
-          <div class="p-2" style="text-align: right;width: 100%">
+          <div class="head-btn-flex">
             <el-button :loading="buttonLoading" type="primary" @click="handleGenerate()">生成报价单</el-button>
           </div>
 
@@ -110,7 +110,7 @@
           </XTable>
         </el-tab-pane>
         <el-tab-pane label="已报价" name="2">
-          <div class="p-2" style="text-align: right;width: 100%">
+          <div class="head-btn-flex">
             <el-button :loading="buttonLoading" type="primary" @click="handleSalesContract()">生成销售合同</el-button>
           </div>
           <XTable toolId="quotationFinish" :pageShow="true" v-model:page-size="queryParams2.pageSize" height="100%" class="xtable-content"
@@ -304,16 +304,26 @@
           </XTable>
         </el-tab-pane>
       </el-tabs>
-    </el-card>
+    <!-- </el-card> -->
     <!--报价下单预览 -->
     <el-drawer destroy-on-close v-model="reportDrawer.visible" :title="reportDrawer.title" size="65%" visible.sync="false" draggable>
       <iframe :src="reportUrl" style="width: 100%; height: 100%; border: none;"></iframe>
     </el-drawer>
     <!-- 添加或修改报价单对话框 -->
-    <el-drawer :close-on-click-modal="false" :title="dialog.title" v-model="dialog.visible"  size="45%" modal-class="add-prod-drawder">
+    <el-drawer :close-on-click-modal="false" :title="dialog.title" v-model="dialog.visible"
+      size="45%"
+      :modal-class="`add-prod-drawder ${ownerId == '101' && 'normal-prod-drawder'}`">
+      <template #header>
+        <span class="el-drawer__title no-wrap">{{dialog.title}}</span>
+        <TotalTitle :start="true" :firstBorder="true" :list="[
+          { title: `总价：${ form.totalOrderPrice }元` },
+          { title: `税金：${ form.tax }元` },
+          { title: `总金额：${ form.totalPrice }元` },
+        ]"></TotalTitle>
+      </template>
       <el-form ref="quotationFormRef" :model="form" :rules="rules"
                :disabled="dialog.title === '查看详情'"
-               label-width="60px">
+               label-width="65px">
         <el-row>
           <el-col :span="6">
             <el-form-item size="small" label="客户" prop="cusId">
@@ -795,9 +805,7 @@
               <el-select suffix-icon="" class="height-light"
                   v-model="form.commodityTestWay"
                   placeholder=" "
-                  @change="saveDict(form.commodityTestWay,'order_commodity_testway')"
                   filterable
-                  allow-create
                   default-first-option
                   :reserve-keyword="false"
 
@@ -817,9 +825,7 @@
               <el-select suffix-icon=""
                   v-model="form.testFrame"
                   placeholder=" "
-                  @change="saveDict(form.testFrame,'order_test_stand')"
                   filterable
-                  allow-create
                   default-first-option
                   :reserve-keyword="false"
 
@@ -1084,16 +1090,11 @@
           <span style="float: left;margin-right: 20px;">总金额：{{ form.totalPrice }}元</span>
         </div> -->
       </el-form>
-      <template #footer>
-        <el-row>
-          <el-col :span="8" style="text-align: left;">总价：{{ form.totalOrderPrice }}元</el-col>
-          <el-col :span="8" style="text-align: center;">税金：{{ form.tax }}元</el-col>
-          <el-col :span="8" style="text-align: right;">总金额：{{ form.totalPrice }}元</el-col>
-        </el-row>
-        <div class="text-center" style="margin-top: 5px;" v-if="dialog.title != '查看详情'">
-          <el-button :loading="buttonLoading" @click="cancel">取 消</el-button>
+      <template #footer v-if="dialog.title != '查看详情'">
+        <!-- <div class="text-center" style="margin-top: 5px;" v-if="dialog.title != '查看详情'"> -->
           <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
-        </div>
+          <el-button :loading="buttonLoading" @click="cancel">取 消</el-button>
+        <!-- </div> -->
       </template>
     </el-drawer>
 
@@ -1114,165 +1115,171 @@
           <el-input-number v-model="formAddress.logisticsCycle" autocomplete="off" :min="0" :precision="0" placeholder=""></el-input-number>
         </el-form-item>
       </el-form>
-      <div class="text-center">
-        <el-button @click="cancelAddress">取 消</el-button>
+      <div class="text-right">
         <el-button :loading="buttonLoading" type="primary" @click="submitAddress">确 定</el-button>
+        <el-button @click="cancelAddress">取 消</el-button>
       </div>
     </el-dialog>
 
     <!-- 生成销售报价单对话框 -->
     <el-drawer :title="generateDialog.title" v-model="generateDialog.visible" size="70%" @close="cancel">
-      <el-form ref="generatequotationFormRef" :model="formInline" :rules="rules" label-width="80px">
-        <el-row>
-          <el-col :span="6">
-            <el-form-item size="small" label="报价客户" prop="cusId">
-              <el-select v-model="formInline.cusId"
-                         style="width: calc(100%)"
-                         placeholder=""
-                         :disabled="true"
-              >
-                <el-option
-                    v-for="item in customerList"
-                    :key="item.id"
-                    :label="item.customerName"
-                    :value="item.id"
-
+      <div class="ptable-card">
+        <el-form ref="generatequotationFormRef" :model="formInline" :rules="rules" label-width="80px">
+          <el-row>
+            <el-col :span="6">
+              <el-form-item size="small" label="报价客户" prop="cusId">
+                <el-select v-model="formInline.cusId"
+                           style="width: calc(100%)"
+                           placeholder=""
+                           :disabled="true"
                 >
-                  <span style="float: left">{{ item.customerCode }}</span>
-                  <span
-                      style="
-                          float: right;
-                          padding-left: 60px;
-                        "
-                  >{{ item.customerName }}</span
+                  <el-option
+                      v-for="item in customerList"
+                      :key="item.id"
+                      :label="item.customerName"
+                      :value="item.id"
+  
                   >
-                </el-option>
-              </el-select>
-            </el-form-item>
-
-          </el-col>
-          <el-col :span="6">
-            <el-form-item size="small" label="负责人" prop="companyPrincipal">
-              <el-input v-model="formInline.companyPrincipal" placeholder=""/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item size="small" label="电话" prop="companyPrincipalPhone">
-              <el-input v-model="formInline.companyPrincipalPhone" placeholder="" type="number"/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item size="small" label="传真" prop="faxes">
-              <el-input v-model="formInline.faxes" placeholder=""/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item size="small" label="报价时间" prop="placeOrderTime">
-              <el-date-picker
-                  style="width: 100%;"
-                  v-model="formInline.placeOrderTime"
-                  :disabled-date="disabledDateEnd"
-                  type="datetime"
-                  placeholder="选择日期时间"
-                  value-format="YYYY-MM-DD HH:mm:ss"
-                  format="YYYY-MM-DD HH:mm:ss"
-                  clearable
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item size="small" label="业务人员" prop="cusSaleUserId" >
-              <el-select v-model="formInline.cusSaleUserId" clearable :collapse-tags="true" filterable
-                         placeholder="请选择业务员">
-                <el-option
-                    v-for="item in salerOptions"
-                    :key="item.userId"
-                    :label="item.nickName"
-                    :value="item.userId"
+                    <span style="float: left">{{ item.customerCode }}</span>
+                    <span
+                        style="
+                            float: right;
+                            padding-left: 60px;
+                          "
+                    >{{ item.customerName }}</span
+                    >
+                  </el-option>
+                </el-select>
+              </el-form-item>
+  
+            </el-col>
+            <el-col :span="6">
+              <el-form-item size="small" label="负责人" prop="companyPrincipal">
+                <el-input v-model="formInline.companyPrincipal" placeholder=""/>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item size="small" label="电话" prop="companyPrincipalPhone">
+                <el-input v-model="formInline.companyPrincipalPhone" placeholder="" type="number"/>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item size="small" label="传真" prop="faxes">
+                <el-input v-model="formInline.faxes" placeholder=""/>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item size="small" label="报价时间" prop="placeOrderTime">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="formInline.placeOrderTime"
+                    :disabled-date="disabledDateEnd"
+                    type="datetime"
+                    placeholder="选择日期时间"
+                    value-format="YYYY-MM-DD HH:mm:ss"
+                    format="YYYY-MM-DD HH:mm:ss"
+                    clearable
                 />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item size="small" label-width="80px" style="flex: 1;" label="币种" prop="currency">
-              <el-select v-model="formInline.currency" clearable filterable
-                         @change="changeCurrency"
-                         placeholder="请选择币种">
-                <el-option
-                    v-for="dict in currencyTypeOptions"
-                    :key="dict.dictCode"
-                    :label="dict.dictLabel"
-                    :value="dict.dictValue"
-                />
-              </el-select>
-
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item size="small" label="汇率(%)" prop="exchangeRate">
-              <el-input :disabled="formInline.currency=='人民币'" :min="0" style="width: 145px;" v-model="formInline.exchangeRate"
-                        type="number"
-                        placeholder="" clearable/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item size="small" label="收货地址" prop="addressId">
-              <el-select v-model="formInline.addressId"
-                         style="width: calc(100% - 63px)"
-                         clearable :collapse-tags="true"
-                         filterable
-                         placeholder="请选择收货地址">
-                <el-option
-                    v-for="item in customerAddressList"
-                    :key="item.id"
-                    :label="`${item.status==0?'(已禁用)-':''}${item.name},${item.phone},${item.address}`"
-                    :value="item.id"
-                    :disabled="item.status==0"
-                />
-              </el-select>
-              <el-button style="width: 60px;margin-left: 3px" text="plain" @click="handleAddAddress">
-                <el-icon>
-                  <Plus/>
-                </el-icon>
-                添加地址
-              </el-button>
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item size="small" label="邮箱" prop="email">
-              <el-input v-model="formInline.email" placeholder=""/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item size="small" label="是否含税">
-              <el-switch v-model="formInline.isTax" active-value="1" inactive-value="0" active-text="含税"
-                         inactive-text="不含税" @change="changeIsTax"/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item size="small" label="备注" prop="remark">
-              <el-input v-model="formInline.remark" style="padding-top: -10px;" type="textarea" rows="2"></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <vxe-table
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item size="small" label="业务人员" prop="cusSaleUserId" >
+                <el-select v-model="formInline.cusSaleUserId" clearable :collapse-tags="true" filterable
+                           placeholder="请选择业务员">
+                  <el-option
+                      v-for="item in salerOptions"
+                      :key="item.userId"
+                      :label="item.nickName"
+                      :value="item.userId"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item size="small" label-width="80px" style="flex: 1;" label="币种" prop="currency">
+                <el-select v-model="formInline.currency" clearable filterable
+                           @change="changeCurrency"
+                           placeholder="请选择币种">
+                  <el-option
+                      v-for="dict in currencyTypeOptions"
+                      :key="dict.dictCode"
+                      :label="dict.dictLabel"
+                      :value="dict.dictValue"
+                  />
+                </el-select>
+  
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item size="small" label="汇率(%)" prop="exchangeRate">
+                <el-input :disabled="formInline.currency=='人民币'" :min="0" style="width: 145px;" v-model="formInline.exchangeRate"
+                          type="number"
+                          placeholder="" clearable/>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item size="small" label="收货地址" prop="addressId">
+                <el-select v-model="formInline.addressId"
+                           style="width: calc(100% - 63px)"
+                           clearable :collapse-tags="true"
+                           filterable
+                           placeholder="请选择收货地址">
+                  <el-option
+                      v-for="item in customerAddressList"
+                      :key="item.id"
+                      :label="`${item.status==0?'(已禁用)-':''}${item.name},${item.phone},${item.address}`"
+                      :value="item.id"
+                      :disabled="item.status==0"
+                  />
+                </el-select>
+                <el-button style="width: 60px;margin-left: 3px" text="plain" @click="handleAddAddress">
+                  <el-icon>
+                    <Plus/>
+                  </el-icon>
+                  添加地址
+                </el-button>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item size="small" label="邮箱" prop="email">
+                <el-input v-model="formInline.email" placeholder=""/>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item size="small" label="是否含税">
+                <el-switch v-model="formInline.isTax" active-value="1" inactive-value="0" active-text="含税"
+                           inactive-text="不含税" @change="changeIsTax"/>
+              </el-form-item>
+            </el-col>
+            <el-col :span="24">
+              <el-form-item size="small" label="备注" prop="remark">
+                <el-input v-model="formInline.remark" style="padding-top: -10px;" type="textarea" rows="2"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+        <XTable
             border
             keep-source
             size="small"
             align="center"
-            height="545px"
+            height="100%"
+            :showHead="false"
+            class="ptable-content"
             :row-config="{height: 50}"
             :show-footer="true"
             :footer-method="footerMethod"
             :edit-rules="validRules"
             show-overflow
             ref="xTableGenerate"
+            :pageShow="false"
             :column-config="{resizable: true}"
             :loading="loading"
             :data="tableData"
+            :columnList="columnListGenerate"
             :edit-config="{trigger: 'manual', mode: 'row', autoClear: false, showStatus: true}"
         >
-          <vxe-column type="seq" fixed="left" title="序号" width="60"></vxe-column>
+          <!-- <vxe-column type="seq" fixed="left" title="序号" width="60"></vxe-column>
           <vxe-column width="120" title="产品名称" field="commodityName">
             <template #edit="{ row }">
               <el-input v-model="row.commodityName" :maxlength="333"
@@ -1340,17 +1347,19 @@
               <el-input v-model="row.totalPrice"></el-input>
             </template>
           </vxe-column>
-          <vxe-column fixed="right" title="操作" width="100">
-            <el-button size="small" text="plain" @click="deleteRowEvent(row,rowIndex)">删除</el-button>
-          </vxe-column>
-        </vxe-table>
-      </el-form>
+          <vxe-column fixed="right" title="操作" width="100"> -->
+            <template #default-make="{row,rowIndex}">
+              <el-button link @click="deleteRowEvent(row,rowIndex)">删除</el-button>
+            </template>
+          <!-- </vxe-column> -->
+        </XTable>
+      </div>
       <template #footer>
-        <div class="text-center">
-          <el-button :loading="buttonLoading" @click="cancel">取 消</el-button>
+        <!-- <div class="text-center"> -->
           <el-button :loading="buttonLoading" type="primary" @click="preViewQuotation()">预 览</el-button>
           <el-button :loading="buttonLoading" type="primary" @click="handleSave()">保 存</el-button>
-        </div>
+          <el-button :loading="buttonLoading" @click="cancel">取 消</el-button>
+        <!-- </div> -->
       </template>
     </el-drawer>
 
@@ -1399,8 +1408,10 @@ import {downloadUrl} from '@/api/upload/index'
 import {deepClone} from "@/utils";
 import {getReportUrl} from "@/utils/report";
 import useTagsViewStore from '@/store/modules/tagsView';
+import useUserStore from '@/store/modules/user';
 
 
+const { ownerId } = useUserStore();
 const {proxy} = getCurrentInstance() as ComponentInternalInstance;
 const quotationList = ref<QuotationVO[]>([]);
 const quotationQuotedList = ref<QuotationVO[]>([]);
@@ -2076,6 +2087,21 @@ const {queryParams:queryParams3} = toRefs(data3);
 const total2 = ref(0);
 const total3 = ref(0);
 
+const columnListGenerate = ref([
+{ width: '60',type: 'seq',title: '序号',fixed: 'left',align: 'center',  },
+{ width: '120',title: '产品名称',field: 'commodityName',align: 'center',  },
+{ width: '65',title: '版本号',field: 'version',align: 'center',  },
+{ width: '100',title: '产品类型',field: 'commodityType',align: 'center',  },
+{ width: '80',title: '加急',field: 'urgent',align: 'center',  },
+{ width: '90',title: '订购数量pcs',field: 'quantity',align: 'center',  },
+{ width: '85',title: '单价',field: 'price',align: 'center',  },
+{ width: '90',title: '订单面积(m²)',field: 'area',align: 'center',  },
+{ width: '85',title: '平米价',field: 'areaPrice',align: 'center',  },
+{ width: '85',title: '总价',field: 'totalOrderPrice',align: 'center',  },
+{ width: '85',title: '税金',field: 'tax',align: 'center',  },
+{ width: '85',title: '总金额',field: 'totalPrice',align: 'center',  },
+{ width: '100',title: '操作',align: 'center',field: 'make',fixed: 'right'  },
+]);
 
 /**
  * 查询已作废报价单列表
@@ -2342,17 +2368,17 @@ const changeIsTax = (value: number) => {
     if (formInline.isTax == 1) {
       // 含税总金额
       row.totalOrderPrice = Number((row.totalPrice / (1 + taxRate.value)).toFixed(2));
-      row.tax =  Number(row.totalPrice - row.totalOrderPrice).toFixed(2);
+      row.tax =  Number(Number(row.totalPrice - row.totalOrderPrice).toFixed(2));
     //  row.totalPrice = Number((row.totalOrderPrice / (1 + taxRate.value)).toFixed(2))
     } else {
       row.totalOrderPrice = row.totalPrice;
-      row.tax =  Number(row.totalPrice - row.totalOrderPrice).toFixed(2);
+      row.tax =  Number(Number(row.totalPrice - row.totalOrderPrice).toFixed(2));
     }
   })
   nextTick(() => {
     // 解决表格已渲染，金额还未计算完成，导致的总计不对
-    if (xTableGenerate.value) {
-      xTableGenerate.value.reloadData(tableData.value)
+    if (xTableGenerate.value.xTableRef) {
+      xTableGenerate.value.xTableRef.reloadData(tableData.value)
     }
   })
 }
@@ -2394,16 +2420,16 @@ const footerMethod: VxeTablePropTypes.FooterMethod<QuotationVO> = ({columns, dat
         return "合计";
       }
       if (column.field == "area") {
-        return `${sumNum(data, "area").toFixed(4)} `;
+        return `${Number(sumNum(data, "area").toFixed(6))} `;
       }
       if (column.field == "quantity") {
-        return `${sumNum(data, "quantity").toFixed(4)} `;
+        return `${Number(sumNum(data, "quantity").toFixed(4))} `;
       }
       if (column.field == "totalOrderPrice") {
-        return `${sumNum(data, "totalOrderPrice").toFixed(2)} `;
+        return `${Number(sumNum(data, "totalOrderPrice").toFixed(2))} `;
       }
       if (column.field == "totalPrice") {
-        return `${sumNum(data, "totalPrice").toFixed(2)} `;
+        return `${Number(sumNum(data, "totalPrice").toFixed(2))} `;
       }
       return "";
     })
@@ -3512,23 +3538,23 @@ onMounted(async () => {
 });
 
 const countPrice = (row: OrderVO) => {
-  row.price = (returnNumber(row.areaPrice) * (returnNumber(row.unitedLength) * returnNumber(row.unitedWidth)) / returnNumber(row.unitedNumber) / 1000000).toFixed(4)
+  row.price = Number((returnNumber(row.areaPrice) * (returnNumber(row.unitedLength) * returnNumber(row.unitedWidth)) / returnNumber(row.unitedNumber) / 1000000).toFixed(4))
   countAreaPrice(row)
   countTotalPrice(row)
 }
 // 通过单价去计算平米价
 const countAreaPrice = (row: any) => {
-  const areaPrice = (returnNumber(row.price) * returnNumber(row.unitedNumber) / (returnNumber(row.unitedLength) * returnNumber(row.unitedWidth)) * 1000000).toFixed(4)
+  const areaPrice = Number((returnNumber(row.price) * returnNumber(row.unitedNumber) / (returnNumber(row.unitedLength) * returnNumber(row.unitedWidth)) * 1000000).toFixed(4))
   if (isNaN(areaPrice)) {
     row.areaPrice = 0;
   } else {
-    row.areaPrice = Number(areaPrice).toFixed(4);
+    row.areaPrice = Number(Number(areaPrice).toFixed(4));
     //总金额
-    row.totalPrice = Number(parseFloat(row.price) * parseFloat(row.quantity)).toFixed(2);
+    row.totalPrice = Number(Number(parseFloat(row.price) * parseFloat(row.quantity)).toFixed(2));
     //不含税总价
-    row.totalOrderPrice = Number(parseFloat(row.totalPrice) / (1 + taxRate.value)).toFixed(2);
+    row.totalOrderPrice = Number(Number(parseFloat(row.totalPrice) / (1 + taxRate.value)).toFixed(2));
     //税金
-    row.tax = Number(parseFloat(row.totalPrice) - parseFloat(row.totalOrderPrice)).toFixed(2);
+    row.tax = Number(Number(parseFloat(row.totalPrice) - parseFloat(row.totalOrderPrice)).toFixed(2));
   }
 }
 const returnNumber = (val: any) => {
@@ -3544,11 +3570,11 @@ const countTotalPrice = (row: any) => {
       row.totalPrice += returnNumber(item.price)
     })
   }
-  row.totalPrice = returnNumber(row.totalPrice).toFixed(2)
+  row.totalPrice = Number(returnNumber(row.totalPrice).toFixed(2))
   //不含税总价
-  row.totalOrderPrice = Number(parseFloat(row.totalPrice) / (1 +  taxRate.value)).toFixed(2);
+  row.totalOrderPrice = Number(Number(parseFloat(row.totalPrice) / (1 +  taxRate.value)).toFixed(2));
   //税金
-  row.tax = Number(parseFloat(row.totalPrice) - parseFloat(row.totalOrderPrice)).toFixed(2);
+  row.tax = Number(Number(parseFloat(row.totalPrice) - parseFloat(row.totalOrderPrice)).toFixed(2));
 }
 
 // 计算膜具费 得到 总金额
@@ -3669,7 +3695,7 @@ const searchChange = (params: any) => {
  * 计算孔密度
  */
 const holeCountnumber = async () => {
-  form.value.holeDensity = Number(parseFloat(form.value.holeCount) / parseFloat(form.value.unitedLength) / parseFloat(form.value.unitedWidth) * 100).toFixed(6);
+  form.value.holeDensity = Number(Number(parseFloat(form.value.holeCount) / parseFloat(form.value.unitedLength) / parseFloat(form.value.unitedWidth) * 100).toFixed(6));
   form.value.holeDensity = form.value.holeDensity == 'NaN' ? '' : form.value.holeDensity
 }
 
@@ -3678,7 +3704,7 @@ const unitedNumberCount = async (flag?: boolean) => {
   //计算联片数量
   form.value.unitedNumber = parseFloat(form.value.unitedWayLength) * parseFloat(form.value.unitedWayWidth);
   //计算订单面积 (订单面积（㎡）=订购数量/连片方式（长+宽）*连片尺寸（长*宽）/1000000）
-  form.value.area = Number(parseFloat(form.value.quantity) / parseFloat(form.value.unitedNumber) * parseFloat(form.value.unitedLength) * parseFloat(form.value.unitedWidth) / 1000000).toFixed(4);
+  form.value.area = Number(Number(parseFloat(form.value.quantity) / parseFloat(form.value.unitedNumber) * parseFloat(form.value.unitedLength) * parseFloat(form.value.unitedWidth) / 1000000).toFixed(4));
   countPriceOther(form.value)
   if (flag) {
     holeCountnumber()
@@ -3687,9 +3713,9 @@ const unitedNumberCount = async (flag?: boolean) => {
 
 const countQuantity = (row: OrderVO, column?: any) => {
   //计算面积
-  row.area = Number(parseFloat(row.quantity) / parseFloat(row.unitedNumber) * parseFloat(row.unitedLength) * parseFloat(row.unitedWidth) / 1000000).toFixed(4);
+  row.area = Number(Number(parseFloat(row.quantity) / parseFloat(row.unitedNumber) * parseFloat(row.unitedLength) * parseFloat(row.unitedWidth) / 1000000).toFixed(4));
   //总金额
-  row.totalPrice = Number(parseFloat(row.price) * parseFloat(row.quantity)).toFixed(2);
+  row.totalPrice = Number(Number(parseFloat(row.price) * parseFloat(row.quantity)).toFixed(2));
   countTotalPrice(row)
 
   if (row && column) {
@@ -3699,16 +3725,16 @@ const countQuantity = (row: OrderVO, column?: any) => {
 const areaPriceCount = async () => {
   // 总金额=订单面积*平米价  含税总价
   //计算订单面积 (订单面积（㎡）=订购数量/连片方式（长*宽）*连片尺寸（长*宽）/1000000）
-  form.value.area = Number(parseFloat(form.value.quantity) / parseFloat(form.value.unitedNumber) * parseFloat(form.value.unitedLength) * parseFloat(form.value.unitedWidth) / 1000000).toFixed(4);
+  form.value.area = Number(Number(parseFloat(form.value.quantity) / parseFloat(form.value.unitedNumber) * parseFloat(form.value.unitedLength) * parseFloat(form.value.unitedWidth) / 1000000).toFixed(4));
   //计算单价  单价（元/PCS=订单面积*平米价/订购数量））
   //form.value.price = (parseFloat(form.value.quantity) / parseFloat(form.value.unitedWayWidth) * parseFloat(form.value.unitedWayLength) * parseFloat(form.value.unitedLength) * parseFloat(form.value.unitedWidth) / 1000000 * parseFloat(form.value.areaPrice) / parseFloat(form.value.quantity)).toFixed(4);
-  form.value.price = Number(parseFloat(form.value.area) * parseFloat(form.value.areaPrice) / parseFloat(form.value.quantity)).toFixed(4);
+  form.value.price = Number(Number(parseFloat(form.value.area) * parseFloat(form.value.areaPrice) / parseFloat(form.value.quantity)).toFixed(4));
   //总金额
-  form.value.totalPrice = Number(parseFloat(form.value.price) * parseFloat(form.value.quantity)).toFixed(2);
+  form.value.totalPrice = Number(Number(parseFloat(form.value.price) * parseFloat(form.value.quantity)).toFixed(2));
   //不含税总价
-  form.value.totalOrderPrice = Number(parseFloat(form.value.totalPrice) / (1 + taxRate.value)).toFixed(2);
+  form.value.totalOrderPrice = Number(Number(parseFloat(form.value.totalPrice) / (1 + taxRate.value)).toFixed(2));
   //税金
-  form.value.tax = Number(parseFloat(form.value.totalPrice) - parseFloat(form.value.totalOrderPrice)).toFixed(2);
+  form.value.tax = Number(Number(parseFloat(form.value.totalPrice) - parseFloat(form.value.totalOrderPrice)).toFixed(2));
 
   if (form.value.totalPrice == 'NaN') {
     form.value.totalPrice = 0
@@ -3770,117 +3796,117 @@ const isDisabledUser = (list: any[]) => {
   margin-bottom: 0px;
 }
 
-:deep(.add-prod-drawder) {
-  .el-drawer__header {
-    height: auto;
-    padding: 5px !important;
-    margin-bottom: 5px !important;
-  }
-  .el-drawer__body {
-    padding: 5px 5px !important;
+// :deep(.add-prod-drawder) {
+//   .el-drawer__header {
+//     height: auto;
+//     padding: 5px !important;
+//     margin-bottom: 5px !important;
+//   }
+//   .el-drawer__body {
+//     padding: 5px 5px !important;
 
-    .el-divider {
-      margin: 0 0 6px 0 !important;
-    }
-    .error-left {
-      .el-form-item__error {
-        left: -20px;
-      }
-    }
-    .error-left-one {
-      .el-form-item__error {
-        left: -30px;
-      }
-    }
+//     .el-divider {
+//       margin: 0 0 6px 0 !important;
+//     }
+//     .error-left {
+//       .el-form-item__error {
+//         left: -20px;
+//       }
+//     }
+//     .error-left-one {
+//       .el-form-item__error {
+//         left: -30px;
+//       }
+//     }
 
-    .el-form-item {
-      margin-bottom: 6px !important;
+//     .el-form-item {
+//       margin-bottom: 6px !important;
 
-      .el-form-item__label {
-        padding-right: 3px !important;
-      }
+//       .el-form-item__label {
+//         padding-right: 3px !important;
+//       }
 
-      .el-form-item__content {
-        .el-form-item {
-          margin-bottom: 0 !important;
-        }
-        .el-textarea,
-        .el-input__wrapper,
-        .el-textarea__inner {
-          background-color: #FDFFE1 !important;
-          color: #000000 !important;
-        }
-        .el-input__inner {
-          -webkit-text-fill-color: #000000;
-          color: #000000 !important;
-        }
-        .height-light .el-input__wrapper {
-          background-color: #FED547 !important;
-        }
-        .font-14 .el-input__inner {
-          font-size: 14px;
-        }
-        .el-input-group__prepend,
-        .el-input-group__append {
-          padding: 0 2px !important;
-        }
-        .el-input-number {
-          width: 100% !important;
-          .el-input__wrapper {
-            padding: 1px 7px !important;
-            .el-input__inner {
-              width: 100% !important;
-              text-align: left !important;
-            }
-          }
-        }
+//       .el-form-item__content {
+//         .el-form-item {
+//           margin-bottom: 0 !important;
+//         }
+//         .el-textarea,
+//         .el-input__wrapper,
+//         .el-textarea__inner {
+//           background-color: #FDFFE1 !important;
+//           color: #000000 !important;
+//         }
+//         .el-input__inner {
+//           -webkit-text-fill-color: #000000;
+//           color: #000000 !important;
+//         }
+//         .height-light .el-input__wrapper {
+//           background-color: #FED547 !important;
+//         }
+//         .font-14 .el-input__inner {
+//           font-size: 14px;
+//         }
+//         .el-input-group__prepend,
+//         .el-input-group__append {
+//           padding: 0 2px !important;
+//         }
+//         .el-input-number {
+//           width: 100% !important;
+//           .el-input__wrapper {
+//             padding: 1px 7px !important;
+//             .el-input__inner {
+//               width: 100% !important;
+//               text-align: left !important;
+//             }
+//           }
+//         }
 
-        .el-input__inner {
-          // 去除 数字表单 上下按钮
-          &::-webkit-outer-spin-button,
-          &::-webkit-inner-spin-button {
-              -webkit-appearance: none;
-          }
-          &[type="number"] {
-              -moz-appearance: textfield;
-              appearance: textfield;
-          }
-          border: none;
-        }
-      }
+//         .el-input__inner {
+//           // 去除 数字表单 上下按钮
+//           &::-webkit-outer-spin-button,
+//           &::-webkit-inner-spin-button {
+//               -webkit-appearance: none;
+//           }
+//           &[type="number"] {
+//               -moz-appearance: textfield;
+//               appearance: textfield;
+//           }
+//           border: none;
+//         }
+//       }
 
-      &.is-error .el-input__wrapper {
-        box-shadow: 0 0 0 2px var(--el-color-danger) inset;
-      }
-      .el-form-item__error {
-        display: none;
-        // margin-top: -2px;
-        // white-space: nowrap !important;
-        // font-size: 12px !important;
-        // transform: scale(0.9) !important;
-        // z-index: 10 !important;
-      }
-      .error-right {
-        .el-form-item__error {
-          /* text-align: right; */
-          left: 105px !important;
-        }
-        z-index: 10 !important;
-      }
-    }
-  }
-  /* .el-drawer__footer {
-    padding: 5px;
-  } */
-  .flex-start {
-    .el-form-item__content {
-      justify-content: flex-start !important;
-      align-items: center;
-      .el-input-number {
-        flex:1 !important;
-        width: auto;
-      }
-    }
-  }
-}
+//       &.is-error .el-input__wrapper {
+//         box-shadow: 0 0 0 2px var(--el-color-danger) inset;
+//       }
+//       .el-form-item__error {
+//         display: none;
+//         // margin-top: -2px;
+//         // white-space: nowrap !important;
+//         // font-size: 12px !important;
+//         // transform: scale(0.9) !important;
+//         // z-index: 10 !important;
+//       }
+//       .error-right {
+//         .el-form-item__error {
+//           /* text-align: right; */
+//           left: 105px !important;
+//         }
+//         z-index: 10 !important;
+//       }
+//     }
+//   }
+//   /* .el-drawer__footer {
+//     padding: 5px;
+//   } */
+//   .flex-start {
+//     .el-form-item__content {
+//       justify-content: flex-start !important;
+//       align-items: center;
+//       .el-input-number {
+//         flex:1 !important;
+//         width: auto;
+//       }
+//     }
+//   }
+// }
 </style>

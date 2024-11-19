@@ -15,8 +15,30 @@
                 :intervalCondition="recordCondition" border @searchChange="searchChange"
                 :column-config="{ resizable: true }"
                 :row-config="{ keyField: 'id' }">
+
+                <template #header-eqHours="scope">
+                  EQ时长(H)
+                  <el-tooltip
+                    class="box-item"
+                    effect="dark"
+                    raw-content
+                    :content="`累计的EQ时长`"
+                  >
+                    <el-icon class="tooltip-width-auto" ><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </template>
+
           <template #default-make="scope">
-            <el-button v-if="showButton(scope.row)" size="small" type="primary" link @click="editMi(scope.row)">修改
+            <AutoBtn :list="[
+              { title: '修改', isShow: () => showButton(scope.row), fun: () => editMi(scope.row), attrs: { size: 'small' } },
+              { title: '撤回', isShow: () => (scope.row.status == '2' && showButton(scope.row)), fun: () => rollbackMi(scope.row), attrs: { size: 'small' } },
+              { title: '删除', isShow: () => ((scope.row.status == '1' || scope.row.status == '7') && showButton(scope.row)), fun: () => handleDelete(scope.row), attrs: { size: 'small' } },
+              { title: '文件', fun: () => openFile(scope.row), attrs: { size: 'small' } },
+              { title: '预览', isShow: () => true, fun: () => doMIPrint(scope.row, 'noOutsideImages'), attrs: { size: 'small' } },
+              { title: '变更日志', fun: () => queryMIAlterLog(scope.row), attrs: { size: 'small' } },
+              { title: 'EQ记录', fun: () => EQPlanRecord(scope.row), attrs: { size: 'small' } },
+            ]"></AutoBtn>
+            <!-- <el-button v-if="showButton(scope.row)" size="small" type="primary" link @click="editMi(scope.row)">修改
             </el-button>
             <el-button v-if="scope.row.status == '2' && showButton(scope.row)" size="small" type="primary" link
                        @click="rollbackMi(scope.row)">撤回
@@ -32,6 +54,7 @@
             <el-button size="small" type="primary" link
                        @click="queryMIAlterLog(scope.row)">变更日志
             </el-button>
+            <el-button size="small" type="primary" link @click="EQPlanRecord(scope.row)">EQ记录</el-button> -->
           </template>
           <template #default-percentageOrder="scope">
             <el-progress :percentage="scope.row.percentageOrder"></el-progress>
@@ -78,40 +101,43 @@
 
           <template #content-expand="{ row }">
             <div class="expand-wrapper">
-              <vxe-table size="mini" border show-overflow align="center" :data="row.saleOrderVoList">
-                <vxe-column field="code" title="销售单号"></vxe-column>
-                <vxe-column field="orderType" title="新/返">
-                  <template #default="{ row }">
+              <XTable size="mini" border show-overflow align="center" :data="row.saleOrderVoList"
+              :pageShow="false" :showHead="false" min-height="143px" :columnList="columnListOneExpend">
+                <!-- <vxe-column field="code" title="销售单号"></vxe-column>
+                <vxe-column field="orderType" title="新/返"> -->
+                  <template #default-orderType="{ row }">
                     <div v-for="item in resDictData.order_type">
                       <span v-if="item.dictValue == row.orderType">{{ item.dictLabel }}</span>
                     </div>
                   </template>
-                </vxe-column>
-                <vxe-column field="model" title="批/样">
-                  <template #default="{ row }">
+                <!-- </vxe-column>
+                <vxe-column field="model" title="批/样"> -->
+                  <template #default-model="{ row }">
                     <div v-for="item in resDictData.order_model">
                       <span v-if="item.dictValue == row.model">{{ item.dictLabel }}</span>
                     </div>
                   </template>
-                </vxe-column>
-                <vxe-column field="urgent" title="加急">
-                  <template #default="{ row }">
+                <!-- </vxe-column>
+                <vxe-column field="urgent" title="加急"> -->
+                  <template #default-urgent="{ row }">
                     <div v-for="item in resDictData.order_urgent">
                       <span v-if="item.dictValue == row.urgent">{{ item.dictLabel }}</span>
                     </div>
                   </template>
-                </vxe-column>
+                <!-- </vxe-column>
                 <vxe-column field="customerCode" title="客户编码"></vxe-column>
                 <vxe-column field="commodityCode" title="产品编码"></vxe-column>
                 <vxe-column field="commodityName" title="产品名称"></vxe-column>
                 <vxe-column field="commodityType" title="产品类型">
                 </vxe-column>
                 <vxe-column field="version" title="版本号"></vxe-column>
+                <vxe-column field="eqStartTime" title="EQ开始时间"></vxe-column>
+                <vxe-column field="eqEndTime" title="EQ结束时间"></vxe-column>
                 <vxe-column field="placeOrderTime" title="下单时间"></vxe-column>
                 <vxe-column field="quantity" title="下单数量"></vxe-column>
                 <vxe-column field="selfQuantity" title="本厂数量"></vxe-column>
-                <vxe-column field="customerDemand" title="客户要求"></vxe-column>
-              </vxe-table>
+                <vxe-column field="customerDemand" title="客户要求"></vxe-column> -->
+              </XTable>
             </div>
           </template>
         </XTable>
@@ -124,8 +150,21 @@
                 :intervalCondition="recordCondition" border @searchChange="searchChangeOther"
                 :column-config="{ resizable: true }"
                 :row-config="{ keyField: 'id' }">
+
+                <template #header-eqHours="scope">
+                  EQ时长(H)
+                  <el-tooltip
+                    class="box-item"
+                    effect="dark"
+                    raw-content
+                    :content="`累计的EQ时长`"
+                  >
+                    <el-icon class="tooltip-width-auto" ><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </template>
+
           <template #default-orderStatus="scope">
-            <el-tag style="margin-right: 2px" :type="item.isInventoryShipped =='1' ? 'success' : (item.flowStatus == '7' || item.flowStatus == '8') ? 'warning' : item.status == '3' ? 'danger' : 'primary'" v-for="item in scope.row.saleOrderVoList">{{ item.isInventoryShipped =='1' ? '库存发货' : (item.flowStatus == '7' || item.flowStatus == '8') ? '外协' : item.status == '3' ? '撤回' : '正常'  }}</el-tag>
+            <el-tag style="margin-right: 2px" :type="item.isInventoryShipped =='1' ? 'success' : (item.flowStatus == '7' || item.flowStatus == '8') ? 'warning' : item.status == '3' ? 'danger' : 'primary'" v-for="item in scope.row.saleOrderVoList">{{ item.flowStatus =='10' ? '库存发货完成' : item.flowStatus =='9' ? '库存发货' : item.flowStatus == '7' ? '外协完成' : item.flowStatus == '8' ? '外协' : item.status == '3' ? '撤回' : '正常'  }}</el-tag>
           </template>
           <template #default-make="scope">
             <el-button v-if="showButton(scope.row)" size="small" type="primary" link @click="editMi(scope.row)">修改
@@ -144,6 +183,7 @@
             <el-button size="small" type="primary" link
                        @click="queryMIAlterLog(scope.row)">变更日志
             </el-button>
+            <el-button size="small" type="primary" :text="true" @click="EQPlanRecord(scope.row)">EQ记录</el-button>
           </template>
           <template #default-percentageOrder="scope">
             <el-progress :percentage="scope.row.percentageOrder"></el-progress>
@@ -190,40 +230,43 @@
 
           <template #content-expand="{ row }">
             <div class="expand-wrapper">
-              <vxe-table size="mini" border show-overflow align="center" :data="row.saleOrderVoList">
-                <vxe-column field="code" title="销售单号"></vxe-column>
-                <vxe-column field="orderType" title="新/返">
-                  <template #default="{ row }">
+              <XTable size="mini" border show-overflow align="center" :data="row.saleOrderVoList"
+              :pageShow="false" :showHead="false" min-height="143px" :columnList="columnListTwoExpend">
+                <!-- <vxe-column field="code" title="销售单号"></vxe-column>
+                <vxe-column field="orderType" title="新/返"> -->
+                  <template #default-orderType="{ row }">
                     <div v-for="item in resDictData.order_type">
                       <span v-if="item.dictValue == row.orderType">{{ item.dictLabel }}</span>
                     </div>
                   </template>
-                </vxe-column>
-                <vxe-column field="model" title="批/样">
-                  <template #default="{ row }">
+                <!-- </vxe-column>
+                <vxe-column field="model" title="批/样"> -->
+                  <template #default-model="{ row }">
                     <div v-for="item in resDictData.order_model">
                       <span v-if="item.dictValue == row.model">{{ item.dictLabel }}</span>
                     </div>
                   </template>
-                </vxe-column>
-                <vxe-column field="urgent" title="加急">
-                  <template #default="{ row }">
+                <!-- </vxe-column>
+                <vxe-column field="urgent" title="加急"> -->
+                  <template #default-urgent="{ row }">
                     <div v-for="item in resDictData.order_urgent">
                       <span v-if="item.dictValue == row.urgent">{{ item.dictLabel }}</span>
                     </div>
                   </template>
-                </vxe-column>
+                <!-- </vxe-column>
                 <vxe-column field="customerCode" title="客户编码"></vxe-column>
                 <vxe-column field="commodityCode" title="产品编码"></vxe-column>
                 <vxe-column field="commodityName" title="产品名称"></vxe-column>
                 <vxe-column field="commodityType" title="产品类型">
                 </vxe-column>
                 <vxe-column field="version" title="版本号"></vxe-column>
+                <vxe-column field="eqStartTime" title="EQ开始时间"></vxe-column>
+                <vxe-column field="eqEndTime" title="EQ结束时间"></vxe-column>
                 <vxe-column field="placeOrderTime" title="下单时间"></vxe-column>
                 <vxe-column field="quantity" title="下单数量"></vxe-column>
                 <vxe-column field="selfQuantity" title="本厂数量"></vxe-column>
-                <vxe-column field="customerDemand" title="客户要求"></vxe-column>
-              </vxe-table>
+                <vxe-column field="customerDemand" title="客户要求"></vxe-column> -->
+              </XTable>
             </div>
           </template>
         </XTable>
@@ -316,10 +359,12 @@
                 @change="handleChange($event,scope.row)"
               />
           </template>
-          <vxe-column align="center" fixed="right" title="操作" width="150">
+          <vxe-column align="center" fixed="right" title="操作" width="250">
             <template #default="{ row }">
               <el-button size="small" type="primary" :text="true" @click="openOrderDetail(row)">订单详情</el-button>
               <el-button link type="primary" @click="openUpload(row)">EQ文件</el-button>
+
+              <el-button link type="primary" @click="EQRecord(row)">EQ记录</el-button>
             </template>
           </vxe-column>
         </XTable>
@@ -339,38 +384,39 @@
     <el-dialog :title="dialog.title" v-model="dialog.visible" width="90%" :close-on-click-modal="false"
                destroy-on-close>
 
-      <vxe-table border keep-source align="center" :row-config="{ height: 40, isCurrent: true }" max-height="100%"
-                 show-header-overflow
-                 show-overflow :column-config="{ resizable: true }" :data="checkedInfos">
-        <vxe-column fixed="left" type="seq" title="序号" width="60"></vxe-column>
+      <XTable border keep-source align="center" :row-config="{ height: 40, isCurrent: true }" max-height="100%"
+                 toolId="workmanshipOrderDialogToolId" min-height="143px"
+                 :pageShow="false" :columnList="columnListWorkmanshipOrder"
+                 :column-config="{ resizable: true }" :data="checkedInfos">
+        <!-- <vxe-column fixed="left" type="seq" title="序号" width="60"></vxe-column>
         <vxe-column fixed="left" width="130" title="销售单号" field="saleOrderVo.code">
         </vxe-column>
-        <vxe-column width="90" title="外协本厂">
-          <template #default="{ row }">
+        <vxe-column width="90" title="外协本厂"> -->
+          <template #default-field1="{ row }">
             <div>本厂</div>
           </template>
-        </vxe-column>
-        <vxe-column width="60" title="新/返" field="saleOrderVo.orderType">
-          <template #default="{ row }">
+        <!-- </vxe-column>
+        <vxe-column width="60" title="新/返" field="orderType"> -->
+          <template #default-orderType="{ row }">
             <div v-for="item in resDictData.order_type">
               <span v-if="item.dictValue == row.saleOrderVo.orderType">{{ item.dictLabel }}</span>
             </div>
           </template>
-        </vxe-column>
-        <vxe-column width="90" title="批量/样品" field="saleOrderVo.model">
-          <template #default="{ row }">
+        <!-- </vxe-column>
+        <vxe-column width="90" title="批量/样品" field="model"> -->
+          <template #default-model="{ row }">
             <div v-for="item in resDictData.order_model">
               <span v-if="item.dictValue == row.saleOrderVo.model">{{ item.dictLabel }}</span>
             </div>
           </template>
-        </vxe-column>
-        <vxe-column width="50" title="加急" field="saleOrderVo.urgent">
-          <template #default="{ row }">
+        <!-- </vxe-column>
+        <vxe-column width="50" title="加急" field="urgent"> -->
+          <template #default-urgent="{ row }">
             <div v-for="item in resDictData.order_urgent">
               <span v-if="item.dictValue == row.saleOrderVo.urgent">{{ item.dictLabel }}</span>
             </div>
           </template>
-        </vxe-column>
+        <!-- </vxe-column>
         <vxe-column width="70" title="客户编码" field="saleOrderVo.customerCode">
         </vxe-column>
         <vxe-column width="140" title="产品编码" field="saleOrderVo.commodityCode">
@@ -389,76 +435,37 @@
         </vxe-column>
         <vxe-column width="150" title="下单日期" field="saleOrderVo.placeOrderTime">
         </vxe-column>
-        <!--        <vxe-column width="150" title="客户交期" field="saleOrderVo.deliveryTime">-->
-        <!--        </vxe-column>-->
         <vxe-column width="150" title="出货日期" field="saleOrderVo.dispatchTime">
-        </vxe-column>
-      </vxe-table>
+        </vxe-column> -->
+      </XTable>
 
       <div v-if="similarMIList != null && similarMIList.length>0">
         <el-divider content-position="left">可返单</el-divider>
-        <el-table :data="similarMIList"
+        <XTable :showHead="false" :pageShow="false" :columnList="columnListCanReturnOrder" :data="similarMIList"
                   ref="singleTableRef"
                   width="100%"
-                  border
                   height="300"
-                  highlight-current-row
                   @current-change="handleCurrentChange">
-          <el-table-column prop="code"
-                           fixed
-                           label="MI单号"
-                           min-width="160px"
-                           align="center">
-          </el-table-column>
-          <el-table-column prop="commodityCode"
-                           fixed
-                           label="产品编码"
-                           min-width="160px"
-                           align="center">
-            <template #default="scope">
+            <template #default-commodityCode="scope">
               <span v-for="(item, index) in scope.row.saleOrderVoList">
                 <span>{{ item.commodityCode }}</span>
                 <span v-if="index != scope.row.saleOrderVoList.length - 1">-</span>
               </span>
             </template>
-          </el-table-column>
-          <el-table-column prop="name"
-                           label="MI工艺名称"
-                           align="center"
-                           min-width="160px"
-                           :show-overflow-tooltip='true'>
-          </el-table-column>
-          <el-table-column prop="planType"
-                           label="MI类型"
-                           align="center">
-            <template #default="scope">
+            <template #default-planType="scope">
               <div v-if="scope.row.planType==1">单品</div>
               <div v-if="scope.row.planType==2">拼版</div>
             </template>
-          </el-table-column>
-          <el-table-column prop="miUserName"
-                           label="制单人员"
-                           align="center">
-            <template #default="scope">
+            <template #default-miUserName="scope">
               <span>{{ scope.row.miAssignTaskVoList[0]?.miUserName }}</span>
             </template>
-          </el-table-column>
-          <el-table-column prop="createTime"
-                           label="创建时间"
-                           min-width="160px"
-                           align="center">
-            <template #default="scope">
+            <template #default-createTime="scope">
               <span>{{scope.row.createTime}}</span>
             </template>
-          </el-table-column>
-          <el-table-column label="操作"
-                           align="center"
-                           min-width="50px">
-            <template #default="scope">
+            <template #default-make="scope">
               <el-button type="text" @click="doMIPrint(scope.row, 'noOutsideImages')">详情</el-button>
             </template>
-          </el-table-column>
-        </el-table>
+        </XTable>
       </div>
 
       <div style="display: flex;padding-top: 5px">
@@ -517,12 +524,22 @@
     </el-dialog>
 
     <!-- 修改弹框 -->
-    <ProductionPlanDrawer v-model:open="miEditDrawer" :crtMiInfo="crtMiInfo"
+    <ProductionPlanDrawer v-model:open="miEditDrawer" :crtMiInfo="crtMiInfo" :copyCraftName="copyCraftName"
                           @saveFinish="refreshList"></ProductionPlanDrawer>
 
     <!--详情预览-->
-    <el-drawer v-model="orderDrawer.visible" :title="orderDrawer.title" size="850px" :direction="orderDrawer.direction"
-               :destroy-on-close="true" modal-class="detail-prod-drawder">
+    <el-drawer v-model="orderDrawer.visible" :title="orderDrawer.title" :direction="orderDrawer.direction"
+               :destroy-on-close="true"
+      size="45%"
+      :modal-class="`add-prod-drawder ${ownerId == '101' && 'normal-prod-drawder'}`">
+      <template #header>
+        <span class="el-drawer__title no-wrap">{{orderDrawer.title}}11</span>
+        <TotalTitle :start="true" :firstBorder="true" :list="[
+          { title: `总价：${ currentVo?.totalOrderPrice||0 }元` },
+          { title: `税金：${ currentVo?.tax||0 }元` },
+          { title: `总金额：${ currentVo?.totalPrice||0 }元` },
+        ]"></TotalTitle>
+      </template>
       <SaleDescriptions v-if="currentVo" :currentInfo="currentVo" :customerList="customerList" :isShow="false"
                         :resDictData="resDictData">
       </SaleDescriptions>
@@ -532,6 +549,29 @@
     <el-drawer :title="fileDialog.title" v-model="fileDialog.visible" size="60%" visible.sync="false" draggable
                :destroy-on-close="true">
       <el-tabs type="border-card" v-model="fileTab" class="xtable-tab" @tab-click="radioFileTableHandle">
+        <el-tab-pane label="TGZ文件" name="TGZ文件">
+          <XTable  :pageShow="false"
+                   class="xtable-content" :loading="loading" :data="filesDataObj.tgzFileList" :show-footer="false"
+                   :columnList="fileColumnList" ref="fileleteTableRef1" border :column-config="{ resizable: true }"
+                   :row-config="{ keyField: 'id' }" :page-params="{ perfect: true,  }">
+            <template #default-fileName="scope">
+              <XUpload v-model:model-value="scope.row.sysFileVo" model="download" :limit="1" readOnly></XUpload>
+            </template>
+            <template #default-src="scope">
+              <ImagePreview
+                v-if="scope.row.sysFileVo?.length"
+                :width="100"
+                :height="100"
+                :src="scope.row.sysFileVo[0].url"
+                :type="scope.row.sysFileVo[0].type"
+                :preview-src-list="[scope.row.sysFileVo[0].url]"
+              />
+            </template>
+            <template #default-make="scope">
+              <el-button link type="primary" @click="downLoadHandle(scope.row.key)">下载</el-button>
+            </template>
+          </XTable>
+        </el-tab-pane>
         <el-tab-pane label="MI文件" name="MI文件">
           <XTable :pageShow="false" class="xtable-content" :loading="loading" :data="filesDataObj.miFileList"
                   :show-footer="false" :columnList="fileColumnList" ref="fileleteTableRef1" border
@@ -540,6 +580,19 @@
             <template #default-fileName="scope">
               <XUpload v-model:model-value="scope.row.sysFileVo" model="download" :limit="1" readOnly></XUpload>
             </template>
+            <template #default-make="scope">
+              <el-button link type="primary" @click="downLoadHandle(scope.row.key)">下载</el-button>
+            </template>
+            <template #default-src="scope">
+              <ImagePreview
+                v-if="scope.row.sysFileVo?.length"
+                :width="100"
+                :height="100"
+                :src="scope.row.sysFileVo[0].url"
+                :type="scope.row.sysFileVo[0].type"
+                :preview-src-list="[scope.row.sysFileVo[0].url]"
+              />
+            </template>
           </XTable>
         </el-tab-pane>
         <el-tab-pane label="开料方案" name="开料方案">
@@ -547,8 +600,22 @@
                   :show-footer="false" :columnList="fileColumnList" ref="fileleteTableRef2" border
                   :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }"
                   :page-params="{ perfect: true, total: fileTotal }">
+
             <template #default-fileName="scope">
-              <XUpload v-model:model-value="scope.row.sysFileVo" model="download" :limit="1" readOnly></XUpload>
+              {{ scope.row.sysFileVo[0].name }}
+            </template>
+            <template #default-make="scope">
+              <el-button link type="primary" @click="downLoadHandle(scope.row.sysFileVo[0].key)">下载</el-button>
+            </template>
+            <template #default-src="scope">
+              <ImagePreview
+                v-if="scope.row.sysFileVo?.length"
+                :width="100"
+                :height="100"
+                :src="scope.row.sysFileVo[0].url"
+                :type="scope.row.sysFileVo[0].type"
+                :preview-src-list="[scope.row.sysFileVo[0].url]"
+              />
             </template>
           </XTable>
         </el-tab-pane>
@@ -558,7 +625,20 @@
                   :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }"
                   :page-params="{ perfect: true, total: fileTotal }">
             <template #default-fileName="scope">
-              <XUpload v-model:model-value="scope.row.sysFileVo" model="download" :limit="1" readOnly></XUpload>
+              {{ scope.row.sysFileVo[0].name }}
+            </template>
+            <template #default-make="scope">
+              <el-button link type="primary" @click="downLoadHandle(scope.row.sysFileVo[0].key)">下载</el-button>
+            </template>
+            <template #default-src="scope">
+              <ImagePreview
+                v-if="scope.row.sysFileVo?.length"
+                :width="100"
+                :height="100"
+                :src="scope.row.sysFileVo[0].url"
+                :type="scope.row.sysFileVo[0].type"
+                :preview-src-list="[scope.row.sysFileVo[0].url]"
+              />
             </template>
           </XTable>
         </el-tab-pane>
@@ -569,7 +649,20 @@
                   :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }"
                   :page-params="{ perfect: true, total: fileTotal }">
             <template #default-fileName="scope">
-              <XUpload v-model:model-value="scope.row.sysFileVo" model="download" :limit="1" readOnly></XUpload>
+              {{ scope.row.sysFileVo[0].name }}
+            </template>
+            <template #default-make="scope">
+              <el-button link type="primary" @click="downLoadHandle(scope.row.sysFileVo[0].key)">下载</el-button>
+            </template>
+            <template #default-src="scope">
+              <ImagePreview
+                v-if="scope.row.sysFileVo?.length"
+                :width="100"
+                :height="100"
+                :src="scope.row.sysFileVo[0].url"
+                :type="scope.row.sysFileVo[0].type"
+                :preview-src-list="[scope.row.sysFileVo[0].url]"
+              />
             </template>
           </XTable>
         </el-tab-pane>
@@ -580,7 +673,20 @@
                   :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }"
                   :page-params="{ perfect: true, total: fileTotal }">
             <template #default-fileName="scope">
-              <XUpload v-model:model-value="scope.row.sysFileVo" model="download" :limit="1" readOnly></XUpload>
+              {{ scope.row.sysFileVo[0].name }}
+            </template>
+            <template #default-make="scope">
+              <el-button link type="primary" @click="downLoadHandle(scope.row.sysFileVo[0].key)">下载</el-button>
+            </template>
+            <template #default-src="scope">
+              <ImagePreview
+                v-if="scope.row.sysFileVo?.length"
+                :width="100"
+                :height="100"
+                :src="scope.row.sysFileVo[0].url"
+                :type="scope.row.sysFileVo[0].type"
+                :preview-src-list="[scope.row.sysFileVo[0].url]"
+              />
             </template>
           </XTable>
         </el-tab-pane>
@@ -591,7 +697,20 @@
                   :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }"
                   :page-params="{ perfect: true, total: fileTotal }">
             <template #default-fileName="scope">
-              <XUpload v-model:model-value="scope.row.sysFileVo" model="download" :limit="1" readOnly></XUpload>
+              {{ scope.row.sysFileVo[0].name }}
+            </template>
+            <template #default-make="scope">
+              <el-button link type="primary" @click="downLoadHandle(scope.row.sysFileVo[0].key)">下载</el-button>
+            </template>
+            <template #default-src="scope">
+              <ImagePreview
+                v-if="scope.row.sysFileVo?.length"
+                :width="100"
+                :height="100"
+                :src="scope.row.sysFileVo[0].url"
+                :type="scope.row.sysFileVo[0].type"
+                :preview-src-list="[scope.row.sysFileVo[0].url]"
+              />
             </template>
           </XTable>
         </el-tab-pane>
@@ -602,7 +721,20 @@
                   :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }"
                   :page-params="{ perfect: true, total: fileTotal }">
             <template #default-fileName="scope">
-              <XUpload v-model:model-value="scope.row.sysFileVo" model="download" :limit="1" readOnly></XUpload>
+              {{ scope.row.sysFileVo[0].name }}
+            </template>
+            <template #default-make="scope">
+              <el-button link type="primary" @click="downLoadHandle(scope.row.sysFileVo[0].key)">下载</el-button>
+            </template>
+            <template #default-src="scope">
+              <ImagePreview
+                v-if="scope.row.sysFileVo?.length"
+                :width="100"
+                :height="100"
+                :src="scope.row.sysFileVo[0].url"
+                :type="scope.row.sysFileVo[0].type"
+                :preview-src-list="[scope.row.sysFileVo[0].url]"
+              />
             </template>
           </XTable>
         </el-tab-pane>
@@ -620,10 +752,103 @@
     <MIPrint ref="MIPrintRef"></MIPrint>
 
     <!--eq文件-->
-    <el-dialog :title="uploadDialog.title" v-model="uploadDialog.visible" width="1000px">
+    <!-- <el-dialog :title="uploadDialog.title" v-model="uploadDialog.visible" width="1000px">
       <XUpload v-model:model-value="fileList" :readOnly="currentVo.isEqConfirm == '0'" model="download"
                @fileChange="fileChange" @delFile="delEqFile"></XUpload>
-    </el-dialog>
+    </el-dialog> -->
+
+
+        <!--文件-->
+        <el-drawer :title="EQUploadDialog.title" v-model="EQUploadDialog.visible" size="60%" visible.sync="false" draggable
+        :destroy-on-close="true">
+          <el-tabs type="border-card" v-model="eqfileTab" class="xtable-tab" >
+
+          <el-tab-pane label="产品文件" name="产品文件">
+            <XTable :pageShow="false" class="xtable-content" :loading="eqloading" :data="eqfilesDataObj.saleOrderFileVos"
+                    :show-footer="false" :columnList="eqfileColumnList" ref="fileleteTableRef7" border
+                    :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }" >
+              <template #default-fileName="scope">
+                {{ scope.row.name }}
+              </template>
+              <template #default-make="scope">
+                <el-button link type="primary" @click="downLoadHandle(scope.row.key)">下载</el-button>
+              </template>
+              <template #default-src="scope">
+                <ImagePreview
+                  :width="100"
+                  :height="100"
+                  :src="scope.row.url"
+                  :type="scope.row.type"
+                  :preview-src-list="[scope.row.url]"
+                />
+              </template>
+            </XTable>
+          </el-tab-pane>
+
+          <el-tab-pane label="EQ文件" name="EQ文件">
+            <XUpload v-model:model-value="fileList"  model="download"
+              :show-file-list="false"
+                    @fileChange="fileChange"  v-loading="dialogTableLoading"></XUpload>
+              <XTable :pageShow="false" class="xtable-content" :loading="eqloading" :data="eqfilesDataObj.eqfileVos"
+                      :show-footer="false" :columnList="eqfileColumnList" ref="fileleteTableRef6" border
+                      :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }"
+                      >
+                <template #default-fileName="scope">
+                  {{ scope.row.name }}
+                </template>
+                <template #default-src="scope">
+                  <ImagePreview
+                    :width="100"
+                    :height="100"
+                    :src="scope.row.url"
+                    :type="scope.row.type"
+                    :preview-src-list="[scope.row.url]"
+                  />
+                </template>
+                <template #default-make="scope">
+                  <el-button link type="primary" @click="downLoadHandle(scope.row.key)">下载</el-button>
+                  <el-button class="marginAndPadding" size="small" type="primary" :text="true" @click="delAssignFile(scope.row.id)">删除</el-button>
+                </template>
+              </XTable>
+            </el-tab-pane>
+
+            </el-tabs>
+
+            <template #footer>
+            <div class="dialog-footer" style="text-align: center">
+              <el-button @click="eqcacelFile">取 消</el-button>
+              <!-- <el-button type="primary" >下载全部</el-button> -->
+            </div>
+            </template>
+        </el-drawer>
+
+               <!-- EQ记录 -->
+    <el-dialog :title="eqdialog.title" v-model="eqdialog.visible" destroy-on-close width="60%" @close="eqdialog.visible=false">
+      <XTable toolId="planEqReored" v-model:page-size="eqQueryParams.pageSize"
+            v-model:current-page="eqQueryParams.pageNum" height="500" class="xtable-content"
+            :page-params="{ perfect: true, total: eqtotal }" :data="eqList" :columnList="eqColumnList" ref="eqxTable"
+            :loading="eqloading" :showRefresh="true"
+            :intervalCondition="['eqStartTime','eqEndTime']"
+            border @searchChange="eqSearchChange" :column-config="{ resizable: true }"
+            :row-config="{ keyField: 'id' }">
+
+            <template #default-isAutoClose="scope">
+              {{ scope.row.eqEndTime?(scope.row.isAutoClose=='0'?'否':'是'):'' }}
+            </template>
+            <template #header-isAutoClose="scope">
+              是否自动关闭
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                raw-content
+                :content="`MI审核通过时会触发自动关闭EQ，同时EQ结束人为MI审核人`"
+              >
+                <el-icon class="tooltip-width-auto" ><QuestionFilled /></el-icon>
+              </el-tooltip>
+            </template>
+      </XTable>
+  </el-dialog>
+
   </div>
 </template>
 
@@ -633,7 +858,8 @@ import {
   delProductionPlan,
   getWaitProductionPlanList,
   checkSaleOrderByBo,
-  listProductionPlan, saveMi, savePrediction, getMiInfoAlterLog, addProductionPlanAlterLog
+  checkMergeSaleOrderByBo,
+  listProductionPlan, getMiInfoAlterLog, addProductionPlanAlterLog, updateCheckPer
 } from '@/api/project/productionPlan';
   import {ProductionPlanVO} from '@/api/project/productionPlan/types';
   import {getDicts} from "@/api/system/dict/data";
@@ -790,12 +1016,14 @@ const queryMIAlterLog = (row : any) => {
   const checked = ref(false);
   const checkedCode = ref("");
   const currentSchemeIndex = ref(0);
-  const fileTab = ref('MI文件');
+  const fileTab = ref('TGZ文件');
   const singleTableRef = ref()
   let currentType = ref(0);
   /*eq文件*/
   const fileList = ref<any[]>([]);
-
+  const camFileList = ref<any[]>([]);
+  const dialogTableLoading = ref(false)
+  const eqloading = ref(false);
 
   const queryFormRef = ref<ElFormInstance>();
 
@@ -850,6 +1078,11 @@ const queryMIAlterLog = (row : any) => {
         item.sysFileVo = [item];
       })
     }
+    if (filesDataObj.value.tgzFileList) {
+      filesDataObj.value.tgzFileList.forEach((item: any) => {
+        item.sysFileVo = [item];
+      })
+    }
   }
 
   const closeMiHistoryDialog = () => {
@@ -895,10 +1128,13 @@ const queryMIAlterLog = (row : any) => {
   }
 
   import useUserStore from "@/store/modules/user";
-  import {updateOrder} from "@/api/order/directOrder";
   import {ElMessage} from "element-plus";
-  import {updateEq} from "@/api/project/assignTask";
+  import {updateEq,getAssignTaskProjectFile,listEQList} from "@/api/project/assignTask";
   import {addFile, deleteFile, getFileList} from "@/api/upload";
+  import fileSaver from "file-saver";
+  import {downloadUrl} from '@/api/upload/index';
+
+  const { ownerId } = useUserStore();
 
 
   const showButton = (row: any) => {
@@ -955,6 +1191,15 @@ const queryMIAlterLog = (row : any) => {
   const recordSaleCondition = ['saleOrderVo.placeOrderTime', 'saleOrderVo.deliveryTime', 'saleOrderVo.dispatchTime'];
 
   const recordPlanCondition = ['createTime'];
+  const columnListCanReturnOrder = ref([
+  { minWidth: '160px',title: 'MI单号',field: 'code',align: 'center',  },
+  { minWidth: '160px',title: '产品编码',field: 'commodityCode',align: 'center',  },
+  { minWidth: '160px',title: 'MI工艺名称',field: 'name',align: 'center',  },
+  { title: 'MI类型',field: 'planType',align: 'center',  },
+  { title: '制单人员',field: 'miUserName',align: 'center',  },
+  { minWidth: '160px',title: '创建时间',field: 'createTime',align: 'center',  },
+  { minWidth: '50px',title: '操作',field: 'make',align: 'center',  },
+  ]);
   const columnListSelect = ref([
     {width: '60', type: 'checkbox', align: 'center', filterType: 'input'},
     {width: '60', title: '序号', align: 'center', type: 'seq'},
@@ -1075,9 +1320,11 @@ const queryMIAlterLog = (row : any) => {
     {title: '物料名称', width: '120', field: 'materialName', align: 'center', visible: false},
     {title: '产品名称', width: '120', field: 'commodityCode', align: 'center', visible: false},
     {title: '文件名称', field: 'fileName', align: 'center'},
+    {title: '缩略图', field: 'src', align: 'center', showOverflow: false},
     {title: '文件大小', width: '80', field: 'size', align: 'center'},
-    {title: '上传人', width: '120', field: 'createByName', align: 'center'},
-    {title: '上传时间', width: '120', field: 'createTime', align: 'center'},
+    {title: '上传人', width: '80', field: 'createByName', align: 'center'},
+    {title: '上传时间', width: '140', field: 'createTime', align: 'center'},
+    {title: '操作', width: '80', field: 'make', align: 'center'},
   ]);
 
   const columnHistoryList = ref([
@@ -1136,6 +1383,58 @@ const queryMIAlterLog = (row : any) => {
     },
   ]);
 
+  // 生成工艺单
+  const columnListWorkmanshipOrder = ref([
+  { width: '60',type: 'seq',title: '序号',fixed: 'left',align: 'center',  },
+  { width: '130',title: '销售单号',field: 'saleOrderVo.code',fixed: 'left',align: 'center',  },
+  { width: '90',title: '外协本厂',align: 'center', field: 'field1' },
+  { width: '60',title: '新/返',field: 'orderType',align: 'center',  },
+  { width: '90',title: '批量/样品',field: 'model',align: 'center',  },
+  { width: '50',title: '加急',field: 'urgent',align: 'center',  },
+  { width: '70',title: '客户编码',field: 'saleOrderVo.customerCode',align: 'center',  },
+  { width: '140',title: '产品编码',field: 'saleOrderVo.commodityCode',align: 'center',  },
+  { title: '产品名称',field: 'saleOrderVo.commodityName',align: 'center',  },
+  { width: '50',title: '版本号',field: 'saleOrderVo.version',align: 'center',  },
+  { width: '70',title: '产品类型',field: 'saleOrderVo.commodityType',align: 'center',  },
+  { width: '70',title: '订单数量',field: 'saleOrderVo.quantity',align: 'center',  },
+  { width: '70',title: '订单面积',field: 'saleOrderVo.area',align: 'center',  },
+  { width: '70',title: 'PCS/SET',field: 'saleOrderVo.unitedNumber',align: 'center',  },
+  { width: '150',title: '下单日期',field: 'saleOrderVo.placeOrderTime',align: 'center',  },
+  { width: '150',title: '出货日期',field: 'saleOrderVo.dispatchTime',align: 'center',  },
+  ]);
+  // 列表扩展表格
+  const columnListOneExpend = ref([
+  { title: '销售单号',field: 'code',align: 'center',  },
+  { title: '新/返',field: 'orderType',align: 'center',  },
+  { title: '批/样',field: 'model',align: 'center',  },
+  { title: '加急',field: 'urgent',align: 'center',  },
+  { title: '客户编码',field: 'customerCode',align: 'center',  },
+  { title: '产品编码',field: 'commodityCode',align: 'center',  },
+  { title: '产品名称',field: 'commodityName',align: 'center',  },
+  { title: '产品类型',field: 'commodityType',align: 'center',  },
+  { title: '版本号',field: 'version',align: 'center',  },
+  { title: '下单时间',field: 'placeOrderTime',align: 'center',  },
+  { title: '下单数量',field: 'quantity',align: 'center',  },
+  { title: '本厂数量',field: 'selfQuantity',align: 'center',  },
+  { title: '客户要求',field: 'customerDemand',align: 'center',  },
+  ]);
+  // 其他订单列表扩展表格
+  const columnListTwoExpend = ref([
+  { title: '销售单号',field: 'code',align: 'center',  },
+  { title: '新/返',field: 'orderType',align: 'center',  },
+  { title: '批/样',field: 'model',align: 'center',  },
+  { title: '加急',field: 'urgent',align: 'center',  },
+  { title: '客户编码',field: 'customerCode',align: 'center',  },
+  { title: '产品编码',field: 'commodityCode',align: 'center',  },
+  { title: '产品名称',field: 'commodityName',align: 'center',  },
+  { title: '产品类型',field: 'commodityType',align: 'center',  },
+  { title: '版本号',field: 'version',align: 'center',  },
+  { title: '下单时间',field: 'placeOrderTime',align: 'center',  },
+  { title: '下单数量',field: 'quantity',align: 'center',  },
+  { title: '本厂数量',field: 'selfQuantity',align: 'center',  },
+  { title: '客户要求',field: 'customerDemand',align: 'center',  },
+  ]);
+
   const orderDrawer = reactive<DrawerOption>({
     title: '订单详情',
     visible: false,
@@ -1143,6 +1442,8 @@ const queryMIAlterLog = (row : any) => {
   });
 
   const currentVo = ref();
+
+  const copyCraftName = ref();
 
   const openOrderDetail = (row: any) => {
     currentVo.value = row.saleOrderVo;
@@ -1186,7 +1487,7 @@ const queryMIAlterLog = (row : any) => {
 
   })
 
-  const uploadDialog = reactive<DialogOption>({
+  const EQUploadDialog = reactive<DialogOption>({
     visible: false,
     title: ''
   });
@@ -1194,7 +1495,7 @@ const queryMIAlterLog = (row : any) => {
   const recordCondition = ['createTime'];
 
   const columnList = ref([
-    {title: "序号", type: 'seq', align: 'center', width: '60', showOverflow: false},
+    {title: "序号", type: 'seq', field: 'index', align: 'center', width: '60', showOverflow: false},
     {field: "expand", type: 'expand', width: '40', align: 'center'},
     {
       title: '状态', field: 'status', align: 'center',
@@ -1235,14 +1536,16 @@ const queryMIAlterLog = (row : any) => {
         endParams: {placeholder: '请输入结束时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
       }
     },
+    {title: 'EQ时长(H)', width: '90', field: 'eqHours', showHeaderOverflow: false, align: 'center'},
     {title: '提交时间', field: 'submitTime', align: 'center'},
     {title: '审核时间', field: 'auditTime', align: 'center'},
     {title: '审核人', field: 'auditUserName', align: 'center'},
-    {title: '操作', field: 'make', align: 'center', width: '250', fixed: 'right', showOverflow: false},
+    {title: '操作', field: 'make', align: 'center', width: '320', fixed: 'right', showOverflow: false,
+      autoExpend: true,},
   ]);
 
   const columnOtherList = ref([
-    {title: "序号", type: 'seq', align: 'center', width: '60', showOverflow: false},
+    {title: "序号", type: 'seq', align: 'center', field: 'index', width: '60', showOverflow: false},
     {field: "expand", type: 'expand', width: '40', align: 'center'},
     {
       title: '状态', field: 'status', align: 'center',
@@ -1284,10 +1587,11 @@ const queryMIAlterLog = (row : any) => {
         endParams: {placeholder: '请输入结束时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
       }
     },
+    {title: 'EQ时长(H)', width: '90', field: 'eqHours', align: 'center'},
     {title: '提交时间', field: 'submitTime', align: 'center'},
     {title: '审核时间', field: 'auditTime', align: 'center'},
     {title: '审核人', field: 'auditUserName', align: 'center'},
-    {title: '操作', field: 'make', align: 'center', width: '250', fixed: 'right', showOverflow: false},
+    {title: '操作', field: 'make', align: 'center', width: '320', fixed: 'right', showOverflow: false, autoExpend: true,},
   ]);
 
 
@@ -1367,39 +1671,6 @@ const queryMIAlterLog = (row : any) => {
     proxy?.$modal.msgSuccess("修改成功");
   };
 
-  const openUpload = async (info: any) => {
-    currentVo.value = info;
-    // currentVo.value.isEqConfirm = props.type == 'work' ? props.crtMiInfo.miAssignTaskVoList.find(vo=> info.id == vo.saleOrderId)?.isEqConfirm : orderList.value.find(vo=>vo.id == info.id)?.isEqConfirm;
-    getEqFileList();
-    uploadDialog.visible = true;
-    uploadDialog.title = "EQ文件";
-  }
-
-  const getEqFileList = async () => {
-    const param = {
-      bizId: currentVo.value.saleOrderVo.id,
-      bizType: "12",
-      moduleCode: "2",
-    }
-    const res = await getFileList(param);
-    fileList.value = res.data;
-  }
-
-  const fileChange = (value: any) => {
-    let lastFile = value.find(vo => vo.key == value[value.length - 1].key);
-    var data = {
-      bizId: currentVo.value.saleOrderVo.id,
-      moduleCode: "2",
-      bizType: "12",
-      type: lastFile.type,
-      size: lastFile.size,
-      name: lastFile.name,
-      key: lastFile.key,
-    }
-    addFile(data).then(() => {
-      getEqFileList()
-    })
-  }
 
   const delEqFile = (value: any) => {
     const _ids = value?.id;
@@ -1428,6 +1699,8 @@ const queryMIAlterLog = (row : any) => {
 
   const cellDBLClickEvent: VxeTableEvents.CellDblclick<ProductionPlanVO> = async ({row}) => {
     console.log(row.commodityCode)
+
+    copyFlag.value = true;
     const isConfirm = checkedInfos.value.some(info => {
       return row.saleOrderVoList.some(order => order.commodityCode === info.saleOrderVo.commodityCode);
     });
@@ -1456,6 +1729,13 @@ const queryMIAlterLog = (row : any) => {
     })
     crtMiInfo.value = row;
     checkedCode.value = string;
+    if (copyFlag.value) {
+      console.log('前面的row1', row)
+      copyCraftName.value = row.name
+    }
+    else{
+      copyCraftName.value = undefined
+    }
     miHistoryDialog.visible = false;
   }
 
@@ -1499,8 +1779,8 @@ const queryMIAlterLog = (row : any) => {
 
   const currentRow = ref();
 
-  const handleCurrentChange = (val: any) => {
-    currentRow.value = val;
+  const handleCurrentChange = ({row}: any) => {
+    currentRow.value = row;
     checked.value = false;
     checkedCode.value = "";
     // checked.value = true;
@@ -1552,7 +1832,7 @@ const queryMIAlterLog = (row : any) => {
       checked.value = false;
     } else {
       if (currentRow.value) {
-        singleTableRef.value.setCurrentRow();
+        singleTableRef.value.xTableRef.setCurrentRow();
         currentRow.value = null;
         checked.value = true;
       }
@@ -1581,6 +1861,68 @@ const queryMIAlterLog = (row : any) => {
     })
   }
 
+  const copyFlag = ref(false);
+
+/**
+ * 校验合拼订单
+ * @param tipList
+ * @param mergeStatus
+ */
+const checkMergeTip = (tipList: any, mergeStatus: boolean) => {
+
+  return new Promise((resolve, reject) => {
+    ElMessageBox.confirm(
+      // 如果item.mergeStatus 为false 则标红显示     //居左显示
+      '<div style="text-align:left; overflow-y:auto;max-height:400px;height:200px;">' +
+      tipList.map((item: any) => {
+        return item.mergeStatus ? item.tip : '<span style="color:red;">' + item.tip + '</span>'
+      }).join('<br>') +
+      '</div>'
+      ,
+      '提示',
+      {
+        confirmButtonText: '继续合拼',
+        cancelButtonText: '取消合拼',
+        dangerouslyUseHTMLString: true,
+        showConfirmButton: mergeStatus,
+        showClose: false,
+        icon: '',
+        type: 'warning',
+        // center: true,
+        customStyle: {
+          'max-width': '60%',
+          width: '40%',
+        }
+      }
+    ).then(() => {
+      resolve(true)
+    }).catch(() => {
+      buttonLoading.value = false;
+      reject(false)
+    })
+  })
+}
+
+  const checkTip = (msg) => {
+    return new Promise((resolve, reject) => {
+      ElMessageBox.confirm(
+        msg+'确认要新建MI工艺单？',
+        '提示',
+        {
+          confirmButtonText: '确认',
+          cancelButtonText: '取消',
+          dangerouslyUseHTMLString: true,
+          type: 'warning',
+        }
+      ).then(() => {
+        resolve(true)
+      }).catch(() => {
+        buttonLoading.value = false;
+        reject(false)
+      })
+    })
+  }
+
   /**
    *
    * @param b 是否复制
@@ -1588,6 +1930,11 @@ const queryMIAlterLog = (row : any) => {
   const addMi = async (b: boolean) => {
     console.log(currentRow.value)
     if (b) {
+      copyFlag.value = true;
+      if (currentRow.value) {
+        // 返单复制时才不为空
+        copyCraftName.value = currentRow.value.name
+      }
       if (checkedCode.value == "" && null == currentRow.value) {
         ElMessage.error("请选择用于复制的MI单!");
         return;
@@ -1631,6 +1978,25 @@ const queryMIAlterLog = (row : any) => {
     if (!check) {
       buttonLoading.value = false;
       return;
+    }
+    var checkMerge = await checkMergeSaleOrderByBo({ids: info.saleOrderIdList}).catch(() => {
+      buttonLoading.value = false;
+    });
+    if (checkMerge.data?.showTip) {
+      await checkMergeTip(checkMerge.data.saleOrderMergeTipVoList, checkMerge.data.mergeStatus)
+    }
+    //判断选中的订单中是否制作人不为自己，并提示
+    let msg = '';
+    let isSelf = false;
+
+    checkedInfos.value.forEach(item => {
+      if (item.miUserId != useUserStore().userId) {
+        isSelf = true;
+        msg += '订单 '+item.saleOrderVo.code + '  指定制单人为: ' + item.miUserName + '  ,';
+      }
+    })
+    if (isSelf) {
+      await checkTip(msg)
     }
     // console.log('checkedInfos.value', checkedInfos.value);
     //   return;
@@ -1733,6 +2099,12 @@ const queryMIAlterLog = (row : any) => {
   const editMi = async (row?: any) => {
     miEditDrawer.value = true
     crtMiInfo.value = row
+
+    if (!copyFlag.value) {
+      copyCraftName.value = undefined
+    }
+
+    copyFlag.value = false;
   }
 
   const rollbackMi = async (row: any) => {
@@ -1743,7 +2115,7 @@ const queryMIAlterLog = (row : any) => {
     }
     await proxy?.$modal.confirm('您确定要撤回MI单吗？').finally(() => loading.value = false);
     proxy?.$modal.loading('加载中...')
-    await savePrediction(submitInfo).finally(() => proxy?.$modal.closeLoading());
+    await updateCheckPer(submitInfo).finally(() => proxy?.$modal.closeLoading());
     proxy?.$modal.msgSuccess("操作成功");
     await refreshList();
   }
@@ -1758,6 +2130,182 @@ const queryMIAlterLog = (row : any) => {
     console.log('MIPrintRef.value', MIPrintRef.value)
     await MIPrintRef.value.doPrint(data.id, type);
   }
+    // 文件下载
+  const downLoadHandle = (key: string) => {
+    let loadingBox = ElLoading.service({ text: '文件下载中...', background: 'rgba(0, 0, 0, 0.7)' });
+    console.log(key)
+    downloadUrl(key).then(res => {
+      loadingBox.close()
+      if (res.code == 200) {
+        const { data } = res
+        // window.open(data[key])
+        fileSaver.saveAs(data[key])
+      }
+    }).catch((err) => {
+      loadingBox.close()
+    })
+  }
+
+
+  //eq文件
+  const eqfilesDataObj = ref<any>([]);
+  const eqfileTab = ref('产品文件');
+  const eqfileColumnList = ref([
+    {title: "序号", type: 'seq', field: 'index', align: 'center', width: '60'},
+    {title: '文件名称', field: 'name', align: 'center'},
+    {title: '缩略图', field: 'src', align: 'center', showOverflow: false},
+    {title: '文件大小', width: '80', field: 'size', align: 'center'},
+    {title: '上传人', width: '80', field: 'createByName', align: 'center'},
+    {title: '上传时间', width: '140', field: 'createTime', align: 'center'},
+    {title: '操作', width: '100', field: 'make', align: 'center'},
+  ]);
+  /** 文件 */
+  const openUpload = async (row: any) => {
+    eqloading.value = true;
+    currentVo.value = row;
+    EQUploadDialog.title = "工程文件";
+    eqfileTab.value = '产品文件';
+    eqfilesDataObj.value = [];
+    EQUploadDialog.visible = true;
+    let query = {
+      //id: (currentType.value == 0 || currentType.value == 1) ? row.id : row.saleOrderVo.id,
+      saleOrderId:(currentType.value == 0 || currentType.value == 1) ? row.saleOrderId : row.saleOrderVo.id,
+    }
+    eqfilesDataObj.value = await getAssignTaskProjectFile(query);
+    eqloading.value = false;
+  }
+  const fileChange = async (value: any) => {
+    eqloading.value = true;
+    let lastFile = value.find(vo => vo.key == value[value.length - 1].key);
+    var data = {
+      bizId: (currentType.value == 0 || currentType.value == 1) ? currentVo.value.saleOrderId : currentVo.value.saleOrderVo.id,
+      moduleCode: "2",
+      bizType: "12",
+      type: lastFile.type,
+      size: lastFile.size,
+      name: lastFile.name,
+      key: lastFile.key,
+    }
+    console.log(data);
+    await addFile(data);
+    let query = {
+        saleOrderId:(currentType.value == 0 || currentType.value == 1) ? currentVo.value.saleOrderId : currentVo.value.saleOrderVo.id,
+    }
+    eqfilesDataObj.value = await getAssignTaskProjectFile(query);
+    eqloading.value = false;
+  }
+  const CAMFileChange = async (value: any) => {
+    eqloading.value = true;
+    let lastFile = value.find(vo => vo.key == value[value.length - 1].key);
+    var data = {
+      bizId: (currentType.value == 0 || currentType.value == 1) ? currentVo.value.saleOrderId : currentVo.value.saleOrderVo.id,
+      moduleCode: "2",
+      bizType: "35",
+      type: lastFile.type,
+      size: lastFile.size,
+      name: lastFile.name,
+      key: lastFile.key,
+    }
+    console.log(data);
+    await addFile(data);
+    let query = {
+        saleOrderId:(currentType.value == 0 || currentType.value == 1) ? currentVo.value.saleOrderId : currentVo.value.saleOrderVo.id,
+    }
+    eqfilesDataObj.value = await getAssignTaskProjectFile(query);
+    eqloading.value = false;
+  }
+  const eqcacelFile = () => {
+    eqfilesDataObj.value = [];
+    EQUploadDialog.visible = false;
+  }
+  const delAssignFile = async(_ids: any) => {
+    await proxy?.$modal.confirm('是否删除文件？').finally(() => loading.value = false);
+    eqloading.value = true;
+    deleteFile(_ids);
+    eqfilesDataObj.value = [];
+    let query = {
+        saleOrderId:(currentType.value == 0 || currentType.value == 1) ? currentVo.value.saleOrderId : currentVo.value.saleOrderVo.id,
+    }
+    eqfilesDataObj.value = await getAssignTaskProjectFile(query);
+    eqloading.value = false;
+  }
+
+  //eq 记录
+  const eqSaleId = ref();
+  const eqPlanId = ref();
+  const eqList = ref<any>([]);
+  const eqtotal = ref(0);
+  const eeqloading = ref(false);
+  const eqdialog = reactive<DialogOption>({
+    visible: false,
+    title: 'EQ记录'
+  });
+  const initEQQueryParams = {
+    pageNum: 1,
+    pageSize: 20,
+    params: {}
+  }
+  const eqdata = reactive<PageData<any, any>>({
+    form: {},
+    queryParams: {
+      ...initEQQueryParams
+    },
+    rules: {
+    }
+  });
+  const eqColumnList = ref([
+    {title: "序号", type: 'seq', field: 'index', align: 'center', width: '60'},
+    {title: '产品编码', field: 'commodityCode', align: 'center'},
+    {title: 'EQ开始时间', field: 'eqStartTime', align: 'center'},
+    {title: 'EQ开启人', width: '90',field: 'eqStartUserName', align: 'center', showOverflow: false},
+    {title: 'EQ结束时间',field:'eqEndTime',align: 'center'},
+    {title: 'EQ结束人', width: '90', field: 'eqEndUserName', align: 'center'},
+    {title: 'EQ时长(H)', width: '70', field: 'eqHours', align: 'center'},
+    {title: '是否自动关闭', width: '120', field: 'isAutoClose', align: 'center'},
+  ]);
+
+  const {queryParams:eqQueryParams} = toRefs(eqdata);
+  const EQRecord = async (row: any) => {
+    eqSaleId.value = (currentType.value == 0 || currentType.value == 1) ? row.saleOrderId : row.saleOrderVo.id,
+    await getEQList();
+    eqdialog.visible=true;
+  };
+
+
+  const EQPlanRecord = async (row: any) => {
+    eqSaleId.value = undefined;
+    eqPlanId.value = undefined;
+    eqQueryParams.value.planId = row.id;
+    eqPlanId.value = row.id;
+    const res = await listEQList(eqQueryParams.value);
+    eqList.value = res.rows;
+    eqtotal.value = res.total;
+    eqdialog.visible=true;
+  };
+
+     // 获取 搜索条件
+  const eqSearchChange = async(params: any) => {
+    eeqloading.value = true;
+    eqQueryParams.value = params;
+    if(eqSaleId.value){
+      eqQueryParams.value.saleOrderId = eqSaleId.value;
+    }
+    if(eqPlanId.value){
+      eqQueryParams.value.planId = eqPlanId.value;
+    }
+    await getEQList().finally(()=> eeqloading.value = false);
+
+  }
+
+  const getEQList = async ()=>{
+    if(eqSaleId.value){
+      eqQueryParams.value.saleOrderId = eqSaleId.value;
+    }
+    const res = await listEQList(eqQueryParams.value);
+    eqList.value = res.rows;
+    eqtotal.value = res.total;
+  }
+
   onMounted(() => {
     getDictData();
     getList();

@@ -27,6 +27,18 @@ export const listWaitConfirmDelivery = (query) => {
   });
 };
 
+/**
+ * 供应商查询送货单列表
+ * @param query
+ * @returns {*}
+ */
+export const listWaitConfirmDeliverySup = (query) => {
+  return request({
+    url: '/purchase/materialDelivery/listSup',
+    method: 'get',
+    params: query
+  });
+};
 
 /**
  * 查询送货单明细

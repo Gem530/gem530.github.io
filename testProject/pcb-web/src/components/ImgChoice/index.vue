@@ -1,5 +1,5 @@
 <template>
-  <div class="img-choice-list global-flex flex-start">
+  <div class="img-choice-list global-flex flex-start flex-wrap" style="max-height: 100%; overflow-y: auto">
     <div
       :class="{
             'img-choice-item': true,

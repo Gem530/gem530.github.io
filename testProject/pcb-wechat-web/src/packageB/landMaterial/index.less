@@ -1,0 +1,116 @@
+.pcb-page {
+    min-height: 100vh;
+    padding: 20px 32px;
+    background: #f9f9f9;
+    box-sizing: border-box;
+
+    .pcb-box {
+        height: calc(100vh - 90px - 64px - 20px);
+        margin-top: 20px;
+        // padding: 0 32px;
+        box-sizing: border-box;
+
+        .pcb-head {
+            // padding-right: 130px;
+            font-size: 26px;
+            box-sizing: border-box;
+            .pcb-card-name {
+                // flex: 1;
+                font-size: 26px;
+                word-break: break-all;
+            }
+            .pcb-tag {
+                flex: none;
+                // width: 80px;
+                height: 40px !important;
+                padding: 0 16px !important;
+                background: #C0C0C0;
+                font-size: 24px !important;
+                color: #ffffff;
+                text-align: center;
+                line-height: 40px;
+                box-sizing: border-box;
+            }
+            .expend-click {
+                &::after {
+                    width: 120%;
+                    height: 120%;
+                }
+            }
+            .pcb-head-time {
+                flex: none;
+                width: 200px;
+                font-size: 24px;
+                color: #999999;
+                text-align: right;
+            }
+        }
+
+        .pcb-card-item {
+            margin-bottom: 8px;
+            font-size: 24px;
+            color: #999999;
+            .pcb-item-value {
+                flex: 1;
+                font-size: 24px;
+                color: #999999;
+            }
+
+            .common-item-right {
+                margin-left: 20px;
+                color: #666666;
+                &.color-gray {
+                    color: #999999;
+                }
+            }
+
+            .pcb-card-number {
+                flex: none;
+                width: 200px;
+                text-align: right;
+            }
+        }
+        .pcb-price {
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 0;
+
+            &.common-item {
+                .common-item-label {
+                    width: 60px;
+                }
+            }
+            .common-item-price {
+                font-size: 24px !important;
+                color: #999999;
+            }
+            .common-item-label {
+                margin-right: 8px;
+                font-size: 26px;
+                text-align: right !important;
+            }
+            .common-item-value {
+                font-size: 26px;
+                color: #333333;
+                font-weight: 400;
+                align-items: center;
+            }
+        }
+        .pcb-title {
+            flex: 1;
+            font-size: 32px;
+            overflow: hidden;
+
+            .overflow-omit {
+                width: 100%;
+            }
+        }
+    }
+
+    .pcb-red {
+        color: #FC3232;
+    }
+    .pcb-yellow {
+        color: #E6A23C;
+    }
+}

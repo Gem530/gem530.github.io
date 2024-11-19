@@ -1,15 +1,20 @@
 <template>
   <el-dialog title="操作记录" v-model="showFlag" width="60%" draggable destroy-on-close>
-    <div class="expand-wrapper">
-      <vxe-table border show-overflow :row-config="{height: 45}" :column-config="{ resizable: true }" height="500"
+    <div>
+      <XTable border show-overflow :row-config="{height: 45}" :columnList="columnList" :column-config="{ resizable: true }" height="500" :pageShow="false"
         :data="recordList" :loading="loading">
-        <vxe-column align="center" width="50" field="index" title="序号" type="seq"></vxe-column>
+        <!-- <vxe-column align="center" width="50" field="index" title="序号" type="seq"></vxe-column>
         <vxe-column align="center" field="ownerName" title="所属单位"></vxe-column>
         <vxe-column align="center" width="80" field="createByName" title="操作人"></vxe-column>
         <vxe-column align="center" width="160" field="createTime" title="操作时间"></vxe-column>
-        <vxe-column field="operateContent" title="操作内容"></vxe-column>
-        <vxe-column width="160" field="remark" title="确认备注"></vxe-column>
-      </vxe-table>
+        <vxe-column align="center" field="operateContent" title="操作内容"> -->
+            <template #default-operateContent="{row}">
+              <!-- 里面内容居左 -->
+              <div style="text-align: left">{{row.operateContent}}</div>
+            </template>
+        <!-- </vxe-column>
+        <vxe-column align="center"  width="160" field="remark" title="确认备注"></vxe-column> -->
+      </XTable>
     </div>
     <template #footer>
       <span class="dialog-footer">
@@ -27,6 +32,14 @@ import {RecordVO} from "@/api/purchase/record/types";
 const loading = ref(false);
 const recordList = ref<RecordVO[]>([]);
 
+const columnList = ref([
+{ width: '50',type: 'seq',title: '序号',field: 'index',align: 'center',  },
+{ title: '所属单位',field: 'ownerName',align: 'center',  },
+{ width: '80',title: '操作人',field: 'createByName',align: 'center',  },
+{ width: '160',title: '操作时间',field: 'createTime',align: 'center',  },
+{ title: '操作内容',field: 'operateContent',align: 'center',  },
+{ width: '160',title: '确认备注',field: 'remark',align: 'center',  },
+]);
 /** 取消按钮 */
 function cancelRecord() {
   showFlag.value = false;

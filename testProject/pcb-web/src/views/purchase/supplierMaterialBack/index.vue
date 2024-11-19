@@ -84,6 +84,9 @@
 
     <!-- 签名列表 -->
     <signDialog v-if="signVisible" v-model:show="signVisible" @submit="submitSign" @cancel="cancelSign"></signDialog>
+
+    <!-- 库存锁定提示框 -->
+    <InventoryLock title="物料盘点提示" inventoryType="2" v-model:show="inventoryCheck" :data="inventoryRes" @close="inventoryCheck = false"/>
   </div>
 </template>
 
@@ -100,6 +103,8 @@ import {VxeTablePropTypes} from "vxe-table";
 import {DirectPurchase} from "@/api/purchase/materialBackDetail/types";
 import {getSignPdf} from "@/api/financial/accountOrder";
 import {getReportUrl} from "@/utils/report";
+import {listMaterialInventoryInfo} from "@/api/purchase/materialApply";
+import {queryUseModule} from "@/api/basedata/sign";
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 const dataList = ref<any[]>([]);
 const loading = ref(false);
@@ -234,6 +239,9 @@ const handleConfirm = async (row: any) => {
   waitLoading.value = false;
 }
 
+const inventoryCheck = ref(false);
+const inventoryRes = ref([]);
+
 /** 提交按钮 */
 const submitConfirmForm = async () => {
   let flag = false;
@@ -265,8 +273,30 @@ const submitConfirmForm = async () => {
     dialogConfirm.visible = false;
     await getSupplierBackDetail();
   } else {
+    // 查询是否存在盘点中物料
+    let ids = waitConfirmData.value.map(item => item.rawMaterialId);
+    let query = {
+      pageNum: 1,
+      pageSize: 20,
+      idList: ids,
+      isCheck: '1'
+    }
+    const res = await listMaterialInventoryInfo(query);
+    if (res.rows && res.rows.length > 0) {
+      inventoryRes.value = res.rows;
+      inventoryCheck.value = true;
+      return;
+    }
+
     await confirmMaterialBackApp(directPurchase.purchaseList).finally(() => buttonLoading.value = false);
-    querySignList();
+    // 查询是否存在默认签章
+    const res1 = await queryUseModule({useModule: '3'});
+    // 存在则自动签名
+    if(res1.data) {
+      submitSign(res1.data.key, res1.data.signType);
+    } else {
+      querySignList();
+    }
   }
 
 }
@@ -320,16 +350,14 @@ const reportDrawer = reactive<DrawerOption>({
 const uReportHandle = async (row : any) => {
   reportDrawer.title = "采购退货单预览";
   reportDrawer.visible = true;
-  if(row.confirmStatus=="3"){
-    getSignPdf({bizCode:row.code}).then(res=>{
-      let vo = res.data;
-      if (vo.url) {
-        let url = '/web/viewer.html?file=' + encodeURIComponent(vo.url + '#' + vo.name);
-        reportUrl.value = url;
-        return;
-      }
-    });
-  }
+  getSignPdf({bizCode: row.code}).then(res => {
+    let vo = res.data;
+    if (vo.url) {
+      let url = '/web/viewer.html?file=' + encodeURIComponent(vo.url + '#' + vo.name);
+      reportUrl.value = url;
+      return;
+    }
+  });
   reportUrl.value = getReportUrl() + `&_n=采购退货单&_u=file:purchaseOrderBack.ureport.xml&url=system/materialBackDetail/materialBackPreview/${row.code}&listUrl=system/materialBackDetail/materialBackPreview?xyz=y&code=${row.code}&confirmStatus=${row.confirmStatus}`;
   console.log(reportUrl.value)
   reportUrl.value = reportUrl.value.replace("1,4,6","2,4,6");

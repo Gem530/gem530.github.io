@@ -1,9 +1,9 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
+    <el-card v-if="checkPermi(['report:commodity:list'])" shadow="never" class="xtable-card">
       <template #header>
         <el-col :span="24" style="justify-content: flex-end;display: flex;">
-          <el-button plain @click="handleExport">导出</el-button>
+          <el-button v-if="checkPermi(['report:commodity:export'])" type="primary" @click="handleExport">导出</el-button>
         </el-col>
       </template>
       <el-row :gutter="10" class="mb8" style="width:100%;margin:0;display:flex;justify-content: end;">
@@ -50,6 +50,7 @@ import { getListCustomer } from "@/api/basedata/customer";
 
 import { parseTime } from "@/utils/ruoyi";
 import {listUserByRoleKey} from "@/api/system/user";
+import {checkPermi} from "@/utils/permission";
 
 const accQuantityTotal=ref();
 const accTotalAmountTotal=ref();
@@ -183,13 +184,13 @@ const handleExport = () => {
 const doHandleExport = () => {
   proxy?.download('report/saleOrderDetail/export', {
     ...queryParams.value, tableName: orderTableId.value, exportPageSize: total.value
-  }, `销售明细查询_${parseTime(new Date())}.xlsx`)
+  }, `成品明细查询_${parseTime(new Date())}.xlsx`)
 }
 
 const doHandleExport30 = () => {
   proxy?.download('report/saleOrderDetail/export', {
     ...queryParams.value, tableName: orderTableId.value, isExport30Days: true
-  }, `销售明细查询_${parseTime(new Date())}.xlsx`).finally(() => {
+  }, `成品明细查询_${parseTime(new Date())}.xlsx`).finally(() => {
     exportVisible.value = false;
   })
 }

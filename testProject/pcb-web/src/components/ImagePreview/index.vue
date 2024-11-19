@@ -2,7 +2,8 @@
   <el-image :src="`${realSrc}`" fit="cover" :style="`width:${realWidth};height:${realHeight};`" :preview-src-list="realSrcList" preview-teleported>
     <template #error>
       <div class="image-slot">
-        <el-icon><picture-filled /></el-icon>
+        <div v-if="props.type && !['jpg','jpeg','tiff','svg','bmp','png','webp','gif','tif','psd'].includes(((props.type || '')+'').replace('.','').toLowerCase())">{{((props.type || '')+'').toUpperCase()}}</div>
+        <el-icon v-else><picture-filled /></el-icon>
       </div>
     </template>
   </el-image>
@@ -13,6 +14,10 @@ import { propTypes } from '@/utils/propTypes';
 
 const props = defineProps({
   src: propTypes.string.def(''),
+  type: {
+    type: String,
+    default: ''
+  },
   width: {
     type: [Number, String],
     default: ""

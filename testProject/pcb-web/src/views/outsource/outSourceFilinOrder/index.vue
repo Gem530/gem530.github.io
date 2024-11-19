@@ -3,9 +3,10 @@
     <el-card shadow="never" class="xtable-card">
       <el-row class="mb8" style="width: 100%; text-align: right">
         <el-col>
-          <el-button type="primary" plain @click="handleAdd('菲林')">新增菲林
+          <el-button type="primary" plain v-if="checkPermi(['outSource:FilinOrder:edit'])"
+           @click="handleAdd('菲林')">新增菲林
           </el-button>
-          <el-button type="primary" plain @click="handleAdd('网板')">新增网板
+          <el-button type="primary" plain v-if="checkPermi(['outSource:FilinOrder:edit'])" @click="handleAdd('网板')">新增网板
           </el-button>
           <el-button plain @click="handleExport">导出</el-button>
         </el-col>
@@ -25,6 +26,11 @@
                 <span>{{ item.value == scope.row.isCompression ? item.label : "" }}</span>
               </div>
             </template>
+            <template #default-isCcd="scope">
+              <div v-for="item in isCCDList">
+                <span>{{ item.value == scope.row.isCcd ? item.label : "" }}</span>
+              </div>
+            </template>
             <template #default-type="scope">
               <div v-for="item in orderTypeList">
                 <span>{{ item.value == scope.row.type ? item.label : "" }}</span>
@@ -33,6 +39,11 @@
             <template #default-wangBanType="scope">
               <div v-for="item in wangBanTypeOptions">
                 <span>{{ item.value == scope.row.wangBanType ? item.label : "" }}</span>
+              </div>
+            </template>
+            <template #default-orderType="scope">
+              <div v-for="item in resDictData.order_type">
+                <span>{{ item.value == scope.row.orderType ? item.label : '' }}</span>
               </div>
             </template>
             <template #default-make="scope">
@@ -62,6 +73,14 @@
                 <span>{{ item.value == scope.row.isCompression ? item.label : "" }}</span>
               </div>
             </template>
+            <template #default-hasAccountOrder="scope">
+              {{ accountStatusList.find(item => item.value == scope.row.hasAccountOrder)?.label }}
+            </template>
+            <template #default-isCcd="scope">
+              <div v-for="item in isCCDList">
+                <span>{{ item.value == scope.row.isCcd ? item.label : "" }}</span>
+              </div>
+            </template>
             <template #default-type="scope">
               <div v-for="item in orderTypeList">
                 <span>{{ item.value == scope.row.type ? item.label : "" }}</span>
@@ -70,6 +89,11 @@
              <template #default-wangBanType="scope">
               <div v-for="item in wangBanTypeOptions">
                 <span>{{ item.value == scope.row.wangBanType ? item.label : "" }}</span>
+              </div>
+            </template>
+            <template #default-orderType="scope">
+              <div v-for="item in resDictData.order_type">
+                <span>{{ item.value == scope.row.orderType ? item.label : '' }}</span>
               </div>
             </template>
             <template #default-make="scope">
@@ -90,36 +114,43 @@
 
     <el-drawer v-model="outsourceFilinTable.visible" :title="outsourceFilinTable.title" size="80%">
       <el-card class="mb8">
-        <vxe-table border show-overflow keep-source ref="_tableRef" :data="addList" size="mini" class="mb8">
-          <vxe-column type="seq" title="序号" width="60" align="center"></vxe-column>
-          <vxe-column field="type" title="外协类型">
-            <template #default="scope">
+        <XTable border keep-source ref="_tableRef"  min-height="143px" :columnList="columnListDrawerProcessOrder" :pageShow="false" :data="addList" class="mb8">
+          <!-- <vxe-column type="seq" title="序号" width="60" align="center"></vxe-column>
+          <vxe-column field="type" title="外协类型"> -->
+            <template #default-type="scope">
               <div v-for="item in orderTypeList">
                 <span>{{ item.value == scope.row.type ? item.label : "" }}</span>
               </div>
             </template>
-          </vxe-column>
+          <!-- </vxe-column>
           <vxe-column field="productionNo" title="排产单号" />
           <vxe-column field="commodityNo" title="产品编码" />
           <vxe-column field="quantity" title="加工数量" />
-          <vxe-column :visible="isFilin" field="isCompression" title="是否压膜">
-            <template #default="scope">
+          <vxe-column :visible="isFilin" field="isCompression" title="是否压膜"> -->
+            <template #default-isCompression="scope">
               <div v-for="item in isCompressionList">
                 <span>{{ item.value == scope.row.isCompression ? item.label : "" }}</span>
+              </div>
+            </template>
+          <!-- </vxe-column>
+          <vxe-column :visible="isFilin" field="isCcd" title="是否CCD">
+            <template #default="scope">
+              <div v-for="item in isCCDList">
+                <span>{{ item.value == scope.row.isCcd ? item.label : "" }}</span>
               </div>
             </template>
           </vxe-column>
           <vxe-column :visible="isFilin" field="reason" title="菲林原因" />
           <vxe-column :visible="isFilin" field="otherRequirement" title="其他要求" />
           <vxe-column field="remark" title="备注" />
-          <vxe-column field="make" title="操作" width="170" align="center">
-            <template #default="scope">
+          <vxe-column field="make" title="操作" width="170" align="center"> -->
+            <template #default-make="scope">
               <el-button link type="primary" @click="editAddOrder(scope.row)">修改</el-button>
               <el-button link type="danger" @click="removeChange(scope.row)">删除</el-button>
               <!--              <el-button link type="primary" @click="downloadFile(scope.row)">下载文件</el-button>-->
             </template>
-          </vxe-column>
-        </vxe-table>
+          <!-- </vxe-column> -->
+        </XTable>
         <el-row>
           <el-button type="primary" plain @click="preAdd">新增记录</el-button>
         </el-row>
@@ -247,6 +278,20 @@
               </el-radio-group>
             </el-form-item>
           </el-col>
+           <el-col :span="8" v-if="isFilin">
+            <el-form-item label="是否CCD" prop="isCcd">
+              <el-radio-group v-model="form.isCcd" @change="isCCDChange">
+                <el-radio v-for="dict in isCCDList" :key="dict.value" :label="dict.value">
+                  {{ dict.label }}
+                </el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+          <el-col :span="24" v-if="isFilin && editReturnOrderReissuanceReason">
+            <el-form-item label="返单再发原因" prop="returnOrderReissuanceReason">
+              <el-input maxLength="2000" v-model="form.returnOrderReissuanceReason" :rows="2" type="textarea" />
+            </el-form-item>
+          </el-col>
           <el-col :span="24" v-if="isFilin">
             <el-form-item label="菲林原因" prop="reason">
               <el-input maxLength="1000" v-model="form.reason" :rows="2" type="textarea" />
@@ -273,84 +318,165 @@
     </el-dialog>
 
     <!-- 确认完成对话框 -->
-    <el-dialog :title="completeDialog.title" v-model="completeDialog.visible" width="50%" destroy-on-close>
-      <el-form ref="completeFilinOrderFormRef" :model="form" :rules="commpleteRules" label-width="80px" v-loading="dialogTableLoading">
-        <el-row>
-          <el-col :span="8">
-            <el-form-item label="产品编码" prop="commodityId">
-              <el-input v-model="form.commodityNo"   disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="排产单号" prop="productionId">
-              <el-input v-model="form.productionNo"   disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="工艺" prop="craftId">
-              <el-input v-model="form.craftName"   disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="加工数量" prop="quantity">
-              <el-input v-model="form.quantity" type="number" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8" v-if="form.type=='1'">
-            <el-form-item label="是否压膜" prop="isCompression">
-              <el-radio-group v-model="form.isCompression" disabled>
-                <el-radio v-for="dict in isCompressionList" :key="dict.value" :label="dict.value">
-                  {{ dict.label }}
-                </el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24" v-if="form.type=='1'">
-            <el-form-item label="菲林原因" prop="reason">
-              <el-input maxLength="1000" v-model="form.reason" :rows="2" type="textarea" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24" v-if="form.type=='1'">
-            <el-form-item label="其他要求" prop="otherRequirement">
-              <el-input maxLength="1000" v-model="form.otherRequirement" :rows="2" type="textarea" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="备注" prop="remark">
-              <el-input maxLength="1000" v-model="form.remark" :rows="2" type="textarea" disabled />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="8"  v-if="form.type=='1'" >
-            <el-form-item  label="长" prop="length">
-              <el-input-number v-model="form.length" :precision="2" style="width: 85%;"
-                :controls="false" :max="999999" />
-                <span style="width: 15%;">cm</span>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8" v-if="form.type=='1'">
-            <el-form-item label="宽" prop="width">
-              <el-input-number v-model="form.width" :precision="2" style="width: 85%;"
-                :controls="false" :max="999999" />
-                <span style="width: 15%;">cm</span>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="确认数量" prop="confirmQuantity">
-              <el-input-number v-model="form.confirmQuantity" :precision="0" style="width: 99%;"
-                :controls="false" :min="0" :max="form.quantity" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
+    <el-drawer :title="completeDialog.title" v-model="completeDialog.visible" size="80%" destroy-on-close>
+<!--      <el-form ref="completeFilinOrderFormRef" :model="form" :rules="commpleteRules" label-width="80px" v-loading="dialogTableLoading">-->
+<!--        <el-row>-->
+<!--          <el-col :span="8">-->
+<!--            <el-form-item label="产品编码" prop="commodityId">-->
+<!--              <el-input v-model="form.commodityNo"   disabled />-->
+<!--            </el-form-item>-->
+<!--          </el-col>-->
+<!--          <el-col :span="8">-->
+<!--            <el-form-item label="排产单号" prop="productionId">-->
+<!--              <el-input v-model="form.productionNo"   disabled />-->
+<!--            </el-form-item>-->
+<!--          </el-col>-->
+<!--          <el-col :span="8">-->
+<!--            <el-form-item label="工艺" prop="craftId">-->
+<!--              <el-input v-model="form.craftName"   disabled />-->
+<!--            </el-form-item>-->
+<!--          </el-col>-->
+<!--          <el-col :span="8">-->
+<!--            <el-form-item label="加工数量" prop="quantity">-->
+<!--              <el-input v-model="form.quantity" type="number" disabled />-->
+<!--            </el-form-item>-->
+<!--          </el-col>-->
+<!--          <el-col :span="8" v-if="form.type=='1'">-->
+<!--            <el-form-item label="是否压膜" prop="isCompression">-->
+<!--              <el-radio-group v-model="form.isCompression" disabled>-->
+<!--                <el-radio v-for="dict in isCompressionList" :key="dict.value" :label="dict.value">-->
+<!--                  {{ dict.label }}-->
+<!--                </el-radio>-->
+<!--              </el-radio-group>-->
+<!--            </el-form-item>-->
+<!--          </el-col>-->
+<!--          <el-col :span="8" v-if="form.type=='1'" >-->
+<!--            <el-form-item label="是否CCD" prop="isCcd">-->
+<!--              <el-radio-group v-model="form.isCcd" disabled>-->
+<!--                <el-radio v-for="dict in isCCDList" :key="dict.value" :label="dict.value">-->
+<!--                  {{ dict.label }}-->
+<!--                </el-radio>-->
+<!--              </el-radio-group>-->
+<!--            </el-form-item>-->
+<!--          </el-col>-->
+<!--          <el-col :span="24" v-if="form.type=='1'">-->
+<!--            <el-form-item label="菲林原因" prop="reason">-->
+<!--              <el-input maxLength="1000" v-model="form.reason" :rows="2" type="textarea" disabled />-->
+<!--            </el-form-item>-->
+<!--          </el-col>-->
+<!--          <el-col :span="24" v-if="form.type=='1'">-->
+<!--            <el-form-item label="其他要求" prop="otherRequirement">-->
+<!--              <el-input maxLength="1000" v-model="form.otherRequirement" :rows="2" type="textarea" disabled />-->
+<!--            </el-form-item>-->
+<!--          </el-col>-->
+<!--          <el-col :span="24">-->
+<!--            <el-form-item label="备注" prop="remark">-->
+<!--              <el-input maxLength="1000" v-model="form.remark" :rows="2" type="textarea" disabled />-->
+<!--            </el-form-item>-->
+<!--          </el-col>-->
+<!--        </el-row>-->
+<!--        <el-row>-->
+<!--          <el-col :span="8"  v-if="form.type=='1'" >-->
+<!--            <el-form-item  label="长" prop="length">-->
+<!--              <el-input-number v-model="form.length" :precision="2" style="width: 85%;"-->
+<!--                :controls="false" :max="999999" />-->
+<!--                <span style="width: 15%;">cm</span>-->
+<!--            </el-form-item>-->
+<!--          </el-col>-->
+<!--          <el-col :span="8" v-if="form.type=='1'">-->
+<!--            <el-form-item label="宽" prop="width">-->
+<!--              <el-input-number v-model="form.width" :precision="2" style="width: 85%;"-->
+<!--                :controls="false" :max="999999" />-->
+<!--                <span style="width: 15%;">cm</span>-->
+<!--            </el-form-item>-->
+<!--          </el-col>-->
+<!--          <el-col :span="8">-->
+<!--            <el-form-item label="确认数量" prop="confirmQuantity">-->
+<!--              <el-input-number v-model="form.confirmQuantity" :precision="0" style="width: 99%;"-->
+<!--                :controls="false" :min="0" :max="form.quantity" />-->
+<!--            </el-form-item>-->
+<!--          </el-col>-->
+<!--        </el-row>-->
+<!--      </el-form>-->
+      <XTable v-if="rowType == '1'" toolId="filinCompleteDrawer" :pageShow="false" :loading="dialogTableLoading" class="xtable-content"
+              ref="filinCompleteRef"
+              :intervalCondition="intervalCondition" :page-params="{ perfect: true, total: total }" :edit-rules="editRules"
+              :edit-config="{ trigger: 'click', mode: 'row', autoClear: false,showIcon:true,showAsterisk:true}"
+              :data="filinCompleteList" :columnList="filinCompleteColumnList" border
+              :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }">
+        <template #default-craftName="scope">
+          <div v-for="item in craftOptionsBase">
+            <span>{{ item.id == scope.row.craftId ? item.craftName : "" }}</span>
+          </div>
+        </template>
+        <template #default-isCompression="scope">
+          <div v-for="item in isCompressionList">
+            <span>{{ item.value == scope.row.isCompression ? item.label : "" }}</span>
+          </div>
+        </template>
+        <template #default-isCcd="scope">
+          <div v-for="item in isCCDList">
+            <span>{{ item.value == scope.row.isCcd ? item.label : "" }}</span>
+          </div>
+        </template>
+        <template #edit-length="{ row }">
+          <XInputNumber :min="0" maxLength="11" :precision="2" style="width: 99%;" :controls="false" v-model="row.length" />
+        </template>
+        <template #edit-width="{ row }">
+          <XInputNumber :min="0" maxLength="11" :precision="2" style="width: 99%;" :controls="false" v-model="row.width" />
+        </template>
+        <template #edit-confirmQuantity="{ row }">
+          <XInputNumber :min="0" :max="row.quantity" maxLength="11" :precision="0" style="width: 99%;" v-model="row.confirmQuantity" />
+        </template>
+        <template #default-make="scope">
+          <el-button link type="primary" @click="deleteComplete(scope.row)">
+            删除
+          </el-button>
+        </template>
+      </XTable>
+      <XTable v-if="rowType == '2'" toolId="screenCompleteDrawer" :pageShow="false" :loading="dialogTableLoading" class="xtable-content"
+              ref="screenCompleteRef"
+              :intervalCondition="intervalCondition" :page-params="{ perfect: true, total: total }" :edit-rules="editRules"
+              :edit-config="{ trigger: 'click', mode: 'row', autoClear: 'false',showIcon:'true',showAsterisk:'true'}"
+              :data="screenCompleteList" :columnList="screenCompleteColumnList" border
+              :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }">
+        <template #default-craftName="scope">
+          <div v-for="item in craftOptionsBase">
+            <span>{{ item.id == scope.row.craftId ? item.craftName : "" }}</span>
+          </div>
+        </template>
+        <template #default-isCompression="scope">
+          <div v-for="item in isCompressionList">
+            <span>{{ item.value == scope.row.isCompression ? item.label : "" }}</span>
+          </div>
+        </template>
+        <template #default-isCcd="scope">
+          <div v-for="item in isCCDList">
+            <span>{{ item.value == scope.row.isCcd ? item.label : "" }}</span>
+          </div>
+        </template>
+        <template #edit-length="{ row }">
+          <XInputNumber :min="0" maxLength="11" :precision="0" style="width: 99%;" :controls="false" v-model="row.length" />
+        </template>
+        <template #edit-width="{ row }">
+          <XInputNumber :min="0" maxLength="11" :precision="0" style="width: 99%;" :controls="false" v-model="row.width" />
+        </template>
+        <template #edit-confirmQuantity="{ row }">
+          <XInputNumber :min="0" :max="row.quantity" maxLength="11" :precision="0" style="width: 99%;" :controls="false" v-model="row.confirmQuantity" />
+        </template>
+        <template #default-make="scope">
+          <el-button link type="primary" @click="deleteComplete(scope.row)">
+            删除
+          </el-button>
+        </template>
+      </XTable>
       <template #footer>
         <div class="dialog-footer" style="text-align: center">
-          <el-button type="primary" @click="doComplete" :loading="buttonLoading">确 定</el-button>
           <el-button @click="completeDialog.visible=false" :loading="buttonLoading">取 消</el-button>
+          <el-button type="primary" @click="doComplete" :loading="buttonLoading">确 定</el-button>
         </div>
       </template>
-    </el-dialog>
+    </el-drawer>
 
     <!-- 工序文件 -->
     <el-dialog v-model="fileDialog.visible" width="60%">
@@ -483,7 +609,9 @@ import {
   addOutSourceFilinOrder,
   updateOutSourceFilinOrder,
   listProCarftFilesInfo,
-  doCompleteFilinOrder
+  doCompleteFilinOrder,
+  doCompleteFilinOrderBatch,
+  listOutSourceFilinDetailList
 } from '@/api/outsource/outSourceFilinOrder';
 import {
   OutSourceFilinOrderVO,
@@ -491,18 +619,19 @@ import {
   OutSourceFilinOrderForm
 } from '@/api/outsource/outSourceFilinOrder/types';
 import {checkPermi} from "@/utils/permission";
-import { VxeTableEvents, VxeTablePropTypes } from 'vxe-table';
+import {VXETable, VxeTableEvents, VxeTablePropTypes} from 'vxe-table';
 import { SourceHalfProcessOrderVO, } from '@/api/outsource/sourceHalfProcessOrder/types';
 import { QuotationVO } from "@/api/order/quotation/types";
 import { getCraftList } from "@/api/basedata/craft";
 import { CraftVO } from "@/api/basedata/craft/types";
 import { listProduction } from '@/api/production/production';
 import dayjs from "dayjs";
+import {ref} from "vue";
 const fileTab = ref('工序文件');
 const fileTotal = ref(0);
 const outSourceInfo = ref<any>();
 const cardRef = ref();
-const intervalCondition = ['deliveryTime', 'outSourceTime'];
+const intervalCondition = ['deliveryTime', 'outSourceTime', 'accountQuantity'];
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 const productionList = ref<SourceHalfProcessOrderVO[]>([]);
 const outSourceFilinOrderList = ref<OutSourceFilinOrderVO[]>([]);
@@ -532,6 +661,12 @@ const defaultDate = ref(new Date());
 const viewCommodityList = ref<any[]>([]);
 const viewProductionList = ref<any[]>([]);
 const viewCraftList = ref<any[]>([]);
+const rowType = ref();
+const filinCompleteRef = ref();
+const screenCompleteRef = ref();
+const filinCompleteList:any = ref([]);
+
+const screenCompleteList:any = ref([]);
 
 const completeDialog = reactive<DialogOption>({ visible: false, title: '确认完成'});
 const completeFilinOrderFormRef = ref<ElFormInstance>();
@@ -547,6 +682,10 @@ const wangBanTypeOptions = ref([
   {value: "2", label: "碳油"}
 ])
 const isCompressionList = ref([
+  { label: '是', value: "1" },
+  { label: '否', value: "2" },
+]);
+const isCCDList = ref([
   { label: '是', value: "1" },
   { label: '否', value: "2" },
 ]);
@@ -588,6 +727,7 @@ const initFormData: OutSourceFilinOrderForm = {
   otherRequirement: undefined,
   type: undefined,
   isCompression: undefined,
+  isCcd: '2',
   completeTime: undefined,
   status: undefined,
   craftId: undefined
@@ -612,6 +752,7 @@ const data = reactive<PageData<OutSourceFilinOrderForm, OutSourceFilinOrderQuery
     completeTime: undefined,
     status: undefined,
     deliveryTime: undefined,
+    returnOrderReissuanceReason: '',
     params: {}
   },
   rules: {
@@ -619,16 +760,16 @@ const data = reactive<PageData<OutSourceFilinOrderForm, OutSourceFilinOrderQuery
       { required: true, message: "下单时间不能为空", trigger: "blur" }
     ],
     commodityId: [
-      { required: true, message: "产品名称不能为空", trigger: "blur" }
+      { required: true, message: "产品名称不能为空", trigger: ["blur","change"] }
     ],
     planId: [
-      { required: true, message: "产品名称不能为空", trigger: "blur" }
+      { required: true, message: "产品名称不能为空", trigger: ["blur","change"] }
     ],
     productionId: [
-      { required: true, message: "排产单号不能为空", trigger: "blur" }
+      { required: true, message: "排产单号不能为空", trigger: ["blur","change"] }
     ],
     craftId: [
-      { required: true, message: "工艺不能为空", trigger: "blur" }
+      { required: true, message: "工艺不能为空", trigger: ["blur","change"] }
     ],
     supplierId: [
       { required: true, message: "供应商不能为空", trigger: "blur" }
@@ -637,16 +778,19 @@ const data = reactive<PageData<OutSourceFilinOrderForm, OutSourceFilinOrderQuery
       { required: true, message: "收货地址不能为空", trigger: "blur" }
     ],
     quantity: [
-      { required: true, message: "数量不能为空", trigger: "blur" }
+      { required: true, message: "数量不能为空", trigger: ["blur","change"] }
     ],
     isCompression: [
       { required: true, message: "是否压膜不能为空", trigger: "blur" }
     ],
+    returnOrderReissuanceReason: [
+      { required: false, message: "返单再发原因不能为空", trigger: ["blur","change"] }
+    ],
     reason: [
-      { required: true, message: "菲林原因不能为空", trigger: "blur" }
+      { required: true, message: "菲林原因不能为空", trigger: ["blur","change"] }
     ],
     otherRequirement: [
-      { required: true, message: "其他要求不能为空", trigger: "blur" }
+      { required: true, message: "其他要求不能为空", trigger: ["blur","change"] }
     ],
      wangBanType: [
       { required: true, message: "网板类型不能为空", trigger: "blur" }
@@ -701,6 +845,44 @@ const fileData = reactive<PageData<FileItemForm, FileQuery>>({
   rules: {}
 });
 
+const editRules = ref<VxeTablePropTypes.EditRules>({
+  width:[
+    { required: true, validator: 'positiveNumberWithTwoDecimals' }
+  ],
+  length:[
+    { required: true, validator: 'positiveNumberWithTwoDecimals' }
+  ],
+  confirmQuantity: [
+    { required: true, validator: 'positiveIntValid' }
+  ],
+
+})
+
+//Tab正整数校验
+const positiveIntValid = (cellValue: any) => {
+  if (!/^[1-9]\d*$/.test(cellValue)) {
+    return new Error('请输入正整数')
+  }
+}
+VXETable.validators.add('positiveIntValid', {
+  cellValidatorMethod({ cellValue }) {
+    return positiveIntValid(cellValue)
+  }
+})
+
+//正数且小数点后最多2位校验
+const positiveNumberWithTwoDecimals = (cellValue: any) => {
+  //0|[1-9]\d*)(\.\d{1,2}
+  if (!/^([1-9]\d*)(\.\d{1,2})?$/.test(cellValue)) {
+    return new Error('请输入数字、最多2位小数点')
+  }
+}
+VXETable.validators.add('positiveNumberWithTwoDecimals', {
+  cellValidatorMethod({ cellValue }) {
+    return positiveNumberWithTwoDecimals(cellValue)
+  }
+})
+
 const { queryParams: fileQueryParams } = toRefs(fileData);
 const { queryParams: addressQueryParams } = toRefs(addressData);
 
@@ -735,6 +917,12 @@ const columnList = ref([
     filterType: 'input',
     filterParam: { placeholder: '请输入产品编码' }
   },
+  {
+    width: '80',
+    title: '新/返',
+    field: 'orderType',
+    align: 'center'
+  },
   // {
   //   width: '120',
   //   title: '要求交期',
@@ -761,6 +949,7 @@ const columnList = ref([
   },
   { title: '加工数量', width: '80', field: 'quantity', align: 'center' },
   { title: '是否压膜', width: '80', field: 'isCompression', align: 'center' },
+  { title: '是否CCD', width: '80', field: 'isCcd', align: 'center' },
   { title: '菲林原因', width: '120', field: 'reason', align: 'center' },
   { title: '其他要求', width: '120', field: 'otherRequirement', align: 'center' },
   { title: '网板类型', width: '120', field: 'wangBanType', align: 'center' },
@@ -783,6 +972,12 @@ const columnList = ref([
   },
   { title: '操作', field: 'make', align: 'center', width: '240', fixed: 'right', showOverflow: false },
 ]);
+
+const accountStatusList = ref([
+  {label: '已对账', value: '1', },
+  {label: '未对账', value: '0', },
+]);
+
 const completeColumnList = ref([
   { title: "序号", type: 'seq', field: 'index', align: 'center', width: '60' },
   { title: '外协单号', width: '120', field: 'no', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入外协单号' } },
@@ -790,13 +985,19 @@ const completeColumnList = ref([
     filterData: () => orderTypeList.value },
   { width: '120',title: '排产单号',field: 'productionNo',align: 'center',filterType: 'input',filterParam: { placeholder: '请输入排产单编号' }},
   { width: '120', title: '产品编码', field: 'commodityNo', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入产品编码' }},
+  { width: '60', title: '新/返', field: 'orderType', align: 'center'},
   { width: '120', title: '供应商编码', field: 'supplierCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入供应商编码' }},
   { width: '120', title: '供应商名称', field: 'supplierName', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入供应商名称' }},
   { title: '加工数量', width: '80', field: 'quantity', align: 'center' },
   { title: '确认数量', width: '80', field: 'confirmQuantity', align: 'center' },
-  { title: '长（cm）', width: '80', field: 'length', align: 'center' },
-  { title: '宽（cm）', width: '80', field: 'width', align: 'center' },
+  { title: '长（mm）', width: '80', field: 'length', align: 'center' },
+  { title: '宽（mm）', width: '80', field: 'width', align: 'center' },
+  { title: '面积（㎡）', width: '80', field: 'area', align: 'center' },
+  { title: '对账状态', width: '80', field: 'hasAccountOrder',  align: 'center', filterType: 'radioButton', filterData: () => accountStatusList.value, isPermi: () => checkPermi(['outsource:account:query']) },
+  { title: '对账数量', width: '80', field: 'accountQuantity',align: 'center', filterType:'intervalNumber', isPermi: () => checkPermi(['outsource:account:query']) },
+  { title: '对账面积(㎡)', width: '80', field: 'accountArea', align: 'center', isPermi: () => checkPermi(['outsource:account:query'])  },
   { title: '是否压膜', width: '80', field: 'isCompression', align: 'center' },
+  { title: '是否CCD', width: '80', field: 'isCcd', align: 'center' },
   { title: '菲林原因', width: '120', field: 'reason', align: 'center' },
   { title: '其他要求', width: '120', field: 'otherRequirement', align: 'center' },
   { title: '网板类型', width: '120', field: 'wangBanType', align: 'center' },
@@ -810,6 +1011,32 @@ const completeColumnList = ref([
   { title: '操作', field: 'make', align: 'center', width: '240', fixed: 'right', showOverflow: false },
 ]);
 
+const filinCompleteColumnList = ref([
+  { width: '120', title: '产品编码', field: 'commodityNo', align: 'center'},
+  { width: '120', title: '排产单号', field: 'productionNo', align: 'center'},
+  { width: '80', title: '工艺', field: 'craftName', align: 'center'},
+  { title: '是否压膜', width: '80', field: 'isCompression', align: 'center' },
+  { title: '是否CCD', width: '80', field: 'isCcd', align: 'center' },
+  { title: '菲林原因', width: '120', field: 'reason', align: 'center' },
+  { title: '其他要求', width: '120', field: 'otherRequirement', align: 'center' },
+  { title: '备注', width: '120', field: 'remark', align: 'center' },
+  { title: '加工数量', width: '80', field: 'quantity', align: 'center' },
+  { title: '长（mm）', width: '80', field: 'length', align: 'center',editRender: {}},
+  { title: '宽（mm）', width: '80', field: 'width', align: 'center',editRender: {}},
+  { title: '确认数量', width: '80', field: 'confirmQuantity', align: 'center',editRender: {}},
+  { title: '操作', field: 'make', align: 'center', width: '40', fixed: 'right', showOverflow: false },
+])
+
+const screenCompleteColumnList = ref([
+  { width: '120', title: '产品编码', field: 'commodityNo', align: 'center'},
+  { width: '120', title: '排产单号', field: 'productionNo', align: 'center'},
+  { width: '120', title: '工艺', field: 'craftName', align: 'center'},
+  { title: '备注', width: '120', field: 'remark', align: 'center' },
+  { title: '加工数量', width: '80', field: 'quantity', align: 'center' },
+  { title: '确认数量', width: '80', field: 'confirmQuantity', align: 'center',editRender: {}},
+  { title: '操作', field: 'make', align: 'center', width: '40', fixed: 'right', showOverflow: false },
+])
+
 const fileColumnList = ref([
   { title: "序号", type: 'seq', field: 'index', align: 'center', width: '60' },
   { title: '工序名称', width: '120', field: 'craftName', align: 'center' },
@@ -817,6 +1044,19 @@ const fileColumnList = ref([
   { title: '文件名称', field: 'fileName', align: 'center' },
   { title: '上传人', width: '120', field: 'createByName', align: 'center' },
   { title: '上传时间', width: '120', field: 'createTime', align: 'center' },
+]);
+const columnListDrawerProcessOrder = ref([
+{ width: '60',type: 'seq',title: '序号',align: 'center',  },
+{ title: '外协类型',field: 'type',align: 'center',  },
+{ title: '排产单号',field: 'productionNo',align: 'center',  },
+{ title: '产品编码',field: 'commodityNo',align: 'center',  },
+{ title: '加工数量',field: 'quantity',align: 'center',  },
+{ title: '是否压膜',field: 'isCompression',align: 'center', isPermi: () => isFilin.value  },
+{ title: '返单再发原因',field: 'returnOrderReissuanceReason',align: 'center', isPermi: () => isFilin.value  },
+{ title: '菲林原因',field: 'reason',align: 'center', isPermi: () => isFilin.value  },
+{ title: '其他要求',field: 'otherRequirement',align: 'center', isPermi: () => isFilin.value  },
+{ title: '备注',field: 'remark',align: 'center',  },
+{ width: '170',type: 'primary',title: '操作',field: 'make',align: 'center',  },
 ]);
 
 const checkedOutSourceFilinOrderList = ref<OutSourceFilinOrderVO[]>([]);
@@ -836,6 +1076,23 @@ const { queryParams: commodityQueryParams, form: commodityForm } = toRefs(commod
 const craftOptions = ref<CraftVO[]>([]);
 let craftOptionsBase: CraftVO[] = [];
 
+const resDictData = reactive({
+  //订单类型
+  order_type: [{
+    value: '1',
+    label: '新单',
+  },{
+    value: '2',
+    label: '返单',
+  },{
+    value: '3',
+    label: '返单有改',
+  },{
+    value: '4',
+    label: '样转批',
+  }],
+})
+const editReturnOrderReissuanceReason = ref(false);
 /** 初始化产品列表 */
 const getFilesList = async (item: any) => {
 
@@ -875,16 +1132,16 @@ const setProduction = async (params: any) => {
 };
 const getWangBanListCraft = async () => {
   const res = await getCraftList();
-  const resList = res.data.filter(r => {
-    return r.craftName == '丝印字符'
+  const resList = res.data.filter((r: any) => {
+    return r.isScreen == '1'
   });
   setSupList(resList);
   craftOptionsBase = resList;
 };
 const getFinLinListCraft = async () => {
   const res = await getCraftList();
-  const resList = res.data.filter(r => {
-    return r.craftName == '外层线路' || r.craftName == '阻焊'
+  const resList = res.data.filter((r: any) => {
+    return r.isFilin == '1'
   });
   setSupList(resList);
   craftOptionsBase = resList;
@@ -913,7 +1170,7 @@ const footerMethod: VxeTablePropTypes.FooterMethod<OutSourceFilinOrderVO> = ({ c
         return "合计";
       }
       if (column.field == "quantity") {
-        return `${sumNum(data, "quantity").toFixed(4)} `;
+        return `${Number(parseFloat(sumNum(data, "quantity").toFixed(4)).toString())} `;
       }
       return "";
     })
@@ -970,6 +1227,20 @@ const radioTableHandle = (tab: any, event: any) => {
 const searchChange = (params: any) => {
   queryParams.value = params
   getList()
+}
+//ccd修改时间
+const isCCDChange = () => {
+  if (form.value.isCcd == "1") {
+   //在加工要求中添加CCD
+   //先判断是否有加工要求 并且是否有CCD 或 ccd
+    if(form.value.otherRequirement){
+      if((form.value.otherRequirement.indexOf("CCD") == -1) && (form.value.otherRequirement.indexOf("ccd") == -1)){
+        form.value.otherRequirement = "CCD"+form.value.otherRequirement;
+      }
+  }else{
+    form.value.otherRequirement = "CCD";
+  }
+}
 }
 
 /** 查询菲林网板外协单列表 */
@@ -1038,6 +1309,7 @@ const preAdd = () => {
   form.value.addressId = oldFormVal.addressId;
   //默认压膜,跳过校验
   form.value.isCompression = "1";
+  form.value.isCcd = "2";
   dialog.visible = true;
   dialog.title = "添加外协单";
 }
@@ -1083,6 +1355,23 @@ const setPreCommodity = (params: any) => {
     form.value.productionId = undefined;
     form.value.craftId = undefined;
   }
+  // 如果选的【产品编码】对应的订单是【返单】的，则展示返单再发原因
+  resetReturnOrderReissuanceReason(commodity.orderType == resDictData.order_type[1].value)
+}
+/**
+ * 设置返单再发原因相关
+ *
+ * @param flag
+ */
+const resetReturnOrderReissuanceReason = (flag: boolean) => {
+  if (flag) {
+    editReturnOrderReissuanceReason.value = true
+    rules.value.returnOrderReissuanceReason.forEach(val => val.required = true)
+  } else {
+    editReturnOrderReissuanceReason.value = false
+    form.value.returnOrderReissuanceReason = ''
+    rules.value.returnOrderReissuanceReason.forEach(val => val.required = false)
+  }
 }
 //设置默认值
 const setDefaultVal = (params: any) => {
@@ -1122,6 +1411,7 @@ const submitPreAddForm = () => {
       }
       proxy?.$modal.msgSuccess("操作成功");
       dialog.visible = false;
+      resetReturnOrderReissuanceReason(false)
     }
   });
 }
@@ -1141,7 +1431,7 @@ const cancel = () => {
 }
 
 const removeChange = async (_row: number) => {
-  const $table = _tableRef.value;
+  const $table = _tableRef.value.xTableRef;
   if ($table) {
     console.log("removeChange", _row);
     addList.value.splice(addList.value.findIndex(item => item.addId == _row.addId), 1);
@@ -1150,14 +1440,14 @@ const removeChange = async (_row: number) => {
 }
 
 const editAddOrder = async (_row: number) => {
-  //const $table = _tableRef.value;
+  //const $table = _tableRef.value.xTableRef;
   form.value = _row;
   dialog.visible = true;
   dialog.title = "编辑外协单";
 }
 
 const downloadFile = async (_row: number) => {
-  const $table = _tableRef.value;
+  const $table = _tableRef.value.xTableRef;
   console.log("downloadFile", _row);
   //setFileList(_row);
   getFilesList(_row);
@@ -1183,6 +1473,8 @@ const handleUpdate = async (row?: OutSourceFilinOrderVO) => {
   dialogTableLoading.value = true
   const res = await getOutSourceFilinOrder(_id);
   Object.assign(form.value, res.data);
+  // 设置返单再发原因相关校验规则
+  resetReturnOrderReissuanceReason(row.orderType && row.orderType == '2')
   let orderType1 = orderTypeList.value.filter(_item => _item.value == res.data.type);
   if (orderType1[0].label == "菲林") {
     isFilin.value = true;
@@ -1235,6 +1527,8 @@ const submitForm = () => {
       await addOutSourceFilinOrder(form.value).finally(() => buttonLoading.value = false);
       proxy?.$modal.msgSuccess("修改成功");
       outsourceFilinTable.visible = false;
+      // 重置返单再发原因校验规则
+      resetReturnOrderReissuanceReason(false)
       await getList();
     }
   });
@@ -1252,34 +1546,75 @@ const handleDelete = async (row?: OutSourceFilinOrderVO) => {
   await getList();
 }
 
-const handleComplete = async (row?: OutSourceFilinOrderVO) => {
+const handleComplete = async (row?: any) => {
   const _ids = row?.id || ids.value;
   proxy?.$modal.loading('加载中...')
-  const res = await getOutSourceFilinOrder(_ids).finally(() => proxy?.$modal.closeLoading());
-  Object.assign(form.value, res.data);
+  // const res = await getOutSourceFilinOrder(_ids).finally(() => proxy?.$modal.closeLoading());
+  // Object.assign(form.value, res.data);
+  const queryData = {
+    status: "0",
+    no: row.no,
+  }
+  const res = await listOutSourceFilinDetailList(queryData);
+  res.data.forEach((item:any) => {
+    item.confirmQuantity = item.quantity;
+  })
+  rowType.value = row.type
+  if(row.type == '1'){
+    await getFinLinListCraft();
+    filinCompleteList.value = res.data;
+  } else {
+    await getWangBanListCraft();
+    screenCompleteList.value = res.data;
+  }
+  proxy?.$modal.closeLoading();
   completeDialog.visible=true;
 }
 
-const doComplete = async (row?: OutSourceFilinOrderVO) => {
+const deleteComplete = (row:any) => {
+  if(row.type == '1'){
+    filinCompleteList.value = filinCompleteList.value.filter((item: any) => item.id != row.id);
+  } else {
+    screenCompleteList.value = screenCompleteList.value.filter((item: any) => item.id != row.id);
+  }
+}
 
-   completeFilinOrderFormRef.value?.validate(async (valid: boolean) => {
-    if (valid) {
-      console.log("form.value.confirmQuantity",form.value.confirmQuantity);
-      if(form.value.confirmQuantity<=0){
-        proxy?.$modal.msgError("请输入正确的确认数量");
-        return;
-      }
-      await proxy?.$modal.confirm('是否确认完成菲林网板外协单编号为"' + form?.value.no + '"的数据项？');
-      buttonLoading.value = true;
-      await doCompleteFilinOrder(form.value).finally(() => {
-        buttonLoading.value = false;
-        completeDialog.visible = false
-      });
-      proxy?.$modal.msgSuccess("确认完成成功");
-      await getList();
-    }
+const doComplete = async () => {
+  //  completeFilinOrderFormRef.value?.validate(async (valid: boolean) => {
+  //   if (valid) {
+  //     console.log("form.value.confirmQuantity",form.value.confirmQuantity);
+  //     if(form.value.confirmQuantity<=0){
+  //       proxy?.$modal.msgError("请输入正确的确认数量");
+  //       return;
+  //     }
+  //     await proxy?.$modal.confirm('是否确认完成菲林网板外协单编号为"' + form?.value.no + '"的数据项？');
+  //     buttonLoading.value = true;
+  //     await doCompleteFilinOrder(form.value).finally(() => {
+  //       buttonLoading.value = false;
+  //       completeDialog.visible = false
+  //     });
+  //     proxy?.$modal.msgSuccess("确认完成成功");
+  //     await getList();
+  //   }
+  // });
+  const table = rowType.value == '1' ? filinCompleteRef.value.xTableRef : screenCompleteRef.value.xTableRef;
+  let errMap = await table.validate(true);
+  if (errMap) {
+    return;
+  }
+  let dataList: any = rowType.value == '1' ? filinCompleteList.value : screenCompleteList.value;
+  if(!dataList || dataList.length <= 0){
+    proxy?.$modal.msgError("请至少确认完成一条数据");
+    return;
+  }
+  await proxy?.$modal.confirm('是否确认完成菲林网板外协单编号为"' + dataList[0]?.no + '"的' + dataList.length + '条数据项？');
+  buttonLoading.value = true;
+  await doCompleteFilinOrderBatch(dataList).finally(() => {
+    buttonLoading.value = false;
+    completeDialog.visible = false
   });
-
+  proxy?.$modal.msgSuccess("确认完成成功");
+  await getList();
 }
 
 //

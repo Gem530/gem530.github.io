@@ -35,8 +35,8 @@
           <el-form-item label="发货地址" style="width: 100%" prop="addressId">
             <el-select v-model="formData.addressId" placeholder="请选择" style="width: 100%"
                        filterable default-first-option>
-              <el-option v-for="address in addressList" 
-              :label="`${address.status==0?'(已禁用)-':''}${address.address}`" 
+              <el-option v-for="address in addressList"
+              :label="`${address.status==0?'(已禁用)-':''}${address.address}`"
               :disabled="address.status==0"
               :value="address.id" />
             </el-select>
@@ -80,7 +80,7 @@
         </el-col>
       </el-row>
     </el-form>
-    <div class="text-center" style="margin-top: 10px">
+    <div class="text-right" style="margin-top: 10px">
       <el-button type="primary" @click="submitForm(formRef)" :loading="submitLoading">确 定</el-button>
       <el-button @click="cancel" :loading="submitLoading">关 闭</el-button>
     </div>
@@ -89,11 +89,12 @@
 
 <script setup name="backOrderReDelivery">
 
-import { defineProps } from "vue";
+import {defineProps, ref} from "vue";
 import { listCustomerAddressByCusId } from "@/api/basedata/customerAddress/index";
-import { saveReDelivery } from "@/api/order/orderBackHandle";
+import {saveReDelivery, saveReInventory} from "@/api/order/orderBackHandle";
 import { queryByCommodity } from '@/api/inventory/inventory/index';
 import { deleteBackOrder } from "@/api/order/orderBack";
+import {listCommodityInventory} from "@/api/order/commodity";
 
 const zeroValid = (rule, value, callback) => {
   if (value === 0) {
@@ -138,7 +139,7 @@ const props = defineProps({
 })
 
 const formRef = ref();
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'check']);
 const submitLoading = ref(false);
 const isLoading = ref(false);
 const addressList = ref([]);
@@ -147,24 +148,28 @@ const cancel = () => {
   emit('close');
 }
 
-const submitForm = (formEl) => {
-  formEl.validate((valid) => {
-    if (valid) {
-      submitLoading.value = true;
-      saveReDelivery({
-        saleOrderBackId: props.backOrder.value.id,
-        saleOrderId: props.backOrder.value.saleOrderId,
-        quantity: formData.value.quantity,
-        addressId: formData.value.addressId,
-        remark: formData.value.remark,
-        reserveQuantity: formData.value.reserveQuantity,
-        caseNum: formData.value.caseNum,
-        logisticsNo: formData.value.logisticsNo,
-        logisticsCompany: formData.value.logisticsCompany,
-      }).then(res => {
-        emit('confirm', res.data);
-      }).finally(() => {
-        submitLoading.value = false;
+const submitForm = async (formEl) => {
+  emit('check', (bol) => {
+    if(!bol) {
+      formEl.validate((valid) => {
+        if (valid) {
+          submitLoading.value = true;
+          saveReDelivery({
+            saleOrderBackId: props.backOrder.value.id,
+            saleOrderId: props.backOrder.value.saleOrderId,
+            quantity: formData.value.quantity,
+            addressId: formData.value.addressId,
+            remark: formData.value.remark,
+            reserveQuantity: formData.value.reserveQuantity,
+            caseNum: formData.value.caseNum,
+            logisticsNo: formData.value.logisticsNo,
+            logisticsCompany: formData.value.logisticsCompany,
+          }).then(res => {
+            emit('confirm', res.data);
+          }).finally(() => {
+            submitLoading.value = false;
+          })
+        }
       })
     }
   })

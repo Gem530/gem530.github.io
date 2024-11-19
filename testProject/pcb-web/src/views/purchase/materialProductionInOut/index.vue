@@ -1,7 +1,7 @@
 <template>
-  <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
-      <el-tabs type="border-card" v-model="editableTabsValue" @tab-change="getVoidedList()" class="xtable-tab">
+  <div class="p-2 xtable-page prodcut-page">
+    <!-- <el-card shadow="never" class="xtable-card"> -->
+      <el-tabs v-model="editableTabsValue" @tab-change="getVoidedList()" class="xtable-tab">
         <el-tab-pane label="排产列表" :name="1">
           <XTable toolId="purchaseMaterialProductionInOutProd" v-model:page-size="queryParams.pageSize" height="100%" class="xtable-content"
                   v-model:current-page="queryParams.pageNum"
@@ -36,7 +36,7 @@
         </el-tab-pane>
 
         <el-tab-pane label="发料记录" :name="3">
-          <div class="p-2" style="text-align: right;width: 100%">
+          <div class="head-btn-flex">
             <el-button :loading="buttonLoading" type="primary" @click="exportExcelBefore">导出</el-button>
           </div>
           <XTable toolId="purchaseMaterialProductionInOutSend" v-model:page-size="queryParamsRecord.pageSize" height="100%" class="xtable-content"
@@ -63,7 +63,7 @@
           </XTable>
         </el-tab-pane>
         <el-tab-pane label="退料记录" :name="2">
-          <div class="p-2" style="text-align: right;width: 100%">
+          <div class="head-btn-flex">
             <el-button :loading="buttonLoading" type="primary" @click="exportExcelBeforeReturn">导出</el-button>
           </div>
           <XTable toolId="purchaseMaterialProductionInOutReturn" v-model:page-size="queryParamsReturn.pageSize" height="100%" class="xtable-content"
@@ -85,7 +85,7 @@
           </XTable>
         </el-tab-pane>
       </el-tabs>
-    </el-card>
+    <!-- </el-card> -->
 
     <!-- 生产物料 -->
     <el-drawer :title="dialog.title" v-model="dialog.visible" title="生产物料发料" center size="95%">
@@ -106,7 +106,7 @@
         </el-row>
       </el-form>
       <el-divider content-position="left">投料信息</el-divider>
-      <vxe-table
+      <XTable
           border
           keep-source
           align="center"
@@ -116,101 +116,103 @@
           show-header-overflow
           :loading="loading"
           ref="xTableDelivery"
+          :pageShow="false"
           :column-config="{resizable: true}"
           :data="otherProductionList"
+          :columnList="columnListFeedMaterialInfo"
           :edit-config="{trigger: 'click', mode: 'row', autoClear: true, showStatus: true}"
       >
-        <vxe-column type="seq" title="序号"></vxe-column>
-        <vxe-column align="center" type="expand" width="40" :fixed="expandFixed">
-          <template #content="{ row, rowIndex }">
+        <!-- <vxe-column type="seq" title="序号"></vxe-column>
+        <vxe-column align="center" type="expand" width="40" :fixed="expandFixed"> -->
+          <template #content-expand="{ row, rowIndex }">
             <div class="expand-wrapper">
-              <vxe-table border :data="row.planPnlVoList">
-                <vxe-column label="${}" align="center" prop="id" v-if="false"/>
+              <XTable border :data="row.planPnlVoList" :pageShow="false" :showHead="false" :columnList="columnListFeedMaterialExpend">
+                <!-- <vxe-column label="${}" align="center" prop="id" v-if="false"/>
                 <vxe-column field="name" title="PNL名称"></vxe-column>
                 <vxe-column field="pnlLength" title="长"></vxe-column>
                 <vxe-column field="pnlWidth" title="宽"></vxe-column>
-                <vxe-column field="commodityCode" title="产品编码">
-                  <template #="{row}">
+                <vxe-column field="commodityCode" title="产品编码"> -->
+                  <template #default-commodityCode="{row}">
                     <div v-for="item in row.pnlSetBoList" :key="item.id">{{ item?.saleOrderBo?.commodityCode }}</div>
                   </template>
-                </vxe-column>
+                <!-- </vxe-column>
                 <vxe-column field="pnlPerScheme" title="pnl/大料">
                 </vxe-column>
-                <vxe-column field="quantity" title="set/pnl">
-                  <template #="{row}">
+                <vxe-column field="quantity" title="set/pnl"> -->
+                  <template #default-quantity="{row}">
                     <div v-for="item in row.pnlSetBoList" :key="item.id">{{ item?.quantity }}</div>
                   </template>
-                </vxe-column>
-                <vxe-column field="pcsPerScheme" title="pcs/大料">
-                  <template #="{row}">
+                <!-- </vxe-column>
+                <vxe-column field="pcsPerScheme" title="pcs/大料"> -->
+                  <template #default-pcsPerScheme="{row}">
                     <div v-for="item in row.pnlSetBoList" :key="item.id">{{ item?.pcsPerScheme }}</div>
                   </template>
-                </vxe-column>
-                <vxe-column field="pcsPerPnl" title="pcs/pnl">
-                  <template #="{row}">
+                <!-- </vxe-column>
+                <vxe-column field="pcsPerPnl" title="pcs/pnl"> -->
+                  <template #default-pcsPerPnl="{row}">
                     <div v-for="item in row.pnlSetBoList" :key="item.id">{{ item?.pcsPerPnl }}</div>
                   </template>
-                </vxe-column>
-              </vxe-table>
+                <!-- </vxe-column> -->
+              </XTable>
             </div>
           </template>
-        </vxe-column>
-        <vxe-column field="name" title="开料方案" width="90px">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="name" title="开料方案" width="90px"> -->
+          <template #edit-name="{ row }">
             <el-input v-model="row.name"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="rawMaterial.boardThickness" title="板厚">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="rawMaterial.boardThickness" title="板厚"> -->
+          <template #edit-rawMaterial.boardThicknes="{ row }">
             <el-input v-model="row.rawMaterial.boardThickness"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="rawMaterial.copperThickness" title="铜厚">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="rawMaterial.copperThickness" title="铜厚"> -->
+          <template #edit-rawMaterial.copperThickness="{ row }">
             <el-input v-model="row.rawMaterial.copperThickness"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="rawMaterial.name" title="板材">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="rawMaterial.name" title="板材"> -->
+          <template #edit-rawMaterial.name="{ row }">
             <el-input v-model="row.rawMaterial.name"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="rawMaterial.manufacturer" title="品牌">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="rawMaterial.manufacturer" title="品牌"> -->
+          <template #edit-rawMaterial.manufacturer="{ row }">
             <el-input v-model="row.rawMaterial.manufacturer"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="rawMaterial.length" title="长（mm）">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="rawMaterial.length" title="长（mm）"> -->
+          <template #edit-rawMaterial.length="{ row }">
             <el-input v-model="row.rawMaterial.length"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="rawMaterial.width" title="宽（mm）">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="rawMaterial.width" title="宽（mm）"> -->
+          <template #edit-rawMaterial.width="{ row }">
             <el-input v-model="row.rawMaterial.width"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="schemeArea" title="投料面积(㎡)">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="schemeArea" title="投料面积(㎡)"> -->
+          <template #edit-schemeArea="{ row }">
             <el-input v-model="row.schemeArea"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="feedQuantity" title="实投数">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="feedQuantity" title="实投数"> -->
+          <template #edit-feedQuantity="{ row }">
             <el-input v-model="row.feedQuantity"></el-input>
           </template>
-        </vxe-column>
-      </vxe-table>
+        <!-- </vxe-column> -->
+      </XTable>
       <el-divider content-position="left">物料信息</el-divider>
       <div>
         <el-button link @click="choosePurchase">
           <el-icon>
             <FolderDelete/>
           </el-icon>
-          选择物料
+          选择板料
         </el-button>
       </div>
-      <vxe-table
+      <XTable
           border
           keep-source
           align="center"
@@ -222,9 +224,11 @@
           ref="xTable"
           :column-config="{resizable: true}"
           :data="tableData"
+          :pageShow="false"
+          :columnList="columnListMaterialInfo"
           :edit-config="{trigger: 'click', mode: 'row', autoClear: true, showStatus: true}"
       >
-        <vxe-column type="seq" title="序号"></vxe-column>
+        <!-- <vxe-column type="seq" title="序号"></vxe-column>
         <vxe-column field="categoryName" title="物料类别" width="80">
           <template #edit="{ row }">
             <el-input v-model="row.categoryName"></el-input>
@@ -295,21 +299,6 @@
             <el-input v-model="row.specification"></el-input>
           </template>
         </vxe-column>
-<!--        <vxe-column field="productionDate" title="生产日期" width="80">
-          <template #edit="{ row }">
-            <el-input v-model="row.productionDate"></el-input>
-          </template>
-        </vxe-column>
-        <vxe-column field="expirationDays" title="保质期（天）" width="80">
-          <template #edit="{ row }">
-            <el-input v-model="row.expirationDays"></el-input>
-          </template>
-        </vxe-column>
-        <vxe-column field="expirationDate" title="过期日期" width="80">
-          <template #edit="{ row }">
-            <el-input v-model="row.expirationDate"></el-input>
-          </template>
-        </vxe-column>-->
         <vxe-column field="unit" title="库存单位" width="80">
           <template #edit="{ row }">
             <el-input v-model="row.unit"></el-input>
@@ -320,40 +309,31 @@
             <el-input v-model="row.quantity"></el-input>
           </template>
         </vxe-column>
-        <!--        <vxe-column field="quantity" title="可用库存数">
-                  <template #edit="{ row }">
-                    <el-input v-model="row.quantity"></el-input>
-                  </template>
-                </vxe-column>-->
         <vxe-column field="inTransitNumber" title="在途数" width="80">
           <template #edit="{ row }">
             <el-input v-model="row.inTransitNumber"></el-input>
           </template>
         </vxe-column>
-        <vxe-column field="producedQuantity" title="发料数量" :edit-render="{}" width="80">
-          <template #edit="{ row }">
+        <vxe-column field="producedQuantity" title="发料数量" :edit-render="{}" width="80"> -->
+          <template #edit-producedQuantity="{ row }">
             <el-input-number v-model="row.producedQuantity" style="width: 100%" :min="0" :controls="false"></el-input-number>
           </template>
-        </vxe-column>
-        <vxe-column field="remark" title="备注" sort-type="string" :edit-render="{}" width="120">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="remark" title="备注" sort-type="string" :edit-render="{}" width="120"> -->
+          <template #edit-remark="{ row }">
             <el-input v-model="row.remark"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column title="操作" width="200">
-          <template #default="{ row,rowIndex}">
+        <!-- </vxe-column>
+        <vxe-column title="操作" width="200"> -->
+          <template #default-make="{ row,rowIndex}">
             <el-button size="small" type="primary" link @click="deleteRowEvent(row,rowIndex)">删除</el-button>
           </template>
-        </vxe-column>
-      </vxe-table>
+        <!-- </vxe-column> -->
+      </XTable>
       </div>
       <template #footer>
-        <div style="display: flex; justify-content: center;">
-          <span class="dialog-footer">
-            <el-button :loading="buttonLoading" @click="cancel">取 消</el-button>
           <el-button :loading="buttonLoading" type="primary" @click="submitProductionInOut">确 定</el-button>
-          </span>
-        </div>
+          <el-button :loading="buttonLoading" @click="cancel">取 消</el-button>
       </template>
     </el-drawer>
 
@@ -361,8 +341,8 @@
     <el-drawer :title="dialogRecord.title" v-model="dialogRecord.visible" title="发料/退料记录" center size="85%">
       <div v-loading="dialogTableLoading">
         <el-divider content-position="left">发料信息</el-divider>
-        <div class="global-flex flex-end">发料总数：{{issuanceQuantityTotal}}</div>
-        <vxe-table
+        <div class="global-flex flex-end">发料总数：{{issuanceQuantityTotal.toFixed(2)}}</div>
+        <XTable
             border
             keep-source
             align="center"
@@ -371,10 +351,12 @@
             show-header-overflow
             :loading="loading"
             ref="xTableDelivery"
+            :pageShow="false"
             :column-config="{resizable: true}"
             :data="materialProductInoutList"
+            :columnList="columnListFeedBackMaterialInfo"
         >
-          <vxe-column type="seq" title="序号"></vxe-column>
+          <!-- <vxe-column type="seq" title="序号"></vxe-column>
           <vxe-column field="categoryName" title="物料类别" width="90px">
             <template #edit="{ row }">
               <el-input v-model="row.categoryName"></el-input>
@@ -459,11 +441,11 @@
             <template #edit="{ row }">
               <el-input v-model="row.remark"></el-input>
             </template>
-          </vxe-column>
-        </vxe-table>
+          </vxe-column> -->
+        </XTable>
         <el-divider content-position="left">退料信息</el-divider>
-        <div class="global-flex flex-end">退料总数：{{quantityTotal}}</div>
-        <vxe-table
+        <div class="global-flex flex-end">退料总数：{{quantityTotal.toFixed(2)}}</div>
+        <XTable
             border
             keep-source
             align="center"
@@ -473,10 +455,12 @@
             show-header-overflow
             :loading="loading"
             ref="xTable"
+            :pageShow="false"
             :column-config="{resizable: true}"
             :data="materialProductReturnList"
+            :columnList="columnListBackMaterialInfo"
         >
-          <vxe-column type="seq" title="序号"></vxe-column>
+          <!-- <vxe-column type="seq" title="序号"></vxe-column>
           <vxe-column field="categoryName" title="物料类别" width="90px">
             <template #edit="{ row }">
               <el-input v-model="row.categoryName"></el-input>
@@ -532,21 +516,6 @@
               <el-input v-model="row.manufacturer"></el-input>
             </template>
           </vxe-column>
-<!--          <vxe-column field="productionDate" title="生产日期">
-            <template #edit="{ row }">
-              <el-input v-model="row.productionDate"></el-input>
-            </template>
-          </vxe-column>
-          <vxe-column field="expirationDays" title="保质期(天)">
-            <template #edit="{ row }">
-              <el-input v-model="row.expirationDays"></el-input>
-            </template>
-          </vxe-column>
-          <vxe-column field="expirationDate" title="过期日期">
-            <template #edit="{ row }">
-              <el-input v-model="row.expirationDate"></el-input>
-            </template>
-          </vxe-column>-->
           <vxe-column field="unit" title="库存单位">
             <template #edit="{ row }">
               <el-input v-model="row.unit"></el-input>
@@ -576,15 +545,11 @@
             <template #edit="{ row }">
               <el-input v-model="row.remark"></el-input>
             </template>
-          </vxe-column>
-        </vxe-table>
+          </vxe-column> -->
+        </XTable>
       </div>
       <template #footer>
-        <div style="display: flex; justify-content: center;">
-          <span class="dialog-footer">
           <el-button @click="dialogRecord.visible= false">取 消</el-button>
-          </span>
-        </div>
       </template>
     </el-drawer>
 
@@ -599,12 +564,10 @@
         没有设置起始时间，将默认导出30天内的数据
       </span>
       <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="exportVisible = false">取消</el-button>
           <el-button type="primary" @click="exportExcel">
             确认
           </el-button>
-        </span>
+          <el-button @click="exportVisible = false">取消</el-button>
       </template>
     </el-dialog>
 
@@ -621,7 +584,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item size="small" label="退料数量：">
+            <el-form-item size="small" label="退料数量：" prop="returnQuanTity">
               <el-input-number v-model="formInlineReturn.returnQuanTity"  placeholder="请输入退料数量"
                 :precision="2" style="width: 99%;"
                 :controls="false" :min="0" maxlength="11" />
@@ -635,12 +598,8 @@
         </el-row>
       </el-form>
       <template #footer>
-        <div style="display: flex; justify-content: center;">
-          <span class="dialog-footer">
-            <el-button :loading="buttonLoading" @click="cancelReturn">取 消</el-button>
           <el-button :loading="buttonLoading" type="primary" @click="submitMaterialRerturn">确 定</el-button>
-          </span>
-        </div>
+          <el-button :loading="buttonLoading" @click="cancelReturn">取 消</el-button>
       </template>
     </el-dialog>
 
@@ -650,25 +609,18 @@
       <el-container>
         <el-aside width="310px" style="height:510px;overflow-y:auto;background-color: rgb(238, 241, 246)">
           <div style=" font-size:medium; font-weight:600">已选物料</div>
-          <el-table :data="alreadySelectPurchase"
-                    tooltip-effect="dark"
-                    style="width: 100%;height: calc(100% - 40px);"
-                    :show-header="false">
-            <el-table-column prop="materialCode"
-                             label="物料编码">
-              <template #default="scope">
+          <div style="background: #fff;">
+            <XTable :showHead="false" :pageShow="false" :columnList="columnListChooseMaterial" :data="alreadySelectPurchase" height="450" :show-header="false">
+              <template #default-materialCode="scope">
                 {{ scope.row.materialCode }} - {{ scope.row.name }}
               </template>
-            </el-table-column>
-            <el-table-column label="操作"
-                             width="50">
-              <template #default="scope">
+              <template #default-make="scope">
                 <div style="text-align:center">
                   <el-button @click="removeDataOrder(scope.row)" link size="small" type="primary">X</el-button>
                 </div>
               </template>
-            </el-table-column>
-          </el-table>
+          </XTable>
+          </div>
         </el-aside>
         <el-main style="padding:0px;overflow-x:hidden;">
           <XTable v-model:page-size="queryParamsCommodity.pageSize" height="450"
@@ -685,143 +637,23 @@
             @checkbox-all="handleSelectionChangePurchaseAll"
             @checkbox-change="handleSelectionChangePurchase">
           </XTable>
-          <!-- :checkbox-config="{reserve:true}" -->
-          <!-- <el-table ref="purchaseTable"
-                    v-loading="loading"
-                    :data="materialInventoryList"
-                    tooltip-effect="dark"
-                    style="width: 100%;"
-                    height="450"
-                    :row-key="(row: any) => row.id"
-                    @select="handleSelectionChangePurchase">
-            <el-table-column type="selection"
-                             width="45"
-                             :reserve-selection="true"
-                             align="center"
-                             fixed>
-            </el-table-column>
-            <el-table-column prop="materialCode"
-                             width="90"
-                             label="物料编码"
-                             align="center"
-                             :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="name"
-                             width="100"
-                             label="物料名称"
-                             align="center"
-                             :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="boardThickness"
-                             width="60"
-                             label="板厚"
-                             align="center"
-                             :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="copperThickness"
-                             width="60"
-                             label="铜厚"
-                             align="center"
-                             :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="level"
-                             width="70"
-                             label="级别"
-                             align="center"
-                             :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="color"
-                             width="60"
-                             label="颜色"
-                             align="center"
-                             :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="length"
-                             width="70"
-                             label="长(mm)"
-                             align="center"
-                             :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="width"
-                             width="70"
-                             label="宽(mm)"
-                             align="center"
-                             :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="manufacturer"
-                             width="70"
-                             label="品牌"
-                             :show-overflow-tooltip="true"
-                             align="center">
-            </el-table-column>
-            <el-table-column prop="materialQuality"
-                             label="材质牌号"
-                             align="center"
-                             min-width="70"
-                             show-overflow-tooltip>
-            </el-table-column>
-            <el-table-column prop="unit"
-                             label="单位"
-                             align="center"
-                             min-width="60"
-                             show-overflow-tooltip>
-            </el-table-column>
-            <el-table-column prop="productionDate"
-                             label="生产日期"
-                             align="center"
-                             min-width="80"
-                             show-overflow-tooltip>
-            </el-table-column>
-            <el-table-column prop="expirationDays"
-                             width="90"
-                             align="center"
-                             label="保质期(天)"
-                             :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="expirationDate"
-                             width="80"
-                             align="center"
-                             label="过期日期"
-                             :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="quantity"
-                             width="70"
-                             align="center"
-                             label="实际库存">
-            </el-table-column>
-            <el-table-column prop="quantity"
-                             width="70"
-                             align="center"
-                             label="可用库存">
-            </el-table-column>
-            <el-table-column prop="inTransitNumber"
-                             width="70"
-                             align="center"
-                             label="在途数">
-            </el-table-column>
-          </el-table>
-          <pagination
-              v-show="total>0"
-              :total="total"
-              v-model:page="queryParamsCommodity.pageNum"
-              v-model:limit="queryParamsCommodity.pageSize"
-              @pagination="choosePurchase"
-          /> -->
         </el-main>
       </el-container>
       <template #footer>
-        <div class="text-center">
-          <el-button @click="purchaseDialog.visible = false">取 消</el-button>
           <el-button :loading="buttonLoading" type="primary" @click="submitPurchase">确 定</el-button>
-        </div>
+          <el-button @click="purchaseDialog.visible = false">取 消</el-button>
       </template>
     </el-dialog>
+
+    <!-- 库存锁定提示框 -->
+    <InventoryLock title="物料盘点提示" inventoryType="2" v-model:show="inventoryCheck" :data="inventoryRes" @close="inventoryCheck = false"/>
   </div>
 </template>
 
 <script setup name="MaterialProductionInOut" lang="ts">
 import {
   addMaterialProductionInOut,
+  checkProductionFinish,
   delMaterialProductionInOut,
   getMaterialProductionInOut,
   listMaterialProductionInOut,
@@ -844,6 +676,7 @@ import {MaterialInventoryVO} from "@/api/purchase/materialInventory/types";
 import useUserStore from "@/store/modules/user";
 import dayjs from "dayjs";
 import {deepClone} from '@/utils'
+import {listMaterialInventoryInfo} from "@/api/purchase/materialApply";
 
 const {proxy} = getCurrentInstance() as ComponentInternalInstance;
 
@@ -1052,7 +885,10 @@ const data = reactive<PageData<MaterialProductionInOutForm, MaterialProductionIn
     ],
     ownerId: [
       {required: true, message: "所属单位ID不能为空", trigger: "blur"}
-    ]
+    ],
+    returnQuanTity: [
+      {required: true, message: "数量不能为空", trigger: "change"}
+    ],
   }
 });
 
@@ -1062,7 +898,10 @@ const statusFilterData =ref( [
 ])
 
 const XTableRef = ref()
-
+const columnListChooseMaterial = ref([
+{ title: '物料编码',field: 'materialCode',align: 'center',  },
+{ width: '50',title: '操作',field: 'make',align: 'center',  },
+]);
 const columnList = ref([
   {title: "序号", type: 'seq', align: 'center', width: '60'},
   {title: '投料类型', field: 'isRemediation', align: 'center',width: '80',
@@ -1092,8 +931,7 @@ const columnList = ref([
 const materialInventoryColumnList = ref([
   {type: 'checkbox', align: 'center', width: '45',fixed:'left'},
   {title: '物料分类', field: 'categoryName', align: 'center',width: '90',
-    filterType: 'input',
-    filterParam: { placeholder: '' },
+
   },
   {title: '物料编码', field: 'materialCode', align: 'center',width: '90',
     filterType: 'input',
@@ -1231,6 +1069,98 @@ const columnReturnList = ref([
   {title: '备注', field: 'remark', align: 'center', width: '120',},
 ]);
 
+// 发料弹框 投料信息
+const columnListFeedMaterialInfo = ref([
+{ type: 'seq',title: '序号',align: 'center',  },
+{ width: '40',type: 'expand',field: 'expand',align: 'center',  },
+{ width: '90px',title: '开料方案',field: 'name',align: 'center',  },
+{ title: '板厚',field: 'rawMaterial.boardThickness',align: 'center',  },
+{ title: '铜厚',field: 'rawMaterial.copperThickness',align: 'center',  },
+{ title: '板材',field: 'rawMaterial.name',align: 'center',  },
+{ title: '品牌',field: 'rawMaterial.manufacturer',align: 'center',  },
+{ title: '长（mm）',field: 'rawMaterial.length',align: 'center',  },
+{ title: '宽（mm）',field: 'rawMaterial.width',align: 'center',  },
+{ title: '投料面积(㎡)',field: 'schemeArea',align: 'center',  },
+{ title: '实投数',field: 'feedQuantity',align: 'center',  },
+]);
+// 发料弹框 扩展表格
+const columnListFeedMaterialExpend = ref([
+{ title: 'PNL名称',field: 'name',align: 'center',  },
+{ title: '长',field: 'pnlLength',align: 'center',  },
+{ title: '宽',field: 'pnlWidth',align: 'center',  },
+{ title: '产品编码',field: 'commodityCode',align: 'center', showOverflow: false },
+{ title: 'pnl/大料',field: 'pnlPerScheme',align: 'center', showOverflow: false },
+{ title: 'set/pnl',field: 'quantity',align: 'center', showOverflow: false },
+{ title: 'pcs/大料',field: 'pcsPerScheme',align: 'center', showOverflow: false },
+{ title: 'pcs/pnl',field: 'pcsPerPnl',align: 'center', showOverflow: false },
+]);
+// 发料弹框 物料信息
+const columnListMaterialInfo = ref([
+{ type: 'seq',title: '序号',align: 'center',  },
+{ width: '80',title: '物料类别',field: 'categoryName',align: 'center',  },
+{ width: '80',title: '物料编码',field: 'materialCode',align: 'center',  },
+{ width: '80',title: '物料名称',field: 'name',align: 'center',  },
+{ width: '80',title: '材质牌号',field: 'materialQuality',align: 'center',  },
+{ width: '80',title: '板厚',field: 'boardThickness',align: 'center',  },
+{ width: '80',title: '铜厚',field: 'copperThickness',align: 'center',  },
+{ width: '80',title: '级别',field: 'level',align: 'center',  },
+{ width: '80',title: '颜色',field: 'color',align: 'center',  },
+{ width: '80',title: '长（mm）',field: 'length',align: 'center',  },
+{ width: '80',title: '宽（mm）',field: 'width',align: 'center',  },
+{ width: '80',title: '品牌',field: 'manufacturer',align: 'center',  },
+{ width: '80',title: '直径',field: 'diameter',align: 'center',  },
+{ width: '80',title: '板厚',field: 'thickness',align: 'center',  },
+{ width: '80',title: '规格型号',field: 'specification',align: 'center',  },
+{ width: '80',title: '库存单位',field: 'unit',align: 'center',  },
+{ width: '80',title: '库存数',field: 'quantity',align: 'center',  },
+{ width: '80',title: '在途数',field: 'inTransitNumber',align: 'center',  },
+{ width: '80',title: '发料数量',field: 'producedQuantity',editRender: '{}',align: 'center',  },
+{ width: '120',title: '备注',field: 'remark',editRender: '{}',align: 'center',  },
+{ width: '200',title: '操作',align: 'center', field: 'make', fixed: 'right' },
+]);
+// 发料、退料记录 发料信息
+const columnListFeedBackMaterialInfo = ref([
+{ type: 'seq',title: '序号',align: 'center',  },
+{ width: '90px',title: '物料类别',field: 'categoryName',align: 'center',  },
+{ width: '90px',title: '物料编码',field: 'materialCode',align: 'center',  },
+{ width: '90px',title: '物料名称',field: 'materialName',align: 'center',  },
+{ width: '90px',title: '材质牌号',field: 'materialQuality',align: 'center',  },
+{ title: '板厚',field: 'boardThickness',align: 'center',  },
+{ title: '铜厚',field: 'copperThickness',align: 'center',  },
+{ title: '颜色',field: 'color',align: 'center',  },
+{ title: '级别',field: 'level',align: 'center',  },
+{ title: '长（mm）',field: 'length',align: 'center',  },
+{ title: '宽（mm）',field: 'width',align: 'center',  },
+{ title: '品牌',field: 'manufacturer',align: 'center',  },
+{ title: '库存单位',field: 'unit',align: 'center',  },
+{ title: '库存数',field: 'inventoryQuantity',align: 'center',  },
+{ title: '可用库存数',field: 'inventoryQuantity',align: 'center',  },
+{ title: '在途数',field: 'inTransitNumber',align: 'center',  },
+{ title: '发料数量',field: 'quantity',align: 'center',  },
+{ title: '备注',field: 'remark',align: 'center',  },
+]);
+// 发料、退料记录 退料信息
+const columnListBackMaterialInfo = ref([
+{ type: 'seq',title: '序号',align: 'center',  },
+{ width: '90px',title: '物料类别',field: 'categoryName',align: 'center',  },
+{ width: '90px',title: '物料编码',field: 'materialCode',align: 'center',  },
+{ width: '90px',title: '物料名称',field: 'materialName',align: 'center',  },
+{ width: '90px',title: '材质牌号',field: 'materialQuality',align: 'center',  },
+{ title: '板厚',field: 'boardThickness',align: 'center',  },
+{ title: '铜厚',field: 'copperThickness',align: 'center',  },
+{ title: '颜色',field: 'color',align: 'center',  },
+{ title: '级别',field: 'level',align: 'center',  },
+{ title: '长（mm）',field: 'length',align: 'center',  },
+{ title: '宽（mm）',field: 'width',align: 'center',  },
+{ title: '品牌',field: 'manufacturer',align: 'center',  },
+{ title: '库存单位',field: 'unit',align: 'center',  },
+{ title: '库存数',field: 'inventoryQuantity',align: 'center',  },
+{ title: '可用库存数',field: 'inventoryQuantity',align: 'center',  },
+{ title: '在途数',field: 'inTransitNumber',align: 'center',  },
+{ title: '退料数量',field: 'quantity',align: 'center',  },
+{ title: '备注',field: 'remark',align: 'center',  },
+]);
+
 const checkedMaterialProductionInOutList = ref<MaterialProductionInOutVO[]>([]);
 const materialInventoryList = ref<MaterialInventoryVO[]>([]);
 const {queryParams, queryParamsRecord, queryParamsReturn, form, rules} = toRefs(data);
@@ -1258,6 +1188,7 @@ const handleMaterialReturn = (row: MaterialProductionInOutVO) => {
   formInlineReturn.materialName = row.materialName;
   formInlineReturn.id=row.id;
   formInlineReturn.inventoryQuantity=row.quantity;
+  formInlineReturn.rawMaterialId = row.rawMaterialId;
   dialogMaterialReturn.visible = true;
 }
 
@@ -1270,6 +1201,7 @@ let initFormInlineReturn = {
   returnQuanTity: undefined,
   inventoryQuantity:undefined,
   id:undefined,
+  rawMaterialId:undefined,
 }
 let formInlineReturn = reactive({
   ...initFormInlineReturn
@@ -1288,16 +1220,39 @@ const cancelReturn = () => {
  * 物料退料确定
  */
 const submitMaterialRerturn = async () => {
-  if (Number(formInlineReturn.returnQuanTity) > Number(formInlineReturn.inventoryQuantity)){
-    proxy?.$modal.msgError("退料数量不能大于发料数量");
+  // 查询是否存在盘点中物料
+  let query = {
+    pageNum: 1,
+    pageSize: 20,
+    idList: formInlineReturn.rawMaterialId,
+    isCheck: '1'
+  }
+  const res = await listMaterialInventoryInfo(query);
+  if (res.rows && res.rows.length > 0) {
+    inventoryRes.value = res.rows;
+    inventoryCheck.value = true;
     return;
   }
-  buttonLoading.value = true;
-  await saveMaterialRerturn(formInlineReturn).finally(() => buttonLoading.value = false);
-  dialogMaterialReturn.visible = false;
-  proxy?.$modal.msgSuccess("退料成功");
-  queryParams.value.statusType = editableTabsValue.value
-  getList();
+  buttonLoading.value = true
+  if (Number(formInlineReturn.returnQuanTity) > Number(formInlineReturn.inventoryQuantity)){
+    proxy?.$modal.msgError("退料数量不能大于发料数量");
+    buttonLoading.value = false
+    return;
+  }
+  if (!formInlineReturn.returnQuanTity) {
+    proxy?.$modal.msgError("退料数量不能为空");
+    buttonLoading.value = false
+    return;
+  }
+  saveMaterialRerturn(formInlineReturn).then(() => {
+    dialogMaterialReturn.visible = false;
+    proxy?.$modal.msgSuccess("退料成功");
+    buttonLoading.value = false
+    queryParams.value.statusType = editableTabsValue.value
+    getList();
+  }).catch(()=>{
+    buttonLoading.value = false
+  });
 }
 
 let formInline = reactive({
@@ -1337,6 +1292,9 @@ const searchChangeReturn = (params: any) => {
   // }
 }
 
+const inventoryCheck = ref(false);
+const inventoryRes = ref<any[]>([]);
+
 /**
  * 生产物料发料确认
  * @param params
@@ -1346,6 +1304,21 @@ const submitProductionInOut = async () => {
     proxy?.$modal.msgError("请至少选择一条需要发料的物料");
     return;
   }
+  // 查询是否存在盘点中物料
+  let ids = tableData.value.map(item => item.rawMaterialId);
+  let query = {
+    pageNum: 1,
+    pageSize: 20,
+    idList: ids,
+    isCheck: '1'
+  }
+  const res = await listMaterialInventoryInfo(query);
+  if (res.rows && res.rows.length > 0) {
+    inventoryRes.value = res.rows;
+    inventoryCheck.value = true;
+    return;
+  }
+
   const flag = tableData.value.some(v => Number(v.quantity) < Number(v.producedQuantity));
   if (flag) {
     proxy?.$modal.msgError("发料数量不能大于库存数量");
@@ -1432,11 +1405,19 @@ const userStore = useUserStore().nickname;
  * @param row
  */
 const handleIssuance = async (row?: MaterialProductionInOutVO) => {
+  const productionId = row?.id;
+  const checkRes = await checkProductionFinish(productionId);
+  if(checkRes){
+    if(checkRes.data && checkRes.data.isComplete == '1'){
+      await proxy?.$modal.confirm('此排产已于' +  checkRes.data.completeTime +' 完成，是否继续发料？').finally(() => loading.value = false);
+    }
+    console.log(checkRes)
+  }
   formInline.inOutUser = userStore;
   //排产单号
   dialog.visible = true;
   dialog.title = "生产物料发料";
-  const productionId = row?.id;
+
   formInline.productionId = productionId;
   dialogTableLoading.value = true
   const res = await queryMiByProductionIds(productionId);
@@ -1575,15 +1556,17 @@ const cancelPurchase = () => {
 const purchaseTable = ref<ElFormInstance>();
 const materialInventorySearchChange = (params :any) => {
   queryParamsCommodity.value = params;
+  queryParamsCommodity.value.categoryName='板材';
   getMaterialInventorySelectList()
 }
 // 获取物料接口
 const getMaterialInventorySelectList = async () => {
+  queryParamsCommodity.value.categoryName='板材';
   const res = await materialInventorySelectList(queryParamsCommodity.value);
   materialInventoryList.value = res.rows;
   // console.log(materialInventoryList.value);
   total.value = res.total;
-  materialInventoryList.value.forEach((item: any) => {
+  materialInventoryList.value?.forEach((item: any) => {
     const crtTemp = alreadySelectPurchase.value.find((v: any) => v.id == item.id)
     if (crtTemp) {
       setTimeout(() => {

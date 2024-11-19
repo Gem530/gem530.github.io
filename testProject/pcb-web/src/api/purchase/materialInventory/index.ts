@@ -27,6 +27,19 @@ export const listCountMaterialInventory = (query?: MaterialInventoryQuery): Axio
     params: query
   });
 };
+
+/**
+ * 查询物料库存列表count
+ * @param query
+ * @returns {*}
+ */
+export const listCountV2 = (query?: MaterialInventoryQuery): AxiosPromise<MaterialInventoryVO[]> => {
+  return request({
+    url: '/system/materialInventory/countV2',
+    method: 'get',
+    params: query
+  });
+};
 /**
  * 查询物料库存列表
  * @param query
@@ -161,5 +174,18 @@ export const listMaterialInventoryList = (data?: any): AxiosPromise<MaterialInve
     url: '/system/materialInventory/queryList',
     method: 'post',
     data: data
+  });
+};
+
+/**
+ * 打印查询物料库存信息
+ * @param query
+ * @returns {*}
+ */
+export const printMaterialList = (query?: MaterialInventoryQuery): AxiosPromise<MaterialInventoryVO[]> => {
+  return request({
+    url: '/system/materialInventory/printList',
+    method: 'get',
+    params: query
   });
 };

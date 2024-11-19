@@ -6,9 +6,9 @@ import request from "@/utils/request";
  * @param query
  * @returns {*}
  */
-export const queryPageNew = (query) => {
+export const getMiProjectReport = (query) => {
   return request({
-    url: '/project/productionPlan/getProjectCapacityReportNew',
+    url: '/project/productionPlan/getMiProjectReport',
     method: 'GET',
     params: query
   });

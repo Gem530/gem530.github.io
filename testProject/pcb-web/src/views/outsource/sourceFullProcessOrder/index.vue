@@ -260,20 +260,35 @@
       </el-tabs>
     </el-card>
     <!-- 添加或修改订单外协订单对话框 -->
-    <el-drawer :title="drawer.title" v-model="drawer.visible" size="70%">
+    <el-drawer :title="drawer.title" v-model="drawer.visible"
+      size="45%">
+      <template #header>
+        <span class="el-drawer__title no-wrap">{{drawer.title}}</span>
+        <TotalTitle :start="true" :firstBorder="true" :list="[
+          { title: `总价：${ currentInfo?.totalOrderPrice||0 }元` },
+          { title: `税金：${ currentInfo?.tax||0 }元` },
+          { title: `总金额：${ currentInfo?.totalPrice||0 }元` },
+        ]"></TotalTitle>
+      </template>
       <div v-loading="dialogTableLoading">
-        <SendOutSource
-          ref="SendOutSourceRef"
-          v-if="!dialogTableLoading"
-          :orderInfo="currentInfo"
-          :disabled="disabled"
-          :isConfirm="isConfirm"
-          :checkAddress="false"
-          :outSourceOrder="outSourceOrder"
-          :mustInt="true"
-        ></SendOutSource>
-        <SaleDescriptions style="padding-top: 50px;" v-if="currentInfo" :currentInfo="currentInfo"
-          :customerList="detailCustomerList"                :resDictData="resDictData"></SaleDescriptions>
+        <el-row>
+          <el-col :span="24" class="prod-card">
+            <SendOutSource
+              ref="SendOutSourceRef"
+              v-if="!dialogTableLoading"
+              :orderInfo="currentInfo"
+              :disabled="disabled"
+              :isConfirm="isConfirm"
+              :checkAddress="false"
+              :isShowOrderPrice="true"
+              :orderPrice="orderPrice"
+              :outSourceOrder="outSourceOrder"
+              :mustInt="true"
+            ></SendOutSource>
+          </el-col>
+        </el-row>
+        <SaleDescriptions style="padding-top: 8px;" v-if="currentInfo" :currentInfo="currentInfo"
+            :resDictData="resDictData"></SaleDescriptions>
       </div>
       <template #footer>
         <div style="display: flex; justify-content: center;">
@@ -359,7 +374,11 @@ import {
   delSourceFullProcessOrder,
   cancelSourceFullProcessOrder,
   updateSourceFullProcessOrderStatus,
-  updateSourceFullProcessOrder, compareList, outSourceStatementDetail, outSourceCancelOrder,
+  updateSourceFullProcessOrder,
+  compareList,
+  outSourceStatementDetail,
+  outSourceCancelOrder,
+  updateSourceCheckPer,
 } from '@/api/outsource/sourceFullProcessOrder';
 import {
   SourceFullProcessOrderVO,
@@ -379,6 +398,9 @@ import { getReportUrl } from '@/utils/report';
 import {getSignPdf} from "@/api/financial/accountOrder";
 import {MaterialOrderForm, MaterialOrderQuery} from "@/api/purchase/materialOrder/types";
 import {ref} from "vue";
+import useUserStore from '@/store/modules/user';
+
+const { ownerId } = useUserStore();
 /** 报表预览地址 */
 let reportUrl = ref("");
 const uReportHandle = async (row: any) => {
@@ -414,6 +436,7 @@ const bizCode = ref<string>();
 
 const sourceFullProcessOrderList = ref<SourceFullProcessOrderVO[]>([]);
 const buttonLoading = ref(false);
+const orderPrice = ref();
 const outSourceOrder = ref<SourceFullProcessOrderVO>();
 const loading = ref(true);
 const disabled = ref(false);
@@ -721,7 +744,7 @@ const footerMethod: VxeTablePropTypes.FooterMethod<SourceFullProcessOrderVO> = (
         return "合计";
       }
       if (column.field == "quantity") {
-        return `${sumNum(data, "quantity").toFixed(4)} `;
+        return `${Number(parseFloat(sumNum(data, "quantity").toFixed(4)).toString())} `;
       }
       return "";
     })
@@ -765,14 +788,14 @@ const columnList = ref([
     filterType: 'input',
     filterParam: {placeholder: '请输入供应商'}
   },
-  {
-    title: '客户名称',
-    width: '180',
-    field: 'cusName',
-    align: 'center',
-    filterType: 'input',
-    filterParam: {placeholder: '请输入客户名称'}
-  },
+  // {
+  //   title: '客户名称',
+  //   width: '180',
+  //   field: 'cusName',
+  //   align: 'center',
+  //   filterType: 'input',
+  //   filterParam: {placeholder: '请输入客户名称'}
+  // },
   {
     title: '客户编码',
     width: '80',
@@ -1036,14 +1059,14 @@ const columnList2 = ref([
     filterParam: {placeholder: '请输入供应商'}
   },
   {title: '外协单价', width: '80', field: 'price', align: 'center',},
-  {
-    title: '客户名称',
-    width: '180',
-    field: 'cusName',
-    align: 'center',
-    filterType: 'input',
-    filterParam: {placeholder: '请输入客户名称'}
-  },
+  // {
+  //   title: '客户名称',
+  //   width: '180',
+  //   field: 'cusName',
+  //   align: 'center',
+  //   filterType: 'input',
+  //   filterParam: {placeholder: '请输入客户名称'}
+  // },
   {
     title: '客户编码',
     width: '80',
@@ -1311,6 +1334,7 @@ const handleSelectionChange = (selection: SourceFullProcessOrderVO[]) => {
 const handleDetail = async (row?: SourceFullProcessOrderVO) => {
 
   reset();
+  orderPrice.value = row?.salePrice
   const _id = row?.id
   disabled.value = true;
   const saleOrderId = row?.saleOrderId;
@@ -1342,8 +1366,9 @@ const handleDetail = async (row?: SourceFullProcessOrderVO) => {
 
 }
 /** 修改按钮操作 */
-const handleUpdate = async (row?: SourceFullProcessOrderVO) => {
+const handleUpdate = async (row?: any) => {
   reset();
+  orderPrice.value = row?.salePrice
   const _id = row?.id || ids.value[0]
   disabled.value = false;
   const saleOrderId = row?.saleOrderId;
@@ -1534,12 +1559,19 @@ const save = async (status: string, isConfirmed: string) => {
       }
       form.value.isConfirmed = isConfirmed;
       buttonLoading.value = true;
-      updateSourceFullProcessOrder(form.value).then(res => {
-        proxy?.$modal.msgSuccess("修改成功");
-        drawer.visible = false;
-        radioTableHandle();
-      }).finally(() => { buttonLoading.value = false; });
-
+      if('1' == isConfirmed) {
+        updateSourceFullProcessOrder(form.value).then(res => {
+          proxy?.$modal.msgSuccess("修改成功");
+          drawer.visible = false;
+          radioTableHandle();
+        }).finally(() => { buttonLoading.value = false; });
+      } else {
+        updateSourceCheckPer(form.value).then(res => {
+          proxy?.$modal.msgSuccess("修改成功");
+          drawer.visible = false;
+          radioTableHandle();
+        }).finally(() => { buttonLoading.value = false; });
+      }
     }
   });
 

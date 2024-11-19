@@ -167,6 +167,11 @@ export interface RawMaterialForm extends BaseEntity {
   length?: number | string;
 
   /**
+   * 可研磨次数
+   */
+  abrasiveNumber?: number ;
+
+  /**
    * 宽
    */
   width?: string | number;
@@ -292,6 +297,17 @@ export const StatusStrings = {
   [StatusEnum.STOP]: '停用'
 };
 
+export enum DrillerOperationTypeEnum {
+  /**
+    * 研磨归还
+    */
+  ABRADE_RETURN = "6",
+  /**
+   * 研磨报废
+   */
+  ABRADE_SCRAP = "7",
+}
+
 export enum InOutTypeEnum {
   /**
     * 采购入库
@@ -361,27 +377,53 @@ export enum InOutTypeEnum {
    * 领料还回
    */
   MATERIAL_RETURN = "17",
+  /**
+   * 钻咀还回
+   */
+  DRILLER_RETURN_IN = "18",
 }
 
 export const typeStrings = {
   [InOutTypeEnum.PURCHASE_IN]: '采购入库',
   [InOutTypeEnum.STOCK_RETURN]: '库存退货',
-  [InOutTypeEnum.PRODUCTION_ISSUE]: '生产发料',
-  [InOutTypeEnum.PRODUCTION_RETURN]: '生产退料',
+  [InOutTypeEnum.PRODUCTION_ISSUE]: '板材发料',
+  [InOutTypeEnum.PRODUCTION_RETURN]: '板材退料',
+  [InOutTypeEnum.MATERIAL_OUT]: '物料领料',
+  [InOutTypeEnum.MATERIAL_RETURN]: '领料还料',
   [InOutTypeEnum.MATERIAL_BORROW]: '物料借出',
   [InOutTypeEnum.BORROW_RETURN]: '借出归还',
   [InOutTypeEnum.MATERIAL_IN]: '物料借入',
   [InOutTypeEnum.BORROW_IN]: '借入归还',
   [InOutTypeEnum.DIRECT_OUT]: '直接出库',
-  [InOutTypeEnum.CHECK_OUT]: '盘点出库',
-  [InOutTypeEnum.CHECK_IN]: '盘点入库',
-  [InOutTypeEnum.TRANSFER_OUT]: '转仓出库',
-  [InOutTypeEnum.TRANSFER_IN]: '转仓入库',
-  [InOutTypeEnum.APPLET_IN]: '小程序入库',
   [InOutTypeEnum.APPLET_OUT]: '小程序出库',
-  [InOutTypeEnum.MATERIAL_OUT]: '领料出库',
-  [InOutTypeEnum.MATERIAL_RETURN]: '领料还回',
+  [InOutTypeEnum.APPLET_IN]: '小程序入库',
+  [InOutTypeEnum.CHECK_IN]: '盘盈入库',
+  [InOutTypeEnum.CHECK_OUT]: '盘亏出库',
+  [InOutTypeEnum.DRILLER_RETURN_IN]: '钻咀还回',
+  // [InOutTypeEnum.TRANSFER_OUT]: '转仓出库',
+  // [InOutTypeEnum.TRANSFER_IN]: '转仓入库',
 };
+
+export const typeList =
+  [
+    {value: InOutTypeEnum.PURCHASE_IN, label: "采购入库"},
+    {value: InOutTypeEnum.STOCK_RETURN, label: "库存退货"},
+    {value: InOutTypeEnum.PRODUCTION_ISSUE, label: "板材发料"},
+    {value: InOutTypeEnum.PRODUCTION_RETURN, label: "板材退料"},
+    {value: InOutTypeEnum.MATERIAL_OUT, label: "物料领料"},
+    {value: InOutTypeEnum.MATERIAL_RETURN, label: "领料还料"},
+    {value: InOutTypeEnum.MATERIAL_BORROW, label: "物料借出"},
+    {value: InOutTypeEnum.BORROW_RETURN, label: "借出归还"},
+    {value: InOutTypeEnum.MATERIAL_IN, label: "物料借入"},
+    {value: InOutTypeEnum.BORROW_IN, label: "借入归还"},
+    {value: InOutTypeEnum.DIRECT_OUT, label: "直接出库"},
+    {value: InOutTypeEnum.APPLET_OUT, label: "小程序出库"},
+    {value: InOutTypeEnum.APPLET_IN, label: "小程序入库"},
+    {value: InOutTypeEnum.CHECK_IN, label: "盘盈入库"},
+    {value: InOutTypeEnum.CHECK_OUT, label: "盘亏出库"},
+    {value: InOutTypeEnum.DRILLER_RETURN_IN, label: "钻咀还回"},
+  ]
+
 
 export enum FeiLinTypeEnum {
   FEI_LIN = "1",

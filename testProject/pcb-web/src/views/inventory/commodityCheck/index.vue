@@ -1,11 +1,12 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
-      <el-tabs type="border-card" class="xtable-tab" @tab-click="radioTableHandle">
-        <el-tab-pane label="成品库存盘点">
-          <el-row style="display: flex;padding: 5px 0;justify-content: end;width:100%">
+    <!-- <el-card shadow="never" class="xtable-card"> -->
+      <!-- 使用 only-one-tab搭配一个占位tab 解决一个tab卡片时，下方的蓝色条长度不对 -->
+      <el-tabs class="xtable-tab only-one-tab" v-model="editableTabsValue" @tab-click="radioTableHandle">
+        <el-tab-pane label="成品库存盘点" name="1">
+          <div class="head-btn-flex">
             <el-button size="small" type="primary" @click.stop="doAdd()">盘入</el-button>
-          </el-row>
+          </div>
           <XTable toolId="inventoryCommodity1" height="100%" class="xtable-content"
             v-model:page-size="queryParams.pageSize" v-model:current-page="queryParams.pageNum"
             :page-params="{ perfect: true, total: total }" :data="inventoryList" :columnList="columnList" ref="XTableRef"
@@ -24,8 +25,9 @@
 
           </XTable>
         </el-tab-pane>
+        <el-tab-pane label="占位tab" name="占位tab"></el-tab-pane>
       </el-tabs>
-    </el-card>
+    <!-- </el-card> -->
 
 
     <el-dialog :title="dialog.title" v-model="dialog.visible" width="40%">
@@ -78,7 +80,7 @@
       <el-main style="padding:0px;height: 100%;overflow-x:hidden;">
         <div style="flex: none;height: 40% !important;" class="ptable-card">
           <el-divider content-position="left" style="padding:0">已选产品</el-divider>
-          <XTable :page-show="false" height="100%" class="ptable-content checkTabCls" :data="checkCommodityList"
+          <XTable :showHead="false" :page-show="false" height="100%" class="ptable-content checkTabCls" :data="checkCommodityList"
             :columnList="commodityColumnList2" ref="tabXTableRef2" border :edit-rules="validRules"
             :edit-config="{ trigger: 'click', mode: 'cell', showStatus: true }">
             <template #edit-quantity="{ row }">
@@ -121,18 +123,18 @@
         </div>
       </el-main>
       <template #footer>
-        <div style="display: flex; justify-content: center;">
-          <span class="dialog-footer">
-            <el-button :loading="buttonLoading" @click="addDialog.visible = false">取消</el-button>
+        <!-- <div style="display: flex; justify-content: center;">
+          <span class="dialog-footer"> -->
             <el-button :loading="buttonLoading" type="primary" @click="savaCommodityDetail">确定</el-button>
-          </span>
-        </div>
+            <el-button :loading="buttonLoading" @click="addDialog.visible = false">取消</el-button>
+          <!-- </span>
+        </div> -->
       </template>
     </el-drawer>
 
 
     <el-dialog :title="commodityDialog.title" v-model="commodityDialog.visible" width="60%">
-      <div class="expand-wrapper">
+      <div>
         <XTable toolId="inventoryRelaCommodity" height="500px" class="xtable-content"
           v-model:page-size="dialogQueryParams.pageSize" v-model:current-page="dialogQueryParams.pageNum"
           :page-params="{ perfect: true, total: total2 }" :data="inventoryRelaList" :columnList="relaColumnList"
@@ -178,6 +180,7 @@ const dialogCommodityId = ref();
 const tabFormRef = ref();
 
 
+const editableTabsValue = ref('1')
 const commodityDialog = reactive<DialogOption>({ visible: false, title: '' });
 const dialog = reactive<DialogOption>({
   visible: false,

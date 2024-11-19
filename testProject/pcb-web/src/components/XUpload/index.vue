@@ -206,7 +206,7 @@ const dealData = () => {
         const temp = {
             id: v?.id,
             url: v.url || '',
-            key: v.raw ? v.raw.key : v.key,
+            key: v.raw ? (v.raw?.key || v.key) : v.key,
             name,
             size: v.raw ? (Number(v.raw.size) / 1024) * 100 / 100 : v.size,
             tempImgUrls: undefined,
@@ -232,7 +232,7 @@ const httpRequest = (options: UploadRequestOptions) => {
     // 修改预览图的名称
     let name = options.file.name.replace(/,/g, '')
     fileList.value.map(v => {
-        v.key = v.raw?.key || v.key
+        v.key = v.raw?.key || v.key || options.file.key
         v.status = 'success'
         if (v.key == options.file.key) {
             v.name = name
@@ -282,7 +282,7 @@ const createWatermark = (value: any, src: any) => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         const img = new Image();
-        
+
         img.onload = () => {
             canvas.width = img.width;
             canvas.height = img.height;
@@ -302,11 +302,11 @@ const createWatermark = (value: any, src: any) => {
             let time = (res?.code == 200 ? res?.msg : '') || dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss')
             ctx?.fillText(time, canvas.width - ctx.measureText(time).width - 10, canvas.height - 10 - 20);
             // ctx?.closePath()
-        
+
             const watermarkSrc = canvas.toDataURL('image/png');
             resolve(watermarkSrc)
         };
-        
+
         img.src = src;
     } catch(err) {
         console.log('绘制水印失败:', err)
@@ -351,6 +351,7 @@ const getAddress = () => {
 
 // 上传前
 const beforeUpload = (file: beforeUploadRawFile) => {
+    console.log(JSON.parse(JSON.stringify(file)))
     return new Promise((resolve, reject) => {
         try {
             if (props.fileSize) {
@@ -379,7 +380,7 @@ const beforeUpload = (file: beforeUploadRawFile) => {
                 actionUrl.value = data.urlStr
 
                 data.urlStr = undefined
-                if (props?.isWaterMark) {
+                if (props?.isWaterMark && file.type.includes('image/')) {
                     if (!addressTxt.value) {
                         addressTxt.value = await getAddress()
                     }

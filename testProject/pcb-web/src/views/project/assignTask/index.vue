@@ -60,7 +60,7 @@
         </el-col>
         <el-col :span="8" class="global-flex flex-end">
           <div class="totalTitle" v-if="currentType == 0 || currentType == 1">结存数量:{{sumData.quantity}}&nbsp;&nbsp;|&nbsp;&nbsp; 结存面积：{{sumData.area}}㎡</div>
-          <el-button v-if="currentType == 0 || currentType == 1" type="primary" @click="allotUser">分配人员</el-button>
+          <el-button v-if="(currentType == 0 || currentType == 1) &&  checkPermi(['mi:assign:allocation'])" type="primary" @click="allotUser">分配人员</el-button>
           <el-button v-if="currentType==2" type="primary " v-has-roles="['admin','superadmin']" @click="allotUser">分配人员</el-button>
           <el-button  type="primary" @click="visible = true">查看产出</el-button>
           <el-button v-if="currentType == 0 || currentType == 1" @click="exportDataBefore">导出</el-button>
@@ -75,16 +75,29 @@
                 :page-params="{ perfect: true, total: total }" :data="orderList" :columnList="columnList" ref="xTable"
                 @checkbox-all="selectAllChangeEvent" @checkbox-change="selectChangeEvent"
                 :loading="loading" :showRefresh="true"
-                :intervalCondition="['placeOrderTime','dispatchTime','deliveryTime','area']"
+                :intervalCondition="['placeOrderTime','dispatchTime','deliveryTime','area','eqStartTime','eqEndTime']"
                 border @searchChange="searchChange" :column-config="{ resizable: true }"
                 :sort-orders="sortCondition"
                 :edit-config="{trigger: 'click', enabled: true, mode: 'cell'}"
                 :row-config="{ keyField: 'id' }">
 
+          <template #header-eqHours="scope">
+            EQ时长(H)
+            <el-tooltip
+              class="box-item"
+              effect="dark"
+              raw-content
+              :content="`累计的EQ时长`"
+            >
+              <el-icon class="tooltip-width-auto" ><QuestionFilled /></el-icon>
+            </el-tooltip>
+          </template>
           <template #edit-miUserName="{row}">
             <vxe-select v-model="row.miUserId" :collapse-tags="true" filterable @change="userChanged(row)"
+                       :disabled="!checkPermi(['mi:assign:allocation'])"
                        placeholder="请选择制作人员">
               <vxe-option
+                :visible = "!item.userName.includes('FDZD')"
                 v-for="item in engineerOptions"
                 :key="item.userId"
                 :label="item.nickName"
@@ -94,8 +107,10 @@
           </template>
           <template #edit-camUserName="{row}">
             <vxe-select v-model="row.camUserId" :collapse-tags="true" filterable @change="userChanged(row)"
+             :disabled="!checkPermi(['mi:assign:allocation'])"
                         placeholder="请选择CAM工程师">
               <vxe-option
+                :visible = "!item.userName.includes('FDZD')"
                 v-for="item in engineerOptions"
                 :key="item.userId"
                 :label="item.nickName"
@@ -105,12 +120,25 @@
           </template>
           <template #default-isEqConfirm="scope">
             <el-switch
+              v-if="scope.row.isEqConfirm"
               v-model="scope.row.isEqConfirm"
               :disabled="scope.row.miUserName == null"
               style="--el-switch-on-color: #13ce66;"
               active-value="1"
               inactive-value="0"
-              @change="handleChange($event,scope.row)"
+              @change="handleEQChange($event,scope.row)"
+
+            />
+          </template>
+          <template #default-isCamConfirm="scope">
+            <el-switch
+              v-if="scope.row.isCamConfirm"
+              v-model="scope.row.isCamConfirm"
+              :disabled="scope.row.camUserName == null"
+              style="--el-switch-on-color: #13ce66;"
+              active-value="1"
+              inactive-value="0"
+              @change="handleCAMChange($event,scope.row)"
 
             />
           </template>
@@ -141,39 +169,13 @@
             </div>
           </template>
 
-<!--          <template #default-commodityThickness="scope">
-            <div v-for="item in resDictData.finish_plate_thickness">
-              <span v-if="item.dictValue==scope.row.commodityThickness">{{item.dictLabel}}</span>
-            </div>
-          </template>-->
-          <!-- <template #default-surfaceTreatment="scope">
-            <div v-for="item in resDictData.order_surface_treatment">
-              <span v-if="item.dictValue==scope.row.surfaceTreatment">{{item.dictLabel}}</span>
-            </div>
-          </template> -->
-<!--          <template #default-commoditySolder="scope">
-            <div v-for="item in resDictData.order_commodity_solder">
-              <span v-if="item.dictValue==scope.row.commoditySolder">{{item.dictLabel}}</span>
-            </div>
-          </template>-->
-<!--          <template #default-characterColor="scope">
-            <div v-for="item in resDictData.order_character">
-              <span v-if="item.dictValue==scope.row.characterColor">{{item.dictLabel}}</span>
-            </div>
-          </template>-->
-<!--          <template #default-commodityType="scope">
-            <div v-for="item in resDictData.sys_commodity_type">
-              <span v-if="item.dictValue==scope.row.commodityType">{{item.dictLabel}}</span>
-            </div>
-          </template>-->
-
           <template #default-model="scope">
             <div v-for="item in resDictData.order_model">
               <span v-if="item.dictValue==scope.row.model">{{item.dictLabel}}</span>
             </div>
           </template>
           <template #default-make="scope">
-            <el-button class="marginAndPadding" v-if="scope.row.miUserId != null && scope.row.planId == null" size="small" type="primary"
+            <el-button class="marginAndPadding" v-if="scope.row.miUserId != null && scope.row.planId == null && checkPermi(['mi:assign:allocation'])" size="small" type="primary"
                        :text="true" @click="handleDelete(scope.row)">取消分配
             </el-button>
             <el-button class="marginAndPadding" size="small" type="primary" :text="true" @click="openCustomerRequire(scope.row)">客户要求
@@ -181,7 +183,8 @@
             <el-button class="marginAndPadding" size="small" type="primary" :text="true" @click="assignTaskUReportHandle(scope.row)">
               制作单
             </el-button>
-            <el-button class="marginAndPadding" size="small" type="primary" :text="true" @click="openUpload(scope.row)">EQ文件</el-button>
+            <el-button class="marginAndPadding" size="small" type="primary" :text="true" @click="EQRecord(scope.row)">EQ记录</el-button>
+            <el-button class="marginAndPadding" size="small" type="primary" :text="true" @click="openFile(scope.row)">文件</el-button>
           </template>
         </XTable>
 
@@ -193,18 +196,33 @@
                 :page-params="{ perfect: true, total: otherTotal }" :data="otherOrderList" :columnList="columnList3" ref="xTableOther"
                 @checkbox-all="selectAllChangeEvent" @checkbox-change="selectChangeEvent"
                 :loading="loading" :showRefresh="true"
-                :intervalCondition="['placeOrderTime','dispatchTime','deliveryTime','area']"
+                :intervalCondition="['placeOrderTime','dispatchTime','deliveryTime','area','eqStartTime','eqEndTime']"
                 border @searchChange="searchChange3" :column-config="{ resizable: true }"
                 :sort-orders="sortCondition"
                 :edit-config="{trigger: 'click', enabled: true, mode: 'cell'}"
                 :row-config="{ keyField: 'id' }">
+
+                <template #header-eqHours="scope">
+                  EQ时长(H)
+                  <el-tooltip
+                    class="box-item"
+                    effect="dark"
+                    raw-content
+                    :content="`累计的EQ时长`"
+                  >
+                    <el-icon class="tooltip-width-auto" ><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </template>
+
           <template #default-orderStatus="scope">
-            <el-tag style="margin-right: 2px" :type="scope.row.isInventoryShipped =='1' ? 'success' : (scope.row.flowStatus == '7' || scope.row.flowStatus == '8') ? 'warning' : scope.row.status == '3' ? 'danger' : 'primary'" >{{ scope.row.isInventoryShipped =='1' ? '库存发货' : (scope.row.flowStatus == '7' || scope.row.flowStatus == '8') ? '外协' : scope.row.status == '3' ? '撤回' : '正常'  }}</el-tag>
+            <el-tag style="margin-right: 2px" :type="scope.row.isInventoryShipped =='1' ? 'success' : (scope.row.flowStatus == '7' || scope.row.flowStatus == '8') ? 'warning' : scope.row.status == '3' ? 'danger' : 'primary'" >{{ scope.row.flowStatus =='10' ? '库存发货完成' : scope.row.flowStatus =='9' ? '库存发货' : scope.row.flowStatus == '7' ? '外协完成' : scope.row.flowStatus == '8' ? '外协' : scope.row.status == '3' ? '撤回' : '正常'  }}</el-tag>
           </template>
           <template #edit-miUserName="{row}">
             <vxe-select v-model="row.miUserId" :collapse-tags="true" filterable @change="userChanged(row)"
+             :disabled="!checkPermi(['mi:assign:allocation'])"
                         placeholder="请选择制作人员">
               <vxe-option
+                :visible = "!item.userName.includes('FDZD')"
                 v-for="item in engineerOptions"
                 :key="item.userId"
                 :label="item.nickName"
@@ -214,8 +232,10 @@
           </template>
           <template #edit-camUserName="{row}">
             <vxe-select v-model="row.camUserId" :collapse-tags="true" filterable @change="userChanged(row)"
+             :disabled="!checkPermi(['mi:assign:allocation'])"
                         placeholder="请选择CAM工程师">
               <vxe-option
+                :visible = "!item.userName.includes('FDZD')"
                 v-for="item in engineerOptions"
                 :key="item.userId"
                 :label="item.nickName"
@@ -225,15 +245,29 @@
           </template>
           <template #default-isEqConfirm="scope">
             <el-switch
+             v-if="scope.row.isEqConfirm"
               v-model="scope.row.isEqConfirm"
               :disabled="scope.row.miUserName == null"
               style="--el-switch-on-color: #13ce66;"
               active-value="1"
               inactive-value="0"
-              @change="handleChange($event,scope.row)"
+              @change="handleEQChange($event,scope.row)"
 
             />
           </template>
+            <template #default-isCamConfirm="scope">
+            <el-switch
+             v-if="scope.row.isCamConfirm"
+              v-model="scope.row.isCamConfirm"
+              :disabled="scope.row.camUserName == null"
+              style="--el-switch-on-color: #13ce66;"
+              active-value="1"
+              inactive-value="0"
+              @change="handleCAMChange($event,scope.row)"
+
+            />
+          </template>
+
 
           <template #default-flowStatus="scope">
             <el-tag v-if="scope.row.assignTaskId==null"
@@ -261,39 +295,13 @@
             </div>
           </template>
 
-<!--          <template #default-commodityThickness="scope">
-            <div v-for="item in resDictData.finish_plate_thickness">
-              <span v-if="item.dictValue==scope.row.commodityThickness">{{item.dictLabel}}</span>
-            </div>
-          </template>-->
-          <!-- <template #default-surfaceTreatment="scope">
-            <div v-for="item in resDictData.order_surface_treatment">
-              <span v-if="item.dictValue==scope.row.surfaceTreatment">{{item.dictLabel}}</span>
-            </div>
-          </template> -->
-<!--          <template #default-commoditySolder="scope">
-            <div v-for="item in resDictData.order_commodity_solder">
-              <span v-if="item.dictValue==scope.row.commoditySolder">{{item.dictLabel}}</span>
-            </div>
-          </template>-->
-<!--          <template #default-characterColor="scope">
-            <div v-for="item in resDictData.order_character">
-              <span v-if="item.dictValue==scope.row.characterColor">{{item.dictLabel}}</span>
-            </div>
-          </template>-->
-<!--          <template #default-commodityType="scope">
-            <div v-for="item in resDictData.sys_commodity_type">
-              <span v-if="item.dictValue==scope.row.commodityType">{{item.dictLabel}}</span>
-            </div>
-          </template>-->
-
           <template #default-model="scope">
             <div v-for="item in resDictData.order_model">
               <span v-if="item.dictValue==scope.row.model">{{item.dictLabel}}</span>
             </div>
           </template>
           <template #default-make="scope">
-            <el-button class="marginAndPadding" v-if="scope.row.miUserId != null && scope.row.planId == null" size="small" type="primary"
+            <el-button class="marginAndPadding" v-if="scope.row.miUserId != null && scope.row.planId == null && checkPermi(['mi:assign:allocation'])" size="small" type="primary"
                        :text="true" @click="handleDelete(scope.row)">取消分配
             </el-button>
             <el-button class="marginAndPadding" size="small" type="primary" :text="true" @click="openCustomerRequire(scope.row)">客户要求
@@ -301,7 +309,8 @@
             <el-button class="marginAndPadding" size="small" type="primary" :text="true" @click="assignTaskUReportHandle(scope.row)">
               制作单
             </el-button>
-            <el-button class="marginAndPadding" size="small" type="primary" :text="true" @click="openUpload(scope.row)">EQ文件</el-button>
+            <el-button class="marginAndPadding" size="small" type="primary" :text="true" @click="EQRecord(scope.row)">EQ记录</el-button>
+            <el-button class="marginAndPadding" size="small" type="primary" :text="true" @click="openFile(scope.row)">文件</el-button>
           </template>
         </XTable>
 
@@ -313,20 +322,46 @@
                 :page-params="{ perfect: true, total: historyTotal }" :data="historyList" :columnList="columnList2"
                 ref="xTableHistory" @checkbox-all="selectAllChangeEvent" @checkbox-change="selectChangeEvent"
                 :loading="loading" :showRefresh="true"
-                :intervalCondition="['saleOrderVo.placeOrderTime','saleOrderVo.dispatchTime','saleOrderVo.deliveryTime']"
+                :intervalCondition="['saleOrderVo.placeOrderTime','saleOrderVo.dispatchTime','saleOrderVo.deliveryTime','eqStartTime','eqEndTime']"
                 border @searchChange="searchChange2" :column-config="{ resizable: true }"
                 :row-config="{ keyField: 'id' }">
 
+                <template #header-eqHours="scope">
+                  EQ时长(H)
+                  <el-tooltip
+                    class="box-item"
+                    effect="dark"
+                    raw-content
+                    :content="`累计的EQ时长`"
+                  >
+                    <el-icon class="tooltip-width-auto" ><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </template>
+
           <template #default-isEqConfirm="scope">
             <el-switch
+            v-if="scope.row.isEqConfirm"
               v-model="scope.row.isEqConfirm"
               :disabled="scope.row.miUserName == null"
               style="--el-switch-on-color: #13ce66;"
               active-value="1"
               inactive-value="0"
-              @change="handleChange($event,scope.row)"
+              @change="handleEQChange($event,scope.row)"
             />
           </template>
+            <template #default-isCamConfirm="scope">
+            <el-switch
+            v-if="scope.row.isCamConfirm"
+              v-model="scope.row.isCamConfirm"
+              :disabled="scope.row.camUserName == null"
+              style="--el-switch-on-color: #13ce66;"
+              active-value="1"
+              inactive-value="0"
+              @change="handleCAMChange($event,scope.row)"
+
+            />
+          </template>
+
 
           <template #default-saleOrderVo.flowStatus="scope">
             <el-tag v-if="scope.row.saleOrderVo?.flowStatus=='3'"
@@ -358,32 +393,6 @@
             </div>
           </template>
 
-<!--          <template #default-saleOrderVo.commodityThickness="scope">
-            <div v-for="item in resDictData.finish_plate_thickness">
-              <span v-if="item.dictValue==scope.row.saleOrderVo.commodityThickness">{{item.dictLabel}}</span>
-            </div>
-          </template>-->
-          <!-- <template #default-saleOrderVo.surfaceTreatment="scope">
-            <div v-for="item in resDictData.order_surface_treatment">
-              <span v-if="item.dictValue==scope.row.saleOrderVo.surfaceTreatment">{{item.dictLabel}}</span>
-            </div>
-          </template> -->
-<!--          <template #default-saleOrderVo.commoditySolder="scope">
-            <div v-for="item in resDictData.order_commodity_solder">
-              <span v-if="item.dictValue==scope.row.saleOrderVo.commoditySolder">{{item.dictLabel}}</span>
-            </div>
-          </template>-->
-<!--          <template #default-saleOrderVo.characterColor="scope">
-            <div v-for="item in resDictData.order_character">
-              <span v-if="item.dictValue==scope.row.saleOrderVo.characterColor">{{item.dictLabel}}</span>
-            </div>
-          </template>-->
-<!--          <template #default-saleOrderVo.commodityType="scope">
-            <div v-for="item in resDictData.sys_commodity_type">
-              <span v-if="item.dictValue==scope.row.saleOrderVo.commodityType">{{item.dictLabel}}</span>
-            </div>
-          </template>-->
-
           <template #default-saleOrderVo.model="scope">
             <div v-for="item in resDictData.order_model">
               <span v-if="item.dictValue==scope.row.saleOrderVo.model">{{item.dictLabel}}</span>
@@ -395,7 +404,8 @@
             <el-button class="marginAndPadding" size="small" type="primary" :text="true"
                        @click="assignTaskHistoryUReportHandle(scope.row)">制作单
             </el-button>
-            <el-button class="marginAndPadding" size="small" type="primary" :text="true" @click="openUpload(scope.row)">EQ文件</el-button>
+            <el-button class="marginAndPadding" size="small" type="primary" :text="true" @click="EQRecord(scope.row)">EQ记录</el-button>
+            <el-button class="marginAndPadding" size="small" type="primary" :text="true" @click="openFile(scope.row)">文件</el-button>
           </template>
         </XTable>
 
@@ -409,6 +419,7 @@
           <el-select v-model="form.miUserId" :collapse-tags="true" @change="selectCamUserId" filterable
                      placeholder="请选择制作人员">
             <el-option
+              :disabled = "item.userName.includes('FDZD')"
               v-for="item in engineerOptions"
               :key="item.userId"
               :label="item.nickName"
@@ -419,6 +430,7 @@
         <el-form-item label="选择CAM工程师" prop="camUserId">
           <el-select v-model="form.camUserId" :collapse-tags="true" filterable placeholder="请选择CAM工程师">
             <el-option
+              :disabled = "item.userName.includes('FDZD')"
               v-for="item in engineerOptions"
               :key="item.userId"
               :label="item.nickName"
@@ -455,6 +467,100 @@
                @fileChange="fileChange" @delFile="delFile" v-loading="dialogTableLoading"></XUpload>
     </el-dialog>
 
+
+    <!--文件-->
+    <el-drawer :title="fileDialog.title" v-model="fileDialog.visible" size="60%" visible.sync="false" draggable
+               :destroy-on-close="true">
+      <el-tabs type="border-card" v-model="fileTab" class="xtable-tab" >
+
+        <el-tab-pane label="产品文件" name="产品文件">
+          <XTable :pageShow="false" class="xtable-content" :loading="loading" :data="filesDataObj.saleOrderFileVos"
+                  :show-footer="false" :columnList="eqfileColumnList" ref="fileleteTableRef7" border
+                  :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }"
+                  :page-params="{ perfect: true, total: fileTotal }">
+            <template #default-fileName="scope">
+              {{ scope.row.name }}
+            </template>
+            <template #default-make="scope">
+              <el-button link type="primary" @click="downLoadHandle(scope.row.key)">下载</el-button>
+            </template>
+            <template #default-src="scope">
+              <ImagePreview
+                :width="100"
+                :height="100"
+                :src="scope.row.url"
+                :type="scope.row.type"
+                :preview-src-list="[scope.row.url]"
+              />
+            </template>
+          </XTable>
+        </el-tab-pane>
+
+        <el-tab-pane label="EQ文件" name="EQ文件">
+          <XUpload v-model:model-value="fileList"  model="download"
+          :show-file-list="false"
+               @fileChange="fileChange"  v-loading="dialogTableLoading"></XUpload>
+          <XTable :pageShow="false" class="xtable-content" :loading="loading" :data="filesDataObj.eqfileVos"
+                  :show-footer="false" :columnList="eqfileColumnList" ref="fileleteTableRef6" border
+                  :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }"
+                  >
+            <template #default-fileName="scope">
+              {{ scope.row.name }}
+            </template>
+            <template #default-src="scope">
+              <ImagePreview
+                :width="100"
+                :height="100"
+                :src="scope.row.url"
+                :type="scope.row.type"
+                :preview-src-list="[scope.row.url]"
+              />
+            </template>
+            <template #default-make="scope">
+              <el-button link type="primary" @click="downLoadHandle(scope.row.key)">下载</el-button>
+              <el-button class="marginAndPadding" size="small" type="primary" :text="true" @click="delAssignFile(scope.row.id)">删除</el-button>
+            </template>
+          </XTable>
+        </el-tab-pane>
+
+        <el-tab-pane label="CAM文件" name="CAM文件">
+          <span style="font-size: 12px;color: #00000085;margin-bottom: 5px;">【CAM完成】开启后可上传CAM文件</span>
+          <XUpload v-model:model-value="camFileList" :readOnly="currentVo.isCamConfirm != '1'" model="download"
+          :show-file-list="false"
+               @fileChange="CAMFileChange"  v-loading="dialogTableLoading"></XUpload>
+          <XTable :pageShow="false" class="xtable-content" :loading="loading" :data="filesDataObj.camfileVos"
+                  :show-footer="false" :columnList="eqfileColumnList" ref="fileleteTableRef6" border
+                  :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }"
+                  >
+            <template #default-fileName="scope">
+              {{ scope.row.name }}
+            </template>
+            <template #default-src="scope">
+              <ImagePreview
+                :width="100"
+                :height="100"
+                :src="scope.row.url"
+                :type="scope.row.type"
+                :preview-src-list="[scope.row.url]"
+              />
+            </template>
+            <template #default-make="scope">
+              <el-button link type="primary" @click="downLoadHandle(scope.row.key)">下载</el-button>
+              <el-button v-if="currentVo.isCamConfirm == '1'" class="marginAndPadding" size="small" type="primary" :text="true" @click="delAssignFile(scope.row.id)">删除</el-button>
+            </template>
+          </XTable>
+        </el-tab-pane>
+      </el-tabs>
+
+      <template #footer>
+        <div class="dialog-footer" style="text-align: center">
+          <el-button @click="cacelFile">取 消</el-button>
+          <!-- <el-button type="primary" >下载全部</el-button> -->
+        </div>
+      </template>
+    </el-drawer>
+
+
     <el-dialog
       v-model="exportVisible"
       title="导出提示"
@@ -479,6 +585,40 @@
     <el-dialog v-model="visible" title="工程产出统计" width="80%"  draggable destroy-on-close>
       <OutputReport/>
     </el-dialog>
+
+       <!-- EQ记录 -->
+    <el-dialog :title="eqdialog.title" v-model="eqdialog.visible" destroy-on-close width="60%" @close="eqdialog.visible=false">
+
+        <XTable toolId="eqAssignToolId" v-model:page-size="eqQueryParams.pageSize"
+              v-model:current-page="eqQueryParams.pageNum" height="500" class="xtable-content"
+              :page-params="{ perfect: true, total: eqtotal }" :data="eqList" :columnList="eqColumnList"
+              :loading="eqloading" :showRefresh="true"
+              :intervalCondition="['eqStartTime','eqEndTime']"
+              border @searchChange="eqSearchChange" :column-config="{ resizable: true }"
+              :sort-orders="sortCondition"
+              :edit-config="{trigger: 'click', enabled: true, mode: 'cell'}"
+              :row-config="{ keyField: 'id' }">
+
+              <template #default-isAutoClose="scope">
+                {{ scope.row.eqEndTime?(scope.row.isAutoClose=='0'?'否':'是'):'' }}
+              </template>
+              <template #header-isAutoClose="scope">
+                是否自动关闭
+                <el-tooltip
+                  class="box-item"
+                  effect="dark"
+                  raw-content
+                  :content="`MI审核通过时会触发自动关闭EQ，同时EQ结束人为MI审核人`"
+                >
+                  <el-icon class="tooltip-width-auto" ><QuestionFilled /></el-icon>
+                </el-tooltip>
+                </template>
+
+
+        </XTable>
+
+    </el-dialog>
+
   </div>
 </template>
 
@@ -490,7 +630,8 @@
     listAssignTask,
     updateAssignTask,
     listHistoryAssignTask,
-    addAssignTaskHistory, getSumSet, delAssignTask
+    addAssignTaskHistory, getSumSet, delAssignTask,getAssignTaskProjectFile,
+    updateEq,listEQList
   } from "@/api/project/assignTask";
   import {listUserByRoleKey} from "@/api/system/user";
   import {ref} from "vue";
@@ -503,11 +644,12 @@
   import {ElMessageBox} from 'element-plus';
   import {addFile, deleteFile, getFileList} from '@/api/upload';
   import {checkSaleOrderByBo} from '@/api/project/productionPlan';
-  import {CustomerUserVO} from "@/api/basedata/customerUser/types";
-  import {delCustomerUser} from "@/api/basedata/customerUser";
   import { parseTime } from '@/utils/ruoyi';
   import OutputReport from "./outputReport.vue";
   import {checkPermi} from "@/utils/permission";
+  import fileSaver from "file-saver";
+  import {downloadUrl} from '@/api/upload/index';
+
 
   const visible = ref(false);
   const {proxy} = getCurrentInstance() as ComponentInternalInstance;
@@ -528,6 +670,7 @@
   const historyTotal = ref(0);
   const otherTotal = ref(0)
   const fileList = ref<any[]>([]);
+  const camFileList = ref<any[]>([]);
   const dialogTableLoading = ref(false)
   const exportVisible = ref(false);
   const toolId = ref('projectAssignTaskOrder');
@@ -580,6 +723,10 @@
     {label: '待制作', value: "2"},
     {label: '制作中', value: "3"},
   ])
+    const booleanType = ref([
+    {label: '是', value: "1"},
+    {label: '否', value: "0"},
+  ])
 
   const sortCondition = ['dispatchTime','placeOrderTime','area'];
 
@@ -593,7 +740,8 @@
       field: 'miUserName',
       align: 'center',
       filterType: 'input',
-      editRender: {}
+      editRender: {},
+
     },
     {
       title: 'CAM工程师',
@@ -602,9 +750,14 @@
       field: 'camUserName',
       align: 'center',
       filterType: 'input',
-      editRender: {}
+      editRender: {} ,
+
     },
     {title: 'EQ', fixed: 'left', width: '80', field: 'isEqConfirm', align: 'center'},
+    {title: 'CAM完成', fixed: 'left', width: '80', field: 'isCamConfirm', align: 'center',
+    filterType: 'radioButton',
+    filterData: () => booleanType.value
+     },
     {
       title: '状态', fixed: 'left', width: '80', field: 'flowStatus', align: 'center'
       //,filterType: 'radioButton', filterData: () => statusFilterData.value
@@ -639,6 +792,7 @@
     {title: '版本号', width: '80', field: 'version', align: 'center', filterType: 'input'},
     {title: '板层', width: '80', field: 'materialLayer', align: 'center', filterType: 'input'},
     {title: '板厚', width: '120', field: 'commodityThickness', align: 'center', filterType: 'input'},
+    {title: '成品铜厚', width: '120', field: 'materialCopperOutside', align: 'center', filterType: 'input'},
     {title: '表面处理', width: '120', field: 'surfaceTreatment', align: 'center', filterType: 'input'},
     {title: '阻焊颜色', width: '80', field: 'commoditySolder', align: 'center', filterType: 'input'},
     {title: '字符颜色', width: '120', field: 'characterColor', align: 'center', filterType: 'input'},
@@ -667,6 +821,21 @@
         endParams: {placeholder: '请输入结束时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
       }
     },
+    {title: 'EQ时长(H)', width: '90', field: 'eqHours',showHeaderOverflow: false, align: 'center'},
+    { title: 'EQ开始时间', width: '150', field: 'eqStartTime', align: 'center', showHeaderOverflow: false,
+      filterType: 'intervalDate',
+      filterParam: {
+        startParams: {placeholder: '请输入开始时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
+        endParams: {placeholder: '请输入结束时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
+      }
+    },
+    { title: 'EQ结束时间', width: '150', field: 'eqEndTime', align: 'center',
+      filterType: 'intervalDate',
+      filterParam: {
+        startParams: {placeholder: '请输入开始时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
+        endParams: {placeholder: '请输入结束时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
+      }
+    },
     {title: '操作', field: 'make', align: 'center', width: '250', fixed: 'right', showOverflow: false},
   ]);
 
@@ -676,6 +845,9 @@
     {title: '制作人员', fixed: 'left', width: '80', field: 'miUserName', align: 'center', filterType: 'input'},
     {title: 'CAM工程师', fixed: 'left', width: '140', field: 'camUserName', align: 'center', filterType: 'input'},
     {title: 'EQ', fixed: 'left', width: '80', field: 'isEqConfirm', align: 'center'},
+    {title: 'CAM完成', fixed: 'left', width: '80', field: 'isCamConfirm', align: 'center',
+      filterType: 'radioButton',
+      filterData: () => booleanType.value },
     {title: '状态', fixed: 'left', width: '80', field: 'saleOrderVo.flowStatus', align: 'center'},
     {title: '销售单号', fixed: 'left', width: '120', field: 'saleOrderVo.code', align: 'center', filterType: 'input'},
     {
@@ -704,6 +876,7 @@
     {title: '版本号', width: '80', field: 'saleOrderVo.version', align: 'center', filterType: 'input'},
     {title: '板层', width: '80', field: 'saleOrderVo.materialLayer', align: 'center', filterType: 'input'},
     {title: '板厚', width: '120', field: 'saleOrderVo.commodityThickness', align: 'center', filterType: 'input'},
+    {title: '成品铜厚', width: '120', field: 'materialCopperOutside', align: 'center', filterType: 'input'},
     {title: '表面处理', width: '120', field: 'saleOrderVo.surfaceTreatment', align: 'center', filterType: 'input'},
     {title: '阻焊颜色', width: '80', field: 'saleOrderVo.commoditySolder', align: 'center', filterType: 'input'},
     {title: '字符颜色', width: '120', field: 'saleOrderVo.characterColor', align: 'center', filterType: 'input'},
@@ -730,7 +903,23 @@
         endParams: {placeholder: '请输入结束时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
       }
     },
-    {title: '操作', field: 'make', align: 'center', width: '200', fixed: 'right', showOverflow: false},
+
+    { title: 'EQ时长(H)', width: '90', field: 'eqHours',showHeaderOverflow: false, align: 'center'},
+    { title: 'EQ开始时间', width: '150', field: 'eqStartTime', align: 'center',
+      filterType: 'intervalDate',showHeaderOverflow: false,
+      filterParam: {
+        startParams: {placeholder: '请输入开始时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
+        endParams: {placeholder: '请输入结束时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
+      }
+    },
+    { title: 'EQ结束时间', width: '150', field: 'eqEndTime', align: 'center',
+      filterType: 'intervalDate',showHeaderOverflow: false,
+      filterParam: {
+        startParams: {placeholder: '请输入开始时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
+        endParams: {placeholder: '请输入结束时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
+      }
+    },
+    {title: '操作', field: 'make', align: 'center', width: '250', fixed: 'right', showOverflow: false},
   ]);
 
   const columnList3 = ref([
@@ -755,6 +944,9 @@
       editRender: {}
     },
     {title: 'EQ', fixed: 'left', width: '80', field: 'isEqConfirm', align: 'center'},
+    {title: 'CAM完成', fixed: 'left', width: '80', field: 'isCamConfirm', align: 'center',
+      filterType: 'radioButton',
+      filterData: () => booleanType.value },
     {title: '订单状态', fixed: 'left', width: '80', field: 'orderStatus', align: 'center'},
     {
       title: '状态', fixed: 'left', width: '80', field: 'flowStatus', align: 'center'
@@ -790,6 +982,7 @@
     {title: '版本号', width: '80', field: 'version', align: 'center', filterType: 'input'},
     {title: '板层', width: '80', field: 'materialLayer', align: 'center', filterType: 'input'},
     {title: '板厚', width: '120', field: 'commodityThickness', align: 'center', filterType: 'input'},
+    {title: '成品铜厚', width: '120', field: 'materialCopperOutside', align: 'center', filterType: 'input'},
     {title: '表面处理', width: '120', field: 'surfaceTreatment', align: 'center', filterType: 'input'},
     {title: '阻焊颜色', width: '80', field: 'commoditySolder', align: 'center', filterType: 'input'},
     {title: '字符颜色', width: '120', field: 'characterColor', align: 'center', filterType: 'input'},
@@ -813,6 +1006,21 @@
       title: '工厂交期', width: '200', field: 'dispatchTime', align: 'center',
       filterType: 'intervalDate',
       sortable: true,
+      filterParam: {
+        startParams: {placeholder: '请输入开始时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
+        endParams: {placeholder: '请输入结束时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
+      }
+    },
+    { title: 'EQ时长(H)', width: '90', field: 'eqHours',showHeaderOverflow: false, align: 'center'},
+    { title: 'EQ开始时间', width: '150', field: 'eqStartTime', align: 'center',
+      filterType: 'intervalDate',showHeaderOverflow: false,
+      filterParam: {
+        startParams: {placeholder: '请输入开始时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
+        endParams: {placeholder: '请输入结束时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
+      }
+    },
+    { title: 'EQ结束时间', width: '150', field: 'eqEndTime', align: 'center',
+      filterType: 'intervalDate',
       filterParam: {
         startParams: {placeholder: '请输入开始时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
         endParams: {placeholder: '请输入结束时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
@@ -1128,7 +1336,40 @@
     await changeList();
   };
 
-  const fileChange = (value: any) => {
+  /*switch change事件*/
+  const handleEQChange = async ($event: any, row: any) => {
+    const data = {
+      id: (currentType.value == 0 || currentType.value == 1) ? row.assignTaskId : row.id,
+      miUserId: row.miUserId,
+      miUserName: row.miUserName,
+      camUserId: row.camUserId,
+      camUserName: row.camUserName,
+      isEqConfirm: row.isEqConfirm,
+      // planId: row.planId,
+    }
+    await updateEq(data).finally(() => buttonLoading.value = false);
+    proxy?.$modal.msgSuccess("修改成功");
+    await changeList();
+  };
+
+    /*CAM 的 switch change事件*/
+  const handleCAMChange = async ($event: any, row: any) => {
+    const data = {
+      id: (currentType.value == 0 || currentType.value == 1) ? row.assignTaskId : row.id,
+      miUserId: row.miUserId,
+      miUserName: row.miUserName,
+      camUserId: row.camUserId,
+      camUserName: row.camUserName,
+      isEqConfirm: row.isEqConfirm,
+      isCamConfirm: row.isCamConfirm,
+      // planId: row.planId,
+    }
+    await updateAssignTask(data).finally(() => buttonLoading.value = false);
+    proxy?.$modal.msgSuccess("修改成功");
+    await changeList();
+  };
+
+  const fileChange = async (value: any) => {
     let lastFile = value.find(vo => vo.key == value[value.length - 1].key);
     var data = {
       bizId: (currentType.value == 0 || currentType.value == 1) ? currentVo.value.id : currentVo.value.saleOrderVo.id,
@@ -1140,7 +1381,30 @@
       key: lastFile.key,
     }
     console.log(data);
-    addFile(data)
+    await addFile(data);
+    let query = {
+        saleOrderId:(currentType.value == 0 || currentType.value == 1) ? currentVo.value.id : currentVo.value.saleOrderVo.id,
+    }
+    filesDataObj.value = await getAssignTaskProjectFile(query);
+  }
+
+  const CAMFileChange = async (value: any) => {
+    let lastFile = value.find(vo => vo.key == value[value.length - 1].key);
+    var data = {
+      bizId: (currentType.value == 0 || currentType.value == 1) ? currentVo.value.id : currentVo.value.saleOrderVo.id,
+      moduleCode: "2",
+      bizType: "35",
+      type: lastFile.type,
+      size: lastFile.size,
+      name: lastFile.name,
+      key: lastFile.key,
+    }
+    console.log(data);
+    await addFile(data);
+    let query = {
+        saleOrderId:(currentType.value == 0 || currentType.value == 1) ? currentVo.value.id : currentVo.value.saleOrderVo.id,
+    }
+    filesDataObj.value = await getAssignTaskProjectFile(query);
   }
 
   const delFile = (value: any) => {
@@ -1182,11 +1446,14 @@
     const res = await listAssignTask(queryParams.value);
     orderList.value = res.rows;
     if (orderList.value.length > 0) {
-      orderList.value.forEach(info => {
-        if (info.isEqConfirm == null || info.isEqConfirm == undefined) {
-          info.isEqConfirm = "0";
-        }
-      })
+      // orderList.value.forEach(info => {
+      //   if (info.isEqConfirm == null || info.isEqConfirm == undefined) {
+      //     info.isEqConfirm = "0";
+      //   }
+      //   if (info.isCamConfirm == null || info.isCamConfirm == undefined) {
+      //     info.isCamConfirm = "0";
+      //   }
+      // })
     }
     const resSum = await getSumSet(queryParams.value);
     sumData.value = resSum.data;
@@ -1208,11 +1475,14 @@
     const res = await listHistoryAssignTask(queryPageParamsHistory.value);
     historyList.value = res.rows;
     if (historyList.value && historyList.value.length > 0) {
-      historyList.value.forEach(info => {
-        if (info.isEqConfirm == null || info.isEqConfirm == undefined) {
-          info.isEqConfirm = "0";
-        }
-      })
+      // historyList.value.forEach(info => {
+      //   if (info.isEqConfirm == null || info.isEqConfirm == undefined) {
+      //     info.isEqConfirm = "0";
+      //   }
+      //   if (info.isCamConfirm == null || info.isCamConfirm == undefined) {
+      //     info.isCamConfirm = "0";
+      //   }
+      // })
     }
     historyTotal.value = res.total;
     loading.value = false;
@@ -1226,11 +1496,14 @@
     const res = await listAssignTask(queryParamsOther.value);
     otherOrderList.value = res.rows;
     if (otherOrderList.value.length > 0) {
-      otherOrderList.value.forEach(info => {
-        if (info.isEqConfirm == null || info.isEqConfirm == undefined) {
-          info.isEqConfirm = "0";
-        }
-      })
+      // otherOrderList.value.forEach(info => {
+      //   if (info.isEqConfirm == null || info.isEqConfirm == undefined) {
+      //     info.isEqConfirm = "0";
+      //   }
+      //   if (info.isCamConfirm == null || info.isCamConfirm == undefined) {
+      //     info.isCamConfirm = "0";
+      //   }
+      // })
     }
     const resSum = await getSumSet(queryParamsOther.value);
     sumData.value = resSum.data;
@@ -1242,7 +1515,7 @@
   const userChanged = async (row:any)=>{
     const saleOrderIdList:any[] = [];
     const alreadyAssignList:any[] = [];
-    alreadyAssignList.push(row.assignTaskId);
+    row.assignTaskId && alreadyAssignList.push(row.assignTaskId);
     saleOrderIdList.push(row.id);
     const info = {
       saleOrderIdList: saleOrderIdList,
@@ -1301,7 +1574,7 @@
           checkedInfos.value.forEach(info => {
             if (info.miUserId != null) {
               alreadyUserArray.push(info.commodityCode);
-              alreadyAssignList.push(info.assignTaskId);
+              info.assignTaskId && alreadyAssignList.push(info.assignTaskId);
               saleOrderIdList.push(info.id);
             } else {
               saleOrderIdList.push(info.id);
@@ -1384,6 +1657,7 @@
 
   /*订单分配提交*/
   const submitDate = async (info: any, row?: any) => {
+    console.log('submitDate', info);
     if (currentType.value == 0) {
       await addAssignTask(info).finally(() => resetRow(row));
       xTable.value.xTableRef.clearCheckboxRow()
@@ -1475,6 +1749,124 @@
   }
 
 
+  const fileDialog = reactive<DialogOption>({
+    visible: false,
+    title: ''
+  });
+
+  const filesDataObj = ref<any>([]);
+  const fileTab = ref('产品文件');
+
+  const eqfileColumnList = ref([
+    {title: "序号", type: 'seq', field: 'index', align: 'center', width: '60'},
+    {title: '文件名称', field: 'name', align: 'center'},
+    {title: '缩略图', field: 'src', align: 'center', showOverflow: false},
+    {title: '文件大小', width: '80', field: 'size', align: 'center'},
+    {title: '上传人', width: '80', field: 'createByName', align: 'center'},
+    {title: '上传时间', width: '140', field: 'createTime', align: 'center'},
+    {title: '操作', width: '100', field: 'make', align: 'center'},
+  ]);
+  /** 文件 */
+  const openFile = async (row: any) => {
+    currentVo.value = row;
+    fileDialog.title = "工程文件";
+    fileTab.value = '产品文件';
+    filesDataObj.value = [];
+    fileDialog.visible = true;
+    let query = {
+      //id: (currentType.value == 0 || currentType.value == 1) ? row.id : row.saleOrderVo.id,
+      saleOrderId:(currentType.value == 0 || currentType.value == 1) ? row.id : row.saleOrderVo.id,
+    }
+    filesDataObj.value = await getAssignTaskProjectFile(query);
+  }
+
+  const delAssignFile = async(_ids: any) => {
+    await proxy?.$modal.confirm('是否删除文件？').finally(() => loading.value = false);
+    deleteFile(_ids);
+    filesDataObj.value = [];
+    let query = {
+        saleOrderId:(currentType.value == 0 || currentType.value == 1) ? currentVo.value.id : currentVo.value.saleOrderVo.id,
+    }
+    filesDataObj.value = await getAssignTaskProjectFile(query);
+  }
+
+  const cacelFile = () => {
+    filesDataObj.value = [];
+    fileDialog.visible = false;
+  }
+
+    // 文件下载
+  const downLoadHandle = (key: string) => {
+    let loadingBox = ElLoading.service({ text: '文件下载中...', background: 'rgba(0, 0, 0, 0.7)' });
+    console.log(key)
+    downloadUrl(key).then(res => {
+      loadingBox.close()
+      if (res.code == 200) {
+        const { data } = res
+        // window.open(data[key])
+        fileSaver.saveAs(data[key])
+      }
+    }).catch((err) => {
+      loadingBox.close()
+    })
+  }
+
+
+  const eqSaleId = ref();
+  const eqList = ref<any>([]);
+  const eqtotal = ref(0);
+  const eqloading = ref(false);
+  const eqdialog = reactive<DialogOption>({
+    visible: false,
+    title: 'EQ记录'
+  });
+  const initEQQueryParams = {
+    pageNum: 1,
+    pageSize: 20,
+    params: {}
+  }
+  const eqdata = reactive<PageData<OrderForm, OrderQuery>>({
+    form: {...initFormData},
+    queryParams: {
+      ...initEQQueryParams
+    },
+    rules: {
+    }
+  });
+  const eqColumnList = ref([
+    {title: "序号", type: 'seq', field: 'index', align: 'center', width: '60'},
+    {title: '产品编码', field: 'commodityCode', align: 'center'},
+    {title: 'EQ开始时间',width: '130', field: 'eqStartTime', align: 'center'},
+    {title: 'EQ开启人', width: '90',field: 'eqStartUserName', align: 'center', showOverflow: false},
+    {title: 'EQ结束时间',width: '130',field:'eqEndTime',align: 'center'},
+    {title: 'EQ结束人', width: '90', field: 'eqEndUserName', align: 'center'},
+    {title: 'EQ时长(H)', width: '70', field: 'eqHours', align: 'center'},
+    {title: '是否自动关闭', width: '150', field: 'isAutoClose', align: 'center'},
+  ]);
+
+  const {queryParams:eqQueryParams} = toRefs(eqdata);
+  const EQRecord = async (row: any) => {
+    eqSaleId.value = (currentType.value == 0 || currentType.value == 1) ? row.id : row.saleOrderVo.id;
+    await getEQList();
+    eqdialog.visible=true;
+  };
+   // 获取 搜索条件
+  const eqSearchChange = async(params: any) => {
+    eqloading.value = true;
+    eqQueryParams.value = params;
+
+    await getEQList();
+    eqloading.value = false;
+  }
+
+  const getEQList = async ()=>{
+    eqQueryParams.value.saleOrderId = eqSaleId.value;
+    const res = await listEQList(eqQueryParams.value);
+    eqList.value = res.rows;
+    eqtotal.value = res.total;
+  }
+
+
   onMounted(() => {
     getDictOptions();
     getList();
@@ -1501,4 +1893,5 @@
     padding-left: 3px;
     padding-right: 3px
   }
+
 </style>

@@ -1,0 +1,59 @@
+.g-sign-drawer {
+    .sign-drawer-card {
+        position: relative;
+        margin-top: 20px;
+        border: 2px solid #F3F3F3;
+        border-radius: 6px;
+        &.active {
+            border: 2px solid #1890FF;
+            .sign-drawer-card-title {
+                color: #1890FF;
+            }
+        }
+
+        .sign-drawer-card-title {
+            min-height: 40px;
+            border-bottom: 2px solid #F3F3F3;
+            padding: 12px 14px;
+            font-size: 28px;
+            font-weight: 400;
+            color: #333333;
+        }
+        .sign-drawer-card-content {
+            padding: 16px;
+            
+            .sign-drawer-card-img {
+                width: 100%;
+                height: 200px !important;
+                border-radius: 4px;
+            }
+        }
+
+        .sign-drawer-card-active {
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            width: 36px;
+            height: 36px;
+        }
+    }
+
+    .g-sign-empty {
+        width: 100%;
+        height: 268px;
+        background: rgba(243, 243, 243, 1);
+        margin-top: 56px;
+        margin-bottom: 28px;
+        color: #999999;
+        border-radius: 8px;
+        .g-sign-empty-text {
+            margin-bottom: 8px;
+            font-size: 24px;
+            font-weight: 400;
+        }
+        .g-sign-empty-tip {
+            font-size: 28px;
+            font-weight: 700;
+        }
+    }
+}

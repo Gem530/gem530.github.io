@@ -7,6 +7,7 @@
           <template #header>
               <div class="global-flex flex-start">
                 <el-input
+                  clearable
                   v-model="queryParams.roleName"
                   prefix-icon="Search"
                   placeholder="搜索角色名称"
@@ -102,6 +103,11 @@
         <el-form-item label="角色名称" prop="roleName">
           <el-input v-model="form.roleName" placeholder="请输入角色名称" maxlength="100" />
         </el-form-item>
+        <el-form-item label="角色所属单位" prop="ownerId" v-if="['100'].includes(userStore.ownerId+'') && dialog.title?.includes('新增')" >
+          <el-select v-model="form.ownerId" filterable placeholder="请选择角色所属单位" clearable style="width: 100%">
+            <el-option v-for="item in ownerAllList" :key="item.deptId" :label="item.deptName" :value="item.deptId"></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="排序" prop="roleSort">
           <el-input-number v-model="form.roleSort" controls-position="right" :precision="0" :min="0" style="width: 100%;"/>
         </el-form-item>
@@ -125,7 +131,7 @@
         </el-form-item> -->
          <!-- <el-row>
           <el-col :span="12">
-         
+
         <el-form-item label="PC端菜单权限">
           <el-checkbox v-model="menuExpand" @change="handleCheckedTreeExpand($event, 'menu')">展开/折叠</el-checkbox>
           <el-checkbox v-model="menuNodeAll" @change="handleCheckedTreeNodeAll($event, 'menu')">全选/全不选</el-checkbox>
@@ -214,7 +220,17 @@
 </template>
 
 <script setup name="Role" lang="ts">
-import { addRole, changeRoleStatus, dataScope, delRole, getRole, listRole, updateRole, deptTreeSelect } from "@/api/system/role";
+import {
+  addRole,
+  changeRoleStatus,
+  dataScope,
+  delRole,
+  getRole,
+  listRole,
+  updateRole,
+  deptTreeSelect,
+  getOwnerAllList
+} from '@/api/system/role';
 import { roleMenuTreeselect, treeselect as menuTreeselect ,treeselectXcx as xcxMenuTreeselect} from '@/api/system/menu/index';
 import { RoleVO, RoleForm, RoleQuery, DeptTreeOption } from '@/api/system/role/types';
 import { MenuTreeOption, RoleMenuTree } from '@/api/system/menu/types';
@@ -241,10 +257,12 @@ const menuExpand = ref(false)
 const menuExpandXcx = ref(false)
 const menuNodeAll = ref(false)
 const menuNodeAllXcx = ref(false)
+const isSuperAdmin = ref(false)
 const deptExpand = ref(true)
 const deptNodeAll = ref(false)
 const deptOptions = ref<DeptTreeOption[]>([])
 const openDataScope = ref(false)
+const ownerAllList = ref<any[]>([]);
 
 const menuErpRef = ref()
 const menuXcxRef = ref()
@@ -280,6 +298,7 @@ const initForm: RoleForm = {
   status: '0',
   roleName: '',
   roleKey: '',
+  ownerId: '',
   menuCheckStrictly: true,
   menuCheckStrictlyXcx: true,
   menuChecks: [],
@@ -296,11 +315,13 @@ const data = reactive<PageData<RoleForm, RoleQuery>>({
   queryParams: {
     // pageNum: 1,
     // pageSize: 200000,
+    ownerId: '',
     roleName: '',
     roleKey: '',
     status: '',
   },
   rules: {
+    ownerId: [{ required: true, message: "单位不能为空", trigger: "blur" }],
     roleName: [{ required: true, message: "角色名称不能为空", trigger: "blur" }],
     roleKey: [{ required: true, message: "权限字符不能为空", trigger: "blur" }],
     roleSort: [{ required: true, message: "排序不能为空", trigger: "blur" }]
@@ -328,6 +349,15 @@ const getList = (flag = false) => {
   })
 }
 
+
+/** 单位列表 */
+const initOwnerAllList = async () => {
+  const { data } = await getOwnerAllList();
+  console.log('data', data);
+  ownerAllList.value = data;
+};
+
+
 /**
  * 搜索按钮操作
  */
@@ -346,7 +376,7 @@ const resetQuery = () => {
 const handleDelete = async (row?: RoleVO) => {
   const roleids = ((row?.roleId || '')+'') || ids.value;
   let names=roleList.value?.filter((item) => roleids.includes(item.roleId)).map((item) => item.roleName).join(",");
-  
+
   await proxy?.$modal.confirm('是否确认删除 "' + names + '" 角色？');
   proxy?.$modal.loading('加载中...');
   await delRole(roleids).finally(() => proxy?.$modal.closeLoading());
@@ -663,6 +693,7 @@ const saveMenu = async () => {
 }
 
 onMounted(() => {
+  initOwnerAllList();
   getList(true);
 });
 </script>
@@ -683,6 +714,7 @@ onMounted(() => {
     }
   }
 
+  &>form,&header,&section,&footer,
   &>div {
     width: 100%;
   }
@@ -715,7 +747,7 @@ onMounted(() => {
         &.active {
           background: rgba(242, 246, 252, 1);
         }
-        
+
         .role-item-name {
           flex: 1;
           overflow: hidden;
@@ -763,6 +795,7 @@ onMounted(() => {
   // height: 100%;
   flex: 1;
   overflow: hidden;
+  &>form,&header,&section,&footer,
   &>div {
     width: 100%;
   }

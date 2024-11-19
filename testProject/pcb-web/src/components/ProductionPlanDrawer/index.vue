@@ -3,7 +3,7 @@
   <el-drawer
     v-model="openFlag"
     :title="miDrawer.title"
-    size="90%"
+    size="95%"
     :close-on-click-modal="false"
     modal-class="mi-drawer-scoped"
     :direction="miDrawer.direction"
@@ -20,39 +20,41 @@
         </el-col>
       </el-row>
     </template>
-    <vxe-table
+    <XTable
       border
       keep-source
       align="center"
       min-height="48px"
+      :columnList="columnList"
+      toolId="ProductionPlanDrawerMainToolId"
       max-height="200px" class="padding-table"
-      show-overflow :loading="dialogLoading"
+      :loading="dialogLoading"
       :column-config="{resizable: true}"
       :data="orderList">
-      <vxe-column fixed="left" type="seq" title="序号" width="40"></vxe-column>
-      <vxe-column width="45" title="新/返" field="orderType">
-        <template #default="{row}">
+      <!-- <vxe-column fixed="left" type="seq" title="序号" width="40"></vxe-column>
+      <vxe-column width="45" show-overflow title="新/返" field="orderType"> -->
+        <template #default-orderType="{row}">
           <div v-for="item in resDictData.order_type">
             <span v-if="item.dictValue==row.orderType">{{item.dictLabel}}</span>
           </div>
         </template>
-      </vxe-column>
-      <vxe-column width="70" title="批量/样品" field="model">
-        <template #default="{ row }">
+      <!-- </vxe-column>
+      <vxe-column width="70" show-overflow title="批量/样品" field="model"> -->
+        <template #default-model="{ row }">
           <div v-for="item in resDictData.order_model">
             <span v-if="item.dictValue==row.model">{{item.dictLabel}}</span>
           </div>
         </template>
-      </vxe-column>
-      <vxe-column width="40" title="加急" field="urgent">
-        <template #default="{ row }">
+      <!-- </vxe-column>
+      <vxe-column width="40" show-overflow title="加急" field="urgent"> -->
+        <template #default-urgent="{ row }">
           <div v-for="item in resDictData.order_urgent">
             <span v-if="item.dictValue==row.urgent">{{item.dictLabel}}</span>
           </div>
         </template>
-      </vxe-column>
-      <vxe-column width="40" title="EQ" field="eq">
-        <template #default="{ row }">
+      <!-- </vxe-column>
+      <vxe-column width="40" show-overflow title="EQ" field="eq"> -->
+        <template #default-eq="{ row }">
           <el-switch
             v-model="row.isEqConfirm"
             style="--el-switch-on-color: #13ce66;"
@@ -61,76 +63,76 @@
             @change="handleChange($event,row)"
           />
         </template>
-      </vxe-column>
-      <vxe-column width="70" title="产品编码" field="commodityCode">
-        <template #default="{ row }">
+      <!-- </vxe-column>
+      <vxe-column width="70" show-overflow title="产品编码" field="commodityCode"> -->
+        <template #default-commodityCode="{ row }">
           <el-button link type="primary" @click="openOrderDetail(row)">{{row.commodityCode}}</el-button>
         </template>
+      <!-- </vxe-column>
+      <vxe-column width="70" show-overflow title="订单数量" field="quantity">
       </vxe-column>
-      <vxe-column width="70" title="订单数量" field="quantity">
+      <vxe-column width="70" show-overflow title="订单面积" field="area">
       </vxe-column>
-      <vxe-column width="70" title="订单面积" field="area">
+      <vxe-column width="70" show-overflow title="PCS/SET" field="unitedNumber">
       </vxe-column>
-      <vxe-column width="70" title="PCS/SET" field="unitedNumber">
+      <vxe-column width="50" show-overflow title="板材" field="materialQuality">
       </vxe-column>
-      <vxe-column width="50" title="板材" field="materialQuality">
+      <vxe-column width="50" show-overflow title="品牌" field="materialBrand">
       </vxe-column>
-      <vxe-column width="50" title="品牌" field="materialBrand">
+      <vxe-column width="50" show-overflow title="级别" field="materialLevel">
       </vxe-column>
-      <vxe-column width="50" title="级别" field="materialLevel">
+      <vxe-column width="50" show-overflow title="板厚" field="commodityThickness">
       </vxe-column>
-      <vxe-column width="50" title="板厚" field="commodityThickness">
+      <vxe-column width="70" show-overflow title="外层铜厚" field="materialCopperOutside">
       </vxe-column>
-      <vxe-column width="70" title="外层铜厚" field="materialCopperOutside">
+      <vxe-column width="70" show-overflow title="内层铜厚" field="materialCopperInside">
       </vxe-column>
-      <vxe-column width="70" title="内层铜厚" field="materialCopperInside">
-      </vxe-column>
-      <vxe-column width="65" title="单片尺寸" filed="singleLength">
-        <template #default="{ row }">
-          <span>{{Number(row.singleLength)?.toFixed(2)}}*{{Number(row.singleWidth)?.toFixed(2)}}</span>
+      <vxe-column width="65" show-overflow title="单片尺寸" filed="singleLength"> -->
+        <template #default-singleLength="{ row }">
+          <span>{{ parseFloat(row.singleLength).toFixed(2).replace(/\.?0+$/, '') }}*{{ parseFloat(row.singleWidth).toFixed(2).replace(/\.?0+$/, '') }}</span>
         </template>
-      </vxe-column>
-      <vxe-column width="65" title="连片尺寸" filed="unitedLength">
-        <template #default="{ row }">
-          <span>{{Number(row.unitedLength)?.toFixed(2)}}*{{Number(row.unitedWidth)?.toFixed(2)}}</span>
+      <!-- </vxe-column>
+      <vxe-column width="65" show-overflow title="连片尺寸" filed="unitedLength"> -->
+        <template #default-unitedLength="{ row }">
+          <span>{{ parseFloat(row.unitedLength).toFixed(2).replace(/\.?0+$/, '') }}*{{ parseFloat(row.unitedWidth).toFixed(2).replace(/\.?0+$/, '') }}</span>
         </template>
-      </vxe-column>
-      <vxe-column width="65" title="连片数量" field="unitedNumber">
-        <template #default="{ row }">
+      <!-- </vxe-column>
+      <vxe-column width="65" show-overflow title="连片数量" field="unitedNumber"> -->
+        <template #default-unitedNumber="{ row }">
           <span>{{row.unitedNumber}}</span>
         </template>
-      </vxe-column>
-      <vxe-column width="65" title="联片方式" field="unitedWayLength">
-        <template #default="{ row }">
+      <!-- </vxe-column>
+      <vxe-column width="65" show-overflow title="联片方式" field="unitedWayLength"> -->
+        <template #default-unitedWayLength="{ row }">
           <span>{{row.unitedWayLength}}*{{row.unitedWayWidth}}</span>
         </template>
+      <!-- </vxe-column>
+      <vxe-column width="65" show-overflow title="阻焊颜色" field="commoditySolder">
       </vxe-column>
-      <vxe-column width="65" title="阻焊颜色" field="commoditySolder">
-      </vxe-column>
-      <vxe-column width="50" title="字符" field="characterColor">
-        <template #default="{ row }">
-          <div v-for="item in resDictData.order_character">
-            <span v-if="item.dictValue==row.characterColor">{{item.dictLabel}}</span>
-          </div>
-        </template>
-      </vxe-column>
-      <vxe-column width="70" title="金厚(u'')" field="goldenThickness">
-        <template #edit="{ row }">
+      <vxe-column width="50" show-overflow title="字符" field="characterColor"> -->
+<!--        <template #default-characterColor="{ row }">-->
+<!--          <div v-for="item in resDictData.order_character">-->
+<!--            <span v-if="item.dictValue==row.characterColor">{{item.dictLabel}}</span>-->
+<!--          </div>-->
+<!--        </template>-->
+      <!-- </vxe-column>
+      <vxe-column width="70" show-overflow title="金厚(u'')" field="goldenThickness"> -->
+        <template #edit-goldenThickness="{ row }">
           <el-input style="width: 100%" v-model="row.goldenThickness"></el-input>
         </template>
+      <!-- </vxe-column>
+      <vxe-column width="65" show-overflow title="过孔要求" field="holeRequirement">
       </vxe-column>
-      <vxe-column width="65" title="过孔要求" field="holeRequirement">
-      </vxe-column>
-      <vxe-column show-overflow="false" min-width="180" title="操作" field="make">
-        <template #default="{ row }">
+      <vxe-column show-overflow="false" min-width="180" title="操作" field="make"> -->
+        <template #default-make="{ row }">
           <el-button link type="primary" @click="assignTaskHistoryUReportHandle(row)">制作单</el-button>
           <el-button link type="primary" @click="openCustomerRequire(row)">客户要求</el-button>
           <el-button link type="primary" @click="openUpload(row)">EQ文件</el-button>
         </template>
-      </vxe-column>
-    </vxe-table>
+      <!-- </vxe-column> -->
+    </XTable>
     <el-tabs type="border-card" class="plan-tabs" v-loading="dialogLoading">
-      <el-form ref="productionPlanFormRef" :model="form" :rules="rules" label-width="110px" label-position="right">
+      <el-form ref="productionPlanFormRef" :model="form" :rules="rules" label-width="135px" label-position="right">
         <el-tab-pane label="基础信息" class="plan-tab-auto">
           <el-row>
             <el-col :span="12">
@@ -229,7 +231,8 @@
                   <!-- <div >
                     <el-input v-model="item.name"></el-input>
                   </div> -->
-                  <EditName v-model:name="item.name" :disabled="disabledTab"></EditName>
+<!--                  <EditName v-model:name="item.name" :disabled="disabledTab"></EditName>-->
+                  {{item.name}}
                 </div>
                 <el-row class="pnlInfo-row-content" :gutter="20">
                   <el-col :span="8">
@@ -245,7 +248,7 @@
                     </el-form-item>
                   </el-col>
                   <el-col :span="8">
-                    <el-form-item label="宽" label-width="140px">
+                    <el-form-item label="宽">
                       <el-input v-model="item.pnlWidth"
                                 type="number"
                                 placeholder="宽" :disabled="disabledTab"
@@ -311,8 +314,8 @@
               <div style="position:relative;display:flex;justify-content:space-between;">
                 <div style="display:flex;align-items: center;">
                   <!-- <el-input v-model="item.name" style="width: 100px"></el-input> -->
-                  <EditName v-model:name="item.name" style="width: 100px" :disabled="disabledTab"></EditName>
-
+<!--                  <EditName v-model:name="item.name" style="width: 100px" :disabled="disabledTab"></EditName>-->
+                  {{item.name}}
                   <el-button
                     size="small"
                     type="primary"
@@ -340,11 +343,14 @@
                 <el-row :gutter="10">
                   <el-col :span="24">
                     <el-form-item label="板材">
-                      <el-input style="width: 90%" :model-value="item?.rawMaterial?.name" disabled></el-input>
+                      <!-- <el-input style="width: 90%" :model-value="item?.rawMaterial?.name" disabled></el-input>
                       <el-button ref="button"
                                  icon="Search"
                                  size="small"
                                  @click="openDialog(index)" :disabled="disabledTab">
+                      </el-button> -->
+                      <el-button type="primary" size="small" @click="openDialog(index)" :disabled="disabledTab">
+                        选择尺寸
                       </el-button>
                     </el-form-item>
                   </el-col>
@@ -616,7 +622,7 @@
                     </el-row>
                     <div class="right-work-content">
                       <el-card class="box-card" v-if="crruntWorkInfo.isLamination == '1'">
-                        <el-form label-width="60px">
+                        <el-form label-width="75px">
                           <el-form-item label="层叠状态">
                             <el-select v-model="crruntWorkInfo.cascadingState" @change="changeCascading">
                               <el-option
@@ -635,7 +641,6 @@
                           </div>
                           <XTable
                             border
-                            show-footer
                             height="200px"
                             :pageShow="false"
                             :searchShow="false"
@@ -798,33 +803,49 @@
   </el-drawer>
 
   <!-- 选择工艺单对话框 -->
-  <el-dialog :title="rawMaterialDialog.title" v-model="rawMaterialDialog.visible" width="50%"
+  <el-dialog :title="rawMaterialDialog.title" v-model="rawMaterialDialog.visible" width="60%"
              :close-on-click-modal="false" destroy-on-close>
-    <vxe-table
-      border
-      keep-source
-      align="center"
-      :row-config="{height: 40,isCurrent:true}"
-      show-overflow
-      :column-config="{resizable: true}"
-      @cell-dblclick="chooseRawMaterial"
-      :loading="loading"
-      :data="rawMaterialList">
-      <vxe-column fixed="left" type="seq" title="序号" width="60"></vxe-column>
-      <vxe-column width="290" title="物料名称" field="name">
-      </vxe-column>
-      <vxe-column width="290" title="长" field="length">
-      </vxe-column>
-      <vxe-column width="290" title="宽" field="width">
-      </vxe-column>
-    </vxe-table>
-    <pagination
-      v-show="materialTotal>0"
-      :total="materialTotal"
-      v-model:page="materialListQueryParam.pageNum"
-      v-model:limit="materialListQueryParam.pageSize"
-      @pagination="getMaterialList"
-    />
+      <template #header>
+      <el-row style="margin-left: -5px;">
+        <el-col :span="12">
+          <div style="text-align: left;font-size:16px !important">{{rawMaterialDialog.title}}</div>
+        </el-col>
+      </el-row>
+    </template>
+    <el-row >
+      <el-col :span="21">
+          <el-check-tag
+          v-for="item in rawMaterialSizeList"
+          :key="item.id"
+          size="small"
+          effect="dark"
+          type="primary"
+          primary
+          @change="onChangeSize(item)"
+          :checked="checkedSizeList.includes(item.id)"
+          style="margin-right: 5px;"
+          >
+          {{ item.rawSize }}
+        </el-check-tag>
+      </el-col>
+      <el-col :span="3" style="display: flex;justify-content: end;">
+        <el-button type="primary" @click="chooseRawMaterial()">确认选择</el-button>
+      </el-col>
+    </el-row>
+    <el-row>
+      <span class="el-dialog__title" style="marign-top:5px;font-size:16px !important">参考库存</span>
+    </el-row>
+    <XTable toolId="productionPlanRawMaterialToolId" :pageShow="true"
+            v-model:page-size="rawMaterialQueryParams.pageSize"
+            v-model:current-page="rawMaterialQueryParams.pageNum"
+            v-loading="proPlanRawMaterialLoading"
+            :page-params="{ perfect: true, total: materialTotal }"
+            :data="rawMaterialList" :columnList="proPlanRawMaterialColumnList"  height="500px" width="100%" class="xtable-content"
+            ref="productionPlanRawMaterialRef" border @searchChange="searchChangeProductionPlanRawMaterial" :column-config="{ resizable: true }" :showRefresh="true"
+            :radio-config="{trigger:'row'}"
+            >
+    </XTable>
+
   </el-dialog>
 
   <!-- 新增工序 -->
@@ -957,7 +978,7 @@
         <el-row>
           <el-col :span="8">
             <el-form-item label="图层" prop="layer">
-              <el-select v-model="nodeData.addWorkForm.layer" placeholder="请选择图层" style="width: 100%;">
+              <el-select v-model="nodeData.addWorkForm.layer" placeholder="请选择图层" style="width: 100%;" @change="changeLayer">
                 <el-option
                   :key="item.dictValue"
                   :label="item.dictLabel"
@@ -997,6 +1018,11 @@
           <el-col :span="8">
             <el-form-item label="PP片" prop="pp">
               <el-input v-model="nodeData.addWorkForm.pp" placeholder="请输入PP片" clearable/>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="厚度" prop="ppThickness">
+              <el-input v-model="nodeData.addWorkForm.ppThickness" placeholder="请输入厚度" clearable/>
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -1051,11 +1077,11 @@
 
   <!--客户要求-->
   <el-dialog :title="customerDialog.title" v-model="customerDialog.visible" width="1000px" destroy-on-close>
-    <el-input type="textarea" rows="25" maxlength="2000" show-word-limit v-model="customerDemand">
+    <el-input type="textarea" rows="25" maxlength="2000" show-word-limit v-model="customerDemand" :readonly="true">
     </el-input>
     <div style="text-align: center;padding: 5px">
       <el-button @click="customerDialog.visible = false">关闭</el-button>
-      <el-button type="primary" @click="saveCustomer">保存</el-button>
+<!--      <el-button type="primary" @click="saveCustomer">保存</el-button>-->
     </div>
   </el-dialog>
 
@@ -1066,20 +1092,89 @@
   </el-drawer>
 
   <!--eq文件-->
-  <el-dialog :title="uploadDialog.title" v-model="uploadDialog.visible" width="1000px">
-    <XUpload v-model:model-value="fileList" :readOnly="currentVo.isEqConfirm == '0'" model="download"
-             @fileChange="fileChange" @delFile="delEqFile"></XUpload>
-  </el-dialog>
+   <el-drawer :title="EQUploadDialog.title" v-model="EQUploadDialog.visible" size="60%" visible.sync="false" draggable
+   :destroy-on-close="true">
+     <el-tabs type="border-card" v-model="eqfileTab" class="xtable-tab" >
+
+     <el-tab-pane label="产品文件" name="产品文件">
+       <XTable :pageShow="false" class="xtable-content" :loading="eqloading" :data="eqfilesDataObj.saleOrderFileVos"
+               :show-footer="false" :columnList="eqfileColumnList" ref="fileleteTableRef7" border
+               :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }" >
+         <template #default-fileName="scope">
+           {{ scope.row.name }}
+         </template>
+         <template #default-make="scope">
+           <el-button link type="primary" @click="downLoadHandle(scope.row.key)">下载</el-button>
+         </template>
+         <template #default-src="scope">
+           <ImagePreview
+             :width="100"
+             :height="100"
+             :src="scope.row.url"
+             :type="scope.row.type"
+             :preview-src-list="[scope.row.url]"
+           />
+         </template>
+       </XTable>
+     </el-tab-pane>
+
+     <el-tab-pane label="EQ文件" name="EQ文件">
+       <XUpload v-model:model-value="fileList"  model="download"
+         :show-file-list="false"
+               @fileChange="fileChange"  v-loading="dialogTableLoading"></XUpload>
+         <XTable :pageShow="false" class="xtable-content" :loading="eqloading" :data="eqfilesDataObj.eqfileVos"
+                 :show-footer="false" :columnList="eqfileColumnList" ref="fileleteTableRef6" border
+                 :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }"
+                 >
+           <template #default-fileName="scope">
+             {{ scope.row.name }}
+           </template>
+           <template #default-src="scope">
+             <ImagePreview
+               :width="100"
+               :height="100"
+               :src="scope.row.url"
+               :type="scope.row.type"
+               :preview-src-list="[scope.row.url]"
+             />
+           </template>
+           <template #default-make="scope">
+             <el-button link type="primary" @click="downLoadHandle(scope.row.key)">下载</el-button>
+             <el-button class="marginAndPadding" size="small" type="primary" :text="true" @click="delAssignFile(scope.row.id)">删除</el-button>
+           </template>
+         </XTable>
+       </el-tab-pane>
+
+       </el-tabs>
+
+       <template #footer>
+       <div class="dialog-footer" style="text-align: center">
+         <el-button @click="eqcacelFile">取 消</el-button>
+         <!-- <el-button type="primary" >下载全部</el-button> -->
+       </div>
+       </template>
+   </el-drawer>
+
+   <!-- 暂存时错误提示表格 -->
+   <GConfirm ref="GConfirmRef" title="系统提示"></GConfirm>
 
   <!--详情预览-->
   <el-drawer
     v-model="orderDrawer.visible"
     :title="orderDrawer.title"
-    size="850px"
     :direction="orderDrawer.direction"
     :destroy-on-close="true"
-    modal-class="detail-prod-drawder"
+    size="45%"
+    :modal-class="`add-prod-drawder ${ownerId == '101' && 'normal-prod-drawder'}`"
   >
+    <template #header>
+      <span class="el-drawer__title no-wrap">{{orderDrawer.title}}</span>
+      <TotalTitle :start="true" :firstBorder="true" :list="[
+        { title: `总价：${ currentVo?.totalOrderPrice||0 }元` },
+        { title: `税金：${ currentVo?.tax||0 }元` },
+        { title: `总金额：${ currentVo?.totalPrice||0 }元` },
+      ]"></TotalTitle>
+    </template>
     <SaleDescriptions v-if="currentVo" :currentInfo="currentVo" :customerList="customerList" :isShow="false"
                       :resDictData="resDictData"></SaleDescriptions>
   </el-drawer>
@@ -1087,11 +1182,12 @@
 </template>
 
 <script setup name="ProductionPlanDrawer" lang="ts">
+  import { Decimal } from 'decimal.js'
   import {
-    saveMi, getMiInfo, getCheckUpdate,checkSaleOrderByBo
+    saveMi, getMiInfo, getCheckUpdate,checkSaleOrderByBo,checkMiTestCraftByBo
   } from '@/api/project/productionPlan';
   import {addCraftTemplate} from '@/api/basedata/craftTemplate/index'
-  import {getCraftRequirementJson,getRemarkJson,initFillData,getFieldTable,getFieldTableIndex,initNodeInfoList} from './util'
+  import {getCraftRequirementJson,getRemarkJson,initFillData,getFieldTable,getFieldTableIndex,initNodeInfoList, getMinDirllAndTotalDirll,getNodeWorkFieldValue,checkFormItemWork,sortRequirment,changeRequirementValue} from './util'
   import {getTemplateList} from '@/api/project/productionPlan/index'
   import {getCraft,getCraftList} from '@/api/basedata/craft/index'
   import {ProductionPlanQuery, ProductionPlanForm, linkCopperList} from '@/api/project/productionPlan/types';
@@ -1101,7 +1197,7 @@
   import {deepClone, getCharName} from "@/utils";
   import {RawMaterialVO} from "@/api/basedata/rawMaterial/types";
   import {VxeTableEvents} from "vxe-table";
-  import {listMaterial} from "@/api/basedata/rawMaterial";
+  import {listMaterial,listInvMaterial,getRawSizeList} from "@/api/basedata/rawMaterial";
   import {ref} from "vue";
   import {ElMessageBox} from "element-plus";
   import {OrderVO} from "@/api/order/directOrder/types";
@@ -1110,7 +1206,11 @@
   import {addFile, deleteFile, getFileList} from "@/api/upload";
   import { updateMiNodesToCard } from '@/api/production/card';
   import {getCustomer, updateCustomer} from "@/api/basedata/customer";
-  import { updateEq} from "@/api/project/assignTask";
+  import { updateEq,getAssignTaskProjectFile} from "@/api/project/assignTask";
+  import useUserStore from "@/store/modules/user";
+
+  // const { ownerId } = useUserStore();
+  const ownerId = 1001;
 
   const {proxy} = getCurrentInstance() as ComponentInternalInstance;
   const emits = defineEmits(['update:open', 'saveFinish'])
@@ -1118,11 +1218,14 @@
     open: boolean
     type: string
     crtMiInfo: any
+    copyCraftName: any
   }>(), {
     open: false,
     type: 'work', // work:工序工艺模块弹框  examine:审核模块弹框
-    crtMiInfo: undefined
+    crtMiInfo: undefined,
+    copyCraftName: undefined
   })
+  const GConfirmRef = ref();
   const PlanMIPrintRef = ref();
   const workTitleRef = ref()
   const drillXTableRef = ref()
@@ -1140,13 +1243,18 @@
 
   const materialTotal = ref(0);
 
-  watch(() => openFlag.value, (v) => {
+  watch(() => openFlag.value, async (v) => {
     if (v) {
       // console.log(111111)
       // console.log(props.crtMiInfo)
       if (props.crtMiInfo) {
-        buttonLoading.value = false;
-        editMi(props.crtMiInfo)
+        // 在打开弹框时，开启loading
+        buttonLoading.value = true;
+        dialogLoading.value = true
+        await editMi(props.crtMiInfo).finally(() => {
+          dialogLoading.value = false
+          buttonLoading.value = false
+        })
         checkIsUpdate(props.crtMiInfo.id)
       }
     } else {
@@ -1196,6 +1304,7 @@
       layer: undefined,
       layerIndex: undefined,
       rawMaterialType: undefined,
+      ppThickness: undefined,
       material: undefined,
       pp: undefined,
       boardThickness: undefined,
@@ -1242,6 +1351,10 @@
   const delFileIdList = ref([]);
   /*eq文件*/
   const fileList = ref<any[]>([]);
+  const camFileList = ref<any[]>([]);
+  const dialogTableLoading = ref(false);
+  const eqloading = ref(true);
+
 
   const minCuttingRate = ref(0);
   const currentSchemeIndex = ref(0);
@@ -1256,16 +1369,25 @@
     title: ''
   });
 
-  const uploadDialog = reactive<DialogOption>({
+  const EQUploadDialog = reactive<DialogOption>({
     visible: false,
     title: ''
   });
 
   const materialListQueryParam = {
-    pageNum: 1,
-    pageSize: 20,
     rawMaterialTypeName: "板材",
+    notName: "不指定板材",
+    status:'0',
+    sizeQuery:undefined,
+    params: {}
+  }
+  const sizeMaterialListQueryParam = {
+    pageNum: 1,
+    pageSize: 100,
+    rawMaterialTypeName: "板材",
+    status:'0',
     name: "不指定板材",
+    sizeQuery:undefined,
     params: {}
   }
 
@@ -1414,6 +1536,32 @@
   });
 
   const {form, rules} = toRefs(data);
+  const columnList = ref([
+  { width: '40',type: 'seq',title: '序号',align: 'center',  },
+  { width: '45',title: '新/返',field: 'orderType',align: 'center',  },
+  { width: '70',title: '批量/样品',field: 'model',align: 'center',  },
+  { width: '40',title: '加急',field: 'urgent',align: 'center',  },
+  { width: '40',title: 'EQ',field: 'eq',align: 'center',  },
+  { width: '70',title: '产品编码',field: 'commodityCode',align: 'center',  },
+  { width: '70',title: '订单数量',field: 'quantity',align: 'center',  },
+  { width: '70',title: '订单面积',field: 'area',align: 'center',  },
+  { width: '70',title: 'PCS/SET',field: 'unitedNumber',align: 'center',  },
+  { width: '50',title: '板材',field: 'materialQuality',align: 'center',  },
+  { width: '50',title: '品牌',field: 'materialBrand',align: 'center',  },
+  { width: '50',title: '级别',field: 'materialLevel',align: 'center',  },
+  { width: '50',title: '板厚',field: 'commodityThickness',align: 'center',  },
+  { width: '70',title: '外层铜厚',field: 'materialCopperOutside',align: 'center',  },
+  { width: '70',title: '内层铜厚',field: 'materialCopperInside',align: 'center',  },
+  { width: '65',title: '单片尺寸',field: 'singleLength',align: 'center',  },
+  { width: '65',title: '连片尺寸',field: 'unitedLength',align: 'center',  },
+  { width: '65',title: '连片数量',field: 'unitedNumber',align: 'center',  },
+  { width: '65',title: '联片方式',field: 'unitedWayLength',align: 'center',  },
+  { width: '65',title: '阻焊颜色',field: 'commoditySolder',align: 'center',  },
+  { width: '50',title: '字符',field: 'characterColor',align: 'center',  },
+  { width: '70',title: "金厚(u'')",field: 'goldenThickness',align: 'center',  },
+  { width: '65',title: '过孔要求',field: 'holeRequirement',align: 'center',  },
+  { width: '180',title: '操作',field: 'make',align: 'center',  },
+  ]);
 
   /*订单*/
   const currentVo = ref<any>({});
@@ -1434,46 +1582,6 @@
     await updateCustomer(saveData);
     proxy?.$modal.msgSuccess("操作成功");
     customerDialog.visible = false;
-  }
-
-  const openUpload = async (info: any) => {
-    currentVo.value = info;
-    // currentVo.value.isEqConfirm = props.type == 'work' ? props.crtMiInfo.miAssignTaskVoList.find(vo=> info.id == vo.saleOrderId)?.isEqConfirm : orderList.value.find(vo=>vo.id == info.id)?.isEqConfirm;
-    getEqFileList();
-    uploadDialog.visible = true;
-    uploadDialog.title = "EQ文件";
-  }
-
-  const getEqFileList = async ()=>{
-    const param = {
-      bizId: currentVo.value.id,
-      bizType: "12",
-      moduleCode: "2",
-    }
-    const res = await getFileList(param);
-    fileList.value = res.data;
-  }
-
-  const fileChange = (value: any) => {
-    let lastFile = value.find(vo => vo.key == value[value.length - 1].key);
-    var data = {
-      bizId:  currentVo.value.id,
-      moduleCode: "2",
-      bizType: "12",
-      type: lastFile.type,
-      size: lastFile.size,
-      name: lastFile.name,
-      key: lastFile.key,
-    }
-    addFile(data).then(()=>{
-      getEqFileList()
-    })
-  }
-
-  const delEqFile = (value: any) => {
-    const _ids = value?.id;
-    deleteFile(_ids);
-    proxy?.$modal.msgSuccess("删除成功");
   }
 
   /*switch change事件*/
@@ -1591,6 +1699,8 @@
     if (pnlInfoList.length) {
       const drillParameterList = JSON.parse(JSON.stringify(pnlInfoList[pnlInfoList.length - 1].drillParameterList)).map(v => {
         v.id = undefined
+        v.pnlId = undefined
+        v.pnlName = newPnl?.name
         v.quantity = 0
         return v
       })
@@ -1612,8 +1722,17 @@
     }
   }
 
+
+  const productionPlanRawMaterialRef =ref();
   //选择板材后的处理
-  const chooseRawMaterial: VxeTableEvents.CellDblclick<RawMaterialVO> = ({row}) => {
+  const chooseRawMaterial = () => {
+    let chekcedVal=checkedSizeList.value;
+    console.log("选择-------",chekcedVal);
+    if(!chekcedVal){
+      rawMaterialDialog.visible = false;
+      return;
+    }
+    const row=rawMaterialSizeList.value.filter(_raw=>_raw.id==checkedSizeList.value[0])[0];
     schemeList[currentSchemeIndex.value].rawMaterial = row;
     schemeList[currentSchemeIndex.value].boardLength = row.length;
     schemeList[currentSchemeIndex.value].boardWidth = row.width;
@@ -1701,7 +1820,7 @@
         });
       }
     });
-    return total ;
+    return isNaN(total) ? 0 : (total || 0);
   }
 
   //获取指定开料方案中的产品Set数
@@ -1766,10 +1885,40 @@
   }
 
   /*打开板材列表*/
-  const openDialog = (index: number) => {
+  const openDialog = async(index: number) => {
     currentSchemeIndex.value = index;
-    getMaterialList();
-    rawMaterialDialog.title = '选择板材';
+
+    //getMaterialList();
+    console.log("==========openDialog",schemeList[index]);
+    materialListQueryParam.sizeQuery= undefined;
+    //清空原有查询条件
+    rawMaterialQueryParams.value = {pageNum: 1, pageSize: 20, params: {} }
+
+     //尺寸
+    rawMaterialSizeList.value =[];
+    await getRawSizeList(sizeMaterialListQueryParam).then(res=>{
+      if(res.code == 200){
+        rawMaterialSizeList.value = res.data
+      }
+    });
+
+    checkedSizeList.value=[];
+    if(schemeList[index].rawMaterial){
+      let checkedRaw = schemeList[index].rawMaterial.id
+      checkedSizeList.value.push(checkedRaw);
+      if(checkedSizeList.value.length>0){
+        const rawChecked =rawMaterialSizeList.value.filter(_raw=>_raw.id==checkedSizeList.value[0]);
+        if(rawChecked&&rawChecked.length>0){
+          console.log(rawChecked);
+          materialListQueryParam.sizeQuery =rawChecked[0].rawSize;
+        }
+      }
+    }
+    await getPlanRawMaterialList();
+
+
+    rawMaterialDialog.title = '选择尺寸';
+
     rawMaterialDialog.visible = true;
   }
 
@@ -1802,6 +1951,16 @@
         for (var i = 0; i < schemeList.length; i++) {
           schemeList[i].pnlCountList.splice(index, 1);
         }
+        // 删除pnl后，需要更新工序中的总孔数
+        nodeInfoList.value.map((m: any) => {
+          if (m.isDrill == '1') {
+            m.requirement.map((rm: any) => {
+              if (rm.code == 'HoleNumber') {
+                rm.differPNL = rm.differPNL.filter((df: any) => df.pnlName != item.name)
+              }
+            })
+          }
+        })
         //重新设置流程节点的Requirement和Remark
         ElMessage({
           type: 'success',
@@ -1903,6 +2062,7 @@
   const cancelMi = () => {
     resetList()
     openFlag.value = false;
+    isPropName.value = true;
   }
 
   const disabledTab = ref(false)
@@ -1916,6 +2076,10 @@
       disabledTab.value = res.data
     })
   }
+
+  // 是否使用父组件传递的name值
+  const isPropName = ref(true);
+
   /** 修改按钮操作 */
   const editMi = async (row?: any) => {
     currentMiInfo.value = row;
@@ -1923,7 +2087,19 @@
     const res = await getMiInfo(row.id)
     const data = res.data;
     orderList.value = res.data.saleOrderVoList;
-    form.value.name = data.name;
+    // console.log('row',row)
+    // console.log('data',data)
+    if (!props.copyCraftName || !isPropName.value) {
+      // console.log('1查询数据的nama',data.name)
+      // console.log('2传递的nama',props.copyCraftName)
+      form.value.name = data.name;
+    }else{
+      // console.log('1传递的nama',props.copyCraftName)
+      // console.log('2查询数据的nama',data.name)
+      form.value.name = props.copyCraftName;
+      // 赋值后置空
+      isPropName.value = false;
+    }
     form.value.remark = data.remark;
     form.value.dispatchTime = undefined
     if (form.value.saleOrderVoList?.length) {
@@ -2076,6 +2252,65 @@
     })
   }
 
+  // 参数是否负数
+  function checkNegativeData () {
+    let result = {
+      status: true,
+      message: []
+    };
+    //阻焊颜色
+    let para = getPara('CuttingMaterial_System', 'BoardThickness');
+    if (para) {
+      getNodeValue(para, result);
+    }
+
+    para = getPara('CuttingMaterial_System', 'CopperThickness');
+    if (para) {
+      getNodeValue(para, result);
+    }
+
+    para = getPara('Etch', 'Etch_MinWidth');
+    if (para) {
+      getNodeValue(para, result);
+    }
+
+    para = getPara('Etch', 'Etch_MinDistance');
+    if (para) {
+      getNodeValue(para, result);
+    }
+    return result;
+  }
+  //比较参数
+  function getNodeValue(para: any, result: any) {
+    // console.log('para', para)
+    if (para) {
+      if (para.isDifferentiatePnl == '0') {
+        // 公共参数
+        if (para.defaultValue < 0 && para.isChecked == '1') {
+          result.status = false;
+          result.message.push({
+            paraName: para.name,
+            paraValue: para.defaultValue,
+            paraType: true, // true 公共参数 false 非公共参数
+          });
+        }
+      } else if (para.isDifferentiatePnl == '1') {
+        // 非公共参数
+        para.differPNL.forEach((v: any) => {
+          if (v.defaultValue < 0 && v.isChecked == '1') {
+            result.status = false;
+            result.message.push({
+              paraName: para.name,
+              paraValue: v.defaultValue,
+              paraType: false, // true 公共参数 false 非公共参数
+              paraPnlName: v.pnlName
+            });
+          }
+        })
+      }
+    }
+  }
+
   //参数检测
   function checkStatusData () {
     let result = {
@@ -2108,32 +2343,42 @@
       comparePara(para, commodityValue, result);
     }
 
+    // 'Etch', '底铜' 根据层数，少于2层，取开料铜厚 大于2层，取压合铜厚
+    para = getPara('Etch', '底铜');
+    if (para) {
+      let materialLayer = currentMiInfo.value.saleOrderVoList[0].materialLayer;
+      if (materialLayer <= 2) {
+        let cutInfo = getPara('CuttingMaterial_System', 'CopperThickness');
+        if (cutInfo) {
+          // 特殊处理，开料铜厚为非公共参数，可能有多个，并且取值的地方不一样    其他的参数如果修改为非公共，也需如下处理，并且需要提前告知，改动参数类型时，也需主动去问，以免遗漏
+          console.log(para, cutInfo, cutInfo?.defaultValue)
+          if (cutInfo.isDifferentiatePnl == '1' && cutInfo.differPNL?.length) {
+            // let tempPNL = JSON.parse(JSON.stringify(cutInfo.differPNL[0]))
+            // tempPNL.pnlName = '开料方案B'
+            // cutInfo.differPNL.push(tempPNL)
+            if (cutInfo.differPNL?.length > 1) {
+              cutInfo.differPNL.map((m: any) => {
+                comparePara(para, m?.defaultValue, result, `开料-${m.pnlName}-铜厚`);
+              })
+            } else {
+              comparePara(para, cutInfo.differPNL[0]?.defaultValue, result, `开料-铜厚`);
+            }
+          } else {
+            comparePara(para, cutInfo?.defaultValue, result, '开料-铜厚');
+          }
+        }
+      } else {
+        let cutInfo = getPara('Lamination_System', '压合铜厚');
+        if (cutInfo) {
+          comparePara(para, cutInfo?.defaultValue, result, '压合-压合铜厚');
+        }
+      }
+    }
 
-    // //表面处理
-    // para = getPara('Surface_Treatment', 'SurfaceTreatment_Type');
-    // commodityValue = getCommodityValue('surface_Treatment');
-    // comparePara(para, commodityValue, result);
-
-    // //板厚
-    // para = getPara('CuttingMaterial_System', 'BoardThickness');
-    // if (para) {
-    //   let commodityValue = getCommodityValue('boardThickness');
-    //   let paraValue = para.differPNL[0].defaultValue;
-    //   if (paraValue && commodityValue) {
-    //     if (Number(paraValue) < Number(commodityValue) - 0.2) {
-    //       result.status = false;
-    //       result.message.push({
-    //         paraName: para.name,
-    //         paraValue: paraValue,
-    //         commodityValue: commodityValue
-    //       })
-    //     }
-    //   }
-    // }
     return result;
   }
   //比较参数
-  function comparePara(para: any, commodityValue: any,result: any) {
+  function comparePara(para: any, commodityValue: any,result: any, copperMsg: string) {
     // console.log('para', para)
     if (para) {
       if (para.isDifferentiatePnl == '0') {
@@ -2144,7 +2389,9 @@
             paraName: para.name,
             paraValue: para.defaultValue,
             commodityValue: commodityValue,
+            parentWorkName: para.parentWorkName,
             paraType: true, // true 公共参数 false 非公共参数
+            copperMsg: copperMsg
           });
         }
       } else if (para.isDifferentiatePnl == '1') {
@@ -2156,8 +2403,10 @@
               paraName: para.name,
               paraValue: v.defaultValue,
               commodityValue: commodityValue,
+              parentWorkName: para.parentWorkName,
               paraType: false, // true 公共参数 false 非公共参数
-              paraPnlName: v.pnlName
+              paraPnlName: v.pnlName,
+              copperMsg: copperMsg
             });
           }
         })
@@ -2171,6 +2420,7 @@
       let paras = node.requirement;
       let para = paras.find(o => o.code == paraCode);
       if (para) {
+        para.parentWorkName = node.craftName
         return para;
       }
     }
@@ -2189,8 +2439,12 @@
         let msg = '以下参数在产品信息与工艺要求中不一致，您确认继续提交审核吗?<br/>';
         result.message.forEach(item => {
           // msg += item.paraName + '：' + item.paraType ? (item.commodityValue + '->' + item.paraValue + '<br/>') : (item.paraPnlName + ':' + item.commodityValue + '->' + item.paraValue + '<br/>');
-          msg += `${item.paraName}：${item.paraType ? (item.commodityValue + '->' + item.paraValue + '<br/>')
-          : (item.paraPnlName + '：' + item.commodityValue + '->' + item.paraValue + '<br/>')}`
+          if (item?.copperMsg) {
+            // ${item?.parentWorkName}-
+            msg += `退膜/蚀刻-${item.paraName}与${item?.copperMsg}不一致：${item.paraType ? (item.paraValue + '->' + item.commodityValue + '<br/>') : (item.paraPnlName + '：' + item.paraValue + '->' + item.commodityValue + '<br/>')}`
+          } else {
+            msg += `${item.paraName}：${item.paraType ? (item.commodityValue + '->' + item.paraValue + '<br/>') : (item.paraPnlName + '：' + item.commodityValue + '->' + item.paraValue + '<br/>')}`
+          }
         });
         // return this.$confirm(msg, "提示", {
         //   type: 'warning',
@@ -2198,7 +2452,8 @@
         // });
         ElMessageBox.confirm(msg, '提示', {
           type: 'warning',
-          dangerouslyUseHTMLString: true
+          dangerouslyUseHTMLString: true,
+          confirmButtonText: '继续提交',
         }).then(() => {
           resolve(true)
         }).catch(() => {
@@ -2269,13 +2524,153 @@
     });
   }
 
+  // 校验是否为负数 板厚，铜厚，最小线宽，最小线距
+  const isNegative = () => {
+    return new Promise((resolve: any, reject: any) => {
+      let result = checkNegativeData();
+      if (!result.status) {
+        let msg = `以下参数为负数，您确认继续操作吗?<br/>`;
+        result.message.forEach(item => {
+          // msg += item.paraName + '：' + item.paraType ? (item.commodityValue + '->' + item.paraValue + '<br/>') : (item.paraPnlName + ':' + item.commodityValue + '->' + item.paraValue + '<br/>');
+          msg += `${item.paraName}：${item.paraType ? (item.paraValue + '<br/>')
+          : (item.paraPnlName + '：' + item.paraValue + '<br/>')}`
+        });
+        // return this.$confirm(msg, "提示", {
+        //   type: 'warning',
+        //   dangerouslyUseHTMLString: true
+        // });
+        ElMessageBox.confirm(msg, '提示', {
+          type: 'warning',
+          dangerouslyUseHTMLString: true
+        }).then(() => {
+          resolve(true)
+        }).catch(() => {
+          resolve(false)
+        })
+      } else {
+        resolve(true)
+      }
+    })
+  }
+
   const dialogLoading = ref(false)
   /** 提交按钮 */
-  const submitForm = (status: string,update?:boolean) => {
+  const submitForm = async (status: string,update?:boolean) => {
+    // // 校验工序加工要求的参数是否正确，目前只校验 下拉框，时间，数字
+    // if (nodeInfoList.value?.length && (status == '2' || update)) {
+    //   let msgArr: any[] = []
+    //   nodeInfoList.value.map((item: any) => {
+    //     let tempRes: any = []
+    //     item?.requirement.map((m: any) => {
+    //       let configVo = item?.configVoList.find((f: any) => f.code == m.code) || {}
+    //       // console.log(configVo)
+    //       let tempItemWork = checkFormItemWork(m, configVo)
+    //       tempRes = tempRes.concat(tempItemWork)
+    //     })
+    //     // console.log('tempRes----', tempRes, item)
+    //     if (tempRes?.length) {
+    //       msgArr.push({
+    //         sort: item.sort,
+    //         craftName: item.craftName,
+    //         errorDetail: tempRes
+    //       })
+    //       // msgArr.push(h('div', null, [
+    //       //   h('div', {style: {'font-weight':'600'}}, `序号${item.sort}-${item.craftName}`),
+    //       //   h('div', {style: {'padding-left':'20px'}}, tempRes)
+    //       // ]))
+    //     }
+    //   })
+    //   // console.log('msgArr', msgArr)
+    //   if (msgArr?.length) {
+    //     const res = await GConfirmRef.value.openHandle({
+    //       data: msgArr,
+    //       columnList: [
+    //         {title: '工艺序号', field: 'sort', align: 'center', width: 60},
+    //         {title: '工艺名称', field: 'craftName', align: 'center', width: 100},
+    //         {title: '参数错误详情', field: 'errorDetail', align: 'center', minWidth: 120, showOverflow: false},
+    //       ]
+    //     })
+    //     // console.log(res)
+    //     if (res.cancel) {
+    //       // 由于预览使用的 await ，不返回reject会直接进入then。所以在这里使用 return new Promise 阻断
+    //       return new Promise((resolve, reject) => {
+    //         reject(false)
+    //       });
+    //     }
+    //   }
+    //   // let msgArr: any[] = []
+    //   // nodeInfoList.value.map((item: any) => {
+    //   //   let tempRes: any = []
+    //   //   item?.requirement.map((m: any) => {
+    //   //     let configVo = item?.configVoList.find((f: any) => f.code == m.code) || {}
+    //   //     console.log(configVo)
+    //   //     let tempItemWork = checkFormItemWork(m, configVo)
+    //   //     tempRes = tempRes.concat(tempItemWork).map((tm: any) => {
+    //   //       return h('div', null, tm)
+    //   //     })
+    //   //   })
+    //   //   // console.log('tempRes----', tempRes, item)
+    //   //   if (tempRes?.length) {
+    //   //     msgArr.push(h('div', null, [
+    //   //       h('div', {style: {'font-weight':'600'}}, `序号${item.sort}-${item.craftName}`),
+    //   //       h('div', {style: {'padding-left':'20px'}}, tempRes)
+    //   //     ]))
+    //   //   }
+    //   // })
+    //   // // console.log('res----', msgArr)
+    //   // if (msgArr?.length) {
+    //   //   let vnodeList: any[] = []
+    //   //   msgArr.map((m: any) => {
+    //   //     vnodeList.push(h('div', null, m))
+    //   //   })
+    //   //   await proxy?.$modal.confirm(h('div', null, vnodeList), {
+    //   //     showConfirmButton: false,
+    //   //   });
+    //   //   return;
+    //   // }
+    // }
+  if (status == '3') {
+      let res = await checkMiTestCraftByBo({planId:currentMiInfo.value.id});
+      if (!res.data) {
+        //测试工序，测试方式
+        let para = getPara('Test', '测试方式');
+        if(currentMiInfo.value?.saleOrderVoList?.length){
+          // 二次确认是否要继续
+          await proxy?.$modal.confirm('【'+currentMiInfo.value?.saleOrderVoList[0]?.commodityCode+'】存在历史订单，【测试方式】是否仍要使用【'+(para?.defaultValue || "")+'】？',{
+            confirmButtonText: '仍要使用',
+            cancelButtonText: '取消',
+          });
+        }
+      }
+    }
+    if(status == ''&& update){
+      await proxy?.$modal.confirm('同步工序至生产后，原有排产将更新工艺');
+    }
+    if(status == ''||status == '2'){
+      if(currentMiInfo.value.miAssignTaskVoList?.length && (useUserStore().nickname != currentMiInfo.value.miAssignTaskVoList[0].miUserName)){
+        await proxy?.$modal.confirm('此MI原制单人为：'+currentMiInfo.value.miAssignTaskVoList[0].miUserName+'，确认要修改吗？');
+      }
+      //兼容审核
+      else if(currentMiInfo.value.miUserName && (useUserStore().nickname != currentMiInfo.value.miUserName)){
+        await proxy?.$modal.confirm('此MI原制单人为：'+currentMiInfo.value.miUserName+'，确认要修改吗？');
+      }
+    }
     return new Promise(async (resolve, reject) => {
       const _planId=currentMiInfo.value.id;
       let check =false;
       buttonLoading.value = true;
+      // 去除多余的钻孔pnl
+      nodeInfoList.value.map((item: any) => {
+        item.miDrillDataList = item.miDrillDataList?.length ? item.miDrillDataList : []
+        let delList = deepClone(item.miDrillDataList)
+        item.miDrillDataList = item.miDrillDataList.filter((m: any) => deepClone(pnlList).findIndex((f: any) => f.id == m.pnlId) != -1)
+        // 去除 miDrillDataList 存在的，即是被删除的
+        let tempDelList = delList.filter((f: any) => item.miDrillDataList.findIndex((mf: any) => mf.pnlId == f.pnlId) == -1).map((m: any) => m.id).filter((f: any) => f)
+        // 防止为空
+        tempDelList = tempDelList?.length ? tempDelList : []
+        item.delMiDrillIdList = item.delMiDrillIdList?.length ? item.delMiDrillIdList : []
+        item.delMiDrillIdList = [...item.delMiDrillIdList, ...tempDelList]
+      })
       const submitInfo = {
         id: currentMiInfo.value.id,
         name: currentMiInfo.value.name,
@@ -2299,6 +2694,11 @@
       const res = checkValidator(submitInfo)
       if (res) {
         ElMessage.error(res)
+        buttonLoading.value = false;
+        return
+      }
+      const flagNegative = await isNegative()
+      if (!flagNegative) {
         buttonLoading.value = false;
         return
       }
@@ -2354,6 +2754,7 @@
             proxy?.$modal.msgSuccess("修改成功");
             if(""!=status){
               openFlag.value = false;
+              isPropName.value = true;
             } else {
               try {
                 dialogLoading.value = true
@@ -2420,6 +2821,7 @@
   // 点击 工艺表格，右侧出现表格
   const handleCellClick = ({row}) => {
     crruntWorkInfo.value = JSON.parse(JSON.stringify(row))
+    sortRequirment(crruntWorkInfo.value?.configVoList)
     workTitleValue.value = crruntWorkInfo.value.craftName
     // crruntWorkInfo.value.delMiDrillIdList = []
     nodeIndex.value = 0
@@ -2436,6 +2838,9 @@
     // if (crruntWorkInfo.value.miDrillDataList?.length) {
       pnlInfoList.map(item => {
           item.drillParameterList = crruntWorkInfo.value.miDrillDataList?.length ? crruntWorkInfo.value.miDrillDataList.filter(v => v.pnlId == item.id) : []
+          item.drillParameterList.sort((a,b) => {
+            return Number(a.code.slice(1)) - Number(b.code.slice(1))
+          })
       });
       nextTick(() => {
         if (drillXTableRef.value) {
@@ -2528,8 +2933,9 @@
     {title: '板厚', field: 'boardThickness', align: 'center', width: 80},
     {title: '连铜', field: 'linkCopper', align: 'center', width: 80},
     {title: '铜厚', field: 'copperThickness', align: 'center', width: 80},
+    {title: '厚度', field: 'ppThickness', align: 'center', width: 80},
     {title: '备注', field: 'remark', align: 'center'},
-    {title: '操作', field: 'make', align: 'center', minWidth: 120, showOverflow: false, fixed: 'right'},
+    {title: '操作', field: 'make', align: 'center', minWidth: 130, showOverflow: false, fixed: 'right'},
   ])
 
   const mainColumnList = ref([
@@ -2570,7 +2976,8 @@
         const num = Number(v.field.substring(6))
         let countSum = 0
         pnlInfoList[num]?.drillParameterList.forEach((el) => {
-          countSum = countSum + Number(el.quantity)
+          countSum = new Decimal(countSum).add(new Decimal(Number(el.quantity))).toNumber()
+          // countSum = countSum + Number(el.quantity)
         })
         result.push(countSum)
       } else {
@@ -2641,7 +3048,7 @@
         // 初始化数据
         if (orderList.value?.length) {
           const outsideLineTemp = nodeInfoList.value.find((item: any) => item.code == 'OutsideLine')
-          getFieldTableIndex(orderList.value, nodeData.newAddWorkRow, currentMiInfo.value.planType, schemeList, pnlList, form.value.compensation, outsideLineTemp)
+          getFieldTableIndex(orderList.value, nodeData.newAddWorkRow, currentMiInfo.value.planType, schemeList, pnlList, form.value.compensation, outsideLineTemp, [], nodeInfoList.value)
         }
         nodeData.newAddWorkRow.requirement = getCraftRequirementJson(configVoList, schemeList, pnlList, isCutting == '1')
         // console.log(nodeData.newAddWorkRow)
@@ -2694,6 +3101,9 @@
           const tempDrill = deepClone(v.drillParameterList[index])
           tempDrill?.id && crruntWorkInfo.value.delMiDrillIdList.push(tempDrill.id)
           v.drillParameterList.splice(index, 1)
+          v.drillParameterList.sort((a,b) => {
+            return Number(a.code.slice(1)) - Number(b.code.slice(1))
+          })
         }
       })
       const $drlTable = drillXTableRef.value.xTableRef
@@ -2792,6 +3202,7 @@
         layer: undefined,
         layerIndex: undefined,
         rawMaterialType: undefined,
+        ppThickness: undefined,
         material: undefined,
         pp: undefined,
         boardThickness: undefined,
@@ -2860,6 +3271,24 @@
     })
   }
 
+  // changeLayer
+  const changeLayer = (val: any) => {
+    if (nodeData.addWorkType == 6) {
+      // 压合获取板厚，铜厚
+      let { board, copper, laminationCopper } = getLamintionThickness()
+      console.log(nodeData.addWorkForm, board, copper, laminationCopper)
+
+      nodeData.addWorkForm.boardThickness = undefined
+      nodeData.addWorkForm.copperThickness = undefined
+      if (nodeData.addWorkForm.layer == '芯板') {
+        nodeData.addWorkForm.boardThickness = board
+        nodeData.addWorkForm.copperThickness = copper
+      }
+      if (nodeData.addWorkForm.layer == '铜箔') {
+        nodeData.addWorkForm.copperThickness = laminationCopper
+      }
+    }
+  }
   // 上移 下移操作
   const moveRowLaninated = (type: string, row: any) => {
     let arr: any[] = crruntWorkInfo.value.laminatedStructureList
@@ -2907,13 +3336,18 @@
           ...el
         })
       })
+      val.drillParameterList.sort((a,b) => {
+        return Number(a.code.slice(1)) - Number(b.code.slice(1))
+      })
     })
 
     const i = nodeInfoList.value.findIndex(v => v.localUid == crruntWorkInfo.value.localUid)
     if (i != -1) {
+      // console.log('pnlInfoList[0].drillParameterList', pnlInfoList[0].drillParameterList, nodeInfoList.value[i].miDrillDataList, crruntWorkInfo.value)
       nodeInfoList.value[i].delMiDrillIdList = crruntWorkInfo.value.delMiDrillIdList
       nodeInfoList.value[i].miDrillDataList = drillList
       crruntWorkInfo.value.miDrillDataList = drillList
+      getMinDirllAndTotalDirll(pnlInfoList, crruntWorkInfo.value)
     }
   }
 
@@ -2936,6 +3370,7 @@
           })
           closeAddWorkDialog()
           initFillData(nodeInfoList.value, form.value)
+          sortRequirment(nodeData.newAddWorkRow?.requirement)
         } else if (nodeData.addWorkType == 2) {
           // 生成模板
           const params = {
@@ -2962,10 +3397,13 @@
             // console.log('pnlInfoList', pnlInfoList)
             const $drlTable = drillXTableRef.value.xTableRef
             if ($drlTable) {
-              $drlTable.reloadData(pnlInfoList[0].drillParameterList)
-              $drlTable.updateData()
-              closeAddWorkDialog()
-              setMiDrillList()
+              nextTick(() => {
+                $drlTable.reloadData(pnlInfoList[0].drillParameterList)
+                $drlTable.updateData()
+                $drlTable.sort('code','asc')
+                closeAddWorkDialog()
+                setMiDrillList()
+              })
             }
             // this.$emit('confirm', this.pnlInfoList);
           }
@@ -2994,14 +3432,19 @@
               tempList.push(temp)
             })
             v.drillParameterList = tempList
+            v.drillParameterList.sort((a,b) => {
+              return Number(a.code.slice(1)) - Number(b.code.slice(1))
+            })
           })
           const $drlTable = drillXTableRef.value.xTableRef
           if ($drlTable) {
-            // console.log(pnlInfoList)
-            $drlTable.reloadData(pnlInfoList[0].drillParameterList)
-            $drlTable.updateData()
-            closeAddWorkDialog()
-            setMiDrillList()
+            nextTick(() => {
+              $drlTable.reloadData(pnlInfoList[0].drillParameterList)
+              $drlTable.updateData()
+              $drlTable.sort('code','asc')
+              closeAddWorkDialog()
+              setMiDrillList()
+            })
           }
         } else if ([6,9].includes(nodeData.addWorkType)) {
           // 新增、编辑层压
@@ -3048,6 +3491,19 @@
     // }
   }
 
+  // 压合获取板厚，铜厚
+  const getLamintionThickness = () => {
+    // 获取开料工序中的板厚和铜厚  1. 【压合】工序中，各个【芯板】的【板厚】为【开料】工序的【板厚】，【芯板】的【层压铜厚】为【开料】工序的【铜厚】
+    // 板厚
+    let board = getNodeWorkFieldValue(nodeInfoList.value, 'CuttingMaterial_System', 'BoardThickness')
+    // 铜厚
+    let copper = getNodeWorkFieldValue(nodeInfoList.value, 'CuttingMaterial_System', 'CopperThickness')
+    // 获取压合工序中的压合铜厚  1. 【压合】工序中，各个【铜箔】的铜厚为【压合】工序的【压合铜厚】
+    // 压合铜厚
+    let laminationCopper = getNodeWorkFieldValue(nodeInfoList.value, 'Lamination_System', '压合铜厚')
+    return { board, copper, laminationCopper }
+  }
+
   // 改变层压结构模板
   const changeLaminationTemplate = (id: any) => {
     crruntWorkInfo.value.laminatedStructureList.map((v: any) => {
@@ -3060,8 +3516,11 @@
       nodeInfoList.value[i].delLaminatedIdList = crruntWorkInfo.value.delLaminatedIdList
     }
 
+    // 压合获取板厚，铜厚
+    let { board, copper, laminationCopper } = getLamintionThickness()
     crruntWorkInfo.value.laminatedStructureList = nodeData.laminationTemplateList.find((v: any) => v.id == id)?.templateLayerVoList
     crruntWorkInfo.value.laminatedStructureList.map((v: any, i: number) => {
+      console.log('---', v)
       v.sort = (i + 1)
       v.id = undefined
       v.ownerId = undefined
@@ -3074,6 +3533,14 @@
       v.linkCopper = undefined
       v.copperThickness = undefined
       v.productionPlanId = form.value.id
+
+      if (v.layer == '芯板') {
+        v.boardThickness = board
+        v.copperThickness = copper
+      }
+      if (v.layer == '铜箔') {
+        v.copperThickness = laminationCopper
+      }
     })
     const $cascadTable = cascadXTableRef.value.xTableRef
     if ($cascadTable) {
@@ -3139,18 +3606,123 @@
     // console.log(nodeInfoList.value)
     closeAddWorkDialog()
     initFillData(nodeInfoList.value, form.value)
+
+    // 格式化加工要求名称中文排序
+    nodeInfoList.value.map((item: any) => {
+      sortRequirment(item?.requirement)
+    })
   }
 
+  // 提示会修改到哪些值
+  const tooltipValue = (codeList: string[] = [], subCodeList: string[] = [], crtWorkName: string) => {
+    return new Promise(async (resolve, reject) => {
+      let msgArr: any[] = []
+      nodeInfoList.value.map((item: any) => {
+        // let craftFillList = ['CuttingMaterial_System',
+        // 'Etch','负片蚀刻',
+        // 'Lamination_System',
+        // 'OutsideLine',
+        // 'GraphicElectroplating',
+        // 'Surface_Treatment']
+        // let craftChildrenFillList = ['BoardThickness','CopperThickness',
+        // 'Etch_MinWidth','Etch_MinDistance','底铜','最小线宽','最小线距',
+        // 'OutsideLine_MinWidth','OutsideLine_MinDistance','OutsideLine_Compensation',
+        // 'Electroplate_GTL','Electroplate_GBL',
+        // 'GoldenThickness']
+        let tempRes: any = []
+        // codelist有值，说明只需要判断 指定的工序，不在codelist的，直接跳过
+        if (codeList?.length && !codeList.includes(item?.code)) return;
+        // 由于 外层线路的值 改变时，会改变configVoList中未配置的值选中状态，而requirement中只会有存在的参数
+        item?.configVoList?.length && item?.configVoList.map((m: any) => {
+          // subCodeList有值，说明只需要判断 指定的工序，不在subCodeList的，直接跳过
+          if (subCodeList?.length && !subCodeList.includes(m?.code)) return;
+
+          if (['CuttingMaterial_System'].includes(item.code)) {
+            // 开料
+            if (['BoardThickness','CopperThickness'].includes(m.code)) {
+              // 板厚，铜厚
+              tempRes.push(m.name)
+            }
+          }
+          if (['OutsideLine'].includes(item.code)) {
+            // 外层线路
+            if (['OutsideLine_MinWidth','OutsideLine_MinDistance','OutsideLine_Compensation'].includes(m.code)) {
+              // 最小线宽，最小线距，补偿值
+              tempRes.push(m.name)
+            }
+          }
+          if (['GraphicElectroplating'].includes(item.code)) {
+            // 图形电镀
+            if (['Electroplate_GTL','Electroplate_GBL'].includes(m.code)) {
+              // 电镀面积(GTL)，电镀面积(GBL)
+              tempRes.push(m.name)
+            }
+          }
+          if (['Surface_Treatment'].includes(item.code)) {
+            // 表面处理
+            if (['GoldenThickness'].includes(m.code)) {
+              // 金厚
+              tempRes.push(m.name)
+            }
+          }
+          if (['Etch'].includes(item.code)) {
+            // 退膜蚀刻
+            if (['Etch_MinWidth','Etch_MinDistance','底铜'].includes(m.code)) {
+              // 最小线宽，最小线距，底铜
+              tempRes.push(m.name)
+            }
+          }
+          if (['负片蚀刻'].includes(item.code)) {
+            // 负片蚀刻
+            if (['最小线宽','最小线距'].includes(m.code)) {
+              // 最小线宽，最小线距
+              tempRes.push(m.name)
+            }
+          }
+          if (['Conductive_Film', 'Copper_Sinking'].includes(item.code)) {
+            // 导电膜、沉铜
+            if (['孔径比'].includes(m.code)) {
+              // 孔径比
+              tempRes.push(m.name)
+            }
+          }
+        })
+        if (tempRes?.length) {
+          console.log('tempRes----', tempRes, item)
+          msgArr.push(h('div', null, [
+            h('div', null, `序号${item.sort}-${item.craftName}: ${tempRes.join('/')}`),
+            // h('div', {style: {'padding-left':'20px'}}, tempRes.join('/'))
+          ]))
+        }
+      })
+      // console.log('res----', msgArr)
+      if (msgArr?.length) {
+        let vnodeList: any[] = [h('div', {style: {'font-weight':'600','margin-bottom':'10px'}}, `${(codeList?.length || subCodeList?.length) ? '保存' : '填充'}会影响以下参数，是否继续${(codeList?.length || subCodeList?.length) ? '保存' : '填充'}？`)]
+        msgArr.map((m: any) => {
+          vnodeList.push(h('div', null, m))
+        })
+
+        proxy?.$modal.confirm(h('div', null, vnodeList), {
+          cancelButtonText: `${(codeList?.length || subCodeList?.length) ? `只修改${crtWorkName}` : '取消'}`,
+          confirmButtonText: `${(codeList?.length || subCodeList?.length) ? '同步修改' : '继续填充'}`,
+        }).then(() => resolve(true)).catch(() => resolve(false));
+
+      }
+    })
+  }
   // 填充工序数据
-  const fillData = () => {
+  const fillData = async () => {
+    let isAwait = await tooltipValue()
+    // 取消时，不往后执行
+    if (!isAwait) return;
     //开料
-    var node = nodeInfoList.value.find(o => {
+    var node: any = nodeInfoList.value.find(o => {
       return o.code == 'CuttingMaterial_System';
     })
     if (node) {
-      var paras = node.requirement;
+      var paras: any = node.requirement;
       if (paras) {
-        var para = paras.find(o => {
+        var para: any = paras.find(o => {
           return o.code == 'BoardThickness';
         });
         if (para) {
@@ -3175,6 +3747,42 @@
             para.defaultValue = form.value.copperThickness;
           }
         }
+        // if (isAwait) {
+        // 填充 底铜
+        const EtchTemp = nodeInfoList.value.find((item: any) => item.code == 'Etch')
+        if (EtchTemp) {
+          getFieldTableIndex(orderList.value, EtchTemp, currentMiInfo.value.planType, schemeList, pnlList, form.value.compensation, node, ['底铜'], nodeInfoList.value)
+        }
+        if (crruntWorkInfo.value && crruntWorkInfo.value.code == 'Etch') {
+          crruntWorkInfo.value = EtchTemp
+        }
+        // }
+
+        node.requirement = paras;
+      }
+      if (crruntWorkInfo.value?.localUid == node.localUid) {
+        crruntWorkInfo.value.requirement = node.requirement
+      }
+    }
+
+    //压合
+    var node: any = nodeInfoList.value.find(o => {
+      return o.code == 'Lamination_System';
+    })
+    if (node) {
+      var paras: any = node.requirement;
+      if (paras) {
+        // if (isAwait) {
+        // 填充 底铜
+        const EtchTemp = nodeInfoList.value.find((item: any) => item.code == 'Etch')
+        if (EtchTemp) {
+          getFieldTableIndex(orderList.value, EtchTemp, currentMiInfo.value.planType, schemeList, pnlList, form.value.compensation, node, ['底铜'], nodeInfoList.value)
+        }
+        if (crruntWorkInfo.value && crruntWorkInfo.value.code == 'Etch') {
+          crruntWorkInfo.value = EtchTemp
+        }
+        // }
+
         node.requirement = paras;
       }
       if (crruntWorkInfo.value?.localUid == node.localUid) {
@@ -3217,16 +3825,39 @@
           } else {
             para.defaultValue = form.value.compensation;
           }
-          // 说明有外层线路，并且有补偿值
+          // 说明有外层线路，并且有补偿值，需要格式化退膜蚀刻、负片蚀刻
           if (orderList.value?.length) {
-            // const outsideLineTemp = nodeInfoList.value.find((item: any) => item.code == 'OutsideLine')
+            // //最小线宽
+            // let etchInfo = changeRequirementValue(orderList.value, nodeInfoList.value, node, 'Etch', 'Etch_MinWidth');
+            // //最小线距
+            // etchInfo = changeRequirementValue(orderList.value, nodeInfoList.value, node, 'Etch', 'Etch_MinDistance');
+            // if (crruntWorkInfo.value && crruntWorkInfo.value.code == 'Etch') {
+            //   crruntWorkInfo.value = etchInfo
+            // }
+            // //最小线宽
+            // let filmEtchInfo = changeRequirementValue(orderList.value, nodeInfoList.value, node, '负片蚀刻', '最小线宽');
+            // //最小线距
+            // filmEtchInfo = changeRequirementValue(orderList.value, nodeInfoList.value, node, '负片蚀刻', '最小线距');
+            // if (crruntWorkInfo.value && crruntWorkInfo.value.code == '负片蚀刻') {
+            //   crruntWorkInfo.value = filmEtchInfo
+            // }
+            // console.log('------------', etchInfo, filmEtchInfo)
+            // if (isAwait) {
             const EtchTemp = nodeInfoList.value.find((item: any) => item.code == 'Etch')
             if (EtchTemp) {
-              getFieldTableIndex(orderList.value, EtchTemp, currentMiInfo.value.planType, schemeList, pnlList, form.value.compensation, node, false)
+              getFieldTableIndex(orderList.value, EtchTemp, currentMiInfo.value.planType, schemeList, pnlList, form.value.compensation, node, ['Etch_MinWidth','Etch_MinDistance'], nodeInfoList.value)
             }
             if (crruntWorkInfo.value && crruntWorkInfo.value.code == 'Etch') {
               crruntWorkInfo.value = EtchTemp
             }
+            const FilmEtchTemp = nodeInfoList.value.find((item: any) => item.code == '负片蚀刻')
+            if (FilmEtchTemp) {
+              getFieldTableIndex(orderList.value, FilmEtchTemp, currentMiInfo.value.planType, schemeList, pnlList, form.value.compensation, node, ['最小线宽','最小线距'], nodeInfoList.value)
+            }
+            if (crruntWorkInfo.value && crruntWorkInfo.value.code == '负片蚀刻') {
+              crruntWorkInfo.value = FilmEtchTemp
+            }
+            // }
           }
         }
         node.requirement = paras;
@@ -3309,12 +3940,146 @@
     }
   }
 
+  // 保存时，动态修改其他工艺的数据
+  const refreshWorkData = (row: any, tempOldNodeInfo: any) => {
+    // 说明有外层线路，并且有补偿值，需要格式化退膜蚀刻、负片蚀刻
+    if (row) {
+      // //最小线宽
+      // let etchInfo = changeRequirementValue(orderList.value, nodeInfoList.value, row, 'Etch', 'Etch_MinWidth');
+      // //最小线距
+      // etchInfo = changeRequirementValue(orderList.value, nodeInfoList.value, row, 'Etch', 'Etch_MinDistance');
+      // //最小线宽
+      // let filmEtchInfo = changeRequirementValue(orderList.value, nodeInfoList.value, row, '负片蚀刻', '最小线宽');
+      // //最小线距
+      // filmEtchInfo = changeRequirementValue(orderList.value, nodeInfoList.value, row, '负片蚀刻', '最小线距');
+      if (tempOldNodeInfo.code == 'OutsideLine') {
+        // 当前修改工序 外层线路
+        let tempCompensation = row?.requirement.find((f: any) => f.code == 'OutsideLine_Compensation')
+        // 同步工序 退膜/蚀刻
+        const EtchTemp = nodeInfoList.value.find((item: any) => item.code == 'Etch')
+        if (EtchTemp) {
+          getFieldTableIndex(orderList.value, EtchTemp, currentMiInfo.value.planType, schemeList, pnlList, tempCompensation, row, ['Etch_MinWidth','Etch_MinDistance'], nodeInfoList.value)
+        }
+        // 同步工序 负片蚀刻
+        const FilmEtchTemp = nodeInfoList.value.find((item: any) => item.code == '负片蚀刻')
+        if (FilmEtchTemp) {
+          getFieldTableIndex(orderList.value, FilmEtchTemp, currentMiInfo.value.planType, schemeList, pnlList, tempCompensation, row, ['最小线宽','最小线距'], nodeInfoList.value)
+        }
+      }
+      if (['CuttingMaterial_System','Lamination_System'].includes(tempOldNodeInfo.code)) {
+        // 当前修改工序 开料、压合
+        let tempCompensation = row?.requirement.find((f: any) => f.code == 'OutsideLine_Compensation')
+        // 同步工序 退膜蚀刻
+        const EtchTemp = nodeInfoList.value.find((item: any) => item.code == 'Etch')
+        if (EtchTemp) {
+          getFieldTableIndex(orderList.value, EtchTemp, currentMiInfo.value.planType, schemeList, pnlList, tempCompensation, row, ['底铜'], nodeInfoList.value)
+        }
+      }
+      if (tempOldNodeInfo.code == 'Drill_System') {
+        // 当前修改工序 外层钻孔
+        let tempCompensation = row?.requirement.find((f: any) => f.code == 'OutsideLine_Compensation')
+        // 同步工序 导电膜
+        const ConductiveFilm = nodeInfoList.value.find((item: any) => item.code == 'Conductive_Film')
+        if (ConductiveFilm) {
+          getFieldTableIndex(orderList.value, ConductiveFilm, currentMiInfo.value.planType, schemeList, pnlList, tempCompensation, row, ['孔径比'], nodeInfoList.value)
+        }
+        // 同步工序 沉铜
+        const CopperSinking = nodeInfoList.value.find((item: any) => item.code == 'Copper_Sinking')
+        if (CopperSinking) {
+          getFieldTableIndex(orderList.value, CopperSinking, currentMiInfo.value.planType, schemeList, pnlList, tempCompensation, row, ['孔径比'], nodeInfoList.value)
+        }
+      }
+    }
+  }
+
   // 保存工艺参数
-  const saveCrtMiInfo = () => {
+  const saveCrtMiInfo = async () => {
     const tempWorkInfo = JSON.parse(JSON.stringify(crruntWorkInfo.value))
+    let isAwait = false
+    if (tempWorkInfo?.code) {
+      let tempCodeList = []
+      let tempSubCodeList = []
+      let crtOrderLayer = orderList.value?.length ? orderList.value[0]?.materialLayer : 0
+
+      let EtchTemp = nodeInfoList.value.find((f: any) => f?.code == 'Etch')
+      let FilmEtchTemp = nodeInfoList.value.find((f: any) => f?.code == '负片蚀刻')
+
+      let ConductiveFilm = nodeInfoList.value.find((f: any) => f?.code == 'Conductive_Film')
+      let CopperSinking = nodeInfoList.value.find((f: any) => f?.code == 'Copper_Sinking')
+      // 当前订单的层数 少于2时，底铜与开料的中的铜厚一致  否则底铜与压合铜厚一致
+      if (EtchTemp) {
+        // 有退膜蚀刻时才 提示
+        if (crtOrderLayer <= 2) {
+          if (tempWorkInfo?.code == 'CuttingMaterial_System') {
+            tempCodeList.push('Etch')
+            tempSubCodeList = tempSubCodeList.concat(['底铜'])
+          }
+        } else {
+          if (tempWorkInfo?.code == 'Lamination_System') {
+            tempCodeList.push('Etch')
+            tempSubCodeList = tempSubCodeList.concat(['底铜'])
+          }
+        }
+      }
+
+      // 外层线路
+      if (tempWorkInfo?.code == 'OutsideLine') {
+        // 修改外层线路时，会同步更新退膜时刻以及负片蚀刻中的最小线宽和最小线距
+        if (EtchTemp) tempCodeList.push('Etch')
+        if (FilmEtchTemp) tempCodeList.push('负片蚀刻')
+        if (tempCodeList?.length) {
+          tempSubCodeList = tempSubCodeList.concat(['Etch_MinWidth','Etch_MinDistance','最小线宽','最小线距'])
+        }
+      }
+
+      // 外层钻孔
+      if (tempWorkInfo?.code == 'Drill_System') {
+        // 修改外层钻孔时，会同步更新导电膜以及沉铜中的孔径比
+        if (ConductiveFilm) tempCodeList.push('Conductive_Film')
+        if (CopperSinking) tempCodeList.push('Copper_Sinking')
+        if (tempCodeList?.length) {
+          tempSubCodeList = tempSubCodeList.concat(['孔径比'])
+        }
+      }
+      if (tempCodeList?.length) {
+        isAwait = await tooltipValue(tempCodeList, tempSubCodeList, tempWorkInfo?.craftName)
+      }
+    }
+
+    // // 校验参数是否正确
+    // let res: any[] = []
+    // tempWorkInfo?.requirement.map((m: any) => {
+    //   let configVo = tempWorkInfo?.configVoList.find((f: any) => f.code == m.code) || {}
+    //   let tempRes = checkFormItemWork(m, configVo)
+    //   // console.log('tempRes----', tempRes, m)
+    //   res = res.concat(tempRes)
+    // })
+    // // console.log('res----', res)
+    // if (res?.length) {
+    //   let vnodeList: any[] = []
+    //   res.map((m: any) => {
+    //     vnodeList.push(h('div', null, m))
+    //   })
+    //   proxy?.$modal.confirm(h('div', null, vnodeList), {
+    //     showConfirmButton: false,
+    //   });
+    //   return;
+    // }
+    // 按文字排序
+    sortRequirment(tempWorkInfo?.requirement)
+
     const i = nodeInfoList.value.findIndex(v => v.localUid == tempWorkInfo.localUid)
     if (i != -1) {
+      // 保留之前的序号
+      const tempOldNodeInfo = JSON.parse(JSON.stringify(nodeInfoList.value[i]))
+      tempWorkInfo.sort = tempOldNodeInfo.sort
       nodeInfoList.value[i] = tempWorkInfo
+
+      // if (tempOldNodeInfo.code == 'OutsideLine') {
+      if (isAwait) {
+        refreshWorkData(tempWorkInfo, tempOldNodeInfo)
+      }
+      // }
       // nodeInfoList.value[i].miDrillDataList = pnlInfoList
     }
     // console.log(tempWorkInfo, nodeInfoList.value)
@@ -3651,6 +4416,200 @@
   }
   const beforeAvatarUpload = () => {
   }
+
+
+  //
+  const initPlanRawMaterialFormData: any = {
+    id: undefined,
+  }
+  const planRawMaterialData = reactive<PageData<any,any>>({
+  form: { ...initPlanRawMaterialFormData },
+  queryParams: {
+    pageNum: 1,
+    pageSize: 20,
+    params: {}
+  },
+  rules: {
+  },
+
+});
+
+  const { queryParams:rawMaterialQueryParams} = toRefs(planRawMaterialData);
+  const productionPlanRawMaterialTotal = ref(0);
+  const rawMaterialSizeList = ref();
+  const checkedSize = ref(false);
+  const checkedSizeList = ref([]);
+  const proPlanRawMaterialLoading = ref(false);
+
+  const proPlanRawMaterialColumnList = ref([
+ // { type: 'radio', fixed: 'left', align: 'center', field: "checkbox", width: '40' },
+  { title: "序号", type: 'seq', fixed: "left", field: 'index', align: 'center', width: '40' },
+  { title: '物料编码', field: 'code', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料编码' } },
+  { title: '物料名称', field: 'name', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料名称' } },
+  { title: '物料类别', field: 'categoryName', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料类别' } },
+  { title: '材质牌号', field: 'materialQuality', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入材质牌号' } },
+  //{ title: '品牌', field: 'manufacturer', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入品牌' } },
+  //{ title: '厚度', field: 'thickness', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入厚度' } },
+  //{ title: '规格型号', field: 'specification', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入规格型号' } },
+  { title: '铜厚', field: 'copperThickness', width: '60', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入铜厚' } },
+  { title: '板厚', field: 'boardThickness', width: '60', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入板厚' } },
+  { title: '长(mm)', field: 'length', width: '60', align: 'center',  filterType: 'input', filterParam: { placeholder: '' } },
+  { title: '宽(mm)', field: 'width', width: '60', align: 'center' , filterType: 'input', filterParam: { placeholder: '' } },
+  { title: '颜色', field: 'color', width: '60', align: 'center' , filterType: 'input', filterParam: { placeholder: '' } },
+  { title: '级别', field: 'level', width: '60', align: 'center' , filterType: 'input', filterParam: { placeholder: '' } },
+  { title: '可用库存数', field: 'inventoryQuantity', width: '80', align: 'center',},
+  { title: '在途数', field: 'inTransitNumber', width: '80', align: 'center',},
+]);
+
+  const searchChangeProductionPlanRawMaterial = (params?: any) => {
+  if (params) {
+    rawMaterialQueryParams.value = params
+    }
+    getPlanRawMaterialList();
+  }
+
+
+/** 查询原料列表 */
+const getPlanRawMaterialList = async () => {
+  proPlanRawMaterialLoading.value = true;
+
+  //获取板材默认参数
+  for (const key in materialListQueryParam) {
+    if (materialListQueryParam  && materialListQueryParam.hasOwnProperty(key)) {
+       rawMaterialQueryParams.value[key] = materialListQueryParam[key];
+    }
+  }
+
+  await listInvMaterial(rawMaterialQueryParams.value).then(res => {
+          rawMaterialList.value = res.rows;
+          materialTotal.value = res.total;
+    });
+  proPlanRawMaterialLoading.value = false;
+}
+
+const onChangeSize = async(raw)=>{
+  console.log(raw);
+  const _params = raw.id;
+  let querySize= true;
+  if(checkedSizeList.value.includes(_params)){
+    checkedSizeList.value=[];
+    querySize= false;
+    //清空 点击时已选择
+    rawMaterialQueryParams.value.code=undefined;
+  }else{
+    checkedSizeList.value=[];
+    checkedSizeList.value.push(_params);
+  }
+
+  if( querySize&&checkedSizeList.value.length>0){
+    materialListQueryParam.sizeQuery = rawMaterialSizeList.value.filter(_raw=>_raw.id==checkedSizeList.value[0])[0].rawSize;
+  }
+
+  //materialListQueryParam.sizeQuery = querySize&&checkedSizeList.value.length>0?.rawSize:undefined;
+  getPlanRawMaterialList();
+}
+
+//eq文件
+  import {ElMessage} from "element-plus";
+  import fileSaver from "file-saver";
+  import {downloadUrl} from '@/api/upload/index';
+
+ const eqfilesDataObj = ref<any>([]);
+  const eqfileTab = ref('产品文件');
+  const eqfileColumnList = ref([
+    {title: "序号", type: 'seq', field: 'index', align: 'center', width: '60'},
+    {title: '文件名称', field: 'name', align: 'center'},
+    {title: '缩略图', field: 'src', align: 'center', showOverflow: false},
+    {title: '文件大小', width: '80', field: 'size', align: 'center'},
+    {title: '上传人', width: '80', field: 'createByName', align: 'center'},
+    {title: '上传时间', width: '140', field: 'createTime', align: 'center'},
+    {title: '操作', width: '100', field: 'make', align: 'center'},
+  ]);
+      // 文件下载
+  const downLoadHandle = (key: string) => {
+    let loadingBox = ElLoading.service({ text: '文件下载中...', background: 'rgba(0, 0, 0, 0.7)' });
+    console.log(key)
+    downloadUrl(key).then(res => {
+      loadingBox.close()
+      if (res.code == 200) {
+        const { data } = res
+        // window.open(data[key])
+        fileSaver.saveAs(data[key])
+      }
+    }).catch((err) => {
+      loadingBox.close()
+    })
+  }
+  /** 文件 */
+  const openUpload = async (row: any) => {
+    eqloading.value= true;
+    currentVo.value = row;
+    EQUploadDialog.title = "工程文件";
+    eqfileTab.value = '产品文件';
+    eqfilesDataObj.value = [];
+    EQUploadDialog.visible = true;
+    console.log(row)
+    let query = {
+      saleOrderId: row.id,
+    }
+    eqfilesDataObj.value = await getAssignTaskProjectFile(query);
+    eqloading.value = false;
+  }
+  const fileChange = async (value: any) => {
+    eqloading.value= true;
+    let lastFile = value.find(vo => vo.key == value[value.length - 1].key);
+    var data = {
+      bizId: currentVo.value.id,
+      moduleCode: "2",
+      bizType: "12",
+      type: lastFile.type,
+      size: lastFile.size,
+      name: lastFile.name,
+      key: lastFile.key,
+    }
+    console.log(data);
+    await addFile(data);
+    let query = {
+        saleOrderId: currentVo.value.id,
+    }
+    eqfilesDataObj.value = await getAssignTaskProjectFile(query);
+    eqloading.value = false;
+  }
+  const CAMFileChange = async (value: any) => {
+    eqloading.value= true;
+    let lastFile = value.find(vo => vo.key == value[value.length - 1].key);
+    var data = {
+      bizId:  currentVo.value.id,
+      moduleCode: "2",
+      bizType: "35",
+      type: lastFile.type,
+      size: lastFile.size,
+      name: lastFile.name,
+      key: lastFile.key,
+    }
+    console.log(data);
+    await addFile(data);
+    let query = {
+        saleOrderId: currentVo.value.id,
+    }
+    eqfilesDataObj.value = await getAssignTaskProjectFile(query);
+    eqloading.value = false;
+  }
+  const eqcacelFile = () => {
+    eqfilesDataObj.value = [];
+    EQUploadDialog.visible = false;
+  }
+  const delAssignFile = async(_ids: any) => {
+    await proxy?.$modal.confirm('是否删除文件？').finally(() => loading.value = false);
+    deleteFile(_ids);
+    eqfilesDataObj.value = [];
+    let query = {
+        saleOrderId: currentVo.value.id,
+    }
+    eqloading.value= true;
+    eqfilesDataObj.value = await getAssignTaskProjectFile(query);
+    eqloading.value = false;
+  }
 </script>
 
 <style lang="scss" scoped>
@@ -3747,6 +4706,60 @@
   padding-top: 10px;
   box-sizing: border-box;
 }
+
+
+/* 页面内的样式 */
+/* 使 el-check-tag 的 primary 样式与 el-tag 的 primary 样式一致 */
+.el-check-tag[primary] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 8px;
+  font-size: 14px;
+  line-height: 1;
+  white-space: nowrap;
+  color: #0a0a0a94;
+  background-color: #ffffff;
+  border: 1px solid var(--el-color-primary-light-6);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.el-check-tag[primary].is-checked {
+  color: var(--el-tag-primary-text-color, #fff);
+  background-color: var(--el-color-primary);
+  border-color: var(--el-color-primary-light-6);
+}
+
+.el-check-tag[primary]:hover {
+  background-color: var(--el-color-primary-light-8);
+  border-color: var(--el-color-primary-light-8);
+}
+
+.el-check-tag[primary].is-checked:hover {
+  background-color: var(--el-color-primary-light-7);
+  border-color: var(--el-color-primary-light-7);
+}
+
+.el-check-tag[primary].is-disabled {
+  background-color: var(--el-color-primary-light-5);
+  border-color: var(--el-color-primary-light-5);
+  color: var(--el-color-text-secondary);
+  cursor: not-allowed;
+}
+
+/* 保持与其他状态的一致性 */
+.el-check-tag[primary] .el-icon-close {
+  margin-left: 5px;
+  font-size: 12px;
+  transform: translateY(1px);
+}
+
+.el-check-tag[primary] .el-icon-close:hover {
+  color: var(--el-color-primary-light-8);
+}
+
 </style>
 <style lang="scss">
 .mi-drawer-scoped {
@@ -3845,7 +4858,9 @@
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
-  width: 100px;
+  min-width: 100px;
+  padding-top: 3px;
+  box-sizing: border-box;
 }
 
 .pnlInfo-row .pnlInfo-row-content {

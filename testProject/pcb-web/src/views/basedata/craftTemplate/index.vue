@@ -1,16 +1,18 @@
 <template>
   <div class="p-2 xtable-page">
 
-    <el-card shadow="never" class="xtable-card">
+    <!-- <el-card shadow="never" class="xtable-card">
       <template #header>
         <el-row :gutter="10" class="mb8 global-flex flex-end">
-          <el-col :span="1.5">
+          <el-col :span="1.5"> -->
+          <div class="head-btn-flex">
             <el-button type="primary" plain icon="Plus" @click="handleAdd" >
               新增
             </el-button>
-          </el-col>
+          </div>
+          <!-- </el-col>
         </el-row>
-      </template>
+      </template> -->
 
       <XTable toolId="basedataCraftTemplate" :pageShow="true" v-model:page-size="queryParams.pageSize" height="100%" class="xtable-content"
               :loading="loading"
@@ -41,7 +43,7 @@
             </el-button>
         </template>
       </XTable>
-    </el-card>
+    <!-- </el-card> -->
     <!-- 添加或修改工艺模板对话框 -->
     <el-drawer
         v-model="drawer.visible"
@@ -159,7 +161,7 @@ const drawer = reactive<DrawerOption>({
 });
 
 const handleClose = (done: () => void) => {
-  ElMessageBox.confirm("你确定关闭该窗口吗?")
+  ElMessageBox.confirm("你确定关闭该窗口吗?", '提示')
     .then(() => {
       done();
     })

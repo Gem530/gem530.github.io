@@ -171,6 +171,7 @@ export interface MaterialInventoryVO {
      */
     price: string | number;
 
+    existSignHistory: boolean;
 }
 
 export interface MaterialInventoryForm extends BaseEntity {

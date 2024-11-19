@@ -70,9 +70,10 @@ export const delAddress = (id: string | number | Array<string | number>) => {
   });
 };
 
-export const getListAddress = () => {
+export const getListAddress = (query?: AddressQuery) => {
   return request({
     url: '/basedata/address/listAddress',
-    method: 'get'
+    method: 'get',
+    params: query
   });
 };

@@ -86,3 +86,28 @@ export const delRawMaterial = (id: string | number | Array<string | number>) => 
     method: 'delete'
   });
 };
+
+/**
+ * 查询原料库存列表
+ * @param query
+ * @returns {*}
+ */
+export const listInvMaterial = (query?: RawMaterialQuery): AxiosPromise<RawMaterialVO[]> => {
+  return request({
+    url: '/system/materialInventory/getInventoryList',
+    method: 'get',
+    params: query
+  });
+};
+/**
+ * 查询原料库存列表
+ * @param query
+ * @returns {*}
+ */
+export const getRawSizeList = (query?: RawMaterialQuery): AxiosPromise<RawMaterialVO[]> => {
+  return request({
+    url: '/system/materialInventory/getRawSizeList',
+    method: 'get',
+    params: query
+  });
+};

@@ -1,0 +1,11 @@
+{
+    "apps": [
+        {
+            "name": "mobile",
+            "script": "../server/index.mjs",
+            "env": {
+                "PORT": "3001"
+            }
+        }
+    ]
+}

@@ -8,31 +8,31 @@
             <p class="totalTitle">
               <template v-if="!props.titleLabel?.labelHide1">
                 {{ props.titleLabel && props.titleLabel.label1 ? (' ' + props.titleLabel.label1 + ':') : ' 应收金额汇总：' }} {{
-                  payablePriceTotal }}
+                  Number(parseFloat(payablePriceTotal).toString()) }}
               </template>
               <template v-if="!props.titleLabel?.labelHide2">
                 &nbsp;&nbsp;|&nbsp;&nbsp;{{ props.titleLabel && props.titleLabel.label2 ? (' ' + props.titleLabel.label2 + ':') : ' 退货金额汇总：' }} {{
-                  backPriceTotal }}
+                  Number(parseFloat(backPriceTotal).toString()) }}
               </template>
               <template v-if="!props.titleLabel?.labelHide3">
                 &nbsp;&nbsp;|&nbsp;&nbsp;{{ props.titleLabel && props.titleLabel.label3 ? (' ' + props.titleLabel.label3 + ':') : ' 折损金额汇总：' }} {{
-                  accountDiscountPriceTotal }}
+                  Number(parseFloat(accountDiscountPriceTotal).toString()) }}
               </template>
               <template v-if="!props.titleLabel?.labelHide4">
                 &nbsp;&nbsp;|&nbsp;&nbsp;{{ props.titleLabel && props.titleLabel.label4 ? (' ' + props.titleLabel.label4 + ':') : ' 其他金额汇总：' }} {{
-                  otherPriceTotal }}
+                  Number(parseFloat(otherPriceTotal).toString()) }}
               </template>
               <template v-if="!props.titleLabel?.labelHide5">
                 &nbsp;&nbsp;|&nbsp;&nbsp;{{ props.titleLabel && props.titleLabel.label5 ? (' ' + props.titleLabel.label5 + ':') : ' 对账金额汇总：' }}{{
-                  accountPriceTotal }}
+                  Number(parseFloat(accountPriceTotal).toString()) }}
               </template>
               <template v-if="!props.titleLabel?.labelHide6">
                 &nbsp;&nbsp;|&nbsp;&nbsp;{{ props.titleLabel && props.titleLabel.label6 ? (' ' + props.titleLabel.label6 + ':') : ' 回款金额汇总：' }}{{
-                  writeOffPriceTotal }}
+                  Number(parseFloat(writeOffPriceTotal).toString()) }}
               </template>
               <template v-if="!props.titleLabel?.labelHide7">
                 &nbsp;&nbsp;|&nbsp;&nbsp;{{ props.titleLabel && props.titleLabel.label7 ? (' ' + props.titleLabel.label7 + ':') : ' 剩余金额汇总：' }}{{
-                  remainPayablePriceTotal }}
+                  Number(parseFloat(remainPayablePriceTotal).toString()) }}
               </template>
 
             </p>
@@ -54,31 +54,31 @@
           :row-config="{ keyField: 'id' }" :loading="loading">
 
           <template #default-accountPrice="scope">
-            <span>{{ Number(scope.row.accountPrice?scope.row.accountPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.accountPrice?scope.row.accountPrice:0).toString()) }}</span>
           </template>
           <template #default-otherPrice="scope">
-            <span>{{ Number(scope.row.otherPrice?scope.row.otherPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.otherPrice?scope.row.otherPrice:0).toString()) }}</span>
           </template>
           <template #default-payablePrice="scope">
-            <span>{{ Number(scope.row.payablePrice?scope.row.payablePrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.payablePrice?scope.row.payablePrice:0).toString()) }}</span>
           </template>
           <template #default-remainPayablePrice="scope">
-            <span>{{ Number(scope.row.remainPayablePrice?scope.row.remainPayablePrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.remainPayablePrice?scope.row.remainPayablePrice:0).toString()) }}</span>
           </template>
           <template #default-accountDiscountPrice="scope">
-            <span>{{ Number(scope.row.accountDiscountPrice?scope.row.accountDiscountPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.accountDiscountPrice?scope.row.accountDiscountPrice:0).toString()) }}</span>
           </template>
           <template #default-backPrice="scope">
-            <span>{{ Number(scope.row.backPrice?scope.row.backPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.backPrice?scope.row.backPrice:0).toString()) }}</span>
           </template>
 
 
           <template #default-writeOffPrice="scope">
             <span v-if="scope.row.type == '3' || scope.row.type == '4'">
-              {{ Number(scope.row.payablePrice) < 0 && Number(scope.row.writeOffPrice) > 0 ? ('-' + Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2)) :
-              Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2) }}
+              {{ Number(scope.row.payablePrice) < 0 && Number(scope.row.writeOffPrice) > 0 ? ('-' + Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString())) :
+              Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString()) }}
             </span>
-            <span v-else>{{  Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2) }}</span>
+            <span v-else>{{  Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString()) }}</span>
           </template>
 
           <template #default-code="scope">
@@ -139,31 +139,31 @@
           :loading="loadingWait" :row-config="{ keyField: 'id' }">
 
           <template #default-accountPrice="scope">
-            <span>{{ Number(scope.row.accountPrice?scope.row.accountPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.accountPrice?scope.row.accountPrice:0).toString()) }}</span>
           </template>
           <template #default-otherPrice="scope">
-            <span>{{ Number(scope.row.otherPrice?scope.row.otherPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.otherPrice?scope.row.otherPrice:0).toString()) }}</span>
           </template>
           <template #default-payablePrice="scope">
-            <span>{{ Number(scope.row.payablePrice?scope.row.payablePrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.payablePrice?scope.row.payablePrice:0).toString()) }}</span>
           </template>
           <template #default-remainPayablePrice="scope">
-            <span>{{ Number(scope.row.remainPayablePrice?scope.row.remainPayablePrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.remainPayablePrice?scope.row.remainPayablePrice:0).toString()) }}</span>
           </template>
           <template #default-accountDiscountPrice="scope">
-            <span>{{ Number(scope.row.accountDiscountPrice?scope.row.accountDiscountPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.accountDiscountPrice?scope.row.accountDiscountPrice:0).toString()) }}</span>
           </template>
           <template #default-backPrice="scope">
-            <span>{{ Number(scope.row.backPrice?scope.row.backPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.backPrice?scope.row.backPrice:0).toString()) }}</span>
           </template>
 
 
           <template #default-writeOffPrice="scope">
             <span v-if="scope.row.type == '3' || scope.row.type == '4'">
-              {{ Number(scope.row.payablePrice) < 0 && Number(scope.row.writeOffPrice) > 0 ? ('-' + Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2)) :
-              Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2) }}
+              {{ Number(scope.row.payablePrice) < 0 && Number(scope.row.writeOffPrice) > 0 ? ('-' + Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString)) :
+              Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString()) }}
             </span>
-            <span v-else>{{  Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2) }}</span>
+            <span v-else>{{  Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString()) }}</span>
           </template>
 
           <template #default-code="scope">
@@ -227,31 +227,31 @@
           :checkbox-config="{ trigger: 'row', checkMethod: selectableFun }" :row-style="tableRowClassName"
           :toolId="props.toolId3?props.toolId3:'toolId3'" :row-config="{ keyField: 'id' }">
           <template #default-accountPrice="scope">
-            <span>{{ Number(scope.row.accountPrice?scope.row.accountPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.accountPrice?scope.row.accountPrice:0).toString()) }}</span>
           </template>
           <template #default-otherPrice="scope">
-            <span>{{ Number(scope.row.otherPrice?scope.row.otherPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.otherPrice?scope.row.otherPrice:0).toString()) }}</span>
           </template>
           <template #default-payablePrice="scope">
-            <span>{{ Number(scope.row.payablePrice?scope.row.payablePrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.payablePrice?scope.row.payablePrice:0).toString()) }}</span>
           </template>
           <template #default-remainPayablePrice="scope">
-            <span>{{ Number(scope.row.remainPayablePrice?scope.row.remainPayablePrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.remainPayablePrice?scope.row.remainPayablePrice:0).toString()) }}</span>
           </template>
           <template #default-accountDiscountPrice="scope">
-            <span>{{ Number(scope.row.accountDiscountPrice?scope.row.accountDiscountPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.accountDiscountPrice?scope.row.accountDiscountPrice:0).toString()) }}</span>
           </template>
           <template #default-backPrice="scope">
-            <span>{{ Number(scope.row.backPrice?scope.row.backPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.backPrice?scope.row.backPrice:0).toString()) }}</span>
           </template>
 
 
           <template #default-writeOffPrice="scope">
             <span v-if="scope.row.type == '3' || scope.row.type == '4'">
-              {{ Number(scope.row.payablePrice) < 0 && Number(scope.row.writeOffPrice) > 0 ? ('-' + Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2)) :
-              Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2) }}
+              {{ Number(scope.row.payablePrice) < 0 && Number(scope.row.writeOffPrice) > 0 ? ('-' + Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString())) :
+              Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString()) }}
             </span>
-            <span v-else>{{  Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2) }}</span>
+            <span v-else>{{  Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString()) }}</span>
           </template>
 
           <template #default-code="scope">
@@ -327,6 +327,9 @@ import { AccountOrderVO, TypeEnum, StatusEnum, HandleEnum, statusStrings } from 
 import { parseTime } from "@/utils/ruoyi";
 /**对账预览 */
 import { getReportUrl } from '@/utils/report';
+import {ref} from "vue";
+import { decryptBase64ByStr } from '@/utils/crypto'
+
 /** 对账单按钮操作 */
 let reportUrl = ref("");
 const reportDrawer = reactive<DrawerOption>({
@@ -334,12 +337,7 @@ const reportDrawer = reactive<DrawerOption>({
   visible: false,
   title: '对账单'
 });
-const accountUReportHandle = async (row: any) => {
-  reportDrawer.title = "对账单报表预览";
-  reportDrawer.visible = true;
-  reportUrl.value = getReportUrl() + `&_n=${props.accountName}&_u=file:saleAccount.ureport.xml&url=financial/accountOrder/review/${row.id}&listUrl=financial/orderSaleDetail/report/${row.id}&listUrl1=financial/accountOrder/reviewRecord/${row.id}`;
-  reportUrl.value = reportUrl.value.replace("1,4,6", "2,4,6");
-}
+
 const changeOrderList = ref([]) // 用于保存送货单数据.修改了数据之后,切换页码时,需要保留已经修改的值
 
 /**========汇总数据 ========= */
@@ -457,6 +455,7 @@ const data3 = reactive<PageData<OrderFilinOutDetailForm, OrderFilinOutDetailQuer
   }
 });
 const XTableRef = ref();
+const custTableRef = ref();
 const { queryParams: accQueryParams, form } = toRefs(data);
 const { queryParams: accQueryParams2 } = toRefs(data2);
 const { queryParams: accQueryParams3 } = toRefs(data3);
@@ -468,9 +467,17 @@ const drawerBorrow = reactive<DialogOption>({
 const radioTable = ref('对账单列表');
 const intervalCondition = ['accountMonth', 'endTime', 'accountTime', 'createTime'];
 const sortCondition = ['endTime'];
+const route = useRoute();
+/**
+ * 进入页面次数
+ */
+const isFirst = ref(0)
+/**
+ * 待办跳转参数
+ */
+const pendingParams = ref()
 
-
-const emits = defineEmits(['handle'])
+const emits = defineEmits(['handle','accountUReportHandle'])
 const props = withDefaults(defineProps<{
   open: boolean
   type: string
@@ -597,7 +604,7 @@ const getListCount = async (queryAny: any) => {
 }
 
 const toFixTwoPrice = (queryAny: any) => {
-  return queryAny ? Number(queryAny).toFixed(2) : 0;
+  return queryAny ? Number(parseFloat(queryAny).toString()) : 0;
 }
 
 
@@ -801,9 +808,54 @@ const handleExport = () => {
 }
 const columnList = ref([]);
 const columnList2 = ref([]);
+
+
+const accountUReportHandle = async (row: any) => {
+  // reportDrawer.title = "对账单报表预览";
+  // reportDrawer.visible = true;
+  // reportUrl.value = getReportUrl() + `&_n=${props.accountName}&_u=file:saleAccount.ureport.xml&url=financial/accountOrder/review/${row.id}&listUrl=financial/orderSaleDetail/report/${row.id}&listUrl1=financial/accountOrder/reviewRecord/${row.id}`;
+  // reportUrl.value = reportUrl.value.replace("1,4,6", "2,4,6");
+    emits('accountUReportHandle',row)
+}
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      let tab = params.tab ? params.tab : '对账单列表';
+      radioTable.value = tab
+      let tempColumnList = [{field: 'code', defaultValue: params.bizNo}]
+      if (tab === '对账单列表') {
+        accQueryParams.value.code = params.bizNo
+        setTimeout(() => {
+          XTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === '待审核列表') {
+        accQueryParams2.value.code = params.bizNo
+        setTimeout(() => {
+          custTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === '已审核列表') {
+        accQueryParams3.value.code = params.bizNo
+        setTimeout(() => {
+          aduitTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      }
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
 onMounted(() => {
-  getList();
-  getTaxRate();
+  // 先处理表头相关数据
   columnList.value = props.tableColumnList;
   columnList2.value = props.tableColumnList2;
   writeOffIsSupplier.value = props.writeOffIsSupplier;
@@ -812,8 +864,8 @@ onMounted(() => {
   payRecordColumnList.value = props.payRecordColumnList;
   repayRecordColumnList.value = props.repayRecordColumnList;
   defaultRepay.value = props.defaultRepay
-
-  console.log("props.writeOffTitleColumnList", props.writeOffTitleColumnList);
+  getList();
+  getTaxRate();
 });
 
 defineExpose({ radioTableHandle, cancelOrderSelect })

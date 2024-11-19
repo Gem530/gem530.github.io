@@ -1,12 +1,10 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
-      <el-tabs v-model="editableTabsValue" @tab-change="radioTableHandle()" type="border-card" class="xtable-tab">
+      <el-tabs v-model="editableTabsValue" @tab-change="radioTableHandle()" class="xtable-tab">
         <el-tab-pane label="待受理列表" :name="1">
-          <el-row :gutter="10" class="mb8" style="width: 100%;">
-            <el-col :span="24" class="global-flex flex-end">
+          <el-row class="head-btn-flex">
+              <!-- <el-button :disabled="multiple" type="primary" @click="changeDeliveryTimeAllOpen('detail')">批量修改交期</el-button> -->
               <el-button :disabled="multiple" type="primary" @click="waitCheck">受理</el-button>
-            </el-col>
           </el-row>
 
           <XTable
@@ -23,10 +21,7 @@
             :columnList="waitHandleColumnList"
             @checkbox-change="selectAllChangeEvent"
             :intervalCondition="['applyTime','actualStock','onWayStock']"
-            :checkbox-config="{
-          reserve: true,
-          showHeader:false
-         }"
+            :checkbox-config="{ reserve: true, showHeader:false }"
             :row-config="{ keyField:'id' }"
             border
             :showRefresh="true"
@@ -41,10 +36,9 @@
           </XTable>
         </el-tab-pane>
         <el-tab-pane label="待审核列表" :name="2">
-          <el-row :gutter="10" class="mb8" style="width: 100%;">
-            <el-col :span="24" class="global-flex flex-end">
+          <el-row class="head-btn-flex">
+              <!-- <el-button :disabled="!selectedOrderList.length" type="primary" @click="changeDeliveryTimeAllOpen('order')">批量修改交期</el-button> -->
               <el-button :disabled="mergeMultiple" type="primary" @click="mergeCheck">合并采购单</el-button>
-            </el-col>
           </el-row>
           <XTable
             height="100%"
@@ -80,7 +74,14 @@
                 :columnList="materialColumnList"
                 border
               >
+              <template #default-isTax="scope">
+                <span>{{ scope.row.isTax == '1' ? '是' : '否' }}</span>
+              </template>
               </XTable>
+            </template>
+
+            <template #default-isTax="scope">
+              <span>{{ scope.row.isTax == '1' ? '是' : '否' }}</span>
             </template>
 
             <template #default-status="scope">
@@ -93,6 +94,11 @@
           </XTable>
         </el-tab-pane>
         <el-tab-pane label="待提交列表" :name="3">
+          <!-- <el-row :gutter="10" class="mb8" style="width: 100%;">
+            <el-col :span="24" class="global-flex flex-end">
+              <el-button :disabled="!selectedOrderWaitList.length" type="primary" @click="changeDeliveryTimeAllOpen('orderWait')">批量修改交期</el-button>
+            </el-col>
+          </el-row> -->
           <XTable
             height="100%"
             toolId="purchasePurchaseHandleSubmit"
@@ -104,6 +110,7 @@
             :data="materialOrderList"
             :columnList="columnListWait"
             ref="materialCheckOrderRefSubmit"
+            @checkbox-change="selectOneChangeEventWait"
             :intervalCondition="['updateTime']"
             border
             :showRefresh="true"
@@ -127,9 +134,14 @@
                 :columnList="materialColumnList"
                 border
               >
+              <template #default-isTax="scope">
+                <span>{{ scope.row.isTax == '1' ? '是' : '否' }}</span>
+              </template>
               </XTable>
             </template>
-
+            <template #default-isTax="scope">
+              <span>{{ scope.row.isTax == '1' ? '是' : '否' }}</span>
+            </template>
             <template #default-status="scope">
               {{ StatusStrings[scope.row.status as keyof typeof statusStrings] }}
             </template>
@@ -141,9 +153,8 @@
           </XTable>
         </el-tab-pane>
       </el-tabs>
-    </el-card>
 
-    <el-dialog v-model="dialogMaterial.visible" :title="dialogMaterial.title" width="95%" destroy-on-close draggable>
+    <el-drawer v-model="dialogMaterial.visible" :title="dialogMaterial.title" size="95%" destroy-on-close draggable>
       <el-row>
         <el-col :span="8">
           <h3>受理人: {{ nickname }}</h3>
@@ -152,21 +163,13 @@
           <h3>受理时间: {{ currentTime }}</h3>
         </el-col>
         <el-col :span="8" class="global-flex flex-end">
-          <el-button :loading="buttonLoading" v-show="radioTable == '待受理列表'" @click="changeAddressAllOpen">批量修改收货地址</el-button>
-          <el-button :loading="buttonLoading" plain @click="dialogMaterial.visible = false"> 关闭 </el-button>
+          <el-button :loading="buttonLoading" v-show="1 == editableTabsValue" @click="changeMonthlyMethod(null)">批量设置月结方式</el-button>
+          <el-button :loading="buttonLoading" v-show="1 == editableTabsValue" @click="changeDeliveryTimeAllOpen(null)">批量设置交期</el-button>
+          <el-button :loading="buttonLoading" v-show="1 == editableTabsValue" @click="changeAddressAllOpen">批量修改收货地址</el-button>
 
-          <el-button :loading="buttonLoading" v-show="dialogMaterial.title != '订单编辑'" type="primary" @click="handleSave()">保存 </el-button>
-          <el-button :loading="buttonLoading" v-show="dialogMaterial.title === '订单编辑'" type="primary" @click="handleWaitSubmitSave()"
-            >保存
-          </el-button>
-
-          <el-button :loading="buttonLoading" v-show="dialogMaterial.title != '订单编辑'" plain @click="handleApply()">提交审核 </el-button>
-          <el-button :loading="buttonLoading" v-show="dialogMaterial.title === '订单编辑'" plain @click="handleWaitSubmitApply()"
-            >提交审核
-          </el-button>
         </el-col>
       </el-row>
-      <el-row v-if="hasDifferentAddress &&radioTable=='待受理列表'">
+      <el-row v-if="hasDifferentAddress && 1 == editableTabsValue">
         <el-col><div style="color:red;">存在收货地址不同的物料申请，请确认!</div></el-col>
       </el-row>
       <XTable
@@ -177,12 +180,50 @@
         :data="waitHandleDetailList"
         :border="true"
         :columnList="handleColumnList"
+        ref="waitHandleDetailRef"
+        toolId="waitPurchasePurchaseHandleList"
+        :footer-method="footerMethod"
+        show-footer
+        show-footer-overflow
         border
       >
+
+      <template #default-make="scope">
+        <el-button v-if="waitHandleDetailList.length > 1 && dialogMaterial.title?.includes('采购受理')" link type="primary"
+          @click="handleTabDelete(scope.row)">移除</el-button>
+      </template>
+      <template #header-modificationPrice="{ row }">
+        单价区间
+        <el-tooltip
+          class="box-item"
+          effect="dark"
+          raw-content
+          :content="`请在【供应商基价】设置【单价浮动值】`"
+        >
+          <el-icon class="tooltip-width-auto" ><QuestionFilled /></el-icon>
+        </el-tooltip>
+      </template>
+      <template #default-modificationPrice="{ row }">
+{{ (row.modificationPrice||row.modificationPrice==0)?(BigNumber(row.supplierPrice).minus(BigNumber(row.modificationPrice))<(BigNumber(0)))?0:BigNumber(row.supplierPrice).minus(BigNumber(row.modificationPrice)).toNumber():'' }}
+-{{ (row.modificationPrice||row.modificationPrice==0)?BigNumber(row.supplierPrice).plus(BigNumber(row.modificationPrice)).toNumber():'' }}
+
+      </template>
+
         <template #default-supplierId="{ row }">
           <el-select v-model="row.supplierId" filterable placeholder="请选择供应商" style="width: 100%;" @change="getSupplierPrice(row)">
             <el-option v-for="item in SupplierList" :key="item.id" :label="item.supplierName" :value="item.id"></el-option>
           </el-select>
+        </template>
+        <template #default-monthlyMethod="{ row }">
+          <el-select v-model="row.monthlyMethod" filterable placeholder="请选择月结方式" style="width: 100%;">
+            <el-option v-for="dict in monthly_method" :key="dict.value" :label="dict.label" :value="dict.label"></el-option>
+          </el-select>
+        </template>
+        <template #default-isTax="{ row }">
+            <el-select placeholder=" " suffix-icon="" class="height-light font-14" v-model="row.isTax" >
+              <el-option label="是" value="1"/>
+              <el-option label="否" value="0"/>
+            </el-select>
         </template>
         <template #default-supplierPrice="{ row }">
           <el-input-number
@@ -215,8 +256,10 @@
             style="width: 99%;"
             :controls="false"
             v-model="row.price"
-            :min="0.0001"
+            :min="(row.modificationPrice||row.modificationPrice==0)?(BigNumber(row.supplierPrice).minus(BigNumber(row.modificationPrice))<(BigNumber(0)))?0.0001:BigNumber(row.supplierPrice).minus(BigNumber(row.modificationPrice)).toNumber():0.0001"
+            :max="(row.modificationPrice||row.modificationPrice==0)?BigNumber(row.supplierPrice).plus(BigNumber(row.modificationPrice)).toNumber():99999999"
             :precision="4"
+            v-inputNumber="(value: any) => row.price = value"
           />
         </template>
         <template #default-quantity="{ row }">
@@ -228,17 +271,14 @@
             v-model="row.quantity"
             :min="0.01"
             :precision="2"
+            v-inputNumber="(value: any) => row.quantity = value"
           />
         </template>
         <template #default-applyRemark="{ row }">
           <el-input :rows="1" :max="200" type="textarea" v-model="row.applyRemark" autocomplete="off" />
         </template>
-        >
-        <template #default-totalPrice="{ row }">
-          {{ priceFormat(row.totalPrice ,4) }}
-        </template>
         <template #default-addressId="{ row }">
-          <el-select v-model="row.addressId" placeholder=" " @change="checkAddreHasDifferent" v-if="radioTable == '待受理列表'" filterable>
+          <el-select v-model="row.addressId" placeholder=" " @change="checkAddreHasDifferent" v-if="1 == editableTabsValue" filterable>
             <el-option
               v-for="item in customerAddressList"
               :key="item.id"
@@ -250,29 +290,24 @@
           <div v-else>{{  row.addressName}}</div>
         </template>
       </XTable>
-    </el-dialog>
+
+      <template #footer>
+        <el-button :loading="buttonLoading" v-show="dialogMaterial.title != '订单编辑'" type="primary" @click="handleSave()">保存 </el-button>
+        <el-button :loading="buttonLoading" v-show="dialogMaterial.title === '订单编辑'" type="primary" @click="handleWaitSubmitSave()" >保存 </el-button>
+        <el-button :loading="buttonLoading" v-show="dialogMaterial.title != '订单编辑'" plain @click="handleApply()">提交审核 </el-button>
+        <el-button :loading="buttonLoading" v-show="dialogMaterial.title === '订单编辑'" plain @click="handleWaitSubmitApply()" >提交审核 </el-button>
+        <el-button :loading="buttonLoading" plain @click="dialogMaterial.visible = false"> 关闭 </el-button>
+      </template>
+    </el-drawer>
 
     <el-dialog v-model="dialogMerge.visible" title="合并采购单选择" width="80%" draggable>
-      <el-table size="small" v-loading="loading" :data="selectedOrderList" :border="true" style="width: 100%" row-key="id">
-        <el-table-column label="采购单号" align="center" prop="code" />
-        <el-table-column label="供应商名称" align="center" prop="supplierName" />
-
-        <el-table-column label="收货地址" align="center" prop="addressName" width="380" />
-
-        <el-table-column label="备注" align="center" prop="remark" />
-
-        <el-table-column label="操作" align="center" fixed="right" width="260">
-          <template #default="scope">
+      <XTable :showHead="false" :pageShow="false" :columnList="columnListMergeOrder" v-loading="loading" :data="selectedOrderList" :border="true" style="width: 100%" row-key="id">
+          <template #default-make="scope">
             <el-button link type="primary" @click="setMain(scope.row)">设为主单</el-button>
           </template>
-        </el-table-column>
-      </el-table>
+      </XTable>
       <template #footer>
-        <div style="display: flex; justify-content: center;">
-          <span class="dialog-footer">
-            <el-button @click="dialogMerge.visible = false">取消</el-button>
-          </span>
-        </div>
+        <el-button @click="dialogMerge.visible = false">取消</el-button>
       </template>
     </el-dialog>
 
@@ -311,44 +346,62 @@
           </el-col>
         </el-row>
       </el-form>
-      <vxe-table
-        align="center"
-        border
-        ref="xTable"
-        height="500"
-        :row-config="{ isHover: true }"
-        :data="orderExamine?.orderDetailVoList"
-        :loading="loading"
+
+      <div style="height: calc(100% - 168px);">
+      <div style="flex: none;height: 50% !important;" class="ptable-card">
+      <XTable
+        :pageShow="false"
+        height="100%"
+        class="ptable-content"
+        style="height: 100%;"
         :column-config="{resizable: true}"
-        show-overflow
-        show-header-overflow
+        size="mini"
+        :data="orderExamine?.orderDetailVoList"
+        :border="true"
+        toolId="purchaseOrderDetail"
+        :columnList="orderDetailColumnList"
+        :footer-method="footerMethod"
+        show-footer
+        show-footer-overflow
+        border
       >
-        <vxe-column type="seq" title="序号" width="60"></vxe-column>
-        <vxe-column field="materialCode" title="物料编码" width="120"></vxe-column>
-        <vxe-column field="name" title="物料名称" width="80"></vxe-column>
-        <vxe-column field="categoryName" title="物料类别" width="80" sort-type="string"></vxe-column>
-        <!-- <vxe-column field="materialQuality" title="材质牌号" width="80"> </vxe-column> -->
-        <vxe-column field="materialSpecification" title="规格参数" > </vxe-column>
-        <vxe-column field="quantity" title="采购数量" width="80"></vxe-column>
-        <vxe-column field="applyRemark" title="申请备注" width="120"></vxe-column>
-        <vxe-column field="price" title="单价" width="80"></vxe-column>
-        <vxe-column field="units" title="单位" width="60"></vxe-column>
-        <vxe-column field="totalPrice" title="总价" width="100"></vxe-column>
-        <vxe-column field="deliverTime" title="要求交期" width="120"></vxe-column>
-      </vxe-table>
+
+      <template #default-isTax="scope">
+        <span>{{ scope.row.isTax == '1' ? '是' : '否' }}</span>
+      </template>
+      </XTable>
+      </div>
+      <div v-if="confirmationRecordShow" style="flex: none;height: 50% !important;" class="ptable-card">
+        <el-divider content-position="left">修改记录</el-divider>
+
+        <XTable
+        :showHead="false"
+        :pageShow="false"
+        :loading="confirmationRecordLoading"
+        height="100%"
+        class="ptable-content"
+        style="height: 100%;"
+        :column-config="{resizable: true}"
+        size="mini"
+        :data="queryRecordList"
+        :border="true"
+
+        :columnList="orderRecordColumnList"
+        border
+      >
+      </XTable>
+      </div>
+      </div>
       <template #footer>
-        <div style="display: flex; justify-content: center;">
-          <span class="dialog-footer">
-            <el-button :loading="buttonLoading" @click="dialogExamine.visible = false">取消</el-button>
-            <el-button :loading="buttonLoading" type="danger" @click="reject"> 驳回 </el-button>
-            <el-button :loading="buttonLoading" type="primary" @click="examinePass"> 通过 </el-button>
-          </span>
-        </div>
+        <el-button :loading="buttonLoading" type="danger" @click="reject"> 驳回 </el-button>
+        <el-button :loading="buttonLoading" type="primary" @click="examinePass"> 通过 </el-button>
+        <el-button :loading="buttonLoading" @click="dialogExamine.visible = false">取消</el-button>
       </template>
     </el-drawer>
 
     <el-dialog v-model="dialogChangeAddressAll.visible" :title="dialogChangeAddressAll.title" width="50%" destroy-on-close draggable>
       <XTable
+        :showHead="false"
         :pageShow="false"
         height="250"
         :column-config="{resizable: true}"
@@ -369,39 +422,107 @@
         </template>
       </XTable>
       <template #footer>
-        <div style="display: flex; justify-content: center;">
-          <span class="dialog-footer">
-            <el-button @click="dialogChangeAddressAll.visible = false">取消</el-button>
-            <el-button type="primary" @click="changAddressAllConfirm" :disabled="!addressId"> 确定 </el-button>
-          </span>
-        </div>
+        <el-button type="primary" @click="changAddressAllConfirm" :disabled="!addressId"> 确定 </el-button>
+        <el-button @click="dialogChangeAddressAll.visible = false">取消</el-button>
       </template>
     </el-dialog>
        <!-- 文件上传 -->
     <ContractFileDialog v-if="uploadVisible" v-model:show="uploadVisible" :moduleCode="moduleCode"
                         :bizType="bizType" :id="id" :biz-code="bizCode"/>
+
+    <!-- 签名列表 -->
+    <signDialog v-if="signVisible" v-model:show="signVisible" @submit="submitSign" @cancel="cancelSign" />
+
+    <!-- 设置交期 -->
+    <el-dialog v-model="dialogChangeDeliveryTimeAll.visible" :title="dialogChangeDeliveryTimeAll.title" width="20%" destroy-on-close draggable>
+
+      <el-form-item size="small" label="需求交期：" >
+          <el-date-picker
+            style="width: 100%;"
+            v-model="batchDeliveryTime"
+            type="date"
+            placeholder="选择日期时间"
+            value-format="YYYY-MM-DD 23:59:59"
+            format="YYYY-MM-DD"
+            :disabled-date="disabledDate"
+            :clearable="false"
+          />
+      </el-form-item>
+      <template #footer>
+        <el-button type="primary" @click="changeDeliveryTimeConfirm" :disabled="!batchDeliveryTime"> 确定 </el-button>
+        <el-button @click="dialogChangeDeliveryTimeAll.visible = false">取消</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 设置月结方式 -->
+    <el-dialog v-model="dialogChangeMonthlyMethodAll.visible" :title="dialogChangeMonthlyMethodAll.title" width="20%" destroy-on-close draggable>
+      <el-form-item size="small" label="月结方式：" >
+          <el-select v-model="batchMonthlyMethod" filterable placeholder="请选择月结方式" style="width: 100%;">
+            <el-option v-for="dict in monthly_method" :key="dict.value" :label="dict.label" :value="dict.label"></el-option>
+          </el-select>
+      </el-form-item>
+      <template #footer>
+        <el-button type="primary" @click="changeMonthlyMethodConfirm" :disabled="!batchMonthlyMethod"> 确定 </el-button>
+        <el-button @click="dialogChangeMonthlyMethodAll.visible = false">取消</el-button>
+      </template>
+    </el-dialog>
+
+        <!-- 提示同供应商采购单拆分 -->
+        <el-dialog v-model="splitSupplierOrder.visible" :title="splitSupplierOrder.title" width="40%" destroy-on-close draggable>
+          <span>
+            以下物料的月结方式、含税方式在同一个供应商内不一致，是否继续操作。
+          </span>
+          <XTable
+            :showHead="false"
+            :pageShow="false"
+            height="100%"
+            class="ptable-content"
+            style="height: 100%;"
+            :column-config="{resizable: true}"
+            size="mini"
+            :data="promptList"
+            :border="true"
+            toolId="splitSupplierOrderDetail"
+            :columnList="promptColumnList"
+          >
+          <template #default-isTax="scope">
+            <span>{{ scope.row.isTax == '1' ? '是' : '否' }}</span>
+          </template>
+          <template #default-supplierId="{ row }">
+            {{ SupplierList.filter(item => item.id==row.supplierId).length>0?SupplierList.filter(item => item.id==row.supplierId)[0].supplierName:'' }}
+          </template>
+          </XTable>
+          <template #footer>
+            <el-button type="primary" @click="confirmSplit" > 确定 </el-button>
+            <el-button @click="splitSupplierOrder.visible = false">取消</el-button>
+          </template>
+        </el-dialog>
+
   </div>
 </template>
 
 <script setup name="PurchaseHandle" lang="ts">
-import { getSupplierMaterialPrice ,getDefaultSupplierMaterialPrice} from '@/api/purchase/materialApply';
+import { getSupplierMaterialPrice ,getDefaultSupplierMaterialPrice,getDefaultSupplierMaterialPriceByRawIds,getSupplierMaterialPriceInfo} from '@/api/purchase/materialApply';
 import { MaterialApplyQuery, MaterialApplyForm, RawMaterialVO } from '@/api/purchase/materialApply/types';
 
-import { listMaterialOrderDetail,saveOrderDetailList ,submitOrderDetailList,checkOrderDetailList } from '@/api/purchase/materialHandleDetail';
+import { listMaterialOrderDetail,saveOrderDetailList ,submitOrderDetailList,checkOrderDetailList,updateMaterialOrderDeliveryTime ,updateMaterialApplyDeliveryTime} from '@/api/purchase/materialHandleDetail';
 import { MaterialOrderDetailVO } from '@/api/purchase/materialHandleDetail/types';
-
-import { listMaterialOrder, getMaterialOrder, modifyStatus, updateMaterialOrder , setMainOrder } from '@/api/purchase/materialHandle';
+import { operateRecordList } from '@/api/purchase/materialOrder';
+import { listMaterialOrder, getMaterialOrder, modifyStatus, updateMaterialOrder, setMainOrder, modifyDetailStatus } from '@/api/purchase/materialHandle';
 import { MaterialOrderVO,StatusStrings } from '@/api/purchase/materialHandle/types';
 import { listCustomerAddressByOwnerId } from '@/api/basedata/customerAddress';
 import { ElTable } from 'element-plus';
 import useUserStore from '@/store/modules/user';
 import { SupplierVO } from "@/api/basedata/supplier/types";
-import { listSupplier} from '@/api/basedata/supplier';
+import { listSupplier,getSupplier} from '@/api/basedata/supplier';
 import { listRawMaterialCategoryNoPage } from '@/api/basedata/rawMaterialCategory';
-import { deepClone, debounce } from '@/utils'
+import { deepClone } from '@/utils'
 import { VxeTableEvents } from 'vxe-table'
-import { clear } from 'console';
+import {RecordVO} from "@/api/purchase/record/types";
+import { decryptBase64ByStr } from '@/utils/crypto'
 
+// 查询操作记录
+const queryRecordList = ref<RecordVO[]>([]);
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
 const buttonLoading = ref(false);
@@ -445,6 +566,10 @@ const selectInventoryList = ref<RawMaterialVO[]>([]);
 //确认选中的物料
 const confirmSelectInventoryList = ref<RawMaterialVO[]>([]);
 const loading = ref(true);
+
+//是否展示确认记录
+const confirmationRecordShow = ref(false);
+const confirmationRecordLoading = ref(true);
 const addressId = ref('');
 const expandLoading = reactive({});
 
@@ -484,6 +609,23 @@ const statusList = ref([
   { label: '启用', value: "1" },
   { label: '已禁用', value: "0" },
 ]);
+const secordConfirm = ref(false);
+const columnListMergeOrder = ref([
+{ title: '采购单号',field: 'code',align: 'center',  },
+{ title: '供应商名称',field: 'supplierName',align: 'center',  },
+{ width: '380',title: '收货地址',field: 'addressName',align: 'center',  },
+{ title: '备注',field: 'remark',align: 'center',  },
+{ width: '260',title: '操作',field: 'make',fixed: 'right',align: 'center',  },
+]);
+const route = useRoute();
+/**
+ * 进入页面次数
+ */
+const isFirst = ref(0)
+/**
+ * 待办跳转参数
+ */
+const pendingParams = ref()
 /** 是否禁选 */
 const changAddressAllRadioFun = (scope:any) => {
     return scope.row.status=='1';
@@ -528,10 +670,7 @@ const radioChangeAddress =  ({row}) => {
 
 /** 打开批量修改地址弹窗 */
 const changeAddressAllOpen = async () => {
-  await getCustomerAddressList();
-  addressId.value = undefined;
- dialogChangeAddressAll.visible=true;
-
+  dialogChangeAddressAll.visible=true;
 }
 /**
  * 将待受理列表中所有的addressId改为addressId
@@ -614,6 +753,8 @@ const materialOrderList = ref<MaterialOrderVO[]>([]);
 /**选中的采购订单列表 */
 const selectedOrderList = ref<MaterialOrderVO[]>([]);
 
+/**待提交页面选中的采购订单列表 */
+const selectedOrderWaitList = ref<MaterialOrderVO[]>([]);
 
 /**审核订单明细对象 */
 const orderExamine = ref<MaterialOrderVO>();
@@ -623,13 +764,13 @@ const waitSubmit = ref<MaterialOrderVO>();
 
 
 //供应商列表
-let SupplierList: SupplierVO[] = [];
+let SupplierList = ref([]);
 /**
  * 获取供应商列表
  */
 const getSupplierList = async () => {
   const SupplierResponse: any = await listSupplier();
-  SupplierList = SupplierResponse.rows;
+  SupplierList.value = SupplierResponse.rows.filter((v:any) => v.status == '1');
 
 
 
@@ -769,16 +910,19 @@ const handleColumnList = ref([
 { title:'申请备注',field:'applyRemark',align:'center',  width:'100'},
  { title: '实际库存', field: 'actualStock', width: '80', align: 'center', },
   { title: '在途数量', field: 'onWayStock', width: '120', align: 'center',},
-{ width:'240',title:'供应商名称',field:'supplierId', align:'center', },
+{ width:'150',title:'供应商名称',field:'supplierId', align:'center', },
+{ width:'80',title:'月结方式',field:'monthlyMethod', align:'center', },
+{ width:'60',title:'是否含税',field:'isTax', align:'center', },
 { width:'100',title:'供应商基价',field:'supplierPrice', align:'center', },
 
 { title:'申请数量',field:'applyQuantity',align:'center',   width:'100'},
 { width:'125',title:'要求交期',field:'deliverTime',align:'center', },
 { title:'采购单价',field:'price',align:'center',   width:'100'},
+{ title:'单价区间',field:'modificationPrice',align:'center',   width:'100'},
 { title:'采购数量',field:'quantity',align:'center',  width:'100'},
 { title:'采购金额',field:'totalPrice',align:'center',   width:'100'},
 { title:'收货地址',field:'addressId',align:'center',  width:'240' },
-
+{ title:'操作',field:'make',align:'center', fixed: 'right',  width:'100' },
 ]);
 
 const recordCondition = ['applyTime'];
@@ -834,11 +978,13 @@ const columnList = ref([
       startParams: { placeholder: '请输入开始时间', clearable: true, type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm' },
       endParams: { placeholder: '请输入结束时间', clearable: true, type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm' },
     }},
+  { width:'60',title:'总金额',field:'totalPrice', align:'center', },
   { title: '备注', field: 'remark', align: 'center' },
-  { title: '操作', width: '260',field:'make', align: 'center',  showOverflow:false},
+  { title: '操作', width: '260',field:'make', align: 'center',fixed:'right',  showOverflow:false},
 ]);
 
 const columnListWait = ref([
+  { type: 'checkbox', align: 'center', field: "checkbox", width: '40', },
   { title:'序号',type: 'seq', align: 'center', visible: false,  width: '40', },
   { field: 'expand', align: 'center', type: "expand", width: '30' },
   { title: '采购单号', field: 'code', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入采购单号' } },
@@ -850,8 +996,10 @@ const columnListWait = ref([
       startParams: { placeholder: '请输入开始时间', clearable: true, type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm' },
       endParams: { placeholder: '请输入结束时间', clearable: true, type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm' },
     }},
+
+  { width:'60',title:'总金额',field:'totalPrice', align:'center', },
   { title: '备注', field: 'remark', align: 'center' },
-  { title: '操作', width: '260',field:'make', align: 'center',  showOverflow:false},
+  { title: '操作', width: '260',field:'make',fixed: 'right',  align: 'center',  showOverflow:false},
 ]);
 
 const materialColumnList = ref([
@@ -878,6 +1026,8 @@ const materialColumnList = ref([
   { title: '采购单价', field: 'price', align: 'center', width: '80', },
   { title: '采购金额', field: 'totalPrice', align: 'center', width: '80', },
   { title: '要求交期', field: 'deliverTime', width: '200', align: 'center', },
+  { width:'80',title:'月结方式',field:'monthlyMethod', align:'center',},
+  { width:'100',title:'是否含税',field:'isTax', align:'center', },
 ]);
 const changAddressColumnList = ref([
   { type: 'radio', align: 'center', field: "radio", width: '40', },
@@ -887,7 +1037,42 @@ const changAddressColumnList = ref([
   { title: '备注', field: 'remark', align: 'center' },
   { title: '状态', field: 'status', align: 'center', },
 ]);
+const orderDetailColumnList = ref([
+  { width:'60',title:'序号',align:'center',type:'seq'},
+  { width:'120',title:'物料编码',field:'materialCode',align:'center',  },
+  { width:'80',title:'物料名称',field:'name',align:'center',  },
+  { width:'80',title:'物料类别',field:'categoryName',align:'center',  },
+  { width:'80',title:'材质牌号',field:'materialQuality',align:'center',  },
+  { title:'规格参数',field:'materialSpecification',align:'center',  },
+  { width:'80',title:'采购数量',field:'quantity',align:'center',  },
+  { width:'120',title:'申请备注',field:'applyRemark',align:'center',  },
+  { width:'80',title:'单价',field:'price',align:'center',  },
+  { width:'60',title:'单位',field:'units',align:'center',  },
+  { width:'100',title:'总价',field:'totalPrice',align:'center',  },
+  { width:'120',title:'要求交期',field:'deliverTime',align:'center',  },
+  { width:'80',title:'月结方式',field:'monthlyMethod', align:'center',},
+  { width:'100',title:'是否含税',field:'isTax', align:'center', },
+]);
+const orderRecordColumnList = ref([
+ { width:'60',title:'序号',align:'center',type:'seq'},
+{ title:'所属单位',field:'ownerName',align:'center',  },
+{ width:'140',title:'物料名称',field:'materialName',align:'center',  },
+{ width:'80',title:'操作人',field:'createByName',align:'center',  },
+{ width:'160',title:'操作时间',field:'createTime',align:'center',  },
+{ title:'操作内容',field:'operateContent',align:'center',  },
+{ width:'160',title:'确认备注',field:'remark',align:'center',  },
+]);
 
+  //拆分提示
+  const promptList = ref([]);
+  const promptColumnList = ref([
+    { width:'60',title:'序号',align:'center',type:'seq'},
+    { width:'80',title:'物料编码',field:'materialCode',align:'center',  },
+    { width:'120',title:'物料名称',field:'name',align:'center',  },
+    { title: '供应商', field: 'supplierId', align: 'center', },
+    { width:'80',title:'月结方式',field:'monthlyMethod', align:'center', },
+    { width:'60',title:'是否含税',field:'isTax', align:'center', },
+  ]);
 
 // 切换菜单栏
 const radioTableHandle = async (params?: any) => {
@@ -937,26 +1122,34 @@ const getDefaultSupplierPrice = async () => {
 
   const res =  await getDefaultSupplierMaterialPrice(ids);
 
-
   let priceList= res.data;
   //遍历waitHandleDetailList.value，把supplierPrice设置为priceList中的supplierPrice
   waitHandleDetailList.value.forEach((item) => {
     //在priceList 中找到supplierId和rawMaterialId都相同的数据
     let basice =priceList.find(price=>price.rawMaterialId==item.rawMaterialId);
     if (basice) {
+      item.modificationPrice = basice.modificationPrice;
       item.supplierPrice = basice.price;
       item.supplierId = basice.supplierId;
       item.disabled = true;
     }
     item.quantity= item.applyQuantity
     item.price = item.supplierPrice;
-    item.totalPrice = item.price * item.quantity;
+    if(item.price&&item.quantity){
+      item.totalPrice = BigNumber(item.price).times(BigNumber(item.quantity));
+    }
     if(item.totalPrice){
-      item.totalPrice = item.totalPrice.toFixed(2);
+      item.totalPrice = item.totalPrice;
     }else{
       item.totalPrice = 0;
     }
     //  item.totalPrice = item.totalPrice.toFixed(2);
+    //供应商月结含税
+    let supMon =SupplierList.value.find(sup=>sup.id==item.supplierId);
+    if(supMon){
+      item.isTax = supMon.isTax;
+      item.monthlyMethod = supMon.monthlyMethod;
+    }
   });
 };
 
@@ -967,14 +1160,30 @@ const getDefaultSupplierPrice = async () => {
 const getSupplierPrice = async (row: any) => {
   const supplierId = row.supplierId;
   const materialId = row.rawMaterialId;
-  const res =  await getSupplierMaterialPrice(supplierId, materialId);
-  row.supplierPrice = res.data;
+  const res =  await getSupplierMaterialPriceInfo(supplierId, materialId);
+  if(res.data){
+    row.supplierPrice = res.data.price;
+    row.modificationPrice = res.data.modificationPrice;
+  }else{
+    row.supplierPrice = undefined;
+    row.modificationPrice = undefined;
+  }
   if (row.supplierPrice) {
     row.price = row.supplierPrice;
-    row.totalPrice = row.price * row.quantity;
+    //row.totalPrice = row.price * row.quantity;
+    if(row.price&&row.quantity){
+      row.totalPrice = BigNumber(row.price).times(BigNumber(row.quantity));
+    }else{
+      row.totalPrice = 0
+    }
     row.disabled = true;
   }else{
     row.disabled = false;
+  }
+  const supRes = await getSupplier(supplierId);
+  if(supRes?.code=='200'){
+    row.monthlyMethod=supRes.data?.monthlyMethod;
+    row.isTax=supRes.data?.isTax;
   }
 
 };
@@ -994,10 +1203,18 @@ const calculatePrice = async (row: any) => {
     }
 
     //计算总价
-    row.totalPrice = price * quantity;
-    row.totalPrice = row.totalPrice.toFixed(4);
+    //row.totalPrice = price * quantity;
+    if(price&&quantity){
+      row.totalPrice = BigNumber(price).times(BigNumber(quantity));
+    }else{
+      row.totalPrice = 0
+    }
+    //row.totalPrice = row.totalPrice.toFixed(4);
 
-
+    //手动重算
+    if(waitHandleDetailRef.value.xTableRef){
+      waitHandleDetailRef.value.xTableRef.updateFooter()
+    }
 };
 /**
  * 修改供应商价格
@@ -1006,9 +1223,17 @@ const calculatePrice = async (row: any) => {
 const calculateSupplierPrice = async (row: any) => {
 
   row.price = row.supplierPrice;
-  row.totalPrice = row.price * row.quantity;
-   row.totalPrice = row.totalPrice.toFixed(2);
+  //row.totalPrice = row.price * row.quantity;
+  if(row.price&&row.quantity){
+    row.totalPrice = BigNumber(row.price).times(BigNumber(row.quantity));
+  }else{
+    row.totalPrice = 0
+  }
 
+       //手动重算
+  if(waitHandleDetailRef.value.xTableRef){
+      waitHandleDetailRef.value.xTableRef.updateFooter()
+  }
   //  //获得单价
   //   const price = row.price;
   //   //获得数量
@@ -1055,13 +1280,22 @@ const waitCheck = async () => {
 
   checkOrderDetailList(waitHandleDetailList.value).then(async () => {
     getCustomerAddressList();
-
     proxy?.$modal.loading("加载中...");
     await getDefaultSupplierPrice();
     proxy?.$modal.closeLoading();
     checkAddreHasDifferent();
-
+    waitHandleDetailList.value.map((v)=>{
+      const itemSupplier =  SupplierList.value.find((vo)=> vo.id == v.supplierId)
+      if(!itemSupplier){
+        v.supplierId = undefined;
+        v.isTax = undefined;
+        v.monthlyMethod = undefined;
+      }
+    })
     dialogMaterial.title="采购受理";
+    //重置供应商含税校验
+    secordConfirm.value = false;
+    confirmCallback.value = undefined;
     dialogMaterial.visible=true;
    }).catch((err) => {
      //清除勾选
@@ -1088,16 +1322,49 @@ const checkPass = async (row?: any) => {
       if (item.supplierPrice) {
         item.disabled = true;
       }
+      const itemSupplier =  SupplierList.value.find((vo)=> vo.id == item.supplierId)
+      if(!itemSupplier){
+        item.supplierId = undefined;
+        item.isTax = undefined;
+        item.monthlyMethod = undefined;
+      }
 
+      //设置月结方式
+      // item.monthlyMethod = waitSubmit.value.monthlyMethod;
+      // item.isTax = waitSubmit.value.isTax;
     });
+
   });
 
+  //因为不确定是不是要基价逻辑，这里暂只去浮动值
+  console.log(waitHandleDetailList)
+  const ids = waitHandleDetailList.value.map(item => item.rawMaterialId);
+  if (ids.length == 0) {
+    return;
+  }
+  const res =  await getDefaultSupplierMaterialPriceByRawIds(ids);
+  let priceList= res.data;
+  //遍历waitHandleDetailList.value，把supplierPrice设置为priceList中的supplierPrice
+  waitHandleDetailList.value.forEach((item) => {
+      //在priceList 中找到supplierId和rawMaterialId都相同的数据
+  let basice =priceList.find(price=>price.rawMaterialId==item.rawMaterialId);
+  if (basice) {
+    item.modificationPrice = basice.modificationPrice;
+  }
+});
+
+
+
+  //重置供应商含税校验
+  secordConfirm.value = false;
+  confirmCallback.value = undefined;
   // await getDefaultSupplierPrice();
   proxy?.$modal.closeLoading();
    dialogMaterial.visible = true;
     dialogMaterial.title = '订单编辑';
 }
 const uploadVisible = ref(false);
+const signVisible = ref(false);
 // 文件上传类型
 const moduleCode = ref('5');
 const bizType = ref('15');
@@ -1134,10 +1401,23 @@ const setMain = async (row:any) => {
 const examineCheck = async (expandedRows: any) => {
   dialogExamine.visible =true
   loading.value = true
+  //确认记录loading
+  confirmationRecordLoading.value = true
+  //是否显示确认记录
+  confirmationRecordShow.value = false;
+  queryRecordList.value = [];
   await getMaterialOrder(expandedRows.id).then((res) => {
     orderExamine.value = res.data
     loading.value = false
   });
+  // console.log(orderExamine.value?.supplierSwitch);
+  //如果无纸化开关为1，显示确认记录
+  if(orderExamine.value?.supplierSwitch=="1"){
+      confirmationRecordShow.value = true;
+      const res = await operateRecordList({id: expandedRows.id});
+      queryRecordList.value = res.rows;
+  }
+  confirmationRecordLoading.value = false;
 
 }
 /** 审核驳回 */
@@ -1159,18 +1439,30 @@ const reject = async () => {
 }
 /** 审核通过 */
 const examinePass = async () => {
-  // 获取orderExamine的id
-  buttonLoading.value = true;
-  await modifyStatus(orderExamine.value?.id as number, "3", orderExamine.value?.supplierId as number, orderExamine.value?.supplierSwitch).finally(() => { buttonLoading.value = false; });
-   const $table = materialCheckOrderRef.value.xTableRef
-  if ($table) {
-        let order = selectedOrderList.value.filter(item => item.id == orderExamine.value?.id);
-        $table.setCheckboxRow(order, false);
+  // 无纸化开关打开则需选择签章并且没有签过
+  if(orderExamine.value?.supplierSwitch == '1' && !orderExamine.value?.existSignHistory) {
+    // 查询是否存在默认签章
+    const res = await queryUseModule({useModule: '1'});
+    // 存在则自动签名
+    if(res.data) {
+      submitSign(res.data.key, res.data.signType);
+    } else {
+      signVisible.value = true;
+    }
+  } else {
+    // 获取orderExamine的id
+    buttonLoading.value = true;
+    await modifyStatus(orderExamine.value?.id as number, "3", orderExamine.value?.supplierId as number, orderExamine.value?.supplierSwitch).finally(() => { buttonLoading.value = false; });
+    const $table = materialCheckOrderRef.value.xTableRef
+    if ($table) {
+      let order = selectedOrderList.value.filter(item => item.id == orderExamine.value?.id);
+      $table.setCheckboxRow(order, false);
     }
     selectedOrderList.value = selectedOrderList.value.filter(item => item.id != orderExamine.value?.id);
     mergeMultiple.value = !(selectedOrderList.value.length > 1);
-  await getListWaitExamine();
-  dialogExamine.visible = false
+    await getListWaitExamine();
+    dialogExamine.visible = false
+  }
 }
 
 
@@ -1209,6 +1501,15 @@ const selectOneChangeEvent: VxeTableEvents.CheckboxAll<MaterialOrderVO> = ({ che
   disableCheck();
 
 }
+//待提交列表
+const selectOneChangeEventWait: VxeTableEvents.CheckboxAll<MaterialOrderVO> = ({ checked,row }) => {
+  const $table = materialCheckOrderRefSubmit.value.xTableRef
+  if ($table) {
+    const records =$table.getCheckboxReserveRecords().concat( $table.getCheckboxRecords());
+    selectedOrderWaitList.value = records.map(item => item);
+  }
+}
+
 const disableCheck = () => {
   if(selectedOrderList&&selectedOrderList.value.length>0){
     let row = selectedOrderList.value[0];
@@ -1249,7 +1550,7 @@ const selectOne = (selection: MaterialOrderVO[], row: MaterialOrderVO) => {
     selectedOrderList.value.push(row);
   } else {
     if (!checkSelection) {
-      //删除selectInventoryList.value中包含row的数据
+      //移除selectInventoryList.value中包含row的数据
       selectedOrderList.value = selectedOrderList.value.filter(item => item.id != row.id);
     }
   }
@@ -1317,44 +1618,55 @@ const confirmReset = () => {
   confirmSelectInventoryList.value.length = 0;
 }
 
-
+const confirmCallback = ref();
 /**
  * 保存前的校验
  */
-const saveValidate = () => {
+const saveValidate = (callback) => {
   //遍历waitHandleDetailList 判断 supplierPrice 和 quantity 和 price 和 totalprice和deliverTime 是否为空
   let check = false;
   let msg = "";
   waitHandleDetailList.value.forEach((item) => {
-    if (item.supplierId == undefined) {
+    if (!item.supplierId) {
       check = true;
       msg = "供应商不能为空"
       return;
     }
     //判断item.applyNum>0
-    if (item.supplierPrice == undefined) {
+    if (!item.supplierPrice||item.supplierPrice<=0) {
       check = true;
       msg = "供应商基价不能为空"
       return;
     }
-    if (item.quantity == undefined) {
+    if (item.quantity == undefined||item.quantity<=0) {
       check = true;
       msg = "采购数量不能为空"
       return;
     }
-    if (item.price == undefined) {
+    if (item.price == undefined || item.price <= 0) {
       check = true;
-      msg = "采购单价不能为空"
+      msg = "请输入采购单价"
       return;
     }
-    if (item.deliverTime == undefined) {
+    if (!item.deliverTime) {
       check = true;
       msg = "要求交期不能为空"
       return;
     }
-    if (item.totalPrice == undefined) {
+    if (item.totalPrice == undefined || item.totalPrice <= 0) {
       check = true;
-      msg = "采购金额不能为空"
+      msg = "采购金额不能小于等于0"
+      return;
+    }
+    if (!item.monthlyMethod) {
+      check = true;
+      msg = "月结方式不能为空"
+      return;
+    }
+
+    if (!item.isTax) {
+      check = true;
+      msg = "是否含税不能为空"
       return;
     }
   });
@@ -1362,13 +1674,75 @@ const saveValidate = () => {
     proxy?.$modal.msgError(msg);
     return false;
   }
+  if(secordConfirm.value){
+    return true;
+  }
+  confirmCallback.value=callback;
+  return saveValidateSplit();
+
   return true;
+}
+//通过，确认要切割
+const confirmSplit = ()=>{
+  secordConfirm.value = true;
+  splitSupplierOrder.visible = false;
+  confirmCallback.value();
+}
+
+
+//验证是否要提示切割
+const saveValidateSplit = () => {
+    //判断是否存在同供应商多个月结方式和含税
+    const repetitionItemList=findInconsistentRecords(waitHandleDetailList.value);
+    console.log("repetitionItemList",repetitionItemList)
+    console.log("waitHandleDetailList",waitHandleDetailList.value)
+    if(repetitionItemList.length>0){
+      let repetList = waitHandleDetailList.value.filter(item => {
+          return repetitionItemList.some(item2 => item2.supplierId==item.supplierId)
+      });
+      promptList.value = deepClone(repetList);
+      splitSupplierOrder.visible = true;
+      return false;
+    }
+  return true;
+}
+
+//校验同供应商多个月结方式和含税
+function findInconsistentRecords(users:any) {
+    const userRecords = {};
+    const inconsistentRecords = <any>[];
+
+    // 遍历用户数组
+    users.forEach(user => {
+        const { supplierId, monthlyMethod, isTax } = user;
+
+        // 如果用户ID不存在，则初始化记录
+        if (!userRecords[supplierId]) {
+            userRecords[supplierId] = { supplierId, monthlyMethod, isTax };
+        } else {
+            // 检查地址和性别是否与已记录的不同
+            if (userRecords[supplierId].monthlyMethod !== monthlyMethod || userRecords[supplierId].isTax !== isTax) {
+                // 记录不一致的信息
+                inconsistentRecords.push({
+                    supplierId,
+                    original: userRecords[supplierId],
+                    current: { monthlyMethod, isTax }
+                });
+                // 更新记录，这里可以选择保留任何一个版本，根据业务需求决定
+                userRecords[supplierId] = { ...userRecords[supplierId], monthlyMethod, isTax };
+            }
+        }
+    });
+
+    return inconsistentRecords;
 }
 
 /** 待受理的 保存按钮操作 */
 const handleSave = async () => {
 
-  const flag = saveValidate();
+  const flag = saveValidate(handleSave);
+  console.log(flag);
+
   if (!flag) {
     return;
   }else{
@@ -1396,7 +1770,7 @@ const handleSave = async () => {
 /**待提交的 提价审核按钮 */
 const handleWaitSubmitApply = async () => {
 
-  const flag=saveValidate();
+  const flag=saveValidate(handleWaitSubmitApply);
   if(!flag){
     return;
   }else
@@ -1421,7 +1795,7 @@ const handleWaitSubmitApply = async () => {
 
 /** 待提交的 保存按钮操作 */
 const handleWaitSubmitSave = async () => {
-  const flag = saveValidate();
+  const flag = saveValidate(handleWaitSubmitSave);
   if (!flag) {
     return;
   } else {
@@ -1433,12 +1807,11 @@ const handleWaitSubmitSave = async () => {
   buttonLoading.value = true;
   await updateMaterialOrder(waitSubmit.value).finally(() => {buttonLoading.value = false;});
   proxy?.$modal.msgSuccess("保存成功");
-  await getListWaitSubmit();
   dialogMaterial.visible = false;
   waitHandleDetailList.value = [];
   HandleDetailList.value = [];
+  await getListWaitSubmit();
   clearWaitHandleDetailList();
-
   materialCheckOrderRefSubmit.value.xTableRef.clearRowExpand();
   }
 }
@@ -1446,7 +1819,7 @@ const handleWaitSubmitSave = async () => {
 
 /** 提交按钮操作 */
 const handleApply = async () => {
-  const flag = saveValidate();
+  const flag = saveValidate(handleApply);
   if (!flag) {
     return;
   } else {
@@ -1470,11 +1843,203 @@ const handleApply = async () => {
 
 }
 
+const submitSign = async (key : any, signType : any) => {
+  proxy?.$modal.loading("加载中...");
+  await modifyDetailStatus({
+      id: orderExamine.value?.id, status: "3", supplierId: orderExamine.value?.supplierId, code: orderExamine.value?.code,
+      supplierSwitch: orderExamine.value?.supplierSwitch, signType: signType, imageKey: key
+    }
+  ).finally(() => {
+    proxy?.$modal.closeLoading()
+  });
+  proxy?.$modal.msgSuccess("操作成功");
+  const $table = materialCheckOrderRef.value.xTableRef
+  if ($table) {
+    let order = selectedOrderList.value.filter(item => item.id == orderExamine.value?.id);
+    $table.setCheckboxRow(order, false);
+  }
+  selectedOrderList.value = selectedOrderList.value.filter(item => item.id != orderExamine.value?.id);
+  mergeMultiple.value = !(selectedOrderList.value.length > 1);
+  await getListWaitExamine();
+  dialogExamine.visible = false
+}
+
+const cancelSign = async () => {
+  signVisible.value = false;
+}
+
+import {VxeTablePropTypes} from "vxe-table";
+import { BigNumber } from 'bignumber.js';
+import {queryUseModule} from "@/api/basedata/sign";
+
+const footerMethod: VxeTablePropTypes.FooterMethod<any> = ({columns, data}) => {
+    return [
+      columns.map((column, columnIndex) => {
+        if (columnIndex === 0) {
+          return "合计";
+        }
+        if(column.field.includes("quantity")|| column.field.includes("totalPrice")){
+          return `${sumNum(data, column.field,undefined)} `;
+        }
+        return "";
+      })
+    ];
+  };
+  const sumNum = (list:any, field:any,sumField:any) => {
+    let count = 0;
+    list.forEach(item => {
+        count = BigNumber(Number(item[field])).plus(BigNumber(Number(count))).toNumber();
+    });
+      return count;
+  };
+
+  const batchDeliveryTime = ref();
+  const batchMonthlyMethod = ref();
+  const updateDeliveryTimeStr = ref();
+  const waitHandleDetailRef = ref();
+
+  const { monthly_method} = toRefs<any>(proxy?.useDict( 'monthly_method'));
+
+  const dialogChangeDeliveryTimeAll = reactive<DialogOption>({
+    visible: false,
+    title: '批量设置交期'
+  });
+  const dialogChangeMonthlyMethodAll = reactive<DialogOption>({
+    visible: false,
+    title: '批量设置月结方式'
+  });
+  const splitSupplierOrder = reactive<DialogOption>({
+    visible: false,
+    title: '确认'
+  });
+    /** 打开批量修改月结方式弹窗 */
+  const changeMonthlyMethod = async (dt:any) => {
+    batchMonthlyMethod.value=undefined;
+    dialogChangeMonthlyMethodAll.visible=true;
+  }
+
+   /** 批量修改月结方式 */
+   const changeMonthlyMethodConfirm = async () => {
+    if(batchMonthlyMethod.value){
+        waitHandleDetailList.value.forEach(item => {
+          item.monthlyMethod = batchMonthlyMethod.value;
+        });
+    }
+    dialogChangeMonthlyMethodAll.visible = false
+  }
+
+
+  /** 打开批量修改要求交期弹窗 */
+  const changeDeliveryTimeAllOpen = async (dt:any) => {
+    batchDeliveryTime.value=undefined;
+    updateDeliveryTimeStr.value=undefined;
+    updateDeliveryTimeStr.value=dt;
+    dialogChangeDeliveryTimeAll.visible=true;
+  }
+
+  /** 批量修改交期 */
+  const changeDeliveryTimeConfirm = async () => {
+    console.log("changeDeliveryTimeConfirm",updateDeliveryTimeStr.value);
+    if(batchDeliveryTime.value){
+      if(!updateDeliveryTimeStr.value){
+        waitHandleDetailList.value.forEach(item => {
+          item.deliverTime = batchDeliveryTime.value;
+        });
+        dialogChangeDeliveryTimeAll.visible = false
+        return;
+      }
+      ///** 列表批量修改交期 */
+      if(updateDeliveryTimeStr.value=='detail'&&HandleDetailList.value.length){
+        let changeList = deepClone(HandleDetailList.value);
+        let dbq={};
+        dbq.idList = changeList.map((item)=>item.id);
+        dbq.deliverTime = batchDeliveryTime.value;
+        await updateMaterialApplyDeliveryTime(dbq);
+          //清除勾选
+        const $table = waitHandleTableRef.value.xTableRef
+        if ($table) {
+          $table.clearCheckboxReserve();
+          $table.clearCheckboxRow();
+          HandleDetailList.value = [];
+        }
+        listRadio();
+      }else {
+        let dbq={};
+        if(updateDeliveryTimeStr.value=='order'&&selectedOrderList.value.length){
+          let changeList = deepClone(selectedOrderList.value);
+          dbq.idList = changeList.map((item)=>item.id);
+        } else if(updateDeliveryTimeStr.value=='orderWait'&&selectedOrderWaitList.value.length){
+          let changeList = deepClone(selectedOrderWaitList.value);
+          dbq.idList = changeList.map((item)=>item.id);
+        } else{
+          ElMessage.error(`请选择修改日期的物料`)
+        }
+        dbq.deliverTime = batchDeliveryTime.value;
+        await updateMaterialOrderDeliveryTime(dbq);
+         //清除勾选
+         const $table = materialCheckOrderRef.value.xTableRef
+          if ($table) {
+            $table.clearCheckboxReserve();
+            $table.clearCheckboxRow();
+            selectedOrderList.value = [];
+          }
+          const $table2 = materialCheckOrderRefSubmit.value.xTableRef
+          if ($table2) {
+            $table2.clearCheckboxReserve();
+            $table2.clearCheckboxRow();
+            selectedOrderWaitList.value = [];
+          }
+          listRadio();
+      }
+    }
+    dialogChangeDeliveryTimeAll.visible = false
+  }
+
+/** 移除按钮操作 */
+const handleTabDelete = async (row?: any) => {
+  const _ids = row?.id || ids.value;
+  console.log(row)
+  await proxy?.$modal.confirm('是否确认移除单号为"' + row.code + '",物料编码为：'+row.materialCode+'的数据项？').finally(() => loading.value = false);
+  waitHandleDetailList.value = waitHandleDetailList.value.filter((item: any) => item.id != _ids);
+  proxy?.$modal.msgSuccess("移除成功");
+}
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      let tab = !isNaN(Number(params.tab)) ? Number(params.tab) : 1;
+      editableTabsValue.value = tab
+      materialQueryParams.value.code = params.bizNo
+
+      let tempColumnList = [{field: 'code', defaultValue: params.bizNo}]
+      if (tab === 1) {
+        setTimeout(() => {
+          waitHandleTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === 2) {
+        setTimeout(() => {
+          materialCheckOrderRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      }
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
 onMounted(() => {
-  radioTableHandle(null);
-  updateCurrentTime()
-  getSupplierList();
-  getListRawMaterialCategorys();
+    radioTableHandle(null);
+    updateCurrentTime()
+    getSupplierList();
+    getListRawMaterialCategorys();
 });
 </script>
 

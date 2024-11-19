@@ -1,13 +1,11 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
-      <el-tabs type="border-card" v-model="editableTabsValue" @tab-change="getVoidedList()" class="xtable-tab">
+    <!-- <el-card shadow="never" class="xtable-card"> -->
+      <el-tabs v-model="editableTabsValue" @tab-change="getVoidedList()" class="xtable-tab">
         <el-tab-pane label="待审核列表" :name="1">
-          <el-row style=" justify-content: end; width: 100%;">
-            <div style="text-align: right">
-              <el-button :loading="buttonLoading" type="primary" @click="borrowingMaterialReview">借料审核</el-button>
-            </div>
-          </el-row>
+          <div class="head-btn-flex">
+            <el-button :loading="buttonLoading" type="primary" @click="borrowingMaterialReview">借料审核</el-button>
+          </div>
           <XTable toolId="purchaseMaterialBorrowWait" v-model:page-size="waitQueryParams.pageSize"
             v-model:current-page="waitQueryParams.pageNum" height="100%" class="xtable-content"
             :page-params="{ perfect: true, total: auditTotal }" :data="materialBorrowList" :columnList="columnList"
@@ -33,12 +31,10 @@
 
         </el-tab-pane>
         <el-tab-pane label="借料列表" :name="2">
-          <el-row style=" justify-content: end; width: 100%;">
-            <div style="text-align: right">
-              <el-button :loading="buttonLoading" type="primary" @click="handleBorrow">物料借入</el-button>
-              <el-button :loading="buttonLoading" type="primary" @click="handlelend">物料借出</el-button>
-            </div>
-          </el-row>
+          <div class="head-btn-flex">
+            <el-button :loading="buttonLoading" type="primary" @click="handleBorrow">物料借入</el-button>
+            <el-button :loading="buttonLoading" type="primary" @click="handlelend">物料借出</el-button>
+          </div>
 
           <XTable toolId="purchaseMaterialBorrowList1" v-model:page-size="queryParams.pageSize"
             v-model:current-page="queryParams.pageNum" height="100%" class="xtable-content"
@@ -73,7 +69,7 @@
 
         </el-tab-pane>
       </el-tabs>
-    </el-card>
+    <!-- </el-card> -->
 
     <!-- 添加或修改物料借料管理对话框 -->
     <el-dialog :title="dialog.title" v-model="dialog.visible" width="75%">
@@ -340,40 +336,6 @@
       </div> -->
       <el-container>
         <el-main style="padding:0px;overflow-x:hidden;">
-          <!-- <el-table ref="purchaseTable" v-loading="loading" :data="materialInventoryList" tooltip-effect="dark"
-            style="width: 100%;" height="450" :row-key="(row: any) => row.id" @select="handleSelectionChangePurchase"
-            @select-all="handleSelectionChangePurchase">
-            <el-table-column type="selection" width="45" :reserve-selection="true" align="center" fixed>
-            </el-table-column>
-            <el-table-column prop="materialCode" width="80" label="物料编码" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="name" width="150" label="物料名称" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="boardThickness" width="150" label="板厚" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="copperThickness" width="150" label="铜厚" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="level" width="150" label="级别" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="color" width="150" label="颜色" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="length" width="150" label="长（mm）" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="width" width="150" label="宽（mm）" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="manufacturer" width="70" label="品牌" :show-overflow-tooltip="true" align="center">
-            </el-table-column>
-            <el-table-column prop="materialQuality" label="材质牌号" align="center" min-width="100" show-overflow-tooltip>
-            </el-table-column>
-            <el-table-column prop="unit" label="单位" align="center" min-width="100" show-overflow-tooltip>
-            </el-table-column>
-            <el-table-column prop="quantity" width="110" align="right" label="实际库存">
-            </el-table-column>
-            <el-table-column prop="quantity" width="120" align="right" label="可用库存">
-            </el-table-column>
-            <el-table-column prop="inTransitNumber" width="100" align="right" label="在途数">
-            </el-table-column>
-          </el-table> -->
             <XTable
             v-loading="materialLoading"
             :pageShow="true"
@@ -399,13 +361,13 @@
         </el-main>
       </el-container>
       <template #footer>
-        <div style="display: flex; justify-content: center;">
-          <span class="dialog-footer">
-            <el-button :loading="buttonLoading" @click="dialogBorrowExamine.visible = false">关闭</el-button>
+        <!-- <div style="display: flex; justify-content: center;">
+          <span class="dialog-footer"> -->
             <el-button :loading="buttonLoading" type="primary" @click="saveRawMaterialBorrow('1', '1')">保存</el-button>
             <el-button :loading="buttonLoading" type="primary" @click="saveRawMaterialBorrow('2', '1')">提交</el-button>
-          </span>
-        </div>
+            <el-button :loading="buttonLoading" @click="dialogBorrowExamine.visible = false">关闭</el-button>
+          <!-- </span>
+        </div> -->
       </template>
     </el-drawer>
 
@@ -419,11 +381,11 @@
         </template>
       </XTable>
       <template #footer>
-        <div style="display: flex; justify-content: center;">
-          <span class="dialog-footer">
+        <!-- <div style="display: flex; justify-content: center;">
+          <span class="dialog-footer"> -->
             <el-button @click="dialogRecordExamine.visible = false">关闭</el-button>
-          </span>
-        </div>
+          <!-- </span>
+        </div> -->
       </template>
     </el-dialog>
 
@@ -534,342 +496,138 @@
       <template #footer>
         <div style="display: flex; justify-content: center;">
           <span class="dialog-footer">
-            <el-button :loading="buttonLoading" @click="dialogGiveBack.visible = false">关闭</el-button>
             <el-button :loading="buttonLoading" type="primary" @click="saveInventoryBorrow">提交</el-button>
+            <el-button :loading="buttonLoading" @click="dialogGiveBack.visible = false">关闭</el-button>
           </span>
         </div>
       </template>
     </el-drawer>
 
-    <!-- 物料借出 -->
-    <el-dialog v-model="dialogLendExamine.visible" title="物料借出" center width="90%" draggable destroy-on-close>
-      <!-- 主体 -->
-      <el-form  ref="outBorrowFormRef" border label-width="100px" :rules="borrowRules" :model="formBorrowMaterial">
-        <el-row>
-          <el-col :span="12">
-            <el-form-item size="small" label="借料人：">
-              <el-input v-model="formBorrowMaterial.borrowUserName" placeholder="借料人" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item size="small" label="联系方式：">
-              <el-input v-model="formBorrowMaterial.borrowUserPhone" placeholder="请输入联系方式" type="number" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item size="small" label="借料厂商：" prop="suppId">
-              <el-select style="width: 100%;" v-model="formBorrowMaterial.suppId" filterable placeholder="请选择"
-                @change="queryAddressName">
-                <el-option v-for="item in suppliers" :key="item.id" :label="item.supplierName" :value="item.id" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item size="small" label="借料地址："  prop="addressId">
-              <el-select v-model="formBorrowMaterial.addressId" style="width: calc(100% - 63px)" clearable
-                :collapse-tags="true" filterable placeholder="请选择借料地址">
-                <el-option v-for="item in customerAddressList" :key="item.id"
-                   :label="`${item.status==0?'(已禁用)-':''}${item.name},${item.phone},${item.address}`"
-                  :disabled="item.status==0"
-                  :value="item.id" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <el-divider content-position="left">已选物料</el-divider>
-
-      <XTable :pageShow="false" border keep-source size="mini" align="center" height="345px"  :row-config="{ height: 50 }" :scroll-x="{enabled: true}"
-        :show-footer="true" :edit-rules="outValidRules" show-overflow :loading="loading" ref="outXTableBorrowMaterial"
-        :column-config="{ resizable: true }" :data="tableDataBorrowMaterial" :columnList="outCheckedColumnList"
-        :edit-config="{ trigger: 'click', mode: 'row', autoClear: true, showStatus: true }">
-
-        <template #default-expirationDate="{ row, rowIndex }">
-          <span>{{ parseTime(row.expirationDate, '{y}-{m}-{d}') }}</span>
-        </template>
-        <template #default-productionDate="{ row, rowIndex }">
-          <span>{{ parseTime(row.productionDate, '{y}-{m}-{d}') }}</span>
-        </template>
-        <template #default-returnBorrowQuantity="{ row }">
-          <span>{{ row.returnBorrowQuantity }}</span>
-        </template>
-        <template #edit-returnBorrowQuantity="{ row }">
-          <el-input-number v-model="row.returnBorrowQuantity" :precision="0" style="width: 99%;"
-                :controls="false" :min="0" :max="row.quantity" maxlength="14" />
-        </template>
-        <template #default-remark="{ row }">
-          <span>{{ row.remark }}</span>
-        </template>
-        <template #edit-remark="{ row }">
-          <el-input v-model="row.remark"   maxlength="1000" />
-        </template>
-        <template #default-make="{ row, rowIndex }">
-          <el-button size="small" text="plain" @click="deleteRowEventBorrow(row, rowIndex)">删除</el-button>
-        </template>
-      </XTable>
-
-
-      <el-divider content-position="left">待选物料</el-divider>
-      <div style="text-align: right">
-        <el-button :loading="buttonLoading" type="primary" @click="submitPurchase">确定</el-button>
-      </div>
-      <el-container>
-        <el-main style="padding:0px;overflow-x:hidden;">
-          <el-table ref="purchaseTable" v-loading="loading" :data="materialInventoryList" tooltip-effect="dark"
-            style="width: 100%;" height="450" :row-key="(row: any) => row.id" @select="handleSelectionChangePurchase"
-            @select-all="handleSelectionChangePurchase">
-            <el-table-column type="selection" width="45" :reserve-selection="true" align="center" fixed>
-            </el-table-column>
-            <el-table-column prop="materialCode" width="80" label="物料编码" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="name" width="150" label="物料名称" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="boardThickness" width="150" label="板厚" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="copperThickness" width="150" label="铜厚" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="level" width="150" label="级别" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="color" width="150" label="颜色" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="length" width="150" label="长（mm）" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="width" width="150" label="宽（mm）" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="manufacturer" width="70" label="品牌" :show-overflow-tooltip="true" align="center">
-            </el-table-column>
-            <el-table-column prop="materialQuality" label="材质牌号" align="center" min-width="100" show-overflow-tooltip>
-            </el-table-column>
-            <el-table-column prop="unit" label="单位" align="center" min-width="100" show-overflow-tooltip>
-            </el-table-column>
-            <el-table-column prop="productionDate" label="生产日期" align="center" min-width="150" show-overflow-tooltip>
-            </el-table-column>
-            <el-table-column prop="expirationDays" width="110" align="center" label="保质期（天）"
-              :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="expirationDate" width="80" align="center" label="过期日期" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="quantity" width="110" align="right" label="实际库存">
-            </el-table-column>
-            <el-table-column prop="quantity" width="120" align="right" label="可用库存">
-            </el-table-column>
-            <el-table-column prop="inTransitNumber" width="100" align="right" label="在途数">
-            </el-table-column>
-          </el-table>
-          <pagination v-show="total > 0" :total="total" v-model:page="queryParamsCommodity.pageNum"
-            v-model:limit="queryParamsCommodity.pageSize" @pagination="choosePurchase" />
-        </el-main>
-      </el-container>
-      <template #footer>
-        <div style="display: flex; justify-content: center;">
-          <span class="dialog-footer">
-            <el-button :loading="buttonLoading" @click="dialogLendExamine.visible = false">关闭</el-button>
-            <el-button :loading="buttonLoading" type="primary" @click="saveRawMaterialBorrow('1', '2')">保存</el-button>
-            <el-button :loading="buttonLoading" type="primary" @click="saveRawMaterialBorrow('2', '2')">提交</el-button>
-          </span>
-        </div>
-      </template>
-    </el-dialog>
-
-    <!--选择物料弹窗-->
-    <el-dialog v-model="purchaseDialog.visible" :title="purchaseDialog.title" :destroy-on-close="true"
-      :close-on-click-modal="false" width="98%">
-      <el-container>
-        <el-aside width="310px" style="background-color: rgb(238, 241, 246)">
-          <div style=" font-size:medium; font-weight:600">已选物料</div>
-          <el-table :data="alreadySelectPurchase" tooltip-effect="dark" style="width: 100%;height: calc(100% - 40px);"
-            :show-header="false">
-            <el-table-column prop="materialCode" label="物料编码">
-              <template #default="scope">
-                {{ scope.row.materialCode }} - {{ scope.row.name }}
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" width="50">
-              <template #default="scope">
-                <div style="text-align:center">
-                  <el-button @click="removeDataOrder(scope.row)" type="text" size="small">X</el-button>
-                </div>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-aside>
-        <el-main style="padding:0px;overflow-x:hidden;">
-          <el-table ref="purchaseTable" v-loading="loading" :data="materialInventoryList" tooltip-effect="dark"
-            style="width: 100%;" height="450" :row-key="(row: any) => row.id"
-            >
-            <el-table-column type="selection" width="45" :reserve-selection="true" align="center" fixed>
-            </el-table-column>
-            <el-table-column prop="materialCode" width="80" label="物料编码" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="name222" width="150" label="物料名称" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="boardThickness" width="150" label="板厚" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="copperThickness" width="150" label="铜厚" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="level" width="150" label="级别" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="color" width="150" label="颜色" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="length" width="150" label="长（mm）" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="width" width="150" label="宽（mm）" align="center" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="manufacturer" width="70" label="品牌" :show-overflow-tooltip="true" align="center">
-            </el-table-column>
-            <el-table-column prop="materialQuality" label="材质牌号" align="center" min-width="100" show-overflow-tooltip>
-            </el-table-column>
-            <el-table-column prop="unit" label="单位" align="center" min-width="100" show-overflow-tooltip>
-            </el-table-column>
-            <el-table-column prop="productionDate" label="生产日期" align="center" min-width="150" show-overflow-tooltip>
-            </el-table-column>
-            <el-table-column prop="expirationDays" width="110" align="center" label="保质期（天）"
-              :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="expirationDate" width="80" align="center" label="过期日期" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="quantity" width="110" align="right" label="实际库存">
-            </el-table-column>
-            <el-table-column prop="quantity" width="120" align="right" label="可用库存">
-            </el-table-column>
-            <el-table-column prop="inTransitNumber" width="100" align="right" label="在途数">
-            </el-table-column>
-          </el-table>
-          <pagination v-show="total > 0" :total="total" v-model:page="queryParamsCommodity.pageNum"
-            v-model:limit="queryParamsCommodity.pageSize" @pagination="choosePurchase" />
-        </el-main>
-      </el-container>
-      <template #footer>
-        <div class="text-center">
-          <el-button :loading="buttonLoading" @click="purchaseDialog.visible = false">取 消</el-button>
-          <el-button :loading="buttonLoading" type="primary" @click="submitPurchase">确 定</el-button>
-        </div>
-      </template>
-    </el-dialog>
     <!--借料审核-->
     <el-dialog v-model="dialogBorrowReviewExamine.visible" title="借料审核" center width="90%" draggable>
 
       <!-- 主体 -->
-      <vxe-table border keep-source size="mini" align="center" height="545px" :row-config="{ height: 50 }"
+      <XTable border keep-source size="mini" align="center" height="545px" :row-config="{ height: 50 }"
         :show-footer="true" :edit-rules="validRules" show-overflow :loading="loading" ref="xTableBorrow"
+        :pageShow="false" :columnList="columnListBorrowProcess" toolId="borrowProcessDialogToolId"
         :column-config="{ resizable: true }" :data="tableDataBorrowList"
         :edit-config="{ trigger: 'click', mode: 'row', autoClear: false, showStatus: true }">
-        <vxe-column type="seq" title="序号"></vxe-column>
-        <vxe-column field="type" title="借料类型">
-          <template #default="scope">
+        <!-- <vxe-column type="seq" title="序号"></vxe-column>
+        <vxe-column field="type" title="借料类型"> -->
+          <template #default-type="scope">
             <dict-tag :options="material_borrow_type" :value="scope.row.type" />
           </template>
-        </vxe-column>
-        <vxe-column field="materialCode" title="物料编码">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="materialCode" title="物料编码"> -->
+          <template #edit-materialCode="{ row }">
             <el-input v-model="row.materialCode"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="materialName" title="物料名称">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="materialName" title="物料名称"> -->
+          <template #edit-materialName="{ row }">
             <el-input v-model="row.materialName"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="materialQuality" title="材质牌号">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="materialQuality" title="材质牌号"> -->
+          <template #edit-materialQuality="{ row }">
             <el-input v-model="row.materialQuality"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="boardThickness" title="板厚">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="boardThickness" title="板厚"> -->
+          <template #edit-boardThickness="{ row }">
             <el-input v-model="row.boardThickness"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="copperThickness" title="铜厚">
+        <!-- </vxe-column>
+        <vxe-column field="copperThickness" title="铜厚"> -->
           <template #edit="{ row }">
             <el-input v-model="row.copperThickness"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="color" title="颜色">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="color" title="颜色"> -->
+          <template #edit-color="{ row }">
             <el-input v-model="row.color"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="level" title="级别">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="level" title="级别"> -->
+          <template #edit-level="{ row }">
             <el-input v-model="row.level"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="length" title="长">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="length" title="长"> -->
+          <template #edit-length="{ row }">
             <el-input v-model="row.length"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="width" title="宽">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="width" title="宽"> -->
+          <template #edit-width="{ row }">
             <el-input v-model="row.width"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="manufacturer" title="品牌">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="manufacturer" title="品牌"> -->
+          <template #edit-manufacturer="{ row }">
             <el-input v-model="row.manufacturer"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="storageName" title="存货仓">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="storageName" title="存货仓"> -->
+          <template #edit-storageName="{ row }">
             <el-input v-model="row.storageName"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="inventoryQuantity" title="库存数">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="inventoryQuantity" title="库存数"> -->
+          <template #edit-inventoryQuantity="{ row }">
             <el-input v-model="row.inventoryQuantity"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="price" title="单价" :edit-render="{ placeholder: '请点击输入' }" width="70">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="price" title="单价" :edit-render="{ placeholder: '请点击输入' }" width="70"> -->
+          <template #edit-price="{ row }">
             <el-input v-model="row.price" @change="totalPriceCount(row)"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="quantity" title="数量">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="quantity" title="数量"> -->
+          <template #edit-quantity="{ row }">
             <el-input v-model="row.quantity"></el-input>
           </template>
-        </vxe-column>
+        <!-- </vxe-column>
 
-        <vxe-column field="totalPrice" title="金额">
-          <template #edit="{ row }">
+        <vxe-column field="totalPrice" title="金额"> -->
+          <template #edit-totalPrice="{ row }">
             <el-input v-model="row.totalPrice"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="borrowUserName" title="借料人">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="borrowUserName" title="借料人"> -->
+          <template #edit-borrowUserName="{ row }">
             <el-input v-model="row.borrowUserName"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="borrowUserPhone" title="联系方式">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="borrowUserPhone" title="联系方式"> -->
+          <template #edit-borrowUserPhone="{ row }">
             <el-input v-model="row.borrowUserPhone"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="supplierName" title="借料供应商" width="70">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="supplierName" title="借料供应商" width="70"> -->
+          <template #edit-supplierName="{ row }">
             <el-input v-model="row.supplierName"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="addressName" title="借料供应商地址" width="90">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="addressName" title="借料供应商地址" width="90"> -->
+          <template #edit-addressName="{ row }">
             <el-input v-model="row.addressName"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column title="操作" width="70">
-          <template #default="{ row, rowIndex }">
-            <el-button size="small" text="plain" @click="deleteRowEvent(row, rowIndex)">删除</el-button>
+        <!-- </vxe-column>
+        <vxe-column title="操作" width="70"> -->
+          <template #default-make="{ row, rowIndex }">
+            <el-button size="small" link type="primary" @click="deleteRowEvent(row, rowIndex)">删除</el-button>
           </template>
-        </vxe-column>
-      </vxe-table>
+        <!-- </vxe-column> -->
+      </XTable>
       <template #footer>
-        <div style="display: flex; justify-content: center;">
-          <span class="dialog-footer">
-            <el-button :loading="buttonLoading" @click="dialogBorrowReviewExamine.visible = false">取消</el-button>
+        <!-- <div style="display: flex; justify-content: center;">
+          <span class="dialog-footer"> -->
             <el-button :loading="buttonLoading" type="danger" @click="updateRejectBorrow">驳回</el-button>
             <el-button :loading="buttonLoading" type="primary" @click="saveRejectBorrow">通过</el-button>
-          </span>
-        </div>
+            <el-button :loading="buttonLoading" @click="dialogBorrowReviewExamine.visible = false">取消</el-button>
+          <!-- </span>
+        </div> -->
       </template>
     </el-dialog>
 
@@ -890,11 +648,14 @@
           <el-input v-model="formAddress.logisticsCycle" autocomplete="off" type="number" placeholder="请输入物流周期"></el-input>
         </el-form-item>
       </el-form>
-      <div class="text-center">
-        <el-button @click="cancelAddress">取 消</el-button>
+      <div class="text-right">
         <el-button :loading="buttonLoading" type="primary" @click="submitAddress">确 定</el-button>
+        <el-button @click="cancelAddress">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!-- 库存锁定提示框 -->
+    <InventoryLock title="物料盘点提示" inventoryType="2" v-model:show="inventoryCheck" :data="inventoryRes" @close="inventoryCheck = false"/>
   </div>
 </template>
 
@@ -934,7 +695,9 @@ import { savaRawMaterialCheckDetail } from "@/api/purchase/materialCheckDetail";
 import dayjs from "dayjs";
 import { AnyAaaaRecord } from 'node:dns';
 import { VxeTableEvents } from 'vxe-table'
+import {listMaterialInventoryInfo} from "@/api/purchase/materialApply";
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
+import { decryptBase64ByStr } from '@/utils/crypto'
 
 const xTableBorrowBackMaterialRef=ref();
 const recordRef = ref();
@@ -981,7 +744,15 @@ const type =ref([
 // 新增属性
 const editableTabsValue = ref(1);
 const purchaseTable = ref<ElFormInstance>();
-
+const route = useRoute();
+/**
+ * 进入页面次数
+ */
+const isFirst = ref(0)
+/**
+ * 待办跳转参数
+ */
+const pendingParams = ref()
 //选择订单
 const handleSelectionChangePurchase = (val: MaterialInventoryVO[]) => {
   alreadySelectPurchase.value = val;
@@ -1618,6 +1389,32 @@ const outCheckedColumnList = ref([
   { title: '备注', width: '150', field: 'remark', align: 'center', editRender: {} },
   { title: '操作', width: '120', field: 'make', align: 'center' },
 ]);
+
+// 借料审核弹框表格
+const columnListBorrowProcess = ref([
+{ type: 'seq',title: '序号',align: 'center', fixed: 'left' },
+{ title: '借料类型',field: 'type',align: 'center',  },
+{ title: '物料编码',field: 'materialCode',align: 'center',  },
+{ title: '物料名称',field: 'materialName',align: 'center',  },
+{ title: '材质牌号',field: 'materialQuality',align: 'center',  },
+{ title: '板厚',field: 'boardThickness',align: 'center',  },
+{ title: '铜厚',field: 'copperThickness',align: 'center',  },
+{ title: '颜色',field: 'color',align: 'center',  },
+{ title: '级别',field: 'level',align: 'center',  },
+{ title: '长',field: 'length',align: 'center',  },
+{ title: '宽',field: 'width',align: 'center',  },
+{ title: '品牌',field: 'manufacturer',align: 'center',  },
+{ title: '存货仓',field: 'storageName',align: 'center',  },
+{ title: '库存数',field: 'inventoryQuantity',align: 'center',  },
+{ width: '70',title: '单价',field: 'price',editRender: {},align: 'center',  },
+{ title: '数量',field: 'quantity',align: 'center',  },
+{ title: '金额',field: 'totalPrice',align: 'center',  },
+{ title: '借料人',field: 'borrowUserName',align: 'center',  },
+{ title: '联系方式',field: 'borrowUserPhone',align: 'center',  },
+{ width: '70',title: '借料供应商',field: 'supplierName',align: 'center',  },
+{ width: '90',title: '借料供应商地址',field: 'addressName',align: 'center',  },
+{ width: '70',title: '操作',align: 'center', field: 'make', fixed: 'right' },
+]);
 // 获取 搜索条件
 const searchWaitChange = (params: any) => {
   waitQueryParams.value = params
@@ -1682,6 +1479,7 @@ const borrowingMaterialReview = async () => {
     }
     tableDataBorrowList.value = selectRecords;
   }
+  loading.value=false;
   dialogBorrowReviewExamine.visible = true;
 }
 
@@ -2070,6 +1868,9 @@ const totalAmount = async (row: any) => {
   console.log("totalAmount", row)
   row.amount = Number(row.price * row.quantity).toFixed(2);
 }
+
+const inventoryCheck = ref(false);
+const inventoryRes = ref<any[]>([]);
 /**
  *审核通过
  */
@@ -2078,6 +1879,21 @@ const saveRejectBorrow = async () => {
     proxy?.$modal.msgError("请先选择待审核数据");
     return;
   }
+  // 查询是否存在盘点中物料
+  let ids = tableDataBorrowList.value.map(item => item.rawMaterialId);
+  let query = {
+    pageNum: 1,
+    pageSize: 20,
+    idList: ids,
+    isCheck: '1'
+  }
+  const res = await listMaterialInventoryInfo(query);
+  if (res.rows && res.rows.length > 0) {
+    inventoryRes.value = res.rows;
+    inventoryCheck.value = true;
+    return;
+  }
+
   const directMaterialReject: DirectMaterialReject = {
     tableDataBorrowList: [],
   };
@@ -2137,41 +1953,23 @@ const saveRawMaterialBorrow = async (status: string, type: string) => {
   let _valid = true;
   if (dialogBorrowExamine.title=="物料借入") {
     type = "1";
-    await inBorrowFormRef.value?.validate(async (valid: boolean) => {
-      if (!valid) {
-        _valid = false;
-      }
-    });
-
-    //明细校验
-    const $table = inXTableBorrowMaterial.value.xTableRef;
-    if ($table) {
-      let errMap = await $table.validate(true);
-      if (errMap) {
-        _valid = false;
-      }
-    }
   } else {
     type = "2";
-    await outBorrowFormRef.value?.validate(async (valid: boolean) => {
-      if (!valid) {
-        _valid = false;
-        console.log("outBorrowFormRef校验失败")
-        return;
-      }
-    });
+  }
+  await inBorrowFormRef.value?.validate(async (valid: boolean) => {
+    if (!valid) {
+      _valid = false;
+    }
+  });
 
-    //明细校验
-    const $table = inXTableBorrowMaterial.value.xTableRef;
-    if ($table) {
-      let errMap = await $table.validate(true);
-      if (errMap) {
-        _valid = false;
-        console.log("outXTableBorrowMaterial校验失败，",errMap)
-      }
+  //明细校验
+  const $table = inXTableBorrowMaterial.value.xTableRef;
+  if ($table) {
+    let errMap = await $table.validate(true);
+    if (errMap) {
+      _valid = false;
     }
   }
-
 
 
   if (!_valid) {
@@ -2210,6 +2008,20 @@ const saveInventoryBorrow = async () => {
     proxy?.$modal.msgError("请先选择物料");
     return;
   }
+  let ids = tabBackBorrowMaterial.value.map(item => item.rawMaterialId);
+  let query = {
+    pageNum: 1,
+    pageSize: 20,
+    idList: ids,
+    isCheck: '1'
+  }
+  const res = await listMaterialInventoryInfo(query);
+  if (res.rows && res.rows.length > 0) {
+    inventoryRes.value = res.rows;
+    inventoryCheck.value = true;
+    return;
+  }
+
   if (formGiveBackMaterial.borrowUserName == null) {
     proxy?.$modal.msgError("请输入还料人");
     return;
@@ -2473,11 +2285,43 @@ const getStorageOptions = async () => {
   const storageResponse: any = await listMaterialStorage();
   storageOptions = storageResponse.rows;
 }
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      let tab = !isNaN(Number(params.tab)) ? Number(params.tab) : 1;
+      editableTabsValue.value = tab
+      let tempColumnList = [{field: 'code', defaultValue: params.bizNo}]
+      if (tab === 1) {
+        waitQueryParams.value.code = params.bizNo
+        setTimeout(() => {
+          xTableForm.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === 2) {
+        queryParams.value.orderCode = params.bizNo
+        setTimeout(() => {
+          xTable.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      }
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
 onMounted(() => {
-  //等于1代表查询待收货列表
-  queryParams.value.statusType = "1";
-  getWaitList();
-  getSupplierLists();
-  getStorageOptions();
+    //等于1代表查询待收货列表
+    queryParams.value.statusType = "1";
+    getWaitList();
+    getSupplierLists();
+    getStorageOptions();
 });
 </script>

@@ -64,7 +64,7 @@
             <template #default="{row}">
               <el-button type="primary" link
                          @click="showRowDetail(row.days)">
-                {{row.rowTotalInfo.area.toFixed(4)}}m²/{{row.rowTotalInfo.count}}款
+                {{BigNumber(row.rowTotalInfo.area).dp(4)}}m²/{{row.rowTotalInfo.count}}款
               </el-button>
             </template>
             <template #footer="	{column, columnIndex, items}">
@@ -93,7 +93,7 @@
         <XTable
           toolId="productionTotalStatusChecked"
           ref="checkedRef"
-          style="height: 100%;"
+          style="height: 98%;"
           height="100%"
           :pageShow="false"
           v-loading="loading"
@@ -116,10 +116,10 @@
             {{craftList.find(item => item.id == scope.row.craftId)?.craftName }}
           </template>
           <template #default-feedSetArea="{row}">
-            {{Number(row.feedSetArea).toFixed(4)}}
+            {{BigNumber(row.feedSetArea).dp(4)}}
           </template>
           <template #default-pnlSetArea="{row}">
-            {{Number(row.pnlSetArea).toFixed(4)}}
+            {{BigNumber(row.pnlSetArea).dp(4)}}
           </template>
           <template #default-model="{ row }">
             <!-- <div>{{ resDictData?.order_model.find(v => v.dictValue == row.model)?.dictLabel }}</div> -->
@@ -220,10 +220,10 @@
             {{craftList.find(item => item.id == scope.row.craftId)?.craftName }}
           </template>
           <template #default-feedSetArea="{row}">
-            {{Number(row.feedSetArea).toFixed(4)}}
+            {{BigNumber(row.feedSetArea).dp(4)}}
           </template>
           <template #default-pnlSetArea="{row}">
-            {{Number(row.pnlSetArea).toFixed(4)}}
+            {{BigNumber(row.pnlSetArea).dp(4)}}
           </template>
           <template #default-model="{ row }">
             <!-- <div>{{ resDictData?.order_model.find(v => v.dictValue == row.model)?.dictLabel }}</div> -->
@@ -265,6 +265,7 @@
   import {exportDailyProduction, getProductionCardTotal} from "@/api/production/production";
   import {VxeTableEvents, VxeTablePropTypes} from "vxe-table";
   import {AccountMaterialInOutVo} from "@/api/financial/accountOrder/types";
+  import { BigNumber } from 'bignumber.js';
 
 
   import * as xlsx from 'xlsx';
@@ -332,12 +333,14 @@
     {width: '80px', title: '在线工序', field: 'nodeName', align: 'center', sortable: true},
     {width: '80px', title: '交货日期', field: 'planCompleteTime', align: 'center', sortable: true},
     {width: '80px', title: '总孔数(万)', field: 'sumDrillQuantity', align: 'center', sortable: true},
+    {width: '80px', title: '单大料总孔数(万)', field: 'sumSchemeDrillQuantity', align: 'center', sortable: true},
     {width: '60px', title: '排产数量', field: 'bundlePnlQuantity', align: 'center',},
     {width: '80px', title: '排产面积(m²)', field: 'feedSetArea', align: 'center',},
     {width: '100px', title: '结存时间', field: 'differTime', align: 'center', sortable:true },
     {width: '80px', title: '结存面积(m²)', field: 'pnlSetArea', align: 'center',},
     {width: '60px', title: '结存pnl数量', field: 'pnlQuantity', align: 'center',},
     {width: '60px', title: '结存set数量', field: 'setQuantity', align: 'center',},
+    {width: '60px', title: '结存pcs数量', field: 'pcsQuantity', align: 'center',},
     {width: '45', title: '长(mm)', field: 'pnlLength', align: 'center',},
     {width: '45', title: '宽(mm)', field: 'pnlWidth', align: 'center',},
     {width: '30', title: '层数', field: 'materialLayer', align: 'center',},
@@ -361,12 +364,14 @@
     {width: '80px', title: '在线工序', field: 'nodeName', align: 'center', sortable: true},
     {width: '80px', title: '交货日期', field: 'planCompleteTime', align: 'center', sortable: true},
     {width: '80px', title: '总孔数(万)', field: 'sumDrillQuantity', align: 'center', sortable: true},
+    {width: '80px', title: '单大料总孔数(万)', field: 'sumSchemeDrillQuantity', align: 'center', sortable: true},
     {width: '60px', title: '排产数量', field: 'bundlePnlQuantity', align: 'center',},
     {width: '80px', title: '排产面积(m²)', field: 'feedSetArea', align: 'center',},
     {width: '100px', title: '结存时间', field: 'differTime', align: 'center',sortable:true},
     {width: '80px', title: '结存面积(m²)', field: 'pnlSetArea', align: 'center',},
     {width: '60px', title: '结存pnl数量', field: 'pnlQuantity', align: 'center',},
     {width: '60px', title: '结存set数量', field: 'setQuantity', align: 'center',},
+    {width: '60px', title: '结存pcs数量', field: 'pcsQuantity', align: 'center',},
     {width: '45', title: '长(mm)', field: 'pnlLength', align: 'center',},
     {width: '45', title: '宽(mm)', field: 'pnlWidth', align: 'center',},
     {width: '30', title: '层数', field: 'materialLayer', align: 'center',},
@@ -424,7 +429,7 @@
      }
    });
     var item = cardList.value.filter(o => {
-      if(parseInt(column.field) == mergeCraft.id){
+      if(mergeCraft && parseInt(column.field) == mergeCraft.id){
         return o.deliverDays == row.days && ids.includes(o.craftId);
       }else {
         return o.deliverDays == row.days && o.craftId == parseInt(column.field);
@@ -530,7 +535,7 @@
       }
     });
     var tmp = cardList.value.filter(o => {
-      if (craftId == mergeCraft.id){
+      if (mergeCraft && craftId == mergeCraft.id){
         return ids.includes(o.craftId);
       }else {
         return o.craftId == craftId;
@@ -550,7 +555,7 @@
       }
     });
     var itemList: any = cardList.value.filter(o => {
-      if(craftId == mergeCraft.id){
+      if(mergeCraft && craftId == mergeCraft.id){
         return o.deliverDays == days && ids.includes(o.craftId);
       }else {
         return o.deliverDays == days && o.craftId == craftId;
@@ -560,7 +565,7 @@
       var totalArea = itemList.reduce((prev: any, cur: any) => {
         return prev + Number(cur.pnlSetArea);
       }, 0);
-      return totalArea.toFixed(4) + '㎡/' + itemList.length + '款';
+      return BigNumber(totalArea).dp(4) + '㎡/' + itemList.length + '款';
     } else {
       return '';
     }
@@ -598,27 +603,30 @@
         return "";
       } else if (columnIndex == columns.length - 1) {
         let area = cardList.value.reduce((prev, curr) => {
-          return prev + Number(curr.pnlSetArea);
+          return BigNumber(curr.pnlSetArea).plus(BigNumber(prev)).toNumber()
+          //return prev + Number(curr.pnlSetArea);
         }, 0);
-        return area.toFixed(4) + "㎡/" + cardList.value.length + "款";
+        return BigNumber(area).dp(4) + "㎡/" + cardList.value.length + "款";
       } else {
         let area = 0;
         let allList = cardList.value.filter(v => {
-          if(column.field == mergeCraft.id){
+          if(mergeCraft && column.field == mergeCraft.id){
             if (ids.includes(v.craftId)){
-              area += Number(v.pnlSetArea);
+              //area += Number(v.pnlSetArea);
+              area = BigNumber(v.pnlSetArea).plus(BigNumber(area)).toNumber()
             }
             return ids.includes(v.craftId);
           }else {
             if (v.craftId == column.field) {
-              area += Number(v.pnlSetArea);
+              //area += Number(v.pnlSetArea);
+              area = BigNumber(v.pnlSetArea).plus(BigNumber(area)).toNumber()
             }
             return v.craftId == column.field
           }
 
 
         });
-        return area.toFixed(4) + "㎡/" + allList.length + "款";
+        return BigNumber(area).dp(4) + "㎡/" + allList.length + "款";
       }
       return "";
     })
@@ -638,10 +646,10 @@
           return detailData.value.length;
         }
         if (column.field == "feedSetArea") {
-          return `${sumNum(filteredData, "feedSetArea").toFixed(4)} `;
+          return `${sumNum(filteredData, "feedSetArea")} `;
         }
         if (column.field == "pnlSetArea") {
-          return `${sumNum(data, "pnlSetArea").toFixed(4)} `;
+          return `${sumNum(data, "pnlSetArea")} `;
         }
         return "";
       })
@@ -653,7 +661,7 @@
     list.forEach(item => {
       count += Number(item[field]);
     });
-    return Number(count.toFixed(4));
+    return BigNumber(count).dp(4);
   };
 
   const handleDelete = (row)=>{
@@ -706,10 +714,12 @@
       {title: '排产时间', field: 'createTime'},
       {title: '工厂交期', field: 'planCompleteTime'},
       {title: '总孔数(万)', field: "sumDrillQuantity"},
+      {title: '单大料总孔数(万)', field: "sumSchemeDrillQuantity"},
       {title: '排产数量', field: "bundlePnlQuantity"},
       {title: '结存面积', field: "pnlSetArea"},
       {title: '结存pnl数量', field: 'pnlQuantity'},
       { title: '结存set数量', field: 'setQuantity'},
+      { title: '结存pcs数量', field: 'pcsQuantity'},
       {title: '长(mm)', field: 'pnlLength'},
       {title: '宽(mm)', field: 'pnlWidth'},
       {title: '层数', field: "materialLayer"},
@@ -747,15 +757,15 @@
             }
             param['model'] = label
           } else if (v.field == 'feedSetArea'){
-            param['feedSetArea'] = Number(item.feedSetArea).toFixed(4)
+            param['feedSetArea'] = BigNumber(item.feedSetArea).dp(4)
           } else if (v.field == 'pnlSetArea'){
-            param['pnlSetArea'] = Number(item.pnlSetArea).toFixed(4)
+            param['pnlSetArea'] = BigNumber(item.pnlSetArea).dp(4)
           } else if (v.field == 'createTime') {
             param['createTime'] = dayjs(new Date(item.createTime)).format("YYYY-MM-DD")
           } else if (v.field == 'planCompleteTime') {
             param['planCompleteTime'] = dayjs(new Date(item.planCompleteTime)).format("YYYY-MM-DD")
           } else if (v.field == 'taskArea') {
-            param['taskArea'] = Number(item.taskArea).toFixed(4)
+            param['taskArea'] = BigNumber(item.taskArea).dp(4)
           } else if (v.field == 'nodeName') {
             param['nodeName'] = craftList.value.find(info => info.id == item.craftId)?.craftName
           } else if (v.field == 'chargeNode') {

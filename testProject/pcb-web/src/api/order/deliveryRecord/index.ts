@@ -189,3 +189,27 @@ export const getRefreshDeliveryInfoList = (query: any): AxiosPromise<DeliveryRec
     params: query
   });
 };
+
+/**
+ * 修改关联物流信息
+ * @param data
+ */
+export const updateDeliveryRecordLogNo = (data: DeliveryRecordForm) => {
+  return request({
+    url: '/order/deliveryRecord/updateLogNo',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
+ * 物流下单
+ * @param data
+ */
+export const createOrder = (data: any) => {
+  return request({
+    url: '/order/deliveryRecord/createOrder',
+    method: 'post',
+    data: data
+  });
+};

@@ -520,9 +520,7 @@
               <el-select
                   v-model="form.commodityTestWay"
                   placeholder=""
-                  @change="saveDict(form.commodityTestWay,'order_commodity_testway')"
                   filterable
-                  allow-create
                   default-first-option
                   :reserve-keyword="false"
                   clearable
@@ -542,9 +540,7 @@
               <el-select
                   v-model="form.testFrame"
                   placeholder=""
-                  @change="saveDict(form.testFrame,'order_test_stand')"
                   filterable
-                  allow-create
                   default-first-option
                   :reserve-keyword="false"
                   clearable
@@ -646,6 +642,16 @@
               <el-input v-model="form.tinThickness" placeholder=""/>
             </el-form-item>
           </el-col>
+          <el-col :span="4">
+            <el-form-item size="small" label="是否半孔" >
+              <el-select
+                  v-model="form.semiAperture" placeholder="" :reserve-keyword="false"  clearable
+                  style="width: 440px" >
+                <el-option v-for="dict in sys_is_hidden" :key="dict.value" :label="dict.label" :value="dict.value" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          
         </el-row>
         <el-divider content-position="left">线宽线距</el-divider>
         <el-row>
@@ -759,6 +765,7 @@ const {order_hole_requirement} = toRefs<any>(proxy?.useDict("order_hole_requirem
 const {order_inspection_standard} = toRefs<any>(proxy?.useDict("order_inspection_standard"));
 const {order_test_stand} = toRefs<any>(proxy?.useDict("order_test_stand"));
 const {order_test_frame} = toRefs<any>(proxy?.useDict("order_test_frame"));
+const { sys_is_hidden } = toRefs<any>(proxy?.useDict("sys_is_hidden"));
 
 let dictList = ref<any>({
   order_status: [],

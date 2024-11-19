@@ -62,3 +62,16 @@ export const delTenantConfig = (id: string | number | Array<string | number>) =>
     method: 'delete'
   });
 };
+
+/**
+ * 查询小程序菜单列表-不分页
+ * @param query
+ * @returns {*}
+ */
+export const listWxMenu = (query?: any): AxiosPromise<any[]> => {
+  return request({
+    url: '/applet/send/listWxMenu',
+    method: 'get',
+    params: query
+  });
+};

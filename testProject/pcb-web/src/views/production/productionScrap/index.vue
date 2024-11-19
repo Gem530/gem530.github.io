@@ -73,16 +73,16 @@
                 <template #reference>
                   <el-button link type='primary'>{{scope.row.commodityName}}</el-button>
                 </template>
-                <el-table :data="scope.row.saleOrderVoList">
-                  <el-table-column :show-overflow-tooltip="true" width="120" property="commodityCode" label="产品编码"/>
+                <XTable :data="scope.row.saleOrderVoList" :pageShow="false" :columnList="columnListProdName">
+                  <!-- <el-table-column :show-overflow-tooltip="true" width="120" property="commodityCode" label="产品编码"/>
                   <el-table-column :show-overflow-tooltip="true" width="120" property="commodityName" label="产品名称"/>
                   <el-table-column :show-overflow-tooltip="true" width="120" property="customerCode" label="客户编码"/>
-                  <el-table-column label="操作" align="center" width="100" class-name="small-padding fixed-width">
-                    <template #default="scope">
+                  <el-table-column label="操作" align="center" width="100" class-name="small-padding fixed-width"> -->
+                    <template #default-make="scope">
                       <el-button link type="primary" @click="openFeedOrderDetail(scope.row)">详情</el-button>
                     </template>
-                  </el-table-column>
-                </el-table>
+                  <!-- </el-table-column> -->
+                </XTable>
               </el-popover>
             </template>
             <template #default-make="scope">
@@ -138,78 +138,76 @@
     >
       <div class="drawer-flex-column">
         <el-card class="drawer-vxe-column">
-          <vxe-table
+          <XTable
             border
             keep-source
             size="mini"
             height="300px"
             align="center"
             show-overflow
-            :column-config="{resizable: true,height :20}"
-            :data="cardScrapList">
-            <vxe-column type="seq" title="序号" width="48"></vxe-column>
-            <vxe-column field="commodityId" title="产品编码">
-              <template #default="scope">
+            :pageShow="false"
+            :data="cardScrapList"
+            :columnList="columnListScrapDrawer"
+            toolId="columnListScrapDrawerToolId"
+            :column-config="{resizable: true,height :20}">
+            <!-- <vxe-column type="seq" title="序号" width="48"></vxe-column>
+            <vxe-column field="commodityId" title="产品编码"> -->
+              <template #default-commodityId="scope">
                 {{ currentProduction.saleOrderVoList?.find(v => v.id == scope.row.saleOrderId)?.commodityCode
                 }}
               </template>
-            </vxe-column>
-            <vxe-column field="orderQuantity" title="订单数量" width="70">
-              <template #default="scope">
+            <!-- </vxe-column>
+            <vxe-column field="orderQuantity" title="订单数量" width="70"> -->
+              <template #default-orderQuantity="scope">
                 {{scope.row.orderQuantity}}
               </template>
-            </vxe-column>
-            <vxe-column field="productionCardId" title="流转卡号" width="130">
-              <template #default="scope">
+            <!-- </vxe-column>
+            <vxe-column field="productionCardId" title="流转卡号" width="130"> -->
+              <template #default-productionCardId="scope">
                 {{ productionCardList?.find(v => v.id == scope.row.productionCardId)?.code }}
               </template>
-            </vxe-column>
-            <vxe-column field="orderQuantity" title="排产数量" width="70">
-              <template #default="scope">
-                {{scope.row.productionPcsQuantity}}
+            <!-- </vxe-column>
+            <vxe-column field="productionPcsQuantity" title="排产数量" width="70"> -->
+              <template #default-productionPcsQuantity="scope">
+                {{scope.row?.productionPcsQuantity}}
               </template>
-            </vxe-column>
-            <vxe-column field="craftId" title="报废工序" width="100">
-              <template #default="scope">
+            <!-- </vxe-column>
+            <vxe-column field="craftId" title="报废工序" width="100"> -->
+              <template #default-craftId="scope">
                 {{nodeList.find(v => v.id == scope.row.craftId)?.craftName}}
               </template>
-            </vxe-column>
-            <vxe-column field="reasonId" title="报废原因" width="100">
-              <template #default="scope">
-                {{allScrapReasonLIst.find(v => v.id == scope.row.reasonId)?.discardReason}}
+            <!-- </vxe-column>
+            <vxe-column field="reasonId" title="报废原因" width="100"> -->
+              <template #default-reasonId="scope">
+                {{scope.row.discardReason}}
               </template>
-            </vxe-column>
-            <!--            <vxe-column field="orderQuantity" title="排产单总报废数" width="110">-->
-            <!--              <template #default="scope">-->
-            <!--                {{getProductionSum()}}-->
-            <!--              </template>-->
-            <!--            </vxe-column>-->
-            <vxe-column field="orderQuantity" title="报废总数量" width="80">
-              <template #default="scope">
+            <!-- </vxe-column> -->
+            <!-- <vxe-column field="orderQuantity1" title="报废总数量" width="80"> -->
+              <template #default-orderQuantity1="scope">
                 {{getResultSum(scope.row.saleOrderId)}}
-                <!--                {{scope.row.allScrapNum}}-->
               </template>
-            </vxe-column>
+            <!-- </vxe-column>
             <vxe-column field="quantity" title="报废数量" width="70"></vxe-column>
-            <vxe-column field="unit" title="报废单位" width="70">
-              <template #default="scope">
+            <vxe-column field="unit" title="报废单位" width="70"> -->
+              <template #default-unit="scope">
                 {{unitOption.find(v => v.value == scope.row.unit)?.label}}
               </template>
-            </vxe-column>
+            <!-- </vxe-column>
             <vxe-column field="pcsQuantity" title="换算报废数量(pcs)" width="120"></vxe-column>
-            <vxe-column field="responsibleUserName" title="责任人" width="60">
-              <template #default="scope">
+            <vxe-column field="responsibleUserName" title="责任人" width="60"> -->
+              <template #default-responsibleUserName="scope">
                 <span v-if="scope.row.type == '1'">{{scope.row.responsibleUserName}}</span>
                 <span v-if="scope.row.type == '2'">{{scope.row.supplierName}}</span>
+                <span v-if="scope.row.type == '3'">{{scope.row.supplierName}}</span>
               </template>
-            </vxe-column>
+            <!-- </vxe-column>
             <vxe-column field="createTime" title="处理时间" width="140"></vxe-column>
-            <vxe-column width="65" title="操作">
-              <template #default="scope">
+            <vxe-column width="65" title="操作"> -->
+              <template #default-make="scope">
                 <el-button link type="primary" @click="handleDeleteScrap(scope.row)">删除</el-button>
               </template>
-            </vxe-column>
-          </vxe-table>
+            <!-- </vxe-column> -->
+          </XTable>
         </el-card>
         <el-row class="drawer-flex-content">
           <el-col :span="4">
@@ -296,11 +294,12 @@
                   <el-radio-group v-model="form.type" @change="clearTypeValue">
                     <el-radio label="1">责任在本厂</el-radio>
                     <el-radio label="2">责任在外协厂商</el-radio>
+                    <el-radio label="3">责任在物料厂商</el-radio>
                   </el-radio-group>
                 </el-form-item>
-                <el-divider content-position="left">{{form.type == '1'?'责任人':form.type=='2'?'责任供应商':''}}
+                <el-divider v-show="form.type" content-position="left">{{form.type == '1' ? '责任人': '责任供应商'}}
                 </el-divider>
-                <el-form-item prop="typeValue" label-width="10" v-if="['1','2'].includes(form.type)">
+                <el-form-item prop="typeValue" label-width="10" v-if="['1','2','3'].includes(form.type)">
                   <el-select v-model="form.typeValue" filterable v-if="form.type =='1'">
                     <el-option
                       v-for="item in dutyUserList"
@@ -312,6 +311,14 @@
                   <el-select v-model="form.typeValue" filterable v-if="form.type =='2'">
                     <el-option
                       v-for="item in supplierList"
+                      :key="item.id"
+                      :label="item.companyName"
+                      :value="item.id"
+                    />
+                  </el-select>
+                  <el-select v-model="form.typeValue" filterable v-if="form.type =='3'">
+                    <el-option
+                      v-for="item in materialSupplierList"
                       :key="item.id"
                       :label="item.companyName"
                       :value="item.id"
@@ -354,7 +361,7 @@
     <el-drawer
       v-model="feedDrawer.visible"
       :title="feedDrawer.title"
-      size="100%"
+      size="95%"
       :close-on-click-modal="false"
       :direction="feedDrawer.direction"
       :destroy-on-close="true"
@@ -362,97 +369,100 @@
     >
       <template #header="{ close, titleId, titleClass }">
         <span>{{form.productionVo?.code}}-投料<span style="color: red">(补投)</span></span>
-        <div style="float:right;margin-right:10px;">生产面积<span style="color:red;">{{productionArea}}</span>m²</div>
+        <div style="float:right;margin-right:10px;">生产面积<span style="color:red;">{{Number(parseFloat(productionArea).toString())}}</span>m²</div>
       </template>
-      <vxe-table
+      <XTable
         border
         keep-source
         align="center"
         :row-config="{height: 40,isCurrent:true}"
         show-overflow :loading="dialogTableLoading"
         :column-config="{resizable: true}"
-        :data="form.saleOrderVoList">
-        <vxe-column fixed="left" type="seq" title="序号" width="60"></vxe-column>
-        <vxe-column title="新/返" field="orderType">
-          <template #default="{row}">
+        :data="form.saleOrderVoList"
+        :pageShow="false"
+        min-height="143px"
+        :columnList="columnListFeedDrawer">
+        <!-- <vxe-column fixed="left" type="seq" title="序号" width="60"></vxe-column>
+        <vxe-column title="新/返" field="orderType"> -->
+          <template #default-orderType="{row}">
             <div v-for="item in resDictData.order_type">
               <span v-if="item.dictValue==row.orderType">{{item.dictLabel}}</span>
             </div>
           </template>
-        </vxe-column>
-        <vxe-column title="批/样" field="model">
-          <template #default="{ row }">
+        <!-- </vxe-column>
+        <vxe-column title="批/样" field="model"> -->
+          <template #default-model="{ row }">
             <div v-for="item in resDictData.order_model">
               <span v-if="item.dictValue==row.model">{{item.dictLabel}}</span>
             </div>
           </template>
-        </vxe-column>
-        <vxe-column title="加急" field="urgent">
-          <template #default="{ row }">
+        <!-- </vxe-column>
+        <vxe-column title="加急" field="urgent"> -->
+          <template #default-urgent="{ row }">
             <div v-for="item in resDictData.order_urgent">
               <span v-if="item.dictValue==row.urgent">{{item.dictLabel}}</span>
             </div>
           </template>
-        </vxe-column>
+        <!-- </vxe-column>
         <vxe-column title="产品编码" field="commodityCode">
         </vxe-column>
-        <vxe-column title="产品类型" field="commodityType">
-          <template #default="{ row }">
+        <vxe-column title="产品类型" field="commodityType"> -->
+          <template #default-commodityType="{ row }">
             <div v-for="item in resDictData.sys_commodity_type">
               <span v-if="item.dictValue==row.commodityType">{{item.dictLabel}}</span>
             </div>
           </template>
-        </vxe-column>
+        <!-- </vxe-column>
         <vxe-column title="pcs/set" field="unitedNumber">
         </vxe-column>
         <vxe-column title="订单面积(m²)" field="area">
         </vxe-column>
         <vxe-column title="订货数量(pcs)" field="quantity">
         </vxe-column>
-        <vxe-column title="预投pcs数量">
-          <template #default="{row}">
+        <vxe-column title="预投pcs数量"> -->
+          <template #default-field1="{row}">
             <span style="color: red">
               {{getCommodityPcsQuantity(row.id)}}
             </span>
           </template>
-        </vxe-column>
-        <vxe-column title="已投pcs数量">
-          <template #default="{row}">
+        <!-- </vxe-column>
+        <vxe-column title="已投pcs数量"> -->
+          <template #default-field2="{row}">
             <span style="color: red">
               {{getCommodityAlreadPcsQuantity(row.id)}}
             </span>
           </template>
-        </vxe-column>
-        <vxe-column title="报废pcs数量">
-          <template #default="{row}">
+        <!-- </vxe-column>
+        <vxe-column title="报废pcs数量"> -->
+          <template #default-scrapNum="{row}">
             <span style="color: red">
               {{row.scrapNum}}
             </span>
           </template>
-        </vxe-column>
-        <vxe-column title="实投pcs数量">
-          <template #default="{row}">
+        <!-- </vxe-column>
+        <vxe-column title="实投pcs数量"> -->
+          <template #default-field4="{row}">
             <span style="color: red">
               {{getCommodityRealPcsQuantity(row.id)}}
             </span>
           </template>
-        </vxe-column>
-        <vxe-column title="投料率(%)">
-          <template #default="{row}">
-            {{(getCommodityRealPcsQuantity(row.id) / row.quantity * 100).toFixed(2)}}
+        <!-- </vxe-column>
+        <vxe-column title="投料率(%)"> -->
+          <template #default-field5="{row}">
+            {{Number(parseFloat((getCommodityRealPcsQuantity(row.id) / row.quantity * 100).toFixed(2)).toString())}}
           </template>
-        </vxe-column>
+        <!-- </vxe-column>
         <vxe-column title="现有库存数(pcs)" field="existingQuantity">
         </vxe-column>
         <vxe-column title="历史使用库存数(pcs)" field="alreadyUsedQuantity">
         </vxe-column>
-        <vxe-column title="本次使用库存数(pcs)" field="useQuantity">
-          <template #default="{row}">
+        <vxe-column title="本次使用库存数(pcs)" field="useQuantity"> -->
+          <template #default-useQuantity="{row}">
             <el-input :disabled="form.isCalculate == '1' ? true:false" v-model.number="row.useQuantity"
                       type="number"></el-input>
           </template>
-        </vxe-column>
-      </vxe-table>
+        <!-- </vxe-column> -->
+      </XTable>
       <el-form ref="orderPredictionFormRef" :model="form" :rules="rules" label-width="110px" label-position="right"
                v-loading="dialogTableLoading">
         <!--按开料方案循环-->
@@ -531,9 +541,9 @@
             </el-form>
           </div>
           <!--Pnl信息-->
-          <el-table :data="scheme.pnlList"
-                    style="width: 100%;">
-            <el-table-column prop="pnl.name"
+          <XTable :data="scheme.pnlList"
+                    style="width: 100%;" :pageShow="false" :columnList="columnListSchemeDrawer">
+            <!-- <el-table-column prop="pnl.name"
                              align="center"
                              label="PNL名称"
                              width="150px">
@@ -555,63 +565,63 @@
             </el-table-column>
             <el-table-column align="center"
                              label="产品编码"
-                             width="160px">
-              <template #default="scope">
+                             width="160px"> -->
+              <template #default-field1="scope">
                 <div v-for="item in scope.row.pnl.pnlSetBoList">{{item.saleOrderBo.commodityCode}}</div>
               </template>
-            </el-table-column>
+            <!-- </el-table-column>
             <el-table-column align="center"
                              label="set/pnl"
-                             width="100px">
-              <template #default="scope">
+                             width="100px"> -->
+              <template #default-field2="scope">
                 <div v-for="item in scope.row.pnl.pnlSetBoList">
                   {{item.quantity}}
                 </div>
               </template>
-            </el-table-column>
+            <!-- </el-table-column>
             <el-table-column align="center"
                              label="pcs/大料"
-                             width="100px">
-              <template #default="scope">
+                             width="100px"> -->
+              <template #default-field3="scope">
                 <div v-for="item in scope.row.pnl.pnlSetBoList">
                   {{scope.row.count * item.quantity * item.saleOrderBo.unitedNumber}}
                 </div>
               </template>
-            </el-table-column>
+            <!-- </el-table-column>
             <el-table-column align="center"
                              label="pcs/pnl"
-                             width="100px">
-              <template #default="scope">
+                             width="100px"> -->
+              <template #default-field4="scope">
                 <div v-for="item in scope.row.pnl.pnlSetBoList">
                   {{item.quantity * item.saleOrderBo.unitedNumber}}
                 </div>
               </template>
-            </el-table-column>
+            <!-- </el-table-column>
             <el-table-column align="center"
                              label="预投pcs数"
-                             width="100px">
-              <template #default="scope">
+                             width="100px"> -->
+              <template #default-field5="scope">
                 <div v-for="item in scope.row.pnl.pnlSetBoList">
                   {{Math.ceil(scope.row.preFeedQuantity * item.quantity * item.saleOrderBo.unitedNumber)}}
                 </div>
               </template>
-            </el-table-column>
+            <!-- </el-table-column>
             <el-table-column align="center"
-                             label="预投pnl数">
-              <template #default="scope">
+                             label="预投pnl数"> -->
+              <template #default-field6="scope">
                 <span style="color: red">{{Math.ceil(scope.row.preFeedQuantity)}}</span>
 
               </template>
-            </el-table-column>
+            <!-- </el-table-column>
             <el-table-column align="center"
-                             label="总pnl数">
-              <template #default="scope">
+                             label="总pnl数"> -->
+              <template #default-field7="scope">
                 <span style="color: red">{{form.isCalculate == 1 ? scope.row.alreadyFeedQuantity: (scope.row.alreadyFeedQuantity + scope.row.feedQuantity)}}</span>
               </template>
-            </el-table-column>
+            <!-- </el-table-column>
             <el-table-column align="center"
-                             label="实投pnl数">
-              <template #default="scope">
+                             label="实投pnl数"> -->
+              <template #default-field8="scope">
                 <el-input-number v-model="scope.row.feedQuantity"
                                  :min="0"
                                  style="width:100%"
@@ -619,8 +629,8 @@
                                  @change="onPnlRealChargeCount(scheme,scope.row)"
                 ></el-input-number>
               </template>
-            </el-table-column>
-          </el-table>
+            <!-- </el-table-column> -->
+          </XTable>
 
           <!--开料图
                       <el-collapse style="width:100%;" value="schemeImg">
@@ -704,88 +714,94 @@
                :close-on-click-modal="false"
                @close="cancelDetail"
                v-loading="isLoading">
-      <vxe-table
+      <XTable
         border
         keep-source
         size="mini"
         height="800px"
         align="center"
         show-overflow
-        :column-config="{resizable: true,height :20}"
-        :data="cardScrapList">
-        <vxe-column type="seq" title="序号" width="60"></vxe-column>
-        <vxe-column field="commodityId" title="产品编码">
-          <template #default="scope">
+        :pageShow="false"
+        :data="cardScrapList"
+        :columnList="columnListScrapRecord"
+        :column-config="{resizable: true,height :20}">
+        <!-- <vxe-column type="seq" title="序号" width="60"></vxe-column>
+        <vxe-column field="commodityId" title="产品编码"> -->
+          <template #default-commodityId="scope">
             {{scrapInfo.saleOrderVo.commodityCode}}
           </template>
-        </vxe-column>
-        <vxe-column field="orderQuantity" title="订单数量" width="70">
-          <template #default="scope">
+        <!-- </vxe-column>
+        <vxe-column field="orderQuantity" title="订单数量" width="70"> -->
+          <template #default-orderQuantity="scope">
             {{scope.row.orderQuantity}}
           </template>
-        </vxe-column>
-        <vxe-column field="productionCardId" title="流转卡号" width="130">
-          <template #default="scope">
+        <!-- </vxe-column>
+        <vxe-column field="productionCardId" title="流转卡号" width="130"> -->
+          <template #default-productionCardId="scope">
             {{scrapInfo.productionCardVo.code}}
           </template>
-        </vxe-column>
-        <vxe-column field="orderQuantity" title="排产数量" width="70">
-          <template #default="scope">
+        <!-- </vxe-column>
+        <vxe-column field="orderQuantity" title="排产数量" width="70"> -->
+          <template #default-orderQuantity1="scope">
             {{scope.row.productionPcsQuantity}}
           </template>
-        </vxe-column>
-        <vxe-column field="craftId" title="报废工序" width="100">
-          <template #default="scope">
+        <!-- </vxe-column>
+        <vxe-column field="craftId" title="报废工序" width="100"> -->
+          <template #default-craftId="scope">
             {{nodeList.find(v => v.id == scope.row.craftId)?.craftName}}
           </template>
-        </vxe-column>
-        <vxe-column field="reasonId" title="报废原因" width="100">
-          <template #default="scope">
-            {{allScrapReasonLIst.find(v => v.id == scope.row.reasonId)?.discardReason}}
+        <!-- </vxe-column>
+        <vxe-column field="discardReason" title="报废原因" width="100"> -->
+          <template #default-discardReason="scope">
+            {{scope.row.discardReason}}
           </template>
-        </vxe-column>
-        <!--        <vxe-column field="orderQuantity" title="排产单总报废数" width="110">-->
-        <!--          <template #default="scope">-->
-        <!--            {{getProductionSum()}}-->
-        <!--          </template>-->
-        <!--        </vxe-column>-->
-        <vxe-column field="orderQuantity" title="报废总数量" width="80">
-          <template #default="scope">
+        <!-- </vxe-column>
+        <vxe-column field="orderQuantity" title="报废总数量" width="80"> -->
+          <template #default-orderQuantity2="scope">
             {{getResultSum(scope.row.saleOrderId)}}
             <!--            {{scope.row.allScrapNum}}-->
           </template>
-        </vxe-column>
+        <!-- </vxe-column>
         <vxe-column field="quantity" title="报废数量" width="70"></vxe-column>
-        <vxe-column field="unit" title="报废单位" width="70">
-          <template #default="scope">
+        <vxe-column field="unit" title="报废单位" width="70"> -->
+          <template #default-unit="scope">
             {{unitOption.find(v => v.value == scope.row.unit)?.label}}
           </template>
-        </vxe-column>
+        <!-- </vxe-column>
         <vxe-column field="pcsQuantity" title="换算报废数量(pcs)" width="120"></vxe-column>
-        <vxe-column field="responsibleUserName" title="责任人" width="70">
-          <template #default="scope">
+        <vxe-column field="responsibleUserName" title="责任人" width="70"> -->
+          <template #default-responsibleUserName="scope">
             <span v-if="scope.row.type == '1'">{{scope.row.responsibleUserName}}</span>
             <span v-if="scope.row.type == '2'">{{scope.row.supplierName}}</span>
+            <span v-if="scope.row.type == '3'">{{scope.row.supplierName}}</span>
           </template>
-        </vxe-column>
+        <!-- </vxe-column>
         <vxe-column field="createTime" title="处理时间" width="140"></vxe-column>
-        <vxe-column width="60" title="操作">
-          <template #default="scope">
+        <vxe-column width="60" title="操作"> -->
+          <template #default-make="scope">
             <el-button link type="primary" @click="handleDeleteScrap(scope.row)">删除</el-button>
           </template>
-        </vxe-column>
-      </vxe-table>
+        <!-- </vxe-column> -->
+      </XTable>
     </el-dialog>
 
     <!--详情预览-->
     <el-drawer
       v-model="orderDrawer.visible"
       :title="orderDrawer.title"
-      size="850px"
       :direction="orderDrawer.direction"
       :destroy-on-close="true"
-      modal-class="detail-prod-drawder"
+      size="45%"
+      :modal-class="`add-prod-drawder ${ownerId == '101' && 'normal-prod-drawder'}`"
     >
+      <template #header>
+        <span class="el-drawer__title no-wrap">{{orderDrawer.title}}</span>
+        <TotalTitle :start="true" :firstBorder="true" :list="[
+          { title: `总价：${ currentVo?.totalOrderPrice||0 }元` },
+          { title: `税金：${ currentVo?.tax||0 }元` },
+          { title: `总金额：${ currentVo?.totalPrice||0 }元` },
+        ]"></TotalTitle>
+      </template>
       <SaleDescriptions v-if="currentVo" :currentInfo="currentVo" :customerList="customerList" :isShow="false"
                         :resDictData="resDictData"></SaleDescriptions>
     </el-drawer>
@@ -828,11 +844,16 @@
     getScrapListByCard,
     saveScrap
   } from '@/api/production/scrap';
+  import { listByMaterial } from '@/api/basedata/supplier';
   import {CraftTemplateCraftVO} from "@/api/basedata/craftTemplateCraft/types";
   import {delCraftTemplateCraft} from "@/api/basedata/craftTemplateCraft";
   import {getDicts} from "@/api/system/dict/data";
   import {sortBy} from "@/utils/dict";
   import dayjs from "dayjs";
+  import useUserStore from '@/store/modules/user';
+
+  const { ownerId } = useUserStore();
+
 
   const {proxy} = getCurrentInstance() as ComponentInternalInstance;
 
@@ -1344,6 +1365,87 @@
     {title: '操作', field: 'make', showOverflow: false, align: 'center', minWidth: '100', fixed: 'right',},
   ]);
 
+  // 报废抽屉
+  const columnListScrapDrawer = ref([
+  { width: '40',type: 'seq',title: '序号',align: 'center',  },
+  { width: '130', title: '产品编码',field: 'commodityId',align: 'center',  },
+  { width: '70',title: '订单数量',field: 'orderQuantity',align: 'center',  },
+  { width: '140',title: '流转卡号',field: 'productionCardId',align: 'center',  },
+  { width: '70',title: '排产数量',field: 'productionPcsQuantity',align: 'center',  },
+  { width: '80',title: '报废工序',field: 'craftId',align: 'center',  },
+  { width: '100',title: '报废原因',field: 'reasonId',align: 'center',  },
+  { width: '60',title: '报废总数量',field: 'orderQuantity1',align: 'center',  },
+  { width: '60',title: '报废数量',field: 'quantity',align: 'center',  },
+  { width: '60',title: '报废单位',field: 'unit',align: 'center',  },
+  { width: '80',title: '换算报废数量(pcs)',field: 'pcsQuantity',align: 'center',  },
+  { width: '80',title: '责任人',field: 'responsibleUserName',align: 'center',  },
+  { width: '140',title: '处理时间',field: 'createTime',align: 'center',  },
+  { minWidth: '65',title: '操作',align: 'center',field: 'make'  },
+  ]);
+
+  // 补投顶部表格
+  const columnListFeedDrawer = ref([
+  { width: '50',type: 'seq',title: '序号',fixed: 'left',align: 'center',  },
+  { width: '70',title: '新/返',field: 'orderType',align: 'center',  },
+  { width: '70',title: '批/样',field: 'model',align: 'center',  },
+  { width: '70',title: '加急',field: 'urgent',align: 'center',  },
+  { title: '产品编码',field: 'commodityCode',align: 'center',  },
+  { title: '产品类型',field: 'commodityType',align: 'center',  },
+  { title: 'pcs/set',field: 'unitedNumber',align: 'center',  },
+  { title: '订单面积(m²)',field: 'area',align: 'center',  },
+  { title: '订货数量(pcs)',field: 'quantity',align: 'center',  },
+  { title: '预投pcs数量',align: 'center', field: 'field1' },
+  { title: '已投pcs数量',align: 'center', field: 'field2' },
+  { title: '报废pcs数量',align: 'center', field: 'scrapNum' },
+  { title: '实投pcs数量',align: 'center', field: 'field4' },
+  { title: '投料率(%)',align: 'center', field: 'field5' },
+  { width: '130',title: '现有库存数(pcs)',field: 'existingQuantity',align: 'center',  },
+  { width: '130',title: '历史使用库存数(pcs)',field: 'alreadyUsedQuantity',align: 'center',  },
+  { width: '130',type: 'number',title: '本次使用库存数(pcs)',field: 'useQuantity',align: 'center', fixed: 'right' },
+  ]);
+
+  // 补投开料方案
+  const columnListSchemeDrawer = ref([
+  { width: '150px',title: 'PNL名称',field: 'pnl.name',align: 'center',  },
+  { width: '100px',title: '长(mm)',field: 'pnl.pnlLength',align: 'center',  },
+  { width: '100px',title: '宽(mm)',field: 'pnl.pnlWidth',align: 'center',  },
+  { width: '100px',title: 'pnl/大料',field: 'count',align: 'center',  },
+  { width: '160px',title: '产品编码',align: 'center', field: 'field1', showOverflow: false },
+  { width: '100px',title: 'set/pnl',align: 'center', field: 'field2', showOverflow: false },
+  { width: '100px',title: 'pcs/大料',align: 'center', field: 'field3', showOverflow: false },
+  { width: '100px',title: 'pcs/pnl',align: 'center', field: 'field4', showOverflow: false },
+  { width: '100px',title: '预投pcs数',align: 'center', field: 'field5', showOverflow: false },
+  { title: '预投pnl数',align: 'center', field: 'field6' },
+  { title: '总pnl数',align: 'center', field: 'field7' },
+  { title: '实投pnl数',align: 'center', field: 'field8' },
+  ]);
+
+  // 报废记录
+  const columnListScrapRecord = ref([
+  { width: '60',type: 'seq',title: '序号',align: 'center',  },
+  { title: '产品编码',field: 'commodityId',align: 'center',  },
+  { width: '70',title: '订单数量',field: 'orderQuantity',align: 'center',  },
+  { width: '130',title: '流转卡号',field: 'productionCardId',align: 'center',  },
+  { width: '70',title: '排产数量',field: 'orderQuantity1',align: 'center',  },
+  { width: '100',title: '报废工序',field: 'craftId',align: 'center',  },
+  { width: '100',title: '报废原因',field: 'discardReason',align: 'center',  },
+  { width: '80',title: '报废总数量',field: 'orderQuantity2',align: 'center',  },
+  { width: '70',title: '报废数量',field: 'quantity',align: 'center',  },
+  { width: '70',title: '报废单位',field: 'unit',align: 'center',  },
+  { width: '120',title: '换算报废数量(pcs)',field: 'pcsQuantity',align: 'center',  },
+  { width: '70',title: '责任人',field: 'responsibleUserName',align: 'center',  },
+  { width: '140',title: '处理时间',field: 'createTime',align: 'center',  },
+  { width: '60',title: '操作',align: 'center', field: 'make' },
+  ]);
+
+  // 补投列表 产品名称
+  const columnListProdName = ref([
+  { width: '120',title: '产品编码',field: 'commodityCode',align: 'center',  },
+  { width: '120',title: '产品名称',field: 'commodityName',align: 'center',  },
+  { width: '120',title: '客户编码',field: 'customerCode',align: 'center',  },
+  { title: '操作',align: 'center', field: 'make' },
+  ]);
+
   const setRowStyle = ({row, rowIndex, $rowIndex}: any) => {
     if (row.productionStatus == '11' && row.productionCardVoList != null) {
       return {
@@ -1664,10 +1766,13 @@
   const currentProduction = ref({});
 
   let supplierList = ref([]);
+  //物料责任供应商
+  let materialSupplierList = ref<any>([]);
 
   /*报废按钮*/
   const scrapProduction = async (row: any) => {
     supplierList.value = [];
+    materialSupplierList.value = [];
     cardScrapList.value = [];
     currentProduction.value = row;
     const orderIdList = row.saleOrderVoList.map(item => {
@@ -1691,6 +1796,12 @@
     if (res4 && res4.data.length > 0) {
       supplierList.value = supplierList.value.concat(res4.data)
     }
+    //物料供应商
+    const res6 = await listByMaterial().catch(() => proxy?.$modal.closeLoading());
+    if (res6 && res6.data.length > 0) {
+      materialSupplierList.value = res6.data;
+    }
+
     //报废
     const res5 = await getScrapListByCard({productionId: currentProduction.value.id}).finally(() => proxy?.$modal.closeLoading());
     cardScrapList.value = res5.data;
@@ -1741,6 +1852,14 @@
     const req = {
       craftId: node.id
     }
+    //报废产品（新增报废时，只有一个选项，则默认选中）
+    if (currentProduction.value.saleOrderVoList.length == 1) {
+      form.value.saleOrderId = currentProduction.value.saleOrderVoList[0].id;
+    }
+    //流转卡号（新增报废时，只有一个选项，则默认选中）
+    if (productionCardList.value.length == 1) {
+      form.value.productionCardId = productionCardList.value[0].id;
+    }
     const res = await getListDiscardReason(req);
     scrapReasonList.value = res.data;
     const res2 = await getUserByCraftId({id: node.id});
@@ -1782,7 +1901,8 @@
     const req = {
       reasonId: item.id
     }
-    await checkReasonDelete(req)
+    // 无需再校验是否可删除报废原因,当前已将报废原因字符串存表
+    // await checkReasonDelete(req)
     await delDiscardReason(_ids);
     // onNodeClick(currentNode.value);
     tempReason.value = deepClone(scrapReasonList.value)
@@ -1908,6 +2028,11 @@
       }
       if (form.value.type == 2) {
         const info: any = supplierList.value.find(info => info.id == form.value.typeValue)
+        item.supplierId = info?.id;
+        item.supplierName = info?.companyName;
+      }
+      if (form.value.type == 3) {
+        const info: any = materialSupplierList.value.find(info => info.id == form.value.typeValue)
         item.supplierId = info?.id;
         item.supplierName = info?.companyName;
       }

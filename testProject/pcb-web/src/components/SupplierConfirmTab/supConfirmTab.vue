@@ -29,6 +29,7 @@
           :column-config="{ resizable: true }"
           :row-config="{ keyField: 'id' }"
           :row-style="tableRowClassName"
+          ref="waitConfirmTableRef"
         >
           <template #default-confirmStatus="scope">
             <div v-for="item in confirmStatusList">
@@ -49,9 +50,6 @@
           </template>
           <template #default-isTax="{ row }">
             <span>{{ row.isTax == '1' ? '是' : '否' }}</span>
-          </template>
-          <template #default-totalPrice="scope">
-            <div>{{ Number(scope.row.totalPrice).toFixed(2) }}</div>
           </template>
           <template #default-accountMonth="scope">
             <span>{{ parseTime(scope.row.accountMonth, '{y}-{m}') }}</span>
@@ -126,6 +124,7 @@
           :column-config="{ resizable: true }"
           :row-config="{ keyField: 'id' }"
           :row-style="tableRowClassName"
+          ref="confirmedTableRef"
         >
           <template #default-status="scope">
             <div v-if="props.moduleCode == '5'">
@@ -193,7 +192,7 @@
           </template>
         </XTable>
       </el-tab-pane>
-      <el-tab-pane label="待对方确认列表" :name="3">
+      <el-tab-pane :label="lableValue" :name="3">
         <div class="p-2" style="text-align: right;width: 100%">
           <el-row :gutter="10" class="mb8" style="line-height: 32px;width:100%;margin:0;display:flex;justify-content: end;">
             <div style="display:flex;font-size: 14px">
@@ -221,6 +220,7 @@
           :column-config="{ resizable: true }"
           :row-config="{ keyField: 'id' }"
           :row-style="tableRowClassName"
+          ref="waitOtherConfirmTableRef"
         >
           <template #default-status="scope">
             <div v-if="props.moduleCode == '5'">
@@ -340,6 +340,8 @@ import { getUrlLink } from "@/api/purchase/materialOrder";
 const emits = defineEmits(['searchChange','exportExcel','cancelAccount','accountPrint','handleConfirm','relatedDeduction','accountInfo'])
 import clipboard3 from "vue-clipboard3";
 import useUserStore from "@/store/modules/user";
+import { decryptBase64ByStr } from '@/utils/crypto'
+
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
 const props = withDefaults(defineProps<{
@@ -392,6 +394,8 @@ const unitOptions = ref([
 
 const cancelModule = ref(['5', '8']);
 const confirmModule = ref(['5', '10']);
+
+let lableValue = confirmModule.value.includes(props.moduleCode) ? '待买方确认' : '待对方确认列表';
 
 const buttonLoading = ref(false);
 
@@ -492,6 +496,19 @@ const data3 = reactive<PageData<any, any>>({
 const { queryParams} = toRefs(data);
 const { queryParams: confirmQueryParams, } = toRefs(data2);
 const { queryParams: waitQueryParams } = toRefs(data3);
+
+const route = useRoute();
+/**
+ * 进入页面次数
+ */
+const isFirst = ref(0)
+/**
+ * 待办跳转参数
+ */
+const pendingParams = ref()
+const waitConfirmTableRef = ref()
+const confirmedTableRef = ref()
+const waitOtherConfirmTableRef = ref()
 
 // 获取 搜索条件
 const searchChange = (params: any) => {
@@ -869,8 +886,42 @@ const statementConfirmOrder = async () => {
     }
   });
 }
-
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = route.query?.pendingParams ? decryptBase64ByStr(route.query.pendingParams) : '{}'
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    // 再次进入页面确认用
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      let tab = !isNaN(Number(params.tab)) ? Number(params.tab) : 1;
+      editableTabsValue.value = tab
+      confirmQueryParams.value.code = params.bizNo
+      let tempColumnList = [{field: 'orderCode', defaultValue: params.bizNo}]
+      if (tab === 1) {
+        setTimeout(() => {
+          waitConfirmTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === 2) {
+        setTimeout(() => {
+          confirmedTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === 3) {
+        setTimeout(() => {
+          waitOtherConfirmTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      }
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
 onMounted(() => {
-
 });
 </script>

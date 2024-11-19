@@ -7,6 +7,7 @@
         custom-class="ptable-dialog">
         <div class="ptable-card">
             <XTable
+                :showHead="false"
                 :pageShow="false"
                 :data="props.data"
                 height="100%"

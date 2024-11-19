@@ -139,3 +139,27 @@ export const getStatementInfo = (id: string | number): AxiosPromise<MaterialOrde
     method: 'get'
   });
 };
+
+/**
+ * 修改交期
+ * @param data
+ */
+export const updateMaterialOrderDeliveryTime = (data: MaterialOrderDetailVO | undefined) => {
+  return request({
+    url: '/purchase/materialHandleDetail/updateOrderDeliveryTime',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
+ * 修改申请的交期
+ * @param data
+ */
+export const updateMaterialApplyDeliveryTime = (data: MaterialOrderDetailVO | undefined) => {
+  return request({
+    url: '/purchase/materialHandle/updateDeliveryTime',
+    method: 'post',
+    data: data
+  });
+};

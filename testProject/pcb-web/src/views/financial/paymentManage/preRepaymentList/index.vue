@@ -121,10 +121,10 @@
           <span>{{ scope.row.payCode?scope.row.payCode:'--' }}</span>
         </template>
         <template #default-transferredAmount="scope">
-          <span>{{ scope.row.transferredAmount==='0.0000'?'':Number(scope.row.transferredAmount).toFixed(2) }}</span>
+          <span>{{ scope.row.transferredAmount==='0.0000'?'':Number(parseFloat(scope.row.transferredAmount).toString()) }}</span>
         </template>
         <template #default-totalPrice="scope">
-          <span>{{ scope.row.totalPrice?Number(scope.row.totalPrice).toFixed(2):'0.00' }}</span>
+          <span>{{ scope.row.totalPrice?Number(parseFloat(scope.row.totalPrice).toString()):'0' }}</span>
         </template>
         <template #default-status="scope">
           <div v-for="(item,index) in statusFilterData">
@@ -147,8 +147,11 @@
           <span v-else>--</span>
         </template>
         <template #default-payAccount="scope">
-          <dict-tag v-if="payAccountList.find((vo:any) => vo.value == scope.row.payAccount)" :options="payAccountList" :value="scope.row.payAccount" />
-          <span v-else>--</span>
+          <span v-if="['1','2'].includes(scope.row.payWay)">--</span>
+          <dict-tag
+            v-if="!['1','2'].includes(scope.row.payWay)&&payAccountList&&payAccountList.length>0&&payAccountList.find((vo:any) => vo.id == scope.row.payAccount)"
+            :options="payAccountList" :value="scope.row.payAccount"
+          />
         </template>
         <template #default-createTime="scope">
           <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
@@ -243,35 +246,26 @@
     getRepaymentRecord,
     delRepaymentRecord,
     addPaymentRecord,
-    getWriteOffAllListByPayId,
     queryPayRecordListByCustSup,
     updateRepaymentRecord,
-    updatePaymentStatus,
-    uploadReceipt,
     submitPaymentAccount,
     getPaymentAccountList,
-    approvePaymentAccount,
-    rejectPaymentAccount,
     reUpdatePaymentAccount,
-    addSubmitPaymentWriteOff,
     deletePaymentAccount,
-    addSubmitPrePaymentWriteOff, approvePrePaymentAccount, validatePaymentAccountDetail
+    addSubmitPrePaymentWriteOff,
+    validatePaymentAccountDetail,
+    approvePreRepaymentCheckPer, rejectRepaymentCheckPer
   } from '@/api/financial/repaymentRecord';
-import { RepaymentRecordVO, RepaymentRecordQuery, RepaymentRecordForm , InvoiceQuery, InvoiceForm } from '@/api/financial/repaymentRecord/types';
+import { RepaymentRecordVO, RepaymentRecordForm , InvoiceForm } from '@/api/financial/repaymentRecord/types';
 import { InvoiceVO} from "@/api/financial/invoice/types";
 import { listOwnerSupplier } from '@/api/basedata/supplier';
-import { listInvoice } from "@/api/financial/invoice";
-import { VxeTableInstance, VxeTableEvents } from 'vxe-table'
-import { OssForm, OssQuery, OssVO } from "@/api/system/oss/types";
 import { SupplierVO } from "@/api/basedata/supplier/types";
 import { OrderWriteOffRecordVO } from '@/api/financial/orderWriteOffRecord/types';
-import { listDept } from "@/api/system/dept";
 import { listCompany } from '@/api/basedata/customer';
 import { deepClone } from '@/utils';
 import {ref} from "vue";
 import {AccountOrderForm, AccountOrderQuery, AccountOrderVO} from "@/api/financial/accountOrder/types";
 import {getAccountOrder} from "@/api/financial/accountOrder";
-import { BigNumber } from 'bignumber.js';
 import {parseTime} from "@/utils/ruoyi";
 import { listOrderBack } from '@/api/order/orderBack/index';
 import {
@@ -619,7 +613,7 @@ const checkPass = async (row: RepaymentRecordVO) => {
       getList();
     })
   } else {
-    submitPaymentAccount({id: row.id}).then(res => {
+    submitPaymentAccount({id: row.id, isSup: false}).then(res => {
       proxy?.$modal.msgSuccess("操作成功");
       getList();
       paymentTable.visible = false;
@@ -642,9 +636,9 @@ const submit = (row: any) => {
 }
 
   /*审核通过*/
-  const submitPass = (id: any) => {
+  const submitPass = (id: any, isSup: boolean) => {
     buttonLoading.value = true;
-    approvePrePaymentAccount({id: id}).then(res => {
+    approvePreRepaymentCheckPer({id: id, isSup: isSup}).then(res => {
       proxy?.$modal.msgSuccess("操作成功");
       paymentTable.visible = false;
       getList();
@@ -656,7 +650,7 @@ const submit = (row: any) => {
   /*审核驳回*/
   const submitReject = (id: any) => {
     buttonLoading.value = true;
-    rejectPaymentAccount(id).then(res => {
+    rejectRepaymentCheckPer(id).then(res => {
       proxy?.$modal.msgSuccess("操作成功");
       paymentTable.visible = false;
       getList();

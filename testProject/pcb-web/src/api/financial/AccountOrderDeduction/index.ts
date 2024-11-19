@@ -93,3 +93,31 @@ export const listAccountOrderSupplierDeduction = (query?: any): AxiosPromise<Acc
     params: query
   });
 };
+
+/**
+ * 获取责任人列表
+ */
+export const getUserList = () => {
+  return request({
+    url: '/financial/AccountOrderDeduction/queryUser',
+    method: 'get'
+  });
+};
+
+/**
+ * 查询 客户/供应商 的订单
+ * @param params
+ *  supplierId 供应商ID type为2是必填
+ *  type 类型（2：供应商、1：客户）
+ *  saleOrderCode 销售订单编码
+ *  commodityName 产品名称
+ *  commodityCode 产品编码
+ *  customerId 客户ID type为1是必填
+ */
+export const getQueryOrder = (params: any): any => {
+  return request({
+    url: '/financial/AccountOrderDeduction/queryOrder',
+    method: 'get',
+    params
+  });
+};

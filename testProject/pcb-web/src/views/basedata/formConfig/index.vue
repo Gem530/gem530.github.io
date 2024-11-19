@@ -1,20 +1,22 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
+    <!-- <el-card shadow="never" class="xtable-card">
       <template #header>
         <el-row :gutter="10" class="mb8 global-flex flex-end">
-          <el-col :span="1.5">
+          <el-col :span="1.5"> -->
+          <div class="head-btn-flex">
             <el-button type="primary" plain icon="Plus" @click="handleAdd" >新增</el-button>
-          </el-col>
-          <el-col :span="1.5">
+          <!-- </el-col>
+          <el-col :span="1.5"> -->
             <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate()" >修改</el-button>
-          </el-col>
-          <el-col :span="1.5">
+          <!-- </el-col>
+          <el-col :span="1.5"> -->
             <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()" >删除</el-button>
-          </el-col>
+          </div>
+          <!-- </el-col>
           <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
         </el-row>
-      </template>
+      </template> -->
 
       <XTable toolId="basedataFormConfig" :pageShow="true" v-model:page-size="queryParams.pageSize" v-model:current-page="queryParams.pageNum" height="100%" class="xtable-content"
               :page-params="{ perfect: true, total: total }"
@@ -36,7 +38,7 @@
         </template>
       </XTable>
 
-    </el-card>
+    <!-- </el-card> -->
     <!-- 添加或修改表单配置对话框 -->
     <el-drawer  :title="dialog.title" v-model="dialog.visible" width="500px">
       <el-form ref="formConfigFormRef" :model="form" :rules="rules" label-width="80px">

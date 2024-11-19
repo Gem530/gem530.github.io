@@ -29,12 +29,35 @@ export const listUser = (query: UserQuery): AxiosPromise<UserVO[]> => {
 };
 
 /**
+ * 获取用户列表
+ * @param query
+ */
+export const getSysUserList = (query: UserQuery) => {
+  return request({
+    url: '/system/user/userList',
+    method: 'get',
+    params: query
+  });
+};
+
+/**
  * 获取用户详情
  * @param userId
  */
 export const getUser = (userId?: string | number): AxiosPromise<UserInfoVO> => {
   return request({
     url: '/system/user/' + parseStrEmpty(userId),
+    method: 'get'
+  });
+};
+
+/**
+ * 获取用户详情
+ * @param userId
+ */
+export const getAccount = (phoneNumber?: any): AxiosPromise<UserInfoVO> => {
+  return request({
+    url: '/system/account/selectInfoByPhoneNumber/' + parseStrEmpty(phoneNumber),
     method: 'get'
   });
 };
@@ -198,12 +221,45 @@ export const listUserByDeptId = (deptId: string | number): AxiosPromise<UserVO[]
 };
 
 /**
+ * 查询当前部门的所有用户信息
+ * @param deptId
+ */
+export const userListByDeptId = (deptId: string | number): AxiosPromise<UserVO[]> => {
+  return request({
+    url: '/system/user/list/deptId/' + deptId,
+    method: 'get'
+  });
+};
+
+/**
+ * 查询当前单位的所有用户信息
+ * @param ownerId
+ */
+export const listUserByOwnerId = (ownerId: string | number): AxiosPromise<UserVO[]> => {
+  return request({
+    url: '/system/user/list/owner/' + ownerId,
+    method: 'get'
+  });
+};
+
+/**
  * 查询当前角色的所有用户信息
  * @param roleKey
  */
 export const listUserByRoleKey = (roleKey: string | number): AxiosPromise<UserVO[]> => {
   return request({
     url: '/system/user/list/role/' + roleKey,
+    method: 'get'
+  });
+};
+
+/**
+ * 查询所有用户信息
+ * @param roleKey
+ */
+export const listAllUser = (): AxiosPromise<UserVO[]> => {
+  return request({
+    url: '/system/user/listAllUser',
     method: 'get'
   });
 };
@@ -287,6 +343,28 @@ export const batchAssignTask = (data: FlowTaskVo[]) => {
     url: '/flowable/task/batchAssignTask',
     method: 'post',
     data: data
+  });
+};
+
+/**
+ * 生成微信短链
+ */
+export const generateUrlLink = (data: any) => {
+  return request({
+    url: '/wx/generateUrlLink',
+    method: 'post',
+    data
+  });
+};
+
+/**
+ * 生成微信短链
+ */
+export const queryUrlLink = (params: any) => {
+  return request({
+    url: '/wx/queryUrlLink',
+    method: 'get',
+    params
   });
 };
 

@@ -73,32 +73,6 @@
               <el-button link type="primary" @click="cancelAuthUser(scope.row)" >取消授权</el-button>
           </template>
       </XTable>
-      <!-- <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="用户名称" prop="userName" :show-overflow-tooltip="true" />
-        <el-table-column label="用户昵称" prop="nickName" :show-overflow-tooltip="true" />
-        <el-table-column label="邮箱" prop="email" :show-overflow-tooltip="true" />
-        <el-table-column label="手机" prop="phonenumber" :show-overflow-tooltip="true" />
-        <el-table-column label="状态" align="center" prop="status">
-          <template #default="scope">
-            <dict-tag :options="sys_normal_disable" :value="scope.row.status" />
-          </template>
-        </el-table-column>
-        <el-table-column label="创建时间" align="center" prop="createTime" width="180">
-          <template #default="scope">
-            <span>{{ scope.row.createTime }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-          <template #default="scope">
-            <el-tooltip content="取消授权" placement="top">
-              <el-button link type="primary" icon="CircleClose" @click="cancelAuthUser(scope.row)" > </el-button>
-            </el-tooltip>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" @pagination="getList" /> -->
       <select-user ref="selectRef" :roleId="queryParams.roleId" @ok="handleQuery" />
     </el-card>
     <div style="text-align: center;margin: 10px 0;">
@@ -139,7 +113,7 @@ const queryParams = reactive<UserQuery>({
 const columnList = ref([
   { type: 'checkbox', fixed: "left", align: 'center', width: '50' },
   { title: "序号", type: 'seq', fixed: "left", field: 'index', align: 'center', width: '60' },
-  { title: '手机号', field: 'phonenumber', width: '120', align: 'center' },
+  { title: '手机号/用户名', field: 'phonenumber', width: '120', align: 'center' },
   { title: '姓名', field: 'nickName', width: '120', align: 'center' },
   { title: '部门', field: 'deptName', minWidth: '260', align: 'center' },
   { title: '状态', field: 'status', width: '120', align: 'center' },

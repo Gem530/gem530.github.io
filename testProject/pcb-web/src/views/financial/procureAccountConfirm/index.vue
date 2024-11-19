@@ -65,6 +65,8 @@
           :isEdit="isEdit"
           :showSupplierSelect="false"
           :showSupplierStr="true"
+          :show-is-tax-select="true"
+          :monthlyMethod="monthly_method"
         />
         <RawAccountTabSupplier
           tabToolId1="supConfirmProcureToolId1"
@@ -129,6 +131,9 @@ import { listAccountOrderOther } from '@/api/financial/accountOrderOther';
 import { InOutTypeEnum, typeStrings } from '@/api/basedata/rawMaterial/types';
 import { VxeTableEvents } from 'vxe-table'
 import accountForm from '../components/supplierAccountForm.vue';
+import {queryUseModule} from "@/api/basedata/sign";
+//含税
+const { monthly_method, currency_type: currencyTypeList} = toRefs<any>(proxy?.useDict( 'monthly_method','currency_type'));
 const dataList = ref<any[]>([]);
 const loading = ref(false);
 const total = ref(0);
@@ -224,8 +229,8 @@ const tabColumnList = ref([
   { width: '120', title: '采购单号', field: 'purchaseCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入采购单号' } },
   { width: '120', title: '送货单号', field: 'code', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入采购单号' } },
    { title: '入库日期', sortable: true, width: '140', field: 'createTime', align: 'center' },
-  // { width: '160', title: '客户名称', field: 'ownerName', align: 'center' },
-  // { width: '80', title: '是否含税', field: 'supplierIsTax', align: 'center' },
+  { title: '含税', width: '80', field: 'isTax', align: 'center' },
+  { title: '月结方式', width: '90', field: 'monthlyMethod', align: 'center' },
   { width: '100', title: '物料编码', field: 'materialCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料编码' } },
   { width: '120', title: '物料名称', field: 'name', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料名称' } },
   { width: '160', title: '规格参数', field: 'specificationAll', align: 'center', },
@@ -243,7 +248,7 @@ const tabColumnList = ref([
 const deductionColumnList = ref([
   { type: 'checkbox', fixed: 'left', align: 'center', field: "checkbox", width: '50' },
   { title: '序号',field: "index", width: '40', type: 'seq', visible: true, align: 'center' },
-  { title: '扣款单号', width: '100', field: 'no', align: 'center', },
+  { title: '扣款单号', width: '100', field: 'code', align: 'center', },
   { title: '扣款类型', width: '80', field: 'type', align: 'center', },
   { title: '创建人', width: '60', field: 'createByName', align: 'center', },
   { title: '创建时间', width: '120', field: 'createTime', align: 'center', },
@@ -335,16 +340,15 @@ const reportDrawer = reactive<DrawerOption>({
 const accountPrint = async (row: any) => {
   reportDrawer.title = "对账单报表预览";
   reportDrawer.visible = true;
-  if(row.confirmStatus=="3"){
-    getSignPdf({bizId:row.id,bizCode:row.code}).then(res=>{
-      let vo = res.data;
-      if (vo.url) {
-        let url = '/web/viewer.html?file=' + encodeURIComponent(vo.url + '#' + vo.name);
-        reportUrl.value = url;
-        return;
-      }
-    });
-  }
+  getSignPdf({bizId: row.id, bizCode: row.code}).then(res => {
+    let vo = res.data;
+    if (vo.url) {
+      let url = '/web/viewer.html?file=' + encodeURIComponent(vo.url + '#' + vo.name);
+      reportUrl.value = url;
+      return;
+    }
+  });
+
   reportUrl.value = getReportUrl() + `&_n=采购对账单&_u=file:purchaseAccount.ureport.xml&url=financial/accountOrder/supReview/${row.id}&listUrl=financial/accountOrder/reportDetail/${row.id}&listUrl1=financial/accountOrder/supReviewRecord/${row.id}`;
 }
 const accountOrderDeductionId = ref<any>();
@@ -407,7 +411,14 @@ if (addForm.otherOrderBoList && addForm.otherOrderBoList.length > 0) {
         }).finally(() => { buttonLoading.value = false; });
     } else {
       buttonLoading.value = false;
-      querySignList();
+      // 查询是否存在默认签章
+      const res = await queryUseModule({useModule: '4'});
+      // 存在则自动签名
+      if(res.data) {
+        submitSign(res.data.key, res.data.signType);
+      } else {
+        querySignList();
+      }
     }
 }
 
@@ -598,7 +609,7 @@ const accountInfo = async (row: any) => {
 const handleUpdate = async (row?:any) => {
   drawerBorrow.visible = true;
   allData.value.inOrOutLoading = true;
-  await handleInOrOutQuery({accountTime:formInfo.value.accountTime});
+  await handleInOrOutQuery({accountTime:formInfo.value.accountTime,monthlyMethod:formInfo.value.monthlyMethod,isTax:formInfo.value.isTax});
   allData.value.inOrOutLoading = false;
 }
 // tab页签内合并搜索 **************start

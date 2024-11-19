@@ -21,7 +21,7 @@
         <div style="display: flex; justify-content: center;">
           <span class="dialog-footer">
             <el-button :loading="buttonLoading" @click="drawerBorrow.visible = false">取消</el-button>
-            <el-button :loading="buttonLoading" type="danger" v-show="drawerBorrow.title?.includes('修改') || drawerBorrow.title?.includes('添加')"
+            <el-button :loading="buttonLoading" v-show="drawerBorrow.title?.includes('修改') || drawerBorrow.title?.includes('添加')"
               @click="handleSave">
               保存
             </el-button>
@@ -143,8 +143,10 @@ const tabColumnList = ref([
   { width: '90', title: '外协备注', field: 'outRemark', align: 'center' },
   { width: '90', title: '外协数量', field: 'oldQuantity', align: 'center' },
   { width: '90', title: '确认数量', field: 'inOutQuantity', align: 'center' },
+  { width: '90', title: '确认面积（㎡）', field: 'inOutArea', align: 'center' },
   { width: '90', title: '菲林单价', field: 'feiLinPrice', align: 'center' },
   { width: '80', title: '核对数量', field: 'quantity', align: 'center',  editRender: {} },
+  { width: '80', title: '核对面积（㎡）', field: 'area', align: 'center' },
   { width: '80', title: '核对单价', field: 'price', align: 'center', editRender: {} },
   { width: '80', title: '折扣金额', field: 'discountPrice', align: 'center', editRender: {} },
   { width: '90', title: '总金额', field: 'totalPrice', align: 'center', },

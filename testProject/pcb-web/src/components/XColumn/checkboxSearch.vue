@@ -103,7 +103,7 @@ const handleCheckedCitiesChange = (value: any): any => {
     }
 
     &.margin-top {
-        margin-top: 10px;
+        margin-top: 4px;
     }
 }
 </style>

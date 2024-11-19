@@ -54,22 +54,14 @@
         </el-row>
       </template>
 
-      <el-table v-loading="loading" :data="materialOrderDetailList" @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="${comment}" align="center" prop="id" v-if="true" />
-        <el-table-column label="物料ID" align="center" prop="rawMaterialId" />
-        <el-table-column label="采购数量" align="center" prop="quantity" />
-        <el-table-column label="申请明细ID" align="center" prop="applyDetailId" />
-        <el-table-column label="供应商ID" align="center" prop="supplierId" />
-        <el-table-column label="要求交期" align="center" prop="deliverTime" />
-        <el-table-column label="受理人ID" align="center" prop="handleUserId" />
-        <el-table-column label="受理人名称" align="center" prop="handleUserName" />
-        <el-table-column label="采购单价" align="center" prop="price" />
-        <el-table-column label="采购总价" align="center" prop="totalPrice" />
-        <el-table-column label="入库数量" align="center" prop="inventoryQuantity" />
-        <el-table-column label="状态" align="center" prop="status" />
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-          <template #default="scope">
+      <XTable v-loading="loading" :columnList="columnList" :data="materialOrderDetailList" class="xtable-content" height="100%"
+      v-model:page-size="queryParams.pageSize"
+      v-model:current-page="queryParams.pageNum"
+      :page-params="{ perfect: true, total: total }"
+      @search-change="getList"
+      @checkbox-change="handleSelectionChange" ref="xtableRef"
+      @checkbox-all="handleSelectionChange">
+          <template #default-make="scope">
             <el-tooltip content="修改" placement="top">
               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" ></el-button>
             </el-tooltip>
@@ -77,16 +69,7 @@
               <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" ></el-button>
             </el-tooltip>
           </template>
-        </el-table-column>
-      </el-table>
-
-      <pagination
-          v-show="total>0"
-          :total="total"
-          v-model:page="queryParams.pageNum"
-          v-model:limit="queryParams.pageSize"
-          @pagination="getList"
-      />
+      </XTable>
     </el-card>
     <!-- 添加或修改采购明细对话框 -->
     <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px" >
@@ -132,6 +115,7 @@ import { MaterialOrderDetailVO, MaterialOrderDetailQuery, MaterialOrderDetailFor
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
+const xtableRef = ref()
 const materialOrderDetailList = ref<MaterialOrderDetailVO[]>([]);
 const buttonLoading = ref(false);
 const loading = ref(true);
@@ -223,7 +207,22 @@ const data = reactive<PageData<MaterialOrderDetailForm, MaterialOrderDetailQuery
 });
 
 const { queryParams, form, rules } = toRefs(data);
-
+const columnList = ref([
+{ width: '55',type: 'checkbox',align: 'center',  },
+{ title: '${comment}',field: 'id',align: 'center',  },
+{ title: '物料ID',field: 'rawMaterialId',align: 'center',  },
+{ title: '采购数量',field: 'quantity',align: 'center',  },
+{ title: '申请明细ID',field: 'applyDetailId',align: 'center',  },
+{ title: '供应商ID',field: 'supplierId',align: 'center',  },
+{ title: '要求交期',field: 'deliverTime',align: 'center',  },
+{ title: '受理人ID',field: 'handleUserId',align: 'center',  },
+{ title: '受理人名称',field: 'handleUserName',align: 'center',  },
+{ title: '采购单价',field: 'price',align: 'center',  },
+{ title: '采购总价',field: 'totalPrice',align: 'center',  },
+{ title: '入库数量',field: 'inventoryQuantity',align: 'center',  },
+{ title: '状态',field: 'status',align: 'center',  },
+{ title: '操作',field: 'make',align: 'center',  },
+]);
 /** 查询采购明细列表 */
 const getList = async () => {
   loading.value = true;
@@ -259,9 +258,16 @@ const resetQuery = () => {
 
 /** 多选框选中数据 */
 const handleSelectionChange = (selection: MaterialOrderDetailVO[]) => {
-  ids.value = selection.map(item => item.id);
-  single.value = selection.length != 1;
-  multiple.value = !selection.length;
+  // ids.value = selection.map(item => item.id);
+  // single.value = selection.length != 1;
+  // multiple.value = !selection.length;
+  const $table = xtableRef.value.xTableRef
+  if ($table) {
+    const selection = $table.getCheckboxReserveRecords().concat($table.getCheckboxRecords()) // 获取选择的行数据列表
+    ids.value = selection.map((item: any) => item.id);
+    single.value = selection.length != 1;
+    multiple.value = !selection.length;
+  }
 }
 
 /** 新增按钮操作 */

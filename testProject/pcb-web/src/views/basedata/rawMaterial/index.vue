@@ -1,24 +1,30 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
+    <!-- <el-card shadow="never" class="xtable-card">
       <template #header>
         <el-row :gutter="10" class="mb8" style="justify-content: end;">
-          <el-col :span="1.5">
-            <el-button type="primary" plain icon="Plus" @click="handleAdd">
-              新增
-            </el-button>
-          </el-col>
-          <el-col :span="1.5">
-            <el-button plain icon="Download" @click="handleExport">导出
-            </el-button>
-          </el-col>
+          <el-col :span="1.5"> -->
+          <el-form class="width-100">
+            <el-form-item>
+              <div class="width-100 text-right">
+                <el-button type="primary" plain icon="Plus" @click="handleAdd">
+                  新增
+                </el-button>
+              <!-- </el-col>
+              <el-col :span="1.5"> -->
+                <el-button plain icon="Download" @click="handleExport">导出
+                </el-button>
+              </div>
+            </el-form-item>
+          </el-form>
+          <!-- </el-col>
         </el-row>
-      </template>
-      <el-tabs type="border-card" v-model="editableTabsValue" @tab-change="handlerClick" class="xtable-tab">
+      </template> -->
+      <el-tabs v-model="editableTabsValue" @tab-change="handlerClick" class="xtable-tab">
         <el-tab-pane label="使用中" name="0">
           <XTable toolId="basedataRawMaterial" :pageShow="true" v-model:page-size="queryParams.pageSize"
             v-model:current-page="queryParams.pageNum" :page-params="{ perfect: true, total: total }"
-            :data="rawMaterialList" :columnList="columnList" :loading="loading" height="100%" class="xtable-content"
+            :data="rawMaterialList" :intervalCondition="intervalCondition" :columnList="columnList" :loading="loading" height="100%" class="xtable-content"
             ref="newVxeTableRef" border @searchChange="searchChange" :column-config="{ resizable: true }" :showRefresh="true"
             @checkbox-all="checkboxChangeEvent" @checkbox-change="checkboxChangeEvent">
             <template #default-status="scope">
@@ -36,11 +42,23 @@
               <!--            </el-tooltip>-->
             </template>
 
+            <template #header-inventoryWarningQuantity="{ row }">
+              库存预警值
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                raw-content
+                :content="'库存预警值：当物料当前库存小于等于预警值时，该物料会变更为告警状态'"
+              >
+                <el-icon class="tooltip-width-auto" ><QuestionFilled /></el-icon>
+              </el-tooltip>
+            </template>
+
           </XTable>
         </el-tab-pane>
         <el-tab-pane label="不使用" name="2">
-          <XTable toolId="basedataRawMaterial" :pageShow="true" v-model:page-size="queryParams.pageSize"
-            v-model:current-page="queryParams.pageNum" :page-params="{ perfect: true, total: total }"
+          <XTable toolId="basedataRawMaterial" :pageShow="true" v-model:page-size="queryStopParams.pageSize"
+            v-model:current-page="queryStopParams.pageNum" :page-params="{ perfect: true, total: stopTotal }"
             :data="stopRawMaterialList" :columnList="columnList" :loading="stopLoading" height="100%"
             class="xtable-content" ref="newVxeTableRef" border @searchChange="searchChangeStop"
             :column-config="{ resizable: true }" @checkbox-all="checkboxChangeEvent" :showRefresh="true"
@@ -64,12 +82,12 @@
         </el-tab-pane>
       </el-tabs>
 
-    </el-card>
+    <!-- </el-card> -->
 
     <!-- 添加或修改原料对话框 -->
-    <el-drawer :title="dialog.title" v-model="dialog.visible" width="500px">
-      <el-form ref="rawMaterialFormRef" :model="form" :rules="rules" :disabled="dialog.title === '查看原料'"
-        label-width="90px" label-position="right" v-loading="dialogTableLoading">
+    <el-drawer :title="dialog.title" v-model="dialog.visible" size="50%">
+      <el-form size="small" ref="rawMaterialFormRef" :model="form" :rules="rules" :disabled="dialog.title === '查看原料'"
+        label-width="95px" label-position="right" v-loading="dialogTableLoading">
         <el-row>
           <el-col :span="24">
             <el-form-item label="物料类别" prop="categoryId">
@@ -172,6 +190,16 @@
               <el-input v-model="form.specification" placeholder="请输入规格型号" />
             </el-form-item>
           </el-col>
+          <el-col :span="4">
+            <el-form-item label="库存预警值">
+              <el-switch v-model="form.isEnableWarning" active-value="1" inactive-value="0" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="" v-if="form.isEnableWarning == '1'" label-width="0" prop="inventoryWarningQuantity">
+              <el-input maxlength="12" v-model="form.inventoryWarningQuantity" placeholder="请输入" />
+            </el-form-item>
+          </el-col>
 
           <el-col :span="24">
             <el-form-item label="默认供应商" prop="">
@@ -181,6 +209,19 @@
             </el-form-item>
           </el-col>
 
+          <el-col :span="12" v-if="form.categoryName == '钻咀'" >
+            <el-form-item label="可研磨次数"  prop="abrasiveNumber">
+<!--              <el-input-number @change="changeNumber"  v-model="form.abrasiveNumber" placeholder="请输入可研磨次数" precision="0" min="1" max="100"/>-->
+              <XInputNumber class="number-left" :controls="false" style="width: 100%"   @change="changeNumber"  v-model="form.abrasiveNumber" placeholder="请输入可研磨次数" precision="0" min="1" max="100" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12" v-if="form.categoryName == '钻咀'" >
+            <el-form-item label="可使用次数">
+<!--              <el-input-number v-model="form.abrasiveNumberPlus" precision="0" disabled/>-->
+              <XInputNumber class="number-left" :controls="false" style="width: 100%"   v-model="form.abrasiveNumberPlus" precision="0" disabled />
+            </el-form-item>
+          </el-col>
 
           <el-col :span="24">
             <el-form-item label="备注" prop="remark">
@@ -272,10 +313,14 @@ const initFormData: RawMaterialForm = {
   level: undefined,
   copperThickness: undefined,
   length: undefined,
+  abrasiveNumber: undefined,
+  abrasiveNumberPlus: undefined,
+  inventoryWarningQuantity: undefined,
+  isEnableWarning: undefined,
   width: undefined,
   fileId: undefined,
   boardThickness: undefined,
-  file: undefined
+  file: undefined,
 }
  const positiveNumberWithTwoDecimalsHandle = (rule: any, value: any, callback: any) => {
 //  if (!/^(\d{0,6})(\.\d{0,2})?$/.test(value)) {
@@ -290,9 +335,44 @@ const initFormData: RawMaterialForm = {
    }
 
 }
-const data = reactive<PageData<RawMaterialForm, RawMaterialQuery>>({
+
+
+const nullOrPositiveNumberWithTwoDecimalsHandle = (rule: any, value: any, callback: any) => {
+  callback(nullOrPositiveNumberWithTwoDecimals(value))
+}
+
+// 0+正数且小数点后最多4位校验
+const nullOrPositiveNumberWithTwoDecimals = (cellValue: any) => {
+  // console.log('cellValue----', cellValue)
+  if (cellValue && !/^(0|[1-9]\d*)(\.\d{1,2})?$/.test(cellValue)) {
+    return new Error('请输入数字、最多两位小数点')
+  }
+}
+
+
+const data = reactive<any>({
   form: { ...initFormData },
   queryParams: {
+    pageNum: 1,
+    pageSize: 20,
+    categoryId: undefined,
+    name: undefined,
+    specification: undefined,
+    materialQuality: undefined,
+    units: undefined,
+    manufacturer: undefined,
+    supplier: undefined,
+    color: undefined,
+    level: undefined,
+    copperThickness: undefined,
+    length: undefined,
+    width: undefined,
+    fileId: undefined,
+    boardThickness: undefined,
+    status: undefined,
+    params: {}
+  },
+   queryStopParams: {
     pageNum: 1,
     pageSize: 20,
     categoryId: undefined,
@@ -319,6 +399,9 @@ const data = reactive<PageData<RawMaterialForm, RawMaterialQuery>>({
     categoryId: [
       { required: true, message: "物料类别不能为空", trigger: "blur" }
     ],
+    abrasiveNumber: [
+      { required: true, message: "可研磨次数不能为空", trigger: "blur" }
+    ],
     name: [
       { required: true, message: "物料名称不能为空", trigger: "blur" },
       { max: 50, message: "物料名称输入不能超过50个字符", trigger: "blur" }
@@ -335,17 +418,26 @@ const data = reactive<PageData<RawMaterialForm, RawMaterialQuery>>({
     width: [
       { validator: positiveNumberWithTwoDecimalsHandle, trigger: "change" }
     ],
+    inventoryWarningQuantity: [
+      {required: true,message: "请输入库存预警值", trigger: 'change'},
+      { validator: nullOrPositiveNumberWithTwoDecimalsHandle, trigger: 'change'},
+    ],
   },
 
 });
 
-const { queryParams, form, rules } = toRefs(data);
-const { queryParams: stopQuery } = toRefs(data);
+const changeNumber = () =>{
+  if (form.value.abrasiveNumber) {
+    form.value.abrasiveNumberPlus = + form.value.abrasiveNumber + 1;
+  }
+}
+
+const { queryParams, queryStopParams, form, rules } = toRefs(data);
 
 const getUnits = (val) => {
-
   const crtObj = rawMaterialCategorys.value.find(v => v.id == val)
   form.value.units = crtObj?.unit
+  form.value.categoryName = crtObj?.name
   form.value.defaultStorageId = crtObj?.defaultStorageName as any;
 }
 /**
@@ -417,7 +509,7 @@ const getList = async () => {
 /** 查询原料列表 */
 const getStopList = async () => {
   stopLoading.value = true;
-  const res = await listRawMaterial(stopQuery.value);
+  const res = await listRawMaterial(queryStopParams.value);
   stopRawMaterialList.value = res.rows;
   stopTotal.value = res.total;
   stopLoading.value = false;
@@ -465,10 +557,12 @@ const handleSelect = async (row?: RawMaterialVO) => {
   dialogTableLoading.value = true
   const res = await getRawMaterial(_id);
   Object.assign(form.value, res.data);
-
+  getUnits(form.value.categoryId);
   form.value.supplier = res.data.supplierId
   form.value.defaultStorageId = res.data.storageName
-
+  if (form.value.abrasiveNumber) {
+    form.value.abrasiveNumberPlus = +form.value.abrasiveNumber + 1;
+  }
   detailDisabled.value = true
   dialogTableLoading.value = false
 }
@@ -482,8 +576,12 @@ const handleUpdate = async (row?: RawMaterialVO) => {
   dialogTableLoading.value = true
   const res = await getRawMaterial(_id);
   Object.assign(form.value, res.data);
+  getUnits(form.value.categoryId);
   form.value.supplier = res.data.supplierId
   form.value.defaultStorageId = res.data.storageName
+  if (form.value.abrasiveNumber) {
+    form.value.abrasiveNumberPlus = +form.value.abrasiveNumber + 1;
+  }
   detailDisabled.value = false
   dialogTableLoading.value = false
 }
@@ -532,9 +630,9 @@ const handleExport = async () => {
     }, `物料_${new Date().getTime()}.xlsx`);
 
   } else if (editableTabsValue.value == '2') {
-    stopQuery.value.status = StatusEnum.STOP
+    queryStopParams.value.status = StatusEnum.STOP
     proxy?.download('/basedata/rawMaterial/export', {
-      ...stopQuery.value, tableName: 'basedataRawMaterial'
+      ...queryStopParams.value, tableName: 'basedataRawMaterial'
     }, `物料_${new Date().getTime()}.xlsx`);
   }
 
@@ -551,6 +649,8 @@ onMounted(() => {
   getListRawMaterialCategorys();
   getListRawMaterialStoragge();
 });
+
+const intervalCondition = ['inventoryWarningQuantity'];
 
 interface tagRow {
   label: string
@@ -576,6 +676,7 @@ const columnList = ref([
   { title: '物料名称', field: 'name', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料名称' } },
   { title: '物料类别', field: 'categoryName', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料类别' } },
   { title: '单位名称', field: 'units', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入单位名称' }, },
+  { title: '库存预警值', field: 'inventoryWarningQuantity', width: '120', align: 'center' , filterType: 'intervalNumber', },
   { title: '材质牌号', field: 'materialQuality', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入材质牌号' } },
   { title: '品牌', field: 'manufacturer', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入品牌' } },
 
@@ -590,6 +691,8 @@ const columnList = ref([
   { title: '颜色', field: 'color', width: '80', align: 'center' , filterType: 'input', filterParam: { placeholder: '' } },
   { title: '级别', field: 'level', width: '80', align: 'center' , filterType: 'input', filterParam: { placeholder: '' } },
   { title: '默认仓库', field: 'storageName', width: '80', align: 'center' ,filterType: 'input', filterParam: { placeholder: '' } },
+  { title: '可研磨次数', field: 'abrasiveNumber', width: '90', align: 'center' ,filterType: 'input', filterParam: { placeholder: '' } },
+  { title: '可使用次数', field: 'canUseNumber', width: '90', align: 'center' },
    { title: '备注', field: 'remark', width: '80', align: 'center',},
   { title: '状态', field: 'status', width: '80', align: 'center', fixed: 'right', },
   { title: '操作', field: 'make', align: 'center', fixed: 'right', width: 170, showOverflow: false },
@@ -619,9 +722,9 @@ const searchChange = (params?: any) => {
 const searchChangeStop = (params?: any) => {
   // Object.assign(queryParams.value, params)
   if (params) {
-    stopQuery.value = params
+    queryStopParams.value = params
   }
-  stopQuery.value.status = StatusEnum.STOP
+  queryStopParams.value.status = StatusEnum.STOP
   getStopList();
 }
 
@@ -636,3 +739,17 @@ const checkboxChangeEvent = () => {
   }
 }
 </script>
+
+<style scoped lang="scss">
+
+:deep(.number-left) {
+  .el-input__wrapper {
+    padding-left: 11px;
+    padding-right: 7px;
+  }
+  .el-input__inner {
+    text-align: left;
+  }
+}
+
+</style>

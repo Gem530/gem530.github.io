@@ -26,11 +26,13 @@ export default defineConfig(({ mode, command }: ConfigEnv): UserConfig => {
       open: true,
       proxy: {
         [env.VITE_APP_BASE_API]: {
-          // target: 'http://192.168.2.133:8081',
-          // target: 'http://192.168.2.127:8082',
-          // target: 'http://192.168.0.105:8088',
-          // target: 'http://192.168.0.119:8083',
-          target: 'http://pcb-test.enfccn.com:9000/prod-api',
+          // target: 'http://192.168.0.112:8080',
+          // target: 'http://192.168.0.28:8080',
+          // target: 'http://192.168.0.105:8082',
+          // target: 'http://192.168.0.131:8080',
+          // target: 'http://192.168.0.102:8081',
+          target: 'http://192.168.0.198:9000/prod-api',
+          // target: 'http://pcb-test.enfccn.com:9100/prod-api',
           // target: 'http://localhost:8080',
           changeOrigin: true,
           ws: true,

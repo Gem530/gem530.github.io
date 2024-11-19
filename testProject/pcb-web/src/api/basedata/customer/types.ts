@@ -647,6 +647,11 @@ export interface CustomerQuery extends PageQuery {
      * 日期范围参数
      */
     params?: any;
+
+    /**
+     * 客户类型查询-单查
+     */
+    customerOutTypeStr?: any;
 }
 
 

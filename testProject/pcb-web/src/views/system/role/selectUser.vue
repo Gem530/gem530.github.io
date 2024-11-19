@@ -39,25 +39,6 @@
           {{sys_normal_disable.find((f) => f.value == scope.row.status)?.label}}
         </template>
       </XTable>
-        <!-- <el-table @row-click="clickRow" ref="tableRef" :data="userList" @selection-change="handleSelectionChange" height="260px">
-          <el-table-column type="selection" width="55"></el-table-column>
-          <el-table-column label="用户名" prop="userName" :show-overflow-tooltip="true" />
-          <el-table-column label="姓名" prop="nickName" :show-overflow-tooltip="true" />
-          <el-table-column label="邮箱" prop="email" :show-overflow-tooltip="true" />
-          <el-table-column label="手机" prop="phonenumber" :show-overflow-tooltip="true" />
-          <el-table-column label="状态" align="center" prop="status">
-            <template #default="scope">
-              <dict-tag :options="sys_normal_disable" :value="scope.row.status" />
-            </template>
-          </el-table-column>
-          <el-table-column label="创建时间" align="center" prop="createTime" width="180">
-            <template #default="scope">
-              <span>{{ parseTime(scope.row.createTime) }}</span>
-            </template>
-          </el-table-column>
-        </el-table>
-        <pagination v-if="total > 0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" @pagination="getList" /> -->
-      <!-- </el-row> -->
       <template #footer>
         <div class="dialog-footer global-flex flex-center">
           <el-button style="width: 250px;" @click="close">取消</el-button>
@@ -101,7 +82,7 @@ const queryFormRef = ref<ElFormInstance>();
 const columnList = ref([
   { type: 'checkbox', fixed: "left", align: 'center', width: '50' },
   { title: "序号", type: 'seq', fixed: "left", field: 'index', align: 'center', width: '60' },
-  { title: '手机号', field: 'phonenumber', width: '120', align: 'center' },
+  { title: '手机号/用户名', field: 'phonenumber', width: '120', align: 'center' },
   { title: '姓名', field: 'nickName', width: '120', align: 'center' },
   { title: '部门', field: 'deptName', minWidth: '260', align: 'center' },
   { title: '状态', field: 'status', width: '120', align: 'center' },

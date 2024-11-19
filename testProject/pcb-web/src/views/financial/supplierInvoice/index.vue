@@ -152,6 +152,9 @@
               :scroll-y="{enabled: true}" size="small"
       >
 
+        <template #default-invoiceTime="scope">
+          <span>{{ parseTime(scope.row.invoiceTime, '{y}-{m}-{d}') }}</span>
+        </template>
         <template #default-make="scope">
           <el-button link type="primary" @click="handleUpdate(scope.row)" >修改</el-button>
           <el-button link type="primary" @click="handleDelete(scope.row)" >删除</el-button>
@@ -247,9 +250,9 @@
 <!--                  <el-input v-model="form.invoiceTime" placeholder="回票日期" />-->
                   <el-date-picker
                     v-model="form.invoiceTime"
-                    type="datetime"
+                    type="date"
                     placeholder="选择回票日期"
-                    value-format="YYYY-MM-DD hh:mm:ss"
+                    value-format="YYYY-MM-DD"
                     class="absolutely-width"
                   />
                 </el-form-item>
@@ -337,20 +340,20 @@
             </el-form>
 
 
-            <div class="expand-wrapper">
-              <vxe-table border show-overflow :row-config="{height: 45}" :column-config="{ resizable: true }" height="330"
+            <div>
+              <XTable border show-overflow :row-config="{height: 45}" :column-config="{ resizable: true }" height="330" :columnList="columnList" :pageShow="false"
                          :data="fileList" :loading="loading">
-                <vxe-column align="center" width="50" field="index" title="序号" type="seq"></vxe-column>
+                <!-- <vxe-column align="center" width="50" field="index" title="序号" type="seq"></vxe-column>
                 <vxe-column align="center" width="90" field="createByName" title="上传人"></vxe-column>
                 <vxe-column align="center" width="150" field="createTime" title="上传时间"></vxe-column>
                 <vxe-column field="name" title="附件名称" align="center"></vxe-column>
-                <vxe-column field="make" title="操作" align="center" width="120">
-                  <template #default="scope">
+                <vxe-column field="make" title="操作" align="center" width="120"> -->
+                  <template #default-make="scope">
                     <el-button type="primary" link @click="downLoadHandle(scope.row.key)">下载</el-button>
                     <el-button type="primary" link @click="delFile(scope.row.id)">删除</el-button>
                   </template>
-                </vxe-column>
-              </vxe-table>
+                <!-- </vxe-column> -->
+              </XTable>
             </div>
           </el-collapse-item>
         </el-collapse>
@@ -441,14 +444,20 @@ import {
 } from "@/api/financial/invoice";
 import { globalHeaders } from "@/utils/request";
 import { ref } from "vue";
-import { ConfirmEnum } from "@/api/financial/accountOrder/types";
 import { MaterialOrderForm } from "@/api/purchase/materialOrder/types";
-import { any } from "vue-types";
 import { OssForm, OssQuery } from "@/api/system/oss/types";
 import { FileItemVO } from "@/api/upload/types";
 import { addBatchFile, addFile, deleteFile, downloadUrl } from "@/api/upload";
 import { ElMessageBox } from "element-plus";
+import { parseTime } from "@/utils/ruoyi";
 
+const columnList = ref([
+{ width: '50',type: 'seq',title: '序号',field: 'index',align: 'center',  },
+{ width: '90',title: '上传人',field: 'createByName',align: 'center',  },
+{ width: '150',title: '上传时间',field: 'createTime',align: 'center',  },
+{ title: '附件名称',field: 'name',align: 'center',  },
+{ width: '120',title: '操作',field: 'make',align: 'center',  },
+]);
 
 const handleChange = () => {
   if (form.value.amount !== undefined && form.value.tax !== undefined){

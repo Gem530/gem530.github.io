@@ -1,7 +1,7 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
-      <div style="width: 100%; text-align: right; padding-bottom: 10px">
+    <!-- <el-card shadow="never" class="xtable-card"> -->
+      <div class="head-btn-flex">
         <el-button type="primary" @click="() => {backOrderAddVisible = true}">退货下单</el-button>
       </div>
       <XTable toolId="orderBackMainTable" height="100%" class="xtable-content"
@@ -27,7 +27,7 @@
           <el-button link type="primary" @click="onDelete(scope.row.id)">删除</el-button>
         </template>
       </XTable>
-    </el-card>
+    <!-- </el-card> -->
 
     <el-drawer
       v-model="backOrderAddVisible"

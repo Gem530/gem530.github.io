@@ -1,12 +1,12 @@
 <template>
   <div class="p-2 xtable-page">
 
-    <div class="search" style="height:50px">
+    <!-- <div class="search" style="height:50px"> -->
       <el-form :model="queryParams" ref="queryFormRef" label-width="75px"
-               class="demo-form-inline">
+               class="demo-form-inline width-100">
         <el-row>
           <el-col :span="4">
-            <el-form-item label="查询日期：">
+            <el-form-item label="查询日期:">
             <!-- <interval-date ref="timeRef" class="init-date" v-model="queryTime" :start-params="queryParams.startTime" :end-params="queryParams.endTime">
             </interval-date> -->
                 <el-date-picker ref="timeRef" class="init-date" v-model="queryTime" style="width: 100%;" type="date" placeholder="选择日期时间"
@@ -19,17 +19,24 @@
             <!-- <el-button @click="handleQuery" type="primary">查询</el-button> -->
             <el-button @click="reset">重置</el-button>
           </el-col>
-          <el-col :span="16" >
-              <div class="totalTitle">
+          <el-col :span="16" class="global-flex flex-end align-start">
+              <TotalTitle style="justify-content: flex-end;margin-right: 8px;" :list="[
+                { title: `当日已下单总款数:${ totalQuantity }` },
+                { title: `当日已下单总面积：${ Number(totalArea.toFixed(4)) }㎡` },
+                { title: `当月已下单总款数:${ month_totalQuantity }` },
+                { title: `当月已下单总面积：${ Number(month_totalArea.toFixed(4)) }㎡` },
+              ]"></TotalTitle>
+              <el-button @click="exportData" type="primary">导出</el-button>
+              <!-- <div class="totalTitle">
                 当日已下单总款数:{{ totalQuantity }}&nbsp;&nbsp;|&nbsp;&nbsp; 当日已下单总面积：{{ totalArea.toFixed(4) }}㎡&nbsp;&nbsp;|&nbsp;&nbsp;
                 当月已下单总款数:{{ month_totalQuantity }}&nbsp;&nbsp;|&nbsp;&nbsp; 当月已下单总面积：{{ month_totalArea.toFixed(4) }}㎡
               <span style="width: 10px;margin-left: 7px"></span>
               <el-button @click="exportData" type="primary">导出</el-button>
-              </div>
+              </div> -->
           </el-col>
         </el-row>
       </el-form>
-    </div>
+    <!-- </div> -->
 
     <vxe-table
       id="orderData"

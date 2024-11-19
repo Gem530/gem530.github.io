@@ -1,15 +1,15 @@
 <template>
   <div class="p-2 xtable-page">
 
-    <el-card shadow="never" class="xtable-card">
-      <el-tabs class="xtable-tab" type="border-card" @tab-click="radioTableHandle" v-model="radioTable">
+    <!-- <el-card shadow="never" class="xtable-card"> -->
+      <el-tabs class="xtable-tab" @tab-click="radioTableHandle" v-model="radioTable">
         <el-tab-pane label="历史订单" name="历史订单">
           <transition :enter-active-class="proxy?.animate.searchAnimate.enter"
             :leave-active-class="proxy?.animate.searchAnimate.leave">
             <div class="historySearch" v-show="showSearch">
               <el-form :model="queryParams" ref="queryFormRef" size="small" label-width="100px" class="demo-form-inline">
                 <el-row>
-                  <el-col :span="8">
+                  <el-col :span="6">
                     <el-form-item label="下单时间" prop="cusId">
                       <el-date-picker style="width: calc((100% - 15px)/2)" size="small"
                         v-model="queryParams.placeOrderTimeStart" type="datetime" placeholder="选择开始时间"
@@ -20,17 +20,39 @@
                         value-format="YYYY-MM-DD HH:mm:ss" format="YYYY-MM-DD HH:mm:ss" />
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="产品名称" prop="commodityName">
                       <el-input v-model="queryParams.commodityName" clearable @keyup.enter="handleQuery" />
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="物料编码" prop="materialNumber">
                       <el-input v-model="queryParams.materialNumber" clearable @keyup.enter="handleQuery" />
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
+                    <el-form-item label="">
+                      <el-radio-group size="small" v-model="queryParams.finishType" type="vertical" @change="handleQuery"
+                        style="vertical-align: middle;">
+                        <el-radio-button label="1">全部</el-radio-button>
+                        <el-radio-button label="2">未完成</el-radio-button>
+                        <el-radio-button label="3">已完成</el-radio-button>
+                      </el-radio-group>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="3" class="global-flex flex-end align-start">
+                      <el-button type="primary" @click="handleQuery">搜索</el-button>
+                      <el-button @click="resetQuery">重置</el-button>
+                    <!-- <el-row>
+                      <el-col :span="24">
+                        <div style="padding-left: 15px">
+                          <el-button type="primary" @click="handleQuery">搜索</el-button>
+                          <el-button @click="resetQuery">重置</el-button>
+                        </div>
+                      </el-col>
+                    </el-row> -->
+                  </el-col>
+                  <!-- <el-col :span="4">
                     <el-form-item label="下单客户" prop="cusId">
                       <el-select v-model="queryParams.customerIdList" placeholder="请选择客户" multiple filterable clearable
                         collapse-tags>
@@ -41,21 +63,13 @@
                         </el-option>
                       </el-select>
                     </el-form-item>
-                  </el-col>
-                  <el-col :span="4">
-                    <el-radio-group size="small" v-model="queryParams.finishType" type="vertical" @change="handleQuery"
-                      style="vertical-align: middle; padding-left: 15px; float: right">
-                      <el-radio-button label="1">全部</el-radio-button>
-                      <el-radio-button label="2">未完成</el-radio-button>
-                      <el-radio-button label="3">已完成</el-radio-button>
-                    </el-radio-group>
-                  </el-col>
-                  <el-col :span="4">
+                  </el-col> -->
+                  <el-col :span="6">
                     <el-form-item label="销售单号" prop="code">
                       <el-input v-model="queryParams.code" clearable @keyup.enter="handleQuery" />
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="业务员" prop="cusExchangeRate">
                       <el-select v-model="queryParams.cusSaleUserName" clearable :collapse-tags="true" filterable
                         placeholder="请选择业务员">
@@ -64,28 +78,15 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="客户PO" prop="customerPo">
                       <el-input v-model="queryParams.customerPo" clearable @keyup.enter="handleQuery" />
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="产品编码" prop="commodityCode">
                       <el-input v-model="queryParams.commodityCode" clearable @keyup.enter="handleQuery" />
                     </el-form-item>
-                  </el-col>
-                  <el-col :span="8">
-                    <el-row>
-                      <el-col :span="8">
-                        <div style="padding-left: 15px">
-                          <el-button type="primary" @click="handleQuery">搜索</el-button>
-                          <el-button @click="resetQuery">重置</el-button>
-                        </div>
-                      </el-col>
-                      <!-- <el-col :span="16">
-                      <el-button @click="exportExcelBefore" style="float: right">导出</el-button>
-                    </el-col> -->
-                    </el-row>
                   </el-col>
                 </el-row>
               </el-form>
@@ -109,7 +110,7 @@
         row.flowStatus)?.label }}</el-tag>
             </template>
             <template #default-urgent="{ row }">
-              <el-tag :type="row.urgent == '正常' ? 'success' : 'warring'">{{ resDictData?.order_urgent.find(v =>
+              <el-tag :type="row.urgent == '正常' ? 'success' : 'warning'">{{ resDictData?.order_urgent.find(v =>
                 v.dictValue == row.urgent)?.dictLabel }}</el-tag>
             </template>
             <template #default-placeOrderTime="{ row }">
@@ -144,32 +145,12 @@
               <span>自动</span>
             </template>
           </ETable>
-          <!-- 右键菜单 -->
-          <div class="context-box" ref="contextBoxRef" v-click-outside="clickOutside">
-            <div class="context-box-list" v-for="(list, listIndex) in menuConfig?.body?.options" :key="listIndex">
-              <template v-for="(item, index) in list" :key="index">
-                <div class="context-box-menu pointer" v-if="item.visible"
-                  @click="contextMenuClickEvent({ menu: item, row: currentContext, column: true } as any)">
-                  <vxe-icon :name="item.prefixIcon?.substring(9)"></vxe-icon>
-                  <span class="context-box-name">{{ item.name }}</span>
-                </div>
-              </template>
-            </div>
-          </div>
-          <!--详情预览-->
-          <el-drawer v-model="drawer.visible" :title="drawer.title" size="850px" :direction="drawer.direction"
-            :destroy-on-close="true" modal-class="detail-prod-drawder">
-            <SaleDescriptions v-if="currentInfo" :currentInfo="currentInfo" :customerList="customerList"
-              :resDictData="resDictData" :quotationShow="quotationShow" :orderEtrShow="orderEtrShow"></SaleDescriptions>
-          </el-drawer>
 
         </el-tab-pane>
         <el-tab-pane label="订单完结列表" name="订单完结列表">
-          <el-row style="width:100%;margin-bottom: 5px;">
-            <el-col :span="24" style="display: flex;justify-content:end">
-              <el-button plain @click="handleExport">导出已完结订单</el-button>
-            </el-col>
-          </el-row>
+          <div class="head-btn-flex">
+            <el-button plain @click="handleExport">导出已完结订单</el-button>
+          </div>
           <XTable toolId="historyCompleteListTool" v-model:page-size="completeQueryParams.pageSize" :loading="loading2"
             v-model:current-page="completeQueryParams.pageNum" height="100%" class="xtable-content" :showRefresh="true"
             :intervalCondition="intervalCondition" :page-params="{ perfect: true, total: total2 }"
@@ -203,7 +184,7 @@
         row.flowStatus)?.label }}</el-tag>
             </template>
             <template #default-urgent="{ row }">
-              <el-tag :type="row.urgent == '正常' ? 'success' : 'warring'">{{ resDictData?.order_urgent.find(v =>
+              <el-tag :type="row.urgent == '正常' ? 'success' : 'warning'">{{ resDictData?.order_urgent.find(v =>
                 v.dictValue == row.urgent)?.dictLabel }}</el-tag>
             </template>
             <template #default-placeOrderTime="{ row }">
@@ -240,9 +221,37 @@
           </XTable>
         </el-tab-pane>
       </el-tabs>
-    </el-card>
+    <!-- </el-card> -->
 
 
+    <!-- 右键菜单 -->
+    <div class="context-box" ref="contextBoxRef" v-click-outside="clickOutside">
+      <div class="context-box-list" v-for="(list, listIndex) in menuConfig?.body?.options" :key="listIndex">
+        <template v-for="(item, index) in list" :key="index">
+          <div class="context-box-menu pointer" v-if="item.visible"
+            @click="contextMenuClickEvent({ menu: item, row: currentContext, column: true } as any)">
+            <vxe-icon :name="item.prefixIcon?.substring(9)"></vxe-icon>
+            <span class="context-box-name">{{ item.name }}</span>
+          </div>
+        </template>
+      </div>
+    </div>
+    <!--详情预览-->
+    <el-drawer v-model="drawer.visible" :title="drawer.title" :direction="drawer.direction"
+      :destroy-on-close="true"
+      size="45%"
+      :modal-class="`add-prod-drawder ${ownerId == '101' && 'normal-prod-drawder'}`">
+      <template #header>
+        <span class="el-drawer__title no-wrap">{{drawer.title}}</span>
+        <TotalTitle :start="true" :firstBorder="true" :list="[
+          { title: `总价：${ currentInfo?.totalOrderPrice||0 }元` },
+          { title: `税金：${ currentInfo?.tax||0 }元` },
+          { title: `总金额：${ currentInfo?.totalPrice||0 }元` },
+        ]"></TotalTitle>
+      </template>
+      <SaleDescriptions v-if="currentInfo" :currentInfo="currentInfo" :customerList="customerList"
+        :resDictData="resDictData" :quotationShow="quotationShow" :orderEtrShow="orderEtrShow"></SaleDescriptions>
+    </el-drawer>
 
 
     <el-dialog v-model="dialogCotractUpload.visible" title="合同回签查看上传" center width="60%" draggable>
@@ -376,6 +385,9 @@ import { deepClone } from "@/utils";
 import { getQuotation } from "@/api/order/quotation";
 import { getReportUrl } from "@/utils/report";
 import { checkPermi } from "@/utils/permission";
+import useUserStore from '@/store/modules/user';
+
+const { ownerId } = useUserStore();
 
 const auditFormRef = ref();
 const total2 = ref(0);
@@ -405,7 +417,7 @@ const currentContext = ref(undefined)
 const queryFormRef = ref<ElFormInstance>();
 const orderFormRef = ref<ElFormInstance>();
 
-const mainTableToolId = ref('saleContract');
+const mainTableToolId = ref('saleContractHistory');
 
 // 查看报价单详情
 const quotationShow = ref(true)
@@ -492,6 +504,8 @@ const flowStatusOptions = ref([
   { value: "6", label: "已完成" },
   { value: "7", label: "外协完成" },
   { value: "8", label: "外协" },
+  {value: "9", label: "库存发货"},
+  {value: "10", label: "库存发货完成"},
 
 ])
 
@@ -2105,29 +2119,6 @@ onMounted(() => {
 });
 </script>
 
-<style>
-.el-form-item--small {
-  margin-bottom: 15px
-}
-
-.el-select {
-  width: 100%;
-}
-
-.el-input__wrapper {
-  width: 100%;
-}
-
-.vxe-table--fixed-left-wrapper {
-  z-index: 2 !important;
-  height: calc(100% - 10px) !important;
-}
-
-.vxe-table--fixed-right-wrapper {
-  z-index: 2 !important;
-  height: calc(100% - 10px) !important;
-}
-</style>
 <style lang="scss" scoped>
 :deep(.detail-prod-drawder) {
   .el-drawer__header {
@@ -2140,10 +2131,6 @@ onMounted(() => {
     padding: 5px 5px;
   }
 }
-</style>
-
-
-<style lang="scss" scoped>
 
 :deep(.el-select) {
   width: 100%;
@@ -2169,132 +2156,12 @@ onMounted(() => {
   margin-bottom: 0px;
 }
 
-:deep(.add-prod-drawder) {
-  .el-drawer__header {
-    height: auto;
-    padding: 5px !important;
-    margin-bottom: 5px !important;
-  }
-
-  .el-drawer__body {
-    padding: 5px 5px !important;
-
-    .el-divider {
-      margin: 0 0 6px 0 !important;
-    }
-
-    .error-left {
-      .el-form-item__error {
-        left: -20px;
-      }
-    }
-
-    .error-left-one {
-      .el-form-item__error {
-        left: -30px;
-      }
-    }
-
-    .el-form-item {
-      margin-bottom: 6px !important;
-
-      .el-form-item__label {
-        padding-right: 3px !important;
-      }
-
-      .el-form-item__content {
-        .el-form-item {
-          margin-bottom: 0 !important;
-        }
-
-        .el-textarea,
-        .el-input__wrapper,
-        .el-textarea__inner {
-          background-color: #FDFFE1 !important;
-          color: #000000 !important;
-        }
-
-        .el-input__inner {
-          color: #000000 !important;
-        }
-
-        .height-light .el-input__wrapper {
-          background-color: #FED547 !important;
-        }
-
-        .el-input-group__prepend,
-        .el-input-group__append {
-          padding: 0 2px !important;
-        }
-
-        .el-input-number {
-          width: 100% !important;
-
-          .el-input__wrapper {
-            padding: 1px 7px !important;
-
-            .el-input__inner {
-              width: 100% !important;
-              text-align: left !important;
-            }
-          }
-        }
-
-        .el-input__inner {
-
-          // 去除 数字表单 上下按钮
-          &::-webkit-outer-spin-button,
-          &::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-          }
-
-          &[type="number"] {
-            -moz-appearance: textfield;
-            appearance: textfield;
-          }
-
-          border: none;
-        }
-      }
-
-      &.is-error .el-input__wrapper {
-        box-shadow: 0 0 0 2px var(--el-color-danger) inset;
-      }
-
-      .el-form-item__error {
-        display: none;
-      }
-
-      .error-right {
-        .el-form-item__error {
-          /* text-align: right; */
-          left: 105px !important;
-        }
-
-        z-index: 10 !important;
-      }
-    }
-  }
-
-  .flex-start {
-    .el-form-item__content {
-      justify-content: flex-start !important;
-      align-items: center;
-
-      .el-input-number {
-        flex: 1 !important;
-        width: auto;
-      }
-    }
-  }
-}
-
 :deep(.history-page-table) {
   width: 100%;
 
   .pagination {
     width: 100%;
   }
-  
+
 }
 </style>

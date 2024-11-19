@@ -21,10 +21,10 @@ const getBreadcrumb = () => {
   // only show routes with meta.title
   let matched = route.matched.filter(item => item.meta && item.meta.title);
   const first = matched[0]
-  // 判断是否为首页
-  if (!isDashboard(first)) {
-    matched = ([{ path: '/index', meta: { title: '首页' } }] as any).concat(matched)
-  }
+  // // 判断是否为首页
+  // if (!isDashboard(first)) {
+  //   matched = ([{ path: '/index', meta: { title: '首页' } }] as any).concat(matched)
+  // }
   levelList.value = matched.filter(item => item.meta && item.meta.title && item.meta.breadcrumb !== false)
 }
 const isDashboard = (route: RouteLocationMatched) => {
@@ -52,12 +52,11 @@ onMounted(() => {
 <style lang="scss" scoped>
 .app-breadcrumb.el-breadcrumb {
   display: inline-block;
-  font-size: 14px;
-  line-height: 50px;
+  // font-size: 14px;
+  line-height: 36px;
   margin-left: 8px;
 
   .no-redirect {
-    color: #97a8be;
     cursor: text;
   }
 }

@@ -8,46 +8,25 @@
           <div>
             <el-form-item label="查询日期">
               <el-date-picker v-model="tabQueryParams.submitTimeStart"
-                              type="date" placeholder="选择日期时间"
+                              type="datetime" placeholder="选择日期时间"
                               style="width: calc(50% - 9px)"
-                              format="YYYY-MM-DD"
-                              value-format="YYYY-MM-DD 00:00:00"
+                              format="YYYY-MM-DD HH:mm:ss"
+                              value-format="YYYY-MM-DD HH:mm:ss"
                               @change="checkDates"
                               :clearable="false"/>
                 <span style="width: 10px;margin-left: 7px">-</span>
               <el-date-picker v-model="tabQueryParams.submitTimeEnd"
-                              type="date" placeholder="选择日期时间"
+                              type="datetime" placeholder="选择日期时间"
                               style="width: calc(50% - 9px)"
-                              format="YYYY-MM-DD"
-                              value-format="YYYY-MM-DD 23:59:59"
+                              format="YYYY-MM-DD HH:mm:ss"
+                              value-format="YYYY-MM-DD HH:mm:ss"
                               @change="checkDates"
                               :clearable="false"/>
             </el-form-item>
           </div>
-          <div>
-              <el-form-item label="CAM工程师">
-              <el-input
-                v-model="tabQueryParams.camUserName"
-                clearable
-                style="width: 200px"
-              />
-              </el-form-item>
-          </div>
         <div style="padding-left: 10px" class="global-flex">
           <el-button @click="handleQuery" type="primary">查询</el-button>
           <el-button @click="reset">重置</el-button>
-          <el-tooltip
-            class="box-item"
-            effect="dark"
-            raw-content
-            :content="`样板新单：单双面为:1  四层板为:1.5  六层板为:2.0  ,每多两层加0.5<br/>
-            量产新单: 单双面为:1.5  四层板为:2.0  六层板为:2.5  ,每多两层加0.5<br/>
-            返单有改：单双面为:0.8  四层板为:1.3  六层板为:1.8,每多两层加0.5<br/>
-            返单：每款0.25<br/>
-            样转批：单双面为:0.5  四层板为:1  六层板为:1.5 , 每多两层加0.5`"
-          >
-            <el-icon style="margin-left: 10px;color: #f3d8c4;"><QuestionFilled /></el-icon>
-          </el-tooltip>
         </div>
           <el-button @click="exportDataEvent" type="primary" style="margin-left: auto;">导出</el-button>
 
@@ -56,43 +35,19 @@
 
     </div>
 
-    <vxe-table
+    <XTable
+      border
+      class="xtable-content"
+      height="100%"
+      toolId="ProjectCapacity"
       ref="xTableRef"
-      :size="tableSize"
-      :class="tableData&&tableData.length>0?'borderBoldTable':''"
-      :column-config="{resizable: true}"
+      :seqConfig="{}"
       :data="tableData"
-      :span-method="colspanMethod"
-      :row-style="rowStyle"
-      align="center"
-      border="full"
-      show-overflow
-      height="780"
-      max-height="780"
-      :row-config="{height: 40}"
-      :loading ="viewTableLoading"
-      :export-config="{}"
-    >
-      <vxe-column field="camUserName" title="CAM工程师" width="94"></vxe-column>
-      <vxe-column field="type" title="类型" width="78"></vxe-column>
-
-      <vxe-colgroup title="合计">
-        <vxe-column title="分配款数"    width="78" field="sumAssignQuantity"></vxe-column>
-        <vxe-column title="完成款数"    width="78" field="sumFinishedQuantity"></vxe-column>
-        <vxe-column title="绩效款数"    width="78" field="sumAchievementQuantity"></vxe-column>
-      </vxe-colgroup>
-
-      <vxe-colgroup :title="item.title" v-for="(item, index) in titleList" :key="index">
-        <vxe-column title="分配款数" width="78" :field="`layerList[${index}].assignQuantity`"></vxe-column>
-        <vxe-column title="完成款数" width="78" :field="`layerList[${index}].finishedQuantity`"></vxe-column>
-        <vxe-column title="绩效款数" width="78" :field="`layerList[${index}].achievementQuantity`"></vxe-column>
-      </vxe-colgroup>
-
-    </vxe-table>
-
-
-
-
+      :pageShow="false"
+      :loading="viewTableLoading"
+      :columnList="electricColumnList"
+      :sort-config="{ remote: false }"
+      tooltip-config/>
 
   </div>
 </template>
@@ -100,18 +55,20 @@
 <script setup name="ProjectCapacity">
 
 import { computed, ref } from "vue";
-import {queryPageNew} from "@/api/project/projectCapacity";
+import {getMiProjectReport} from "@/api/project/projectCapacity";
 import dayjs from "dayjs";
 import useAppStore from "@/store/modules/app";
+import {deepClone} from "@/utils";
 
 
-
-const titleList = ref([
-]) ;
+const initColumn = [
+  { title: '订单类型', width: '150', field: 'orderTypeName', align: 'center', fixed: 'left',},
+]
+const electricColumnList = ref(deepClone(initColumn));
 
 // 默认导出
 const exportDataEvent = () => {
-  const $table = xTableRef.value
+  const $table = xTableRef.value.xTableRef
 
   if ($table) {
     $table.exportData({
@@ -168,7 +125,12 @@ const handleQuery = () => {
 /** 搜索按钮操作 */
 const reset = () => {
   tabQueryParams.value.submitTimeStart = dayjs().startOf('month').format('YYYY-MM-DD 00:00:00');
-  tabQueryParams.value.submitTimeEnd= dayjs(new Date()).format("YYYY-MM-DD 23:59:59");
+  // 将submitTimeEnd设置为new Date()的后一天的凌晨00:00:00
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(now.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
+  tabQueryParams.value.submitTimeEnd= dayjs(tomorrow).format("YYYY-MM-DD 00:00:00");
   tabQueryParams.value.camUserName= undefined;
   viewTableLoading.value = true;
   QueryDetails();
@@ -179,14 +141,68 @@ const reset = () => {
  */
 const QueryDetails =()=>{
 
-  queryPageNew({
+  getMiProjectReport({
     submitTimeStart: tabQueryParams.value.submitTimeStart,
     submitTimeEnd: tabQueryParams.value.submitTimeEnd,
-    camUserName: tabQueryParams.value.camUserName,
   })
     .then((res) =>{
-      tableData.value = res.data.reportsVoList;
-      titleList.value = res.data.titleVos;
+      let tempColumn = []
+      electricColumnList.value = deepClone(initColumn)
+      if (res?.data?.length) {
+        if (res.data[0]?.camList?.length) {
+          tempColumn.push({
+            title: 'CAM',
+            field: 'CAM',
+            align: 'center',
+            children: [
+            ]
+          })
+          res.data[0].camList.map((m, mi) => {
+            tempColumn[tempColumn.length-1].children
+              .push({
+                title: m.userName,
+                field: `camList[${mi}].quantity`,
+                width: '80px',
+                align: 'center' })
+          })
+        }
+        if (res.data[0]?.pretrialList?.length) {
+          tempColumn.push({
+            title: '预审',
+            field: 'reAudit',
+            align: 'center',
+            children: [
+            ]
+          })
+          res.data[0].pretrialList.map((m, mi) => {
+            tempColumn[tempColumn.length-1].children
+              .push({
+                title: m.userName,
+                field: `pretrialList[${mi}].quantity`,
+                width: '80px',
+                align: 'center' })
+          })
+        }
+        if (res.data[0]?.miAuditList?.length) {
+          tempColumn.push({
+            title: '审核',
+            field: 'miAudit',
+            align: 'center',
+            children: [
+            ]
+          })
+          res.data[0].miAuditList.map((m, mi) => {
+            tempColumn[tempColumn.length-1].children
+              .push({
+                title: m.userName,
+                field: `miAuditList[${mi}].quantity`,
+                width: '80px',
+                align: 'center' })
+          })
+          electricColumnList.value.splice(2, 0, ...(tempColumn || []))
+        }
+      }
+      tableData.value = res.data;
     })
     .finally(() => {
       viewTableLoading.value = false;
@@ -194,59 +210,13 @@ const QueryDetails =()=>{
 }
 
 
-const colspanMethod = ({ _rowIndex, _columnIndex }) => {
-  if (_rowIndex % 5 === 0) {
-    if (_columnIndex === 0 ) {
-      return { rowspan: 5, colspan: 1 }
-    }else {
-      return { rowspan: 1, colspan: 1 }
-    }
-  }else if (_columnIndex === 0 ) {
-    return { rowspan: 0, colspan: 0 }
-  }
-}
-
-const sheetMethod = (e) => {
-  console.log('sheetMethod', e);
-}
-
-
-const rowStyle= ({ rowIndex }) => {
-  if (rowIndex % 40 < 5) {
-    return 'background: #f5f0ff;' // 淡紫色
-  } else if (rowIndex % 40 < 10) {
-    return 'background: #e5e5ff;' // 淡蓝色
-  } else if (rowIndex % 40 < 15) {
-    return 'background: #fff0e5;' // 浅橙色
-  } else if (rowIndex % 40 < 20) {
-    return 'background: #d9e5ff;' // 深蓝色
-  } else if (rowIndex % 40 < 25) {
-    return 'background: #c9dfff;' // 深紫色
-  } else if (rowIndex % 40 < 30) {
-    return 'background: #f5f5ff;' // 深蓝色
-  } else if (rowIndex % 40 < 35) {
-    return 'background: #e5f5ff;' // 淡蓝色
-  } else {
-    return 'background: #e5e5f5;' // 浅紫色
-  }
-}
-
-
-// /**
-//  * 重新进入页面时刷新
-//  */
-// onActivated(() => {
-//   viewTableLoading.value = true;
-//   QueryDetails();
-// })
-
-
 /**
  * 页面刷新数据
  */
 onMounted(() => {
   viewTableLoading.value = true;
-  QueryDetails();
+  reset();
+  // QueryDetails();
 });
 
 </script>

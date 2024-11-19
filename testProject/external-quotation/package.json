@@ -1,0 +1,31 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build --mode prod",
+    "build:test": "nuxt build --mode test",
+    "dev": "nuxt dev --host --port 3001 --mode dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "devDependencies": {
+    "@element-plus/nuxt": "^1.0.7",
+    "@nuxt/devtools": "latest",
+    "@nuxtjs/i18n": "^8.0.0-rc.5",
+    "@vant/nuxt": "^1.0.4",
+    "nuxt": "^3.8.2",
+    "nuxt-gtag": "^1.1.2",
+    "nuxt-swiper": "^1.2.2",
+    "vite-plugin-svg-icons": "^2.0.1",
+    "vue": "^3.3.8",
+    "vue-router": "^4.2.5"
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0",
+    "dayjs": "^1.11.10",
+    "jsencrypt": "^3.3.2",
+    "sass": "^1.69.5"
+  }
+}

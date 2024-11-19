@@ -82,7 +82,7 @@ export const delInventory = (id: string | number | Array<string | number>) => {
     method: 'delete'
   });
 };
-  
+
 //成品库存++
 export const addCommodityCheck = (data: InventoryForm) => {
   return request({
@@ -129,4 +129,56 @@ export const unLockRelaInventory = (id?: any): AxiosPromise<InventoryVO[]> => {
     method: 'get'
   });
 };
+
+/**
+ * 查询成品库存列表
+ * @param query
+ * @returns {*}
+ */
+export const listInventoryV2 = (query?: InventoryQuery): AxiosPromise<InventoryVO[]> => {
+  return request({
+    url: '/inventory/inventory/listV2',
+    method: 'get',
+    params: query
+  });
+};
+
+/**
+ * 查询库存总数
+ * @param query
+ */
+export const getInventorySum = (query?: InventoryQuery) => {
+  return request({
+    url: '/inventory/inventory/inventorySum',
+    method: 'get',
+    params: query
+  });
+};
+
+/**
+ * 打印查询成品库存
+ * @param query
+ * @returns {*}
+ */
+export const printList = (query?: InventoryQuery): AxiosPromise<InventoryVO[]> => {
+  return request({
+    url: '/inventory/inventory/printList',
+    method: 'get',
+    params: query
+  });
+};
+
+/**
+ * 查询成品库存结存列表
+ * @param query
+ * @returns {*}
+ */
+export const listCommodityMonth = (query?: InventoryQuery): AxiosPromise<InventoryVO[]> => {
+  return request({
+    url: '/inventory/month/list',
+    method: 'get',
+    params: query
+  });
+};
+
 

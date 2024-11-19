@@ -1,5 +1,6 @@
 <template>
   <div id="tags-view-container" class="tags-view-container">
+    <hamburger id="hamburger-container" :is-active="appStore.sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
     <scroll-pane ref="scrollPaneRef" class="tags-view-wrapper" @scroll="handleScroll">
       <router-link
         v-for="tag in visitedViews"
@@ -12,16 +13,20 @@
         @click.middle="!isAffix(tag) ? closeSelectedTag(tag) : ''"
         @contextmenu.prevent="openMenu(tag, $event)"
       >
-        {{ tag.title }}
+        <svg-icon class-name="home-icon" icon-class="home-active" style="width: 14px;height: 14px;" v-if="tag.name == 'Index'"></svg-icon>
+        <span :class="`tags-view-item-text ${tag.name == 'Index' && 'no-right-padding'}`">{{tag.title}}</span>
         <span v-if="!isAffix(tag)" @click.prevent.stop="closeSelectedTag(tag)">
-          <close class="el-icon-close" style="width: 1em; height: 1em;vertical-align: middle;" />
+          <svg-icon icon-class="tag-close" style="width: 16px; height: 14px;vertical-align: middle;margin-top: -1px;"></svg-icon>
         </span>
       </router-link>
     </scroll-pane>
     <el-popover :visible="showSearch" placement="bottom-end" width="200px" popper-class="pop-tags-view"
         @show="isShowSearch = true" @hide="isShowSearch = false">
         <template #reference>
-            <el-icon size="20px" @click="openSearch" style="cursor: pointer;"><Operation /></el-icon>
+            <div class="check-menu-class global-flex flex-end" @click="openSearch" style="cursor: pointer;">
+                查找菜单
+                <el-icon style="margin-left: 4px;"><ArrowDown /></el-icon>
+            </div>
         </template>
         <div v-click-outside="clickOutside">
             <el-input v-model="searchTag" placeholder="请输入菜单名称" clearable/>
@@ -69,10 +74,13 @@ import usePermissionStore from '@/store/modules/permission'
 import { ComponentInternalInstance } from "vue";
 import { RouteOption, TagView, RouteLocationRaw } from "vue-router";
 import { ClickOutside as vClickOutside } from 'element-plus'
+import {deepClone} from "@/utils";
+import useAppStore from '@/store/modules/app';
 
 const visible = ref(false);
 const top = ref(0);
 const left = ref(0);
+const appStore = useAppStore();
 const selectedTag = ref<TagView>({});
 const affixTags = ref<TagView[]>([]);
 const scrollPaneRef = ref(ScrollPane);
@@ -100,6 +108,11 @@ watch(visible, (value) => {
         document.body.removeEventListener('click', closeMenu);
     }
 })
+
+const toggleSideBar = () => {
+    console.log(123123)
+  appStore.toggleSideBar(false);
+}
 
 const openSearch = () => {
     if (!isShowSearch.value) {
@@ -171,17 +184,19 @@ const initTags = () => {
     }
 }
 const addTags = () => {
-    const { name } = route;
-    if(route.query.title) {
-        route.meta.title = route.query.title;
+  // ↓佳俊修改---跳转后清除路由后参数
+  const { name } = route;
+  if(route.query.title) {
+    route.meta.title = route.query.title;
+  }
+  if (name) {
+    useTagsViewStore().addView(route);
+    if (route.meta.link) {
+      useTagsViewStore().addIframeView(route);
     }
-    if (name) {
-        useTagsViewStore().addView(route);
-        if (route.meta.link) {
-            useTagsViewStore().addIframeView(route);
-        }
-    }
-    return false
+  }
+  return false
+  // ↑佳俊修改---跳转后清除路由后参数
 }
 const moveToCurrentTag = () => {
     nextTick(() => {
@@ -286,15 +301,16 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .tags-view-container {
+  position: relative;
   display:flex;
   justify-content: space-between;
   align-items: center;
-  height: 34px;
+  height: 28px;
   width: 100%;
   background-color: var(--el-bg-color);
   border: 1px solid var(--el-border-color-light);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 0 3px 0 rgba(0, 0, 0, 0.04);
-  padding-right: 10px;
+//   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 0 3px 0 rgba(0, 0, 0, 0.04);
+//   padding-right: 10px;
   box-sizing: border-box;
   .tags-view-wrapper {
     width: calc(100% - 30px);
@@ -302,40 +318,60 @@ onMounted(() => {
       display: inline-block;
       position: relative;
       cursor: pointer;
-      height: 26px;
+      height: 24px;
       line-height: 23px;
       background-color: var(--el-bg-color);
       border: 1px solid var(--el-border-color-light);
+      border-bottom: none;
       color: #495060;
       padding: 0 8px;
       font-size: 12px;
-      margin-left: 5px;
+      margin-left: 4px;
       margin-top: 4px;
+      border-radius: 2px;
+      .home-icon {
+        margin-right: 4px;
+      }
+      .tags-view-item-text {
+        margin-right: 4px;
+        &.no-right-padding {
+            margin-right: 4px;
+        }
+      }
       &:hover {
         color: var(--el-color-primary);
       }
       &:first-of-type {
-        margin-left: 15px;
+        margin-left: 16px;
+        &::before {
+            display: none !important;
+        }
       }
       &:last-of-type {
-        margin-right: 15px;
+        margin-right: 16px;
       }
       &.active {
         background-color: #42b983;
         color: #fff;
         border-color: #42b983;
-        &::before {
-          content: "";
-          background: #fff;
-          display: inline-block;
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          position: relative;
-          margin-right: 5px;
-        }
+        // &::before {
+        //   content: "";
+        //   background: #fff;
+        //   display: inline-block;
+        //   width: 8px;
+        //   height: 8px;
+        //   border-radius: 50%;
+        //   position: relative;
+        //   margin-right: 5px;
+        // }
       }
     }
+  }
+  .check-menu-class {
+    padding: 0 8px;
+    font-size: 12px;
+    color: #3D3D3D;
+    white-space: nowrap;
   }
   .contextmenu {
     margin: 0;
@@ -363,13 +399,15 @@ onMounted(() => {
     box-sizing: border-box;
     overflow: hidden;
     .pop-tags-box {
-        padding: 7px 0;
+        padding: 0 0 8px;
         max-height: 500px;
+        margin-top: 4px;
         overflow-x: hidden;
         overflow-y: auto;
+        box-sizing: border-box;
         &::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
         }
         .pop-tags-item {
             display: flex;
@@ -386,8 +424,10 @@ onMounted(() => {
             padding: 0 8px;
             font-size: 12px;
             // margin-left: 5px;
-            margin-top: 4px;
             box-sizing: border-box;
+            &:not(:first-child) {
+                margin-top: 4px;
+            }
             &:hover {
                 color: var(--el-color-primary);
             }
@@ -412,16 +452,16 @@ onMounted(() => {
                 background-color: #42b983;
                 color: #fff;
                 border-color: #42b983;
-                &::before {
-                    content: "";
-                    background: #fff;
-                    display: inline-block;
-                    width: 8px;
-                    height: 8px;
-                    border-radius: 50%;
-                    position: relative;
-                    margin-right: 5px;
-                }
+                // &::before {
+                //     content: "";
+                //     background: #fff;
+                //     display: inline-block;
+                //     width: 8px;
+                //     height: 8px;
+                //     border-radius: 50%;
+                //     position: relative;
+                //     margin-right: 5px;
+                // }
             }
         }
     }
@@ -429,6 +469,9 @@ onMounted(() => {
 </style>
 
 <style lang="scss">
+.pop-tags-view {
+    padding-bottom: 0 !important;
+}
 //reset element css of el-icon-close
 .tags-view-wrapper {
   .tags-view-item {

@@ -21,7 +21,7 @@ export default {
     document: 'Document',
     layoutSize: 'Layout Size',
     message: 'Message',
-    selectTenant: 'Select Tenant',
+    selectTenant: 'Select Company',
     layoutSetting: 'Layout Setting',
     personalCenter: 'Personal Center',
     logout: 'Logout'

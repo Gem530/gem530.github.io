@@ -2,46 +2,54 @@
     <div class="newVxeTable">
         <!-- <el-button @click="deleteShowList(0)">删除</el-button> -->
         <div class="XTable-header" v-if="props.showHead">
-            <div class="showText">
-                <template v-if="props.searchShow">
-                    <el-tag v-for="(item, index) in showList" :key="index" class="mx-1" closable :disable-transitions="false"
+            <div class="showText global-flex flex-start flex-wrap">
+                <template v-if="props.searchShow && showList.length">
+                    <div class="show-text-title">筛选条件</div>
+                    <el-tag class="show-text-item" v-for="(item, index) in showList" :key="index" closable :disable-transitions="false"
                         @close="deleteShowList(index)">
                         {{ item.label }}
                     </el-tag>
-                    <el-tag class="mx-1" @click="deleteAll" v-if="showList.length">全部删除</el-tag>
+                    <el-button class="show-text-item" link type="primary" @click="deleteAll">清空筛选</el-button>
                 </template>
             </div>
 
             <div class="XTable-tool global-flex flex-end">
                 <!-- v-if="props.showRefresh || props.toolId" -->
                 <slot name="header-tool"></slot>
-                <el-icon v-if="props.showRefresh" class="pointer XTable-icon" size="20px" @click="refreshHandle"><Refresh /></el-icon>
-                <XPopover @confirm="confirm" @reset="reset" @hide="filterText = undefined" v-if="props.toolId" :reset="true">
+                <el-button type="primary" plain v-if="props.showRefresh" class="pointer XTable-item primary-color" @click="refreshHandle">刷新</el-button>
+                <XPopover :width="250" @confirm="confirm" @reset="reset" @hide="filterText = undefined" v-if="props.toolId" :reset="true">
                     <template #reference>
-                        <el-icon class="pointer XTable-icon" size="20px"><Operation /></el-icon>
+                        <el-button type="primary" plain>
+                            表格配置
+                            <el-icon style="margin-left: 2px;" size="14px"><ArrowDown /></el-icon>
+                        </el-button>
                     </template>
                     <div class="XTable-tool-box">
                         <el-input v-model.trim="filterText" placeholder="请输入列名称"/>
 
-                        <div class="XTable-tool-list margin-top">
+                        <div class="XTable-tool-list margin-top border-bottom" v-if="!filterText">
                             <el-checkbox
                                 v-model="checkAll"
                                 :indeterminate="isIndeterminate"
                                 @change="handleCheckAllChange"
-                                v-if="!filterText"
                             >全选</el-checkbox>
                         </div>
                         <el-checkbox-group v-model="defaultCheck" class="XTable-tool-list" @change="handleCheckedCitiesChange">
                             <template :key="item.title" v-for="(item, i) in toolList">
-                                <el-checkbox
-                                    draggable="true"
-                                    @dragend="dragend"
-                                    :label="item.title"
-                                    @dragstart="dragstart(i)"
-                                    @dragover="dragover($event, i)"
-                                    @dragenter="dragenter($event, i)"
-                                    v-if="(filterText && item.title.includes(filterText)) || !filterText"
-                                >{{ item.title }}</el-checkbox>
+                                <div class="XTable-tool-item global-flex flex-between width-100" v-if="(filterText && item.title.includes(filterText)) || !filterText">
+                                    <div class="XTable-tool-checkbox"><el-checkbox
+                                        draggable="true"
+                                        @dragend="dragend"
+                                        :label="item.title"
+                                        @dragstart="dragstart(i)"
+                                        @dragover="dragover($event, i)"
+                                        @dragenter="dragenter($event, i)"
+                                    >{{ item.title }}</el-checkbox></div>
+                                    <div class="XTable-tool-fixed global-flex flex-end">
+                                        <div class="XTable-tool-fixed-icon global-flex flex-center pointer"><el-icon size="20" :color="item?.fixed == 'left' ? 'var(--el-color-primary)' : 'rgb(192, 196, 204)'" @click="chooseFixed(item, 'left')"><Back /></el-icon></div>
+                                        <div class="XTable-tool-fixed-icon global-flex flex-center pointer"><el-icon size="20" :color="item?.fixed == 'right' ? 'var(--el-color-primary)' : 'rgb(192, 196, 204)'" @click="chooseFixed(item, 'right')"><Right /></el-icon></div>
+                                    </div>
+                                </div>
                             </template>
                         </el-checkbox-group>
                     </div>
@@ -51,7 +59,7 @@
 
         <!-- :height="props.isAutoHeight ? tableAutoHeight : (attrs['height'] as number|string)"
         :max-height="props.isAutoHeight ? '' : (attrs['max-height'] as number|string)" -->
-        <div ref="XTableDomRef" class="x-table-dom">
+        <div ref="XTableDomRef" :class="`x-table-dom ${attrs?.data?.length && 'has-data'}`">
         <vxe-table
             :size="tableSize"
             min-height="0px"
@@ -61,12 +69,18 @@
             :loading="loading"
             ref="xTableRef"
             :column-config="{
-                resizable: !!props.toolId,
+                resizable: true,
+                // resizable: !!props.toolId,
                 ...(attrs['column-config'] as Record<string, any>),
             }"
             :filter-config="{
                 remote:true,
                 ...(attrs['filter-config'] as Record<string, any>)
+            }"
+            :row-config="{
+                // isHover: true,
+                isCurrent:true,
+                ...(attrs['row-config'] as Record<string, any>)
             }"
             :sort-config="{
                 remote: true,
@@ -81,45 +95,90 @@
             @filter-change="filterChange"
             @filter-visible="filterVisible"
             @header-cell-click="openFilterEvent"
-            @resizable-change="resizableChange" v-if="makeFlag">
-            <XColumn v-for="(item, i) in columnShowList" :key="item.field" :="{...item}"
-                :params="{filterData:item?.filterData && item.filterData(), filterCustom:item?.filterCustom}">
-                <template v-if="slots[`default-${item.field}`]" #default="params">
-                    <slot :name="`default-${item.field}`" :="params"/>
-                </template>
+            @resizable-change="resizableChange" v-if="makeFlag" v-resize="resizeHandle">
+            <!-- v-resize="initData(props.columnList)" -->
+                <!-- iconAsc: 'ArrowUp',
+                iconDesc: 'ArrowDown', -->
+            <template v-for="(item, i) in columnShowList" :key="item.field">
+                <vxe-colgroup :="{...item}" v-if="props.toolId ? (item?.children?.length && item?.visible) : item?.children?.length">
+                    <XColumn v-for="(el, i) in item.children" :key="el.field" :="{...el}"
+                        :params="{filterData:el?.filterData && el.filterData(), filterCustom:el?.filterCustom}">
+                        <template v-if="slots[`default-${el.field}`]" #default="params">
+                            <slot :name="`default-${el.field}`" :="params"/>
+                        </template>
 
-                <template v-if="slots[`header-${item.field}`]" #header="params">
-                    <slot :name="`header-${item.field}`" :="params"/>
-                </template>
+                        <template v-if="slots[`header-${el.field}`]" #header="params">
+                            <slot :name="`header-${el.field}`" :="params"/>
+                        </template>
 
-                <template v-if="slots[`edit-${item.field}`]" #edit="params">
-                    <slot :name="`edit-${item.field}`" :="params"/>
-                </template>
+                        <template v-if="slots[`edit-${el.field}`]" #edit="params">
+                            <slot :name="`edit-${el.field}`" :="params"/>
+                        </template>
 
-                <template v-if="slots[`filter-${item.field}`]" #filter="params">
-                    <slot :name="`filter-${item.field}`" :="params"/>
-                </template>
+                        <template v-if="slots[`filter-${el.field}`]" #filter="params">
+                            <slot :name="`filter-${el.field}`" :="params"/>
+                        </template>
 
-                <template v-if="slots[`footer-${item.field}`]" #footer="params">
-                    <slot :name="`footer-${item.field}`" :="params"/>
-                </template>
+                        <template v-if="slots[`footer-${el.field}`]" #footer="params">
+                            <slot :name="`footer-${el.field}`" :="params"/>
+                        </template>
 
-                <template v-if="slots[`title-${item.field}`]" #title="params">
-                    <slot :name="`title-${item.field}`" :="params"/>
-                </template>
+                        <template v-if="slots[`title-${el.field}`]" #title="params">
+                            <slot :name="`title-${el.field}`" :="params"/>
+                        </template>
 
-                <template v-if="slots[`checkbox-${item.field}`]" #checkbox="params">
-                    <slot :name="`checkbox-${item.field}`" :="params"/>
-                </template>
+                        <template v-if="slots[`checkbox-${el.field}`]" #checkbox="params">
+                            <slot :name="`checkbox-${el.field}`" :="params"/>
+                        </template>
 
-                <template v-if="slots[`radio-${item.field}`]" #radio="params">
-                    <slot :name="`radio-${item.field}`" :="params"/>
-                </template>
+                        <template v-if="slots[`radio-${el.field}`]" #radio="params">
+                            <slot :name="`radio-${el.field}`" :="params"/>
+                        </template>
 
-                <template v-if="slots[`content-${item.field}`]" #content="params">
-                    <slot :name="`content-${item.field}`" :="params"/>
-                </template>
-            </XColumn>
+                        <template v-if="slots[`content-${el.field}`]" #content="params">
+                            <slot :name="`content-${el.field}`" :="params"/>
+                        </template>
+                    </XColumn>
+                </vxe-colgroup>
+                <XColumn v-else :="{...item}"
+                    :params="{filterData:item?.filterData && item.filterData(), filterCustom:item?.filterCustom}">
+                    <template v-if="slots[`default-${item.field}`]" #default="params">
+                        <slot :name="`default-${item.field}`" :="params"/>
+                    </template>
+
+                    <template v-if="slots[`header-${item.field}`]" #header="params">
+                        <slot :name="`header-${item.field}`" :="params"/>
+                    </template>
+
+                    <template v-if="slots[`edit-${item.field}`]" #edit="params">
+                        <slot :name="`edit-${item.field}`" :="params"/>
+                    </template>
+
+                    <template v-if="slots[`filter-${item.field}`]" #filter="params">
+                        <slot :name="`filter-${item.field}`" :="params"/>
+                    </template>
+
+                    <template v-if="slots[`footer-${item.field}`]" #footer="params">
+                        <slot :name="`footer-${item.field}`" :="params"/>
+                    </template>
+
+                    <template v-if="slots[`title-${item.field}`]" #title="params">
+                        <slot :name="`title-${item.field}`" :="params"/>
+                    </template>
+
+                    <template v-if="slots[`checkbox-${item.field}`]" #checkbox="params">
+                        <slot :name="`checkbox-${item.field}`" :="params"/>
+                    </template>
+
+                    <template v-if="slots[`radio-${item.field}`]" #radio="params">
+                        <slot :name="`radio-${item.field}`" :="params"/>
+                    </template>
+
+                    <template v-if="slots[`content-${item.field}`]" #content="params">
+                        <slot :name="`content-${item.field}`" :="params"/>
+                    </template>
+                </XColumn>
+            </template>
 
             <slot name="default"></slot>
             <template #empty v-if="slots?.empty"><slot name="empty"/></template>
@@ -200,7 +259,7 @@ const props = withDefaults(defineProps<{
     loading?: boolean
     showRefresh?: boolean
     isNeedEmitRefresh?: boolean
-    columnList: any[]
+    columnList: any[] // columnList[0].autoExpend 唯一，columnlist只能有一个有这个字段 自动扩展，未超出表格宽度时自动撑满，超出时按照拖动的宽度展示
 
     // pager---
     pageShow?: boolean
@@ -236,12 +295,12 @@ const crtPageSize = computed({
     set(val: number) { emits('update:pageSize', val)}
 })
 
-const loading = computed({
+const loading = computed<any>({
     get() { return props.loading },
     set(val: number) { emits('update:loading', val) }
 })
 
-const { proxy } = getCurrentInstance();
+const { proxy } = getCurrentInstance() as any;
 
 const sorts = ref([])
 const makeFlag = ref(true)
@@ -327,17 +386,19 @@ const defaultCheck = ref<any[]>([])
 const checkAll = ref(true)
 const localTool = ref<any>([])
 const localWidth = ref<any>([])
+const hasAutoExpend = ref(false)
 const allCheckList = ref<any>([])
 const isIndeterminate = ref(false)
-const columnShowList = ref<any[]>()
-const initData = async (val: any) => {
+const columnShowList = ref<any>()
+const initData = async (val: any, widthAutoFlag: boolean = false) => {
     val = deepClone(val)
     let tempColumnShowList = val.filter((c: any) => c?.isPermi ? c?.isPermi() : true)
     allCheckList.value = deepClone(tempColumnShowList || []).filter((f: any) => f.title).map((m: any) => m.title)
     // 列宽改变
     if (props?.toolId) {
         const { data }: {data:tableConfigList} = await getTableConfig(props?.toolId)
-        // console.log('data-----', data, props.toolId)
+        let initTableConfigData = JSON.parse(JSON.stringify(data))
+        // console.log('data-----', JSON.parse(JSON.stringify(data)), props.toolId)
         // let tempLocal: any = localStorage.getItem(props.toolId)
         // localWidth.value = tempLocal && JSON.parse(tempLocal) || []
         localWidth.value = data?.tableConfig?.widthList ? data?.tableConfig?.widthList||[] : []
@@ -351,7 +412,7 @@ const initData = async (val: any) => {
             })
         }
         // }
-        // // 排序，显隐功能
+        // // 排序，显隐，固定列功能
         // if (props?.toolId) {
         // let tempLocalTool: any = localStorage.getItem(props.toolId)
         // localTool.value = tempLocalTool && JSON.parse(tempLocalTool) || []
@@ -359,6 +420,7 @@ const initData = async (val: any) => {
         // console.log(localTool.value)
         tempColumnShowList.map((c: any, index: number) => {
             const crtTool = localTool.value.find((t: any) => t.title == c.title)
+            // console.log('crtTool-----', crtTool)
             if (crtTool && (crtTool?.visible != undefined || crtTool?.visible != '' || crtTool?.visible != null)) {
                 c.visible = crtTool.visible
             } else {
@@ -370,6 +432,18 @@ const initData = async (val: any) => {
             } else {
                 c.sortIndex = c.sortIndex || index
             }
+
+            // if (crtTool?.fixed) {
+            if (initTableConfigData) {
+                // 说明该表格已存在，从crtTool中取值
+                c.fixed = crtTool?.fixed || undefined
+            } else {
+                // 不存在，说明需要从代码中取值
+                c.fixed = c?.fixed || undefined
+            }
+            // } else {
+            //     c.fixed = c?.fixed || undefined
+            // }
         })
         tempColumnShowList = tempColumnShowList.sort((a: any,b: any) => a.sortIndex - b.sortIndex)
         toolList.value = tempColumnShowList.filter((f: any) => f.title)
@@ -382,7 +456,82 @@ const initData = async (val: any) => {
         }
     }
 
-    columnShowList.value = tempColumnShowList
+    const initAutoExpendInfo = deepClone(tempColumnShowList).find((f: any) => f?.autoExpend)
+    const tempCrtColumn = tempColumnShowList.find((f: any) => f?.autoExpend)
+    if (widthAutoFlag) {
+        tempCrtColumn.width = 'auto'
+    }
+    columnShowList.value = deepClone(tempColumnShowList)
+    columnShowList.value.map((m: any, mI: number) => {
+        m.initWidth = initAutoExpendInfo?.width == 'auto' ? 40 : (initAutoExpendInfo?.width || 40)
+        if (m.type == 'checkbox') {
+            m.fixed = 'left'
+        }
+    })
+
+    // 修改配置后，更新 可扩展列 的宽度为自适应
+    let expendColumn = columnShowList.value.find((f: any) => f?.autoExpend)
+    if (expendColumn) {
+        hasAutoExpend.value = true
+        const { isOverWidth }: any = await isOverTableWidth()
+        // console.log('isOverWidth1', isOverWidth)
+        if (!isOverWidth) {
+            // console.log('扩展列 宽度 自适应1', expendColumn)
+            expendColumn.width = 'auto'
+        }
+    } else {
+        hasAutoExpend.value = false
+    }
+}
+// 用于tab页，或者 从隐藏到显示的情况，重新计算一次，否则会出现宽度自适应不生效的情况
+const initResizeWidth = ref<number>()
+const resizeHandle = (dom: any) => {
+    // console.log('dom', props.toolId, dom)
+    // const hasAutoExpendColumn = props.columnList?.length && props.columnList?.find((f: any) => f?.autoExpend)
+    // 只有有 扩展列 的才需要重新计算，并且与表格的宽度不一致时才计算   不加上宽度判断时，会出现拖动以及改顺序与固定列时多次触发宽度计算
+    if (hasAutoExpend.value && (initResizeWidth.value != dom?.width)) {
+        // console.log(1111, (initResizeWidth.value != dom?.width), initResizeWidth.value, dom?.width)
+        initData(props.columnList)
+        initResizeWidth.value = dom?.width
+    }
+}
+// 获取xtable每列总宽
+const getXtableColumnWidth = () => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            try {
+                // const columnWidth = xTableRef.value.getColumnWidth(field)
+                // const tableColumn = xTableRef.value.getTableColumn()
+                // console.log(columnWidth, tableColumn, columns)
+                let tableWidth = xTableRef.value?.$el?.clientWidth // 表格总宽度
+                const columns = xTableRef.value.getColumns()
+                let columnsWidth = 0 // 每列宽度相加
+                columns.map((item: any) => {
+                    let expendColumn = columnShowList.value.find((f: any) => f?.autoExpend)
+                    if ((expendColumn?.field == item?.field)) {
+                        // 扩展列 取接口保存的宽度或者初始化的宽度，不取实时的渲染宽度
+                        // console.log(expendColumn)
+                        columnsWidth = columnsWidth + Number(expendColumn?.initWidth || 0)
+                    } else {
+                        columnsWidth = columnsWidth + (item?.renderWidth || 0)
+                    }
+                    // console.log(columnsWidth, item.width, item.initWidth)
+                })
+                // console.log(columns, tableWidth, columnsWidth)
+                resolve({columns, tableWidth, columnsWidth})
+            } catch(err) {
+                console.log(err)
+                resolve({columns: [], tableWidth: 0, columnsWidth: 0})
+            }
+        }, 0)
+    })
+}
+// 判断 所有列的宽度是否超出表格的 总宽度
+const isOverTableWidth = () => {
+    return new Promise(async (resolve, reject) => {
+        const {columns, tableWidth, columnsWidth}: any = await getXtableColumnWidth()
+        resolve({isOverWidth: columnsWidth > tableWidth, columns})
+    })
 }
 watch(() => props.columnList, (val: any) => {
     initData(val)
@@ -423,22 +572,42 @@ const saveTableConfigAPI = (tools?: any[], widths?: any[]) => {
 }
 
 // 宽度变化时，触发
-const resizableChange = ({$rowIndex, column, columnIndex, $columnIndex, $event}: any) => {
+const resizableChange = async ({$rowIndex, column, columnIndex, $columnIndex, $event}: any) => {
     if (!props.toolId) return
     const $table = xTableRef.value
+    let currentColumnWidth = $table.getColumnWidth(column.field)
     if (column.field) {
         let crtLocalWidth: any = localWidth.value.find((l: any) => l.field == column.field)
         if (crtLocalWidth) {
-            crtLocalWidth.width = $table.getColumnWidth(column.field)
+            crtLocalWidth.width = currentColumnWidth
         } else {
             localWidth.value.push({
                 field: column.field,
-                width: $table.getColumnWidth(column.field)
+                width: currentColumnWidth
             })
         }
     }
-    saveTableConfigAPI()
-    // localStorage.setItem(props.toolId as string, JSON.stringify(localWidth.value))
+    // console.log('isOverWidth', isOverWidth, columns)
+    // let expendColumn = columnShowList.value.find((f: any) => f?.autoExpend)
+
+    // if (expendColumn?.field == column.field) {
+    //     if (isOverWidth) {
+    //         await saveTableConfigAPI()
+    //     }
+    // } else {
+    await saveTableConfigAPI()
+    // }
+
+    if (hasAutoExpend.value) {
+        // 修改配置后，更新最后一列的宽度为自适应
+        const { isOverWidth, columns }: any = await isOverTableWidth()
+        await initData(props.columnList, !isOverWidth) // !isOverWidth: 总列没有超过表格，就设置扩展列为自适应
+        makeFlag.value = false
+        // expendColumn.width = currentColumnWidth
+        nextTick(async () => {
+            makeFlag.value = true
+        })
+    }
 }
 
 const drageIndex = ref(1)
@@ -480,6 +649,15 @@ const dragend = () => {
     toolList.value = tempTool.sort((a: any,b: any) => a.sortIndex - b.sortIndex)
     // console.log(defaultCheck.value, toolList.value)
     // console.log('拖拽结束',toolList.value, drageIndex.value, currentSource, drageEndIndex.value)
+}
+
+// 切换当前列，左右固定
+const chooseFixed = (item: any, type: string) => {
+    if (item.fixed && (item.fixed == type)) {
+        item.fixed = undefined
+    } else {
+        item.fixed = type
+    }
 }
 
 // 全选
@@ -526,6 +704,12 @@ const reset = () => {
         } else {
             c.sortIndex = c.sortIndex || index
         }
+
+        if (crtTool?.fixed) {
+            c.fixed = crtTool?.fixed || undefined
+        } else {
+            c.fixed = c?.fixed || undefined
+        }
     })
     tempColumnShowList = tempColumnShowList.sort((a: any,b: any) => a.sortIndex - b.sortIndex)
     toolList.value = tempColumnShowList.filter((f: any) => f.title)
@@ -561,8 +745,9 @@ const confirm = (flag: boolean = true) => {
         t.visible = defaultCheck.value.findIndex((d: any) => d == t.title) != -1
     })
     columnShowList.value.map((v: any) => {
-        const obj = toolList.value.find((t: any) => t.title == v.title)
+        const obj = deepClone(toolList.value).find((t: any) => t.title == v.title)
         if (obj) {
+            v.fixed = obj?.fixed
             v.visible = obj.visible
             v.sortIndex = obj.sortIndex
         }
@@ -580,8 +765,10 @@ const confirm = (flag: boolean = true) => {
         nextTick(async () => {
             makeFlag.value = true
             await saveTableConfigAPI(localTool.value, localWidth.value)
-            if (!flag) {
-                await initData(props.columnList)
+            if (!flag || hasAutoExpend.value) {
+                // 修改配置后，更新最后一列的宽度为自适应
+                const { isOverWidth, columns }: any = await isOverTableWidth()
+                await initData(props.columnList, !isOverWidth)
             }
             $table.refreshColumn()
             $table.reloadData(attrs['data'])
@@ -652,6 +839,7 @@ const sortChange: VxeTableEvents.SortChange = ({ column, property, order, sortBy
         sortsTemp.push(tempSort)
     })
     sorts.value = sortsTemp
+    if (attrs['sort-config']?.remote == false) return
     showListHandle()
 }
 
@@ -878,34 +1066,49 @@ defineExpose({ xTableRef, toolList, deleteAll, filterChange, deleteShowList, fil
 </script>
 
 <style lang="scss" scoped>
+// .newVxeTable {
+//     background: #ffffff;
+// }
 .XTable-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     width: 100%;
     .showText {
         flex: 1;
         max-height: 60px;
         overflow-y: auto;
         overflow-x: hidden;
+
+        .show-text-title {
+            display: inline-block;
+            font-size: 14px;
+            line-height: 14px;
+            color: #919191;
+        }
+        .show-text-item {
+            margin-left: 8px;
+        }
     }
 
     .XTable-tool {
         flex: none;
         // width: 80px;
-        min-height: 20px;
-        padding: 0 5px 0;
+        min-height: 28px;
+        padding: 4px 0;
         margin-left: 20px;
+        font-size: 14px;
+        line-height: 20px;
 
         // .XTable-tool-box {
         // }
 
-        .XTable-icon {
-            margin-left: 5px;
+        .XTable-item {
+            margin-left: 8px;
         }
 
         .filter-box {
-            height: 20px;
+            min-height: 20px;
         }
     }
 }
@@ -916,12 +1119,56 @@ defineExpose({ xTableRef, toolList, deleteAll, filterChange, deleteShowList, fil
     // margin-top: 10px;
     overflow-y: auto;
 
+    // &.border-bottom {
+    //     border-bottom: 1px solid rgb(192, 196, 204);
+    //     margin-bottom: 5px;
+    // }
+
     .el-checkbox {
         flex: none;
     }
 
     &.margin-top {
-        margin-top: 10px;
+        margin-top: 4px;
+    }
+
+    .XTable-tool-item {
+        height: 32px;
+        .XTable-tool-checkbox {
+            flex: 1;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            .el-checkbox {
+                max-height: 32px;
+            }
+        }
+        .XTable-tool-fixed {
+            flex: none;
+            width: 60px;
+            height: 100%;
+            font-size: 12px;
+
+            .XTable-tool-fixed-icon {
+                position: relative;
+                flex: none;
+                width: 50%;
+                height: 100%;
+                text-align: center;
+                &:not(:last-child) {
+                    &::after {
+                        content: '';
+                        position: absolute;
+                        top: 50%;
+                        right: 0;
+                        width: 0;
+                        height: 60%;
+                        border-right: 1px solid #dedede;
+                        transform: translate(0, -50%);
+                    }
+                }
+            }
+        }
     }
 }
 :deep(.vxe-header--column.col--ellipsis>.vxe-cell .vxe-cell--title) {
@@ -946,7 +1193,65 @@ defineExpose({ xTableRef, toolList, deleteAll, filterChange, deleteShowList, fil
     padding-left: 2px !important;
     padding-right: 2px !important;
 }
-
+:deep(.col--edit) {
+    .vxe-cell {
+        max-height: 95% !important;
+    }
+}
+// 解决最后为固定列时，并且没有数据时头部的border不见了，手动在after加个border，在有数据/滚动时隐藏after
+:deep(.has-data) {
+    .vxe-table--render-default {
+        .vxe-table--fixed-right-wrapper {
+            // .is--scroll-x .vxe-header--column,
+            .vxe-header--column {
+                &.col--fixed {
+                    &::after {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        height: 100%;
+                        border-left: 1px solid transparent;
+                    }
+                }
+            }
+        }
+    }
+}
+:deep(.vxe-table) {
+    // 解决最后为固定列时，并且没有数据时头部的border不见了，手动在after加个border，在有数据/滚动时隐藏after
+    .vxe-table--fixed-right-wrapper {
+        &.scrolling--middle {
+            .vxe-header--column {
+                &.col--fixed {
+                    &::after {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        height: 100%;
+                        border-left: 1px solid transparent;
+                    }
+                }
+            }
+        }
+    }
+    &.is--scroll-x {
+        .vxe-header--column {
+            &.col--fixed {
+            // 解决最后为固定列时，并且没有数据时头部的border不见了，手动在after加个border，在有数据/滚动时隐藏after
+                &::after {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    height: 100%;
+                    border-left: 1px solid #E9E9E9;
+                }
+            }
+        }
+    }
+}
 :deep(.vxe-header--column) {
     .vxe-cell {
         width: 100%;
@@ -958,6 +1263,58 @@ defineExpose({ xTableRef, toolList, deleteAll, filterChange, deleteShowList, fil
         .el-tooltip__trigger {
             display: inline-block;
             width: 100%;
+        }
+        .tooltip-width-auto {
+            width: auto;
+        }
+
+        .vxe-cell--sort {
+            width: 14px;
+            height: 14px;
+            .vxe-icon-caret-up {
+                // width: 14px;
+                // height: 8px;
+                &::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: url('@/assets/icons/svg/sort-top.svg') no-repeat;
+                    background-size: 14px 14px;
+                    background-position: center center;
+                }
+                &.sort--active {
+                    &::before {
+                        background: url('@/assets/icons/svg/sort-top-active.svg') no-repeat;
+                        background-size: 14px 14px;
+                        background-position: center center;
+                    }
+                }
+            }
+            .vxe-icon-caret-down {
+                // width: 14px;
+                // height: 8px;
+                &::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: url('@/assets/icons/svg/sort-bottom.svg') no-repeat;
+                    background-size: 14px 14px;
+                    background-position: center center;
+                }
+                &.sort--active {
+                    &::before {
+                        background: url('@/assets/icons/svg/sort-bottom-active.svg') no-repeat;
+                        background-size: 14px 14px;
+                        background-position: center center;
+                    }
+                }
+            }
         }
     }
     &.col--center {
@@ -981,17 +1338,47 @@ defineExpose({ xTableRef, toolList, deleteAll, filterChange, deleteShowList, fil
 :deep(.filter-inactive) {
     .vxe-cell--filter {
         .vxe-filter--btn {
-            color: var(--vxe-table-column-icon-border-color);
+            position: relative;
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            &::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: url('@/assets/icons/svg/filter-init.svg') no-repeat;
+                background-size: 14px 14px;
+            }
         }
     }
 }
 :deep(.filter-active) {
     .vxe-cell--filter {
         .vxe-filter--btn {
-            color: var(--vxe-primary-color);
+            // color: var(--vxe-primary-color);
+            position: relative;
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            &::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: url('@/assets/icons/svg/filter-active.svg') no-repeat;
+                background-size: 14px 14px;
+            }
         }
     }
 }
+// .vxe-table .vxe-header--sort-wrapper .vxe-sort-icon {
+//   display: none;
+// }
 </style>
 <style lang="scss">
 .vxe-table--tooltip-wrapper {

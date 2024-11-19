@@ -276,7 +276,21 @@ export interface SupplierQuery extends PageQuery {
   type?: string;
 
   /**
+   * 供应商类型（1物料供应商、2全制程供应商、3半制成供应商）
+   */
+  module?: any;
+
+  /**
    * 币种
    */
   currency?: string;
+
+  /**
+   * 创建时间区间-开始时间
+   */
+  createTimeStart?:any
+  /**
+   * 创建时间区间-结束时间
+   */
+  createTimeEnd?:any
 }

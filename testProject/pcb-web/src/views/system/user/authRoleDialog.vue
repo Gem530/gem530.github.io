@@ -3,7 +3,7 @@
         <div v-loading="buttonLoading">
         <el-form label-width="70px" :inline="true" :model="userInfo">
             <el-form-item label="姓名">
-                <el-input v-model="userInfo.nickName" disabled></el-input>
+                <el-input v-if="userInfo.nickName" v-model="userInfo.nickName" disabled></el-input>
             </el-form-item>
             <el-form-item label="归属部门">
                 <el-input v-model="userInfo.dept.deptName" disabled></el-input>
@@ -16,14 +16,31 @@
                         v-model="nameStr"
                         prefix-icon="Search"
                         placeholder="搜索角色名称"
+                        @input="searchHandle"
                     />
                     <div class="role-list">
-                        <el-checkbox-group v-model="chooseRoleList">
-                            <template v-for="(item, index) in roleList" :key="item.roleId">
-                                <div v-if="((item?.roleName || '').toLocaleLowerCase()).includes(nameStr.toLocaleLowerCase())">
+                        <el-checkbox-group style="height: 100%;" v-model="chooseRoleList">
+                        <el-auto-resizer>
+                        <template #default="{ width, height }">
+                            <el-table-v2
+                            ref="tableRef"
+                            :width="width"
+                            :height="height"
+                            :row-height="45"
+                            :header-height="0"
+                            :data="showRoleList"
+                            v-if="roleList?.length"
+                            :columns="[{title: 'Id', key: 'id', dataKey: 'id', width: width}]">
+                            <template #cell="{ rowData: item }">
+                                <!-- <template v-for="(item, index) in roleList" :key="item.roleId">
+                                    <div v-if="((item?.roleName || '').toLocaleLowerCase()).includes(nameStr.toLocaleLowerCase())"> -->
                                     <el-checkbox :label="item">{{item.roleName}}</el-checkbox>
-                                </div>
+                                    <!-- </div>
+                                </template> -->
                             </template>
+                            </el-table-v2>
+                        </template>
+                        </el-auto-resizer>
                         </el-checkbox-group>
                     </div>
                 </el-card>
@@ -72,8 +89,16 @@ const userInfo = ref({
     }
 })
 const roleList = ref([])
+const showRoleList = ref([])
 const chooseRoleList = ref([])
 const buttonLoading = ref(false)
+// watch(() => roleList.value, (val) => {
+//     showRoleList.value = JSON.parse(JSON.stringify(val || []))
+// }, { deep: true, immediate: true })
+
+const searchHandle = () => {
+    showRoleList.value = roleList.value.filter((f) => ((f?.roleName || '').toLocaleLowerCase()).includes(nameStr.value.toLocaleLowerCase()))
+}
 
 /** 重置操作表单 */
 const reset = () => {
@@ -110,6 +135,7 @@ const getList = async () => {
             userInfo.value = res.data?.user
             roleList.value = res.data?.roles || []
             chooseRoleList.value = roleList.value.filter((f) => f.flag)
+            showRoleList.value = JSON.parse(JSON.stringify(roleList.value))
         }
     }).finally(() => {
         buttonLoading.value = false;

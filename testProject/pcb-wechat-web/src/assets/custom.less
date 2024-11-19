@@ -1,0 +1,3353 @@
+page {
+    color: #333;
+    // background: #f9f9f9;
+}
+@font-face {
+    font-family: 'font-number';
+    src: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/font/Oswald-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+.display-none {
+    display: none;
+}
+.w-100 {
+    width: 100%;
+}
+.m-l-8 {
+    margin-left: 8px !important;
+}
+.m-b-8 {
+    margin-bottom: 8px !important;
+}
+.m-l-16 {
+    margin-left: 16px !important;
+}
+.m-r-16 {
+    margin-right: 16px !important;
+}
+.m-b-16 {
+    margin-bottom: 16px !important;
+}
+.m-l-32 {
+    margin-left: 32px !important;
+}
+.m-b-20 {
+    margin-bottom: 20px !important;
+}
+.m-t-20 {
+    margin-top: 20px !important;
+}
+.m-b-12 {
+    margin-bottom: 12px !important;
+}
+.m-l-10 {
+    margin-left: 10px !important;
+}
+.m-r-10 {
+    margin-right: 10px !important;
+}
+.m-t-10 {
+    margin-top: 10px !important;
+}
+.m-b-10 {
+    margin-bottom: 10px !important;
+}
+.display-inline-block {
+    display: inline-block;
+}
+.w-100 {
+    width: 100%;
+}
+.overflow-hidde {
+    overflow: hidden !important;
+}
+
+.text-right {
+    text-align: right;
+}
+.text-left {
+    text-align: left;
+}
+.text-center {
+    text-align: center;
+}
+// .gray-bg {
+//     background: #f3f3f3;
+// }
+
+.float-right {
+    float: right;
+}
+
+.img-picker-resver {
+    .at-image-picker__flex-box {
+        flex-direction: row-reverse;
+    }
+}
+
+.switch-small {
+    zoom: 0.6;
+    switch {
+        zoom: 0.6;
+    }
+}
+.switch-default {
+    // position: relative;
+    zoom: 1.2;
+    switch {
+        zoom: 1.2;
+    }
+
+    // &::after {
+    //     content: '';
+    //     position: absolute;
+    //     top: 50%;
+    //     left: 50%;
+    //     transform: translate(-50%, -50%);
+    //     width: 130%;
+    //     height: 130%;
+    // }
+}
+.font-number {
+    font-family: 'font-number';
+}
+.font-weight-4 {
+    font-weight: 400;
+}
+.font-weight-5 {
+    font-weight: 500;
+}
+.font-weight-7 {
+    font-weight: 700;
+}
+.f-s-24 {
+    font-size: 24px;
+}
+.f-s-28 {
+    font-size: 28px;
+}
+.f-s-32 {
+    font-size: 32px;
+}
+.primary-color {
+    color: #2d90ed !important;
+    &.new {
+        color: #1890ff !important;
+    }
+}
+.primary-color-new {
+    color: #1890FF !important;
+}
+.block-color {
+    color: #333333 !important;
+}
+.gray-color {
+    color: #666666 !important;
+}
+.yellow-color {
+    color: #FFB03B !important;
+}
+.error-color {
+    color: #F8431A !important;
+}
+.green-color {
+    color: #00BAAD !important;
+}
+.primary-card-absolute {
+    position: absolute;
+    top: 20px;
+    right: 32px;
+}
+.primary-index {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 48px;
+    height: 48px;
+    background: #2d90ed;
+    font-size: 28px;
+    font-weight: 400;
+    color: #ffffff;
+    border-radius: 8px;
+}
+.register-logo {
+    flex: none;
+    width: 29px;
+    height: 24px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/nosth-logo.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-wx {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/wx.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-info {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/md-info.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-exit {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/exit.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-copy {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/copy.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-upload-plus {
+    flex: none;
+    width: 80px;
+    height: 80px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/upload-plus.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-copy-blue {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/copy-blue.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-filter {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/filter.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-filter-init {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/filter-init.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-notice {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/notice.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-clean {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('./images/clean.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-home-notice {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('./images/home-notice.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-right {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/right.png') no-repeat;
+    background-size: 28px 28px;
+    background-position: center center;
+}
+.primary-top {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/bottom.svg') no-repeat;
+    transform: rotate(180deg);
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-bottom {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/bottom.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-del {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/delete.png') no-repeat;
+    background-size: 28px 28px;
+    background-position: center center;
+}
+.primary-edit {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/edit.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-gift {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/gift.png') no-repeat;
+    background-size: 36px 34px;
+    background-position: center center;
+}
+.primary-card {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    // margin-right: 8px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/count/card.png') no-repeat;
+    background-size: 32px 25px;
+    background-position: center center;
+}
+.primary-template {
+    flex: none;
+    width: 64px;
+    height: 64px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/template.png') no-repeat;
+    background-size: 46px 49px;
+    background-position: center center;
+}
+.primary-feedback {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    // background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/feedback.png') no-repeat;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/feedback.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-shop {
+    flex: none;
+    width: 64px;
+    height: 64px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/shop.png') no-repeat;
+    background-size: 46px 37px;
+    background-position: center center;
+}
+.primary-photo {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/photo.png') no-repeat;
+    background-size: 48px 48px;
+    background-position: center center;
+}
+.primary-download {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/download.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-choose {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/choose.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-choose-active {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/choose-active.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-sigle-text {
+    flex: none;
+    min-width: 40px;
+    height: 40px;
+    font-size: 24px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 1);
+    text-align: center;
+    line-height: 40px;
+    border-radius: 4px;
+    &.sigle-blue {
+        background: rgba(24, 144, 255, 1);
+    }
+    &.sigle-yellow {
+        background: rgba(255, 176, 59, 1);
+    }
+    &.sigle-gray{
+      background: #d3d3d3;
+    }
+}
+.primary-up-page {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/up-page.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-report-time {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/report-time.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-question-gray {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/question-gray.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-question-white {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/question-white.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-change-row {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/change-row.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-change-table {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/change-table.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-change-chart {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/change-chart.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-report-table {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/report-table.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-report-line {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/report-line.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-report-bar {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/report-bar.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-report-plus {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/report-plus.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-sign-back {
+    flex: none;
+    width: 90px;
+    height: 70px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/sign-back.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-show-price {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/show-price.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-hide-price {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/hide-price.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-detail-check {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    // background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/detail-check.png') no-repeat;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/detail-check.png') no-repeat;
+    background-size: 48px 48px;
+    background-position: center center;
+}
+.primary-detail-statement {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    // background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/detail-upload.png') no-repeat;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/detail-statement.png') no-repeat;
+    background-size: 48px 48px;
+    background-position: center center;
+}
+.primary-detail-upload {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    // background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/detail-upload.png') no-repeat;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/detail-upload.png') no-repeat;
+    background-size: 48px 48px;
+    background-position: center center;
+}
+.primary-search-scan {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/search-scan.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-drag-before {
+    flex: none;
+    width: 52px;
+    height: 52px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/drag-before.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-drag-after {
+    flex: none;
+    width: 52px;
+    height: 52px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/drag-after.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-scan-success {
+    flex: none;
+    width: 240px;
+    height: 240px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/scan-success.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-status-wait {
+    flex: none;
+    width: 86px;
+    height: 70px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/status-wait.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-status-pass {
+    flex: none;
+    width: 86px;
+    height: 70px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/status-pass.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-status-reject {
+    flex: none;
+    width: 86px;
+    height: 70px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/status-reject.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-status-confirm {
+    flex: none;
+    width: 86px;
+    height: 70px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/status-confirm.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-status-cancel {
+    flex: none;
+    width: 86px;
+    height: 70px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/status-cancel.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-flow-pass {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/flow-pass.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-flow-wait {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/flow-wait.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-flow-gray {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/flow-gray.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-flow-line-blue {
+    flex: none;
+    width: 102px;
+    height: 8px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/flow-line-blue.png') no-repeat;
+    background-size: cover;
+    background-position: right center;
+}
+.primary-flow-line-gray {
+    flex: none;
+    width: 102px;
+    height: 8px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/flow-line-gray.png') no-repeat;
+    background-size: cover;
+    background-position: right center;
+}
+.primary-material-success {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/material-success.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-material-wait {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/material-wait.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-material-error {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/material-error.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-clock {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/primary-clock.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-clock-active {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/primary-clock-active.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-close {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/primary-close.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-del-init {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/primary-del-init.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-inventory-wait {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/inventory-wait.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-inventory-again {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/inventory-again.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-inventory-doing {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/inventory-doing.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-inventory-finish {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/inventory-finish.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-inventory-process {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/inventory-process.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-inventory-reject {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/inventory-reject.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-inventory-base {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/inventory-base.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-inventory-detail {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/inventory-detail.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-inventory-invalid {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/inventory-invalid.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-inventory-lock {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/inventory-lock.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-inventory-unlock {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/inventory-unlock.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-inventory-refresh {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/inventory-refresh.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-inventory-check-init {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/inventory-check-init.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-inventory-check-active {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/inventory-check-active.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-inventory-reject-tip {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/inventory-reject-tip.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-account-wait {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/account-wait.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-account-finish {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/account-finish.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+.primary-account-doing {
+    flex: none;
+    width: 48px;
+    height: 48px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/account-doing.svg') no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+}
+
+.primary-tag-gray {
+    background: rgba(243, 243, 243, 1);
+    padding: 4px 16px 4px 16px;
+    font-size: 28px;
+    font-weight: 400;
+    color: #333333;
+    border-radius: 4px;
+
+    &:not(:last-child) {
+        margin-right: 20px;
+    }
+
+    .primary-tag-label,
+    .primary-tag-value {
+        display: inline-block;
+    }
+
+    .primary-tag-value {
+        position: relative;
+        margin-left: 8px;
+        padding-left: 8px;
+
+        &::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translate(0, -50%);
+            width: 1px;
+            height: 33px;
+            background: #d3d3d3;
+        }
+    }
+}
+
+.primary-tag-absolute {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 4px 20px;
+    font-size: 28px;
+    font-weight: 400;
+    border-radius: 0px 20px 0px 20px;
+    box-sizing: border-box;
+    &.primary-tag-pass {
+        background: linear-gradient(195.36deg, rgba(0, 186, 173, 0.2) 0%, rgba(0, 186, 173, 0.2) 100%);
+        color: #00baad;
+    }
+    &.primary-tag-error {
+        background: linear-gradient(195.36deg, rgba(252, 50, 50, 0.2) 0%, rgba(252, 50, 50, 0.2) 100%);
+        color: #fc3232;
+    }
+    &.primary-tag-primary {
+        background: linear-gradient(195.36deg, rgba(45, 144, 237, 0.2) 0%, rgba(45, 144, 237, 0.2) 100%);
+        color: #2d90ed;
+    }
+}
+
+.flex {
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    &.flex-start {
+        justify-content: flex-start;
+    }
+
+    &.flex-end {
+        justify-content: flex-end;
+    }
+
+    &.flex-center {
+        justify-content: center;
+    }
+
+    &.flex-between {
+        justify-content: space-between;
+    }
+
+    &.flex-around {
+        justify-content: space-around;
+    }
+
+    &.flex-column {
+        flex-direction: column;
+    }
+
+    &.align-center {
+        align-items: center;
+    }
+    &.align-end {
+        align-items: end;
+    }
+
+    &.flex-wrap {
+        flex-wrap: wrap;
+    }
+}
+.flex-grow {
+    flex-grow: 1;
+}
+.flex-none {
+    flex: none !important;
+}
+
+.ml-5 {
+    margin-left: 5px;
+}
+
+// 溢出隐藏
+.overflow-omit {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+// 多行溢出隐藏
+.overflow-two {
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* 显示3行文本 */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.g-form-item {
+    box-sizing: border-box;
+
+    .g-form-label {
+        flex: none;
+        width: 120px;
+        margin-right: 28px;
+        font-size: 28px;
+        font-weight: 400;
+        box-sizing: border-box;
+    }
+}
+
+.table-des {
+    margin: 30px 0;
+}
+
+.order-detail-table {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: stretch;
+    border-top: 1px solid #ebeef5;
+    border-left: 1px solid #ebeef5;
+    box-sizing: border-box;
+    font-size: 28px;
+
+    // &::after {
+    //     content: "";
+    //     position: absolute;
+    //     top: -1px;
+    //     right: 0;
+    //     width: 1px;
+    //     height: 1px;
+    //     background: #fff;
+    // }
+    .order-detail-table-label {
+        flex: none;
+        width: 22%;
+        padding: 8px 11px;
+        background: #f5f7fa;
+        border-right: 1px solid #d6e4ef;
+        border-bottom: 1px solid #d6e4ef;
+        word-break: normal;
+        box-sizing: border-box;
+
+        &.one {
+            width: 22%;
+        }
+    }
+
+    .order-detail-table-value {
+        flex: none;
+        width: 28%;
+        padding: 8px 11px;
+        border-right: 1px solid #d6e4ef;
+        border-bottom: 1px solid #d6e4ef;
+        word-break: normal;
+        box-sizing: border-box;
+
+        &.one {
+            width: 78%;
+        }
+    }
+}
+
+// 按钮 根据ui全局样式
+.at-button {
+    height: 96px;
+    background: #ffffff;
+    border: 4px solid #96bbfa;
+    font-size: 36px;
+    font-weight: 700;
+    color: #2d90ed;
+    line-height: 96px;
+    border-radius: 8px;
+    box-sizing: border-box;
+
+    &.at-button--primary {
+        background: #2D90ED;
+        border: none;
+        color: #ffffff;
+    }
+
+    &.error {
+        border: 4px solid #ff6a59;
+        color: #fc3232;
+
+    }
+
+    &.new {
+        height: 72px;
+        border: 2px solid #E3E3E3;
+        font-size: 28px;
+        color: #333333;
+        font-weight: 500;
+        line-height: 72px;
+        &.at-button--primary {
+            background: #1890FF;
+            border: none;
+            color: #ffffff;
+        }
+
+        &.gray-btn {
+            background: #F2F6F9;
+            border: none;
+            color: #333333;
+        }
+        &.at-button-tooltip {
+            flex: none !important;
+            width: 75% !important;
+        }
+        &.error {
+            border: 2px solid #E3E3E3;
+            background: #FFFFFF;
+            color: #F8431A;
+        }
+    }
+    &.gray-btn {
+        background: #F2F6F9;
+        border: none;
+        color: #333333;
+    }
+
+    &.full {
+        width: 100%;
+    }
+
+    &.no-margin {
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
+
+// tab 根据ui全局样式
+.at-tabs {
+    min-height: 90px;
+
+    &.at-tabs--horizontal {
+        .at-tabs__item {
+            font-size: 32px;
+            font-weight: 400;
+            color: #333333;
+            box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.04);
+
+            &.at-tabs__item--active {
+                font-size: 32px;
+                font-weight: 700;
+                color: #2d90ed;
+
+                .at-tabs__item-underline {
+                    height: 6px;
+                    background: #2d90ed;
+                }
+            }
+        }
+        .at-tabs__body {
+            .at-tabs__underline {
+                display: none;
+            }
+        }
+    }
+
+    &.border-bottom {
+        .at-tabs__header {
+            border-bottom: 2px solid #F3F3F3;
+        }
+    }
+
+    &.new {
+        &.at-tabs--horizontal {
+            height: 64px;
+            min-height: 64px;
+            box-sizing: border-box;
+            &.tab-auto {
+                width: auto;
+                .at-tabs__header {
+                    width: auto;
+                }
+            }
+
+            .at-tabs__header {
+                height: 64px;
+                .at-tabs__item {
+                    height: 64px;
+                    font-size: 28px;
+                    font-weight: 400;
+                    color: #333333;
+                    padding-top: 0;
+                    padding-bottom: 0;
+                    line-height: 64px;
+                    box-shadow: none;
+                    box-sizing: border-box;
+                    .at-tabs__item-underline {
+                        transition: none !important;
+                    }
+
+                    &.at-tabs__item--active {
+                        position: relative;
+                        font-size: 28px;
+                        font-weight: 700;
+                        color: #2d90ed;
+
+                        .at-tabs__item-underline {
+                            position: absolute;
+                            bottom: 0;
+                            left: 50%;
+                            transform: translate(-50%, 0);
+                            // width: 100%;
+                            // max-width: 72px;
+                            width: 35%;
+                            height: 4px;
+                            background: #2d90ed;
+                        }
+                    }
+                }
+            }
+        }
+        .at-tabs__body {
+            .at-tabs__underline {
+                display: none;
+            }
+        }
+        &.no-body {
+            .at-tabs__body {
+                display: none;
+            }
+        }
+    }
+}
+
+// 扫描结果 卡片公共样式
+.count-card {
+    width: 686px;
+    // height: 528px;
+    background: #ffffff;
+    padding: 20px 32px 41px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
+
+    .card-item {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        min-height: 64px;
+        font-size: 32px;
+        color: #333333;
+        text-align: left;
+        box-sizing: border-box;
+
+        &:not(:last-child) {
+            margin-bottom: 20px;
+        }
+
+        .card-item-label {
+            flex: none;
+            width: 160px;
+            margin-right: 24px;
+            font-weight: 400;
+        }
+
+        .card-item-value {
+            font-weight: 700;
+            word-break: break-all;
+        }
+
+        .card-item-unit {
+            font-weight: 500;
+        }
+
+        // .card-code-icon {
+        //     flex: none;
+        //     width: 48px;
+        //     height: 48px;
+        //     margin-right: 8px;
+        //     background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/count/card.png') no-repeat;
+        //     background-size: 32px 25px;
+        //     background-position: center center;
+        // }
+
+        .card-code-box {
+            margin-left: 8px;
+            font-size: 40px;
+            font-weight: 700;
+            word-break: break-all;
+        }
+    }
+}
+
+// picker中的atinput组件不置灰
+picker {
+    .at-input {
+        .at-input--disabled {
+            opacity: 1;
+        }
+    }
+}
+
+// AtInput 全局样式
+.at-input {
+    z-index: 0;
+    .at-input__input {
+        z-index: 0;
+    }
+}
+.at-input.new {
+    margin: 0;
+    // 类似pc端 input样式
+    &.el-imitate-input {
+        .at-input__title {
+            display: none;
+        }
+        height: 72px;
+        padding-left: 16px;
+        border: 2px solid #E3E3E3;
+        border-radius: 8px;
+        box-sizing: border-box;
+        .at-input__container {
+            height: 100%;
+            .at-input__input {
+                height: 100%;
+            }
+        }
+    }
+
+    &.w-160 {
+        width: 160px;
+    }
+
+    &.label-auto {
+        .at-input__title {
+            min-width: 112px;
+            width: auto;
+        }
+    }
+
+    .at-input__children {
+        .user-item-right {
+            padding: 0 !important;
+        }
+    }
+
+    .at-input__children {
+        &::after {
+            display: none;
+        }
+
+        .max-unit {
+            width: 80px;
+            font-size: 24px;
+            text-align: center;
+        }
+    }
+
+    &.no-t-b-padding {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    &.input-content-gray {
+        padding: 10px 0;
+        .at-input__input {
+            height: 96px;
+            padding-left: 20px;
+            border-radius: 4px;
+            background: #f3f3f3;
+            box-sizing: border-box;
+        }
+        // .at-input__children {
+        //     display: flex;
+        //     justify-content: center;
+        //     align-items: center;
+        //     height: 96px;
+        //     // padding-right: 20px;
+        //     border-radius: 4px;
+        //     background: #f3f3f3;
+        //     box-sizing: border-box;
+        //     &::after {
+        //         display: none;
+        //     }
+        // }
+        // .input-content-gray-unit {
+        //     min-width: 30px;
+        // }
+    }
+
+    &::after {
+        display: none;
+    }
+
+    .at-input__title {
+        flex: none;
+        width: 112px;
+        margin-right: 20px;
+        font-size: 28px;
+        font-weight: 400;
+        text-align: justify;
+        text-align-last: justify;
+    }
+
+    .at-input--disabled {
+        opacity: 1;
+    }
+}
+.el-imitate-input-placeholder {
+    font-size: 32px;
+    font-weight: 400;
+    color: #919191;
+}
+
+// AtTextarea 全局样式
+.at-textarea-box {
+    position: relative;
+    .at-textarea {
+        .at-textarea__counter {
+            opacity: 0;
+        }
+    }
+    .at-textarea-count {
+        position: absolute;
+        right: 0;
+        bottom: 18px;
+        padding-top: 12px;
+        padding-left: 18px;
+        width: 100%;
+        color: #C9C9C9;
+        font-size: 28px;
+        text-align: right;
+        line-height: 1;
+    }
+}
+.at-textarea {
+    &.new {
+        &.el-imitate-textarea {
+            border: 2px solid #E3E3E3;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+    }
+}
+.el-imitate-textarea-placeholder {
+    font-size: 32px;
+    font-weight: 400;
+    color: #919191;
+}
+
+// 个人中心 卡片
+.user-card {
+    padding: 20px 32px;
+    background: rgba(255, 255, 255, 1);
+    border-radius: 20px;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
+
+    picker {
+        min-height: 88px;
+        &:not(:last-child) {
+            margin-bottom: 8px;
+        }
+    }
+
+    .user-card-item {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        flex-wrap: nowrap;
+        width: 100%;
+        min-height: 88px;
+        color: #333333;
+
+        &.title-auto {
+            .at-input {
+                .at-input__title {
+                    min-width: 120px;
+                    white-space: nowrap;
+                }
+            }
+        }
+
+        .at-input {
+            width: 100%;
+            .at-input--disabled {
+                opacity: 1;
+            }
+
+            &.disabled {
+                .at-input__input {
+                    color: #999999;
+                }
+            }
+
+            .at-input__title {
+                width: 120px;
+                margin-right: 30px;
+                font-size: 28px;
+                font-weight: 400;
+                // 文字两边对齐
+                text-align: justify;
+                text-align-last: justify;
+            }
+
+            .at-input__input {
+                flex: 1;
+                font-size: 32px;
+                font-weight: 700;
+            }
+
+            .at-input__children {
+                width: 36px;
+                .user-item-right {
+                    margin-left: 0;
+                }
+            }
+        }
+
+        &:not(:last-child) {
+            margin-bottom: 8px;
+        }
+
+        .user-item-label {
+            flex: none;
+            width: 120px;
+            margin-right: 30px;
+            font-size: 28px;
+            font-weight: 400;
+            // 文字两边对齐
+            text-align: justify;
+            text-align-last: justify;
+
+            &.width-auto {
+                min-width: 120px;
+                width: auto;
+            }
+        }
+
+        .user-item-value {
+            flex: 1;
+            font-size: 32px;
+            font-weight: 700;
+
+            &.disabled {
+                color: #999999;
+            }
+        }
+
+        .user-item-right {
+            flex: none;
+            width: 36px;
+            height: 36px;
+            margin-left: 10px;
+            background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/right.png') no-repeat;
+            background-size: 28px 28px;
+            background-position: center center;
+        }
+    }
+}
+
+// 弹框样式
+.at-modal.new {
+    z-index: 9999;
+    overflow: hidden;
+    &.content-scroll {
+        .at-modal__container {
+            .at-modal__content {
+                max-height: 650px;
+                &::-webkit-scrollbar {
+                    display: none;
+                }
+                ::-webkit-scrollbar {
+                    display: none;
+                }
+            }
+        }
+    }
+    &.pop-bottom {
+        .at-modal__container {
+            top: auto;
+            bottom: 0;
+            width: 750px;
+            transform: translate(-50%, 0);
+            border-radius: 20px 20px 0 0;
+            .at-modal__content {
+                padding: 32px 67px;
+            }
+            .at-modal__footer {
+                padding: 0 0 32px;
+            }
+        }
+
+        &.common-dialog {
+            &.content-no-padding {
+                .at-modal__content {
+                    padding: 0 !important;
+                    .common-dialog-content {
+                        padding: 20px 64px;
+                    }
+                }
+            }
+            .at-modal__container {
+                .at-modal__content {
+                    padding: 20px 64px;
+                }
+                .at-modal__footer {
+                    padding: 0 64px 96px;
+
+                    .at-button {
+                        height: 88px;
+                        line-height: 88px;
+                    }
+                }
+            }
+        }
+    }
+
+    .at-modal__container {
+        width: 616px;
+        // height: 564px;
+        background: #ffffff;
+        font-size: 36px;
+        font-weight: 700;
+        color: #000000;
+        border-radius: 20px;
+        box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.04);
+
+        .at-modal__header {
+            height: 96px;
+            border-bottom: 2px solid #d3d3d3;
+            text-align: center;
+            line-height: 60px;
+            box-sizing: border-box;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+
+            &::after {
+                display: none;
+            }
+        }
+        .at-modal__content {
+            min-height: 100px;
+            padding: 48px;
+            // box-sizing: border-box;
+        }
+        .at-modal__footer {
+            border-top: none;
+            padding: 0 48px 48px;
+            // box-sizing: border-box;
+
+            &::before {
+                display: none;
+            }
+
+            .at-modal__action {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                .at-button {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    flex: 1;
+                    height: 72px;
+                    font-size: 32px;
+                    font-weight: 700;
+                    border-radius: 8px;
+
+                    &:not(:last-child) {
+                        margin-right: 40px;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 空 组件全局样式
+.empty-box {
+    padding: 144px 0;
+
+    .empty-content {
+        width: 272px;
+        height: 340px;
+        margin-bottom: 42px;
+
+        &.empty-default {
+            background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/empty.png') no-repeat;
+            background-size: 100% 100%;
+        }
+    }
+
+    .empty-text {
+        max-width: 500px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: 400;
+        color: #999999;
+    }
+}
+
+// 合同、送货单、退货单、对账单、接单 卡片样式
+.gray-input {
+  margin-left: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  // height: 10px;
+  // border-bottom: none;
+  &::after {
+    display: none;
+  }
+  &.white-bg {
+    .at-input__input {
+      background: #ffffff !important;
+    }
+  }
+
+  &.recive-phone {
+    .at-input__title {
+      width: 150px;
+    }
+  }
+
+  .at-input__input {
+    height: 60px;
+    border: 2px solid #f3f3f3;
+    border-right: 0;
+    border-radius: 8px 0 0 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    box-sizing: border-box;
+  }
+  .at-input__children {
+    height: 60px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #f3f3f3;
+    border-left: 0;
+    border-radius: 0 8px 8px 0;
+    box-sizing: border-box;
+    .at-icon {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    &::after {
+      display: none;
+    }
+  }
+
+  &.large {
+    .at-input__title {
+      width: 190px;
+    }
+  }
+
+  .at-input__title {
+    font-size: 28px;
+    width: 130px;
+    font-weight: bolder;
+    // 文字两边对齐
+    text-align: justify;
+    text-align-last: justify;
+  }
+  .at-input__input {
+    font-size: 28px;
+    box-sizing: border-box;
+  }
+}
+.common-card {
+    position: relative;
+    background: rgba(255, 255, 255, 1);
+    padding: 20px 32px;
+    margin-bottom: 20px;
+    color: #333333;
+    box-shadow: 0px 0px 8px  rgba(0, 0, 0, 0.08);
+    border-radius: 20px;
+
+    &.new {
+        border-radius: 8px;
+        .common-position-tip {
+            background: rgba(231, 243, 255, 1);
+            border-radius: 0px 8px 0px 8px;
+        }
+    }
+
+    &.badge {
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            background: #F53F3F;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 0 2px rgba(245, 63, 63, 1);
+        }
+    }
+
+    .common-status {
+        position: absolute;
+        top: 20px;
+        right: 70px;
+        z-index: 1;
+    }
+
+    .common-position-tip {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 124px;
+        height: 48px;
+        padding: 0 10px;
+        text-align: center;
+        background: rgba(213, 233, 251, 1);
+        font-size: 28px;
+        font-weight: 400;
+        color: #2D90ED;
+        line-height: 48px;
+        border-radius: 0px 20px 0px 20px;
+
+        &.gray {
+            background: #f3f3f3;
+            color: #333333;
+        }
+        &.orange {
+            background: #ffe5d2;
+            color: #ff7b1c;
+        }
+        &.yellow {
+            background: #FFFAEB;
+            color: #FF9800;
+        }
+        &.green {
+            background: #ccf1ef;
+            color: #00baad;
+        }
+        &.red {
+            background: #fff0ee;
+            color: #f8431a;
+        }
+    }
+
+    .common-index {
+        position: absolute;
+        top: 0;
+        left: 0;
+        min-width: 32px;
+        height: 36px;
+        background: linear-gradient(223.59deg, rgba(45, 144, 237, 0.2) 0%, rgba(42, 130, 228, 0.05) 99.31%);
+        font-size: 20px;
+        font-weight: 400;
+        color: rgba(45, 144, 237, 1);
+        text-align: center;
+        line-height: 36px;
+        white-space: nowrap;
+        border-radius: 20px 0px 20px 0px;
+    }
+
+    .common-between {
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        &.half {
+            .common-item {
+                flex: 1;
+                &:first-child {
+                    flex: 1;
+                    width: auto;
+                }
+            }
+        }
+        &.fixed-half {
+            flex-wrap: wrap;
+            .common-item {
+                flex: none !important;
+                width: 50% !important;
+            }
+        }
+        &.border-bottom {
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f3f3f3;
+        }
+
+        .common-item {
+            flex: 1;
+
+            &:first-child {
+                flex: none;
+                width: 355px;
+            }
+        }
+    }
+}
+.common-item {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    &.new {
+        .common-title {
+            font-size: 32px;
+        }
+        .common-item-label {
+            margin-right: 20px;
+            text-align: right;
+            text-align-last: right;
+            font-size: 28px;
+            font-weight: 400;
+            color: rgba(145, 145, 145, 1);
+        }
+        .common-item-value {
+            font-size: 28px;
+            font-weight: 400;
+            color: #333333;
+        }
+    }
+    &.outsource {
+      .common-item-label {
+        min-width: 140px;
+      }
+    }
+
+    &.head {
+        align-items: center;
+    }
+    &.border-bottom {
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #f3f3f3;
+    }
+    &.mini {
+        .common-item-label {
+            margin-right: 20px;
+        }
+    }
+    &.padding-t-b {
+        padding: 10px 0;
+    }
+
+    .common-title-choose {
+        width: 36px;
+        height: 36px;
+        margin-right: 8px;
+    }
+
+    .common-type {
+        flex: none;
+        min-width: 80px;
+        height: 36px;
+        line-height: 36px;
+        background: #A0AABC;
+        font-size: 24px;
+        font-weight: normal;
+        color: #FFFFFF;
+        text-align: center;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    .common-title {
+        flex: 1;
+        margin-right: 8px;
+        font-size: 40px;
+        font-weight: 700;
+        word-break: break-all;
+
+        &.has-position {
+            padding-right: 130px;
+            box-sizing: border-box;
+        }
+
+        &.small {
+            font-size: 32px;
+        }
+        &.mini {
+            font-size: 28px;
+        }
+    }
+
+    .common-item-label {
+        flex: none;
+        min-width: 112px;
+        margin-right: 40px;
+        font-size: 28px;
+        font-weight: 400;
+        text-align: justify;
+        text-align-last: justify;
+
+        &.change {
+            //background: linear-gradient(195.36deg, rgba(45, 144, 237, 0.2) 0%, rgba(45, 144, 237, 0.2) 100%);
+            //color: rgba(45, 144, 237, 1);
+            background: linear-gradient(195.36deg, rgba(255, 182, 193, 0.5) 0%, rgba(255, 182, 193, 0.5) 100%); /* 浅红背景 */
+            //color: #fef0f0; /* 深红字体 */
+            color: #e50d0d; /* 深红字体 */
+        }
+
+        &.m-t-4 {
+            margin-top: 4px;
+        }
+
+        .common-label-unit {
+            display: inline-block;
+            font-size: 24px;
+        }
+    }
+
+    .common-item-value {
+        flex: 1;
+        font-size: 28px;
+        font-weight: 700;
+        word-break: break-all;
+
+        &.change {
+            text-decoration: underline;
+        }
+
+        &.m-t-4 {
+            margin-top: 4px;
+        }
+
+        .common-item-unit {
+            display: inline-block;
+            margin-left: 8px;
+            text-decoration: none;
+
+            &.f-w-4 {
+                font-weight: 400;
+            }
+        }
+    }
+
+    .common-item-btn {
+        // display: inline;
+        float: right;
+        min-width: 184px;
+        height: 50px;
+        line-height: 50px;
+        background: #2D90ED;
+        font-size: 24px;
+        font-weight: 700;
+        &.mini {
+            min-width: 144px;
+            padding: 0 5px;
+        }
+        &.mini-height {
+            height: 50px;
+        }
+    }
+  &.large {
+    .common-item-btn-plain {
+      float: right;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      color: #2D90ED;
+    }
+  }
+    .common-item-btn-plain {
+        float: right;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        color: #2D90ED;
+
+        .common-item-btn-plain-text {
+            margin-left: 8px;
+            font-size: 28px;
+            font-weight: 400;
+            white-space: nowrap;
+        }
+    }
+
+    .common-textarea {
+        background: rgba(243, 243, 243, 1);
+        padding: 8px 20px;
+        border: none;
+        border-radius: 4px;
+    }
+
+    .common-textarea-placeholder {
+        font-size: 28px;
+        font-weight: 400;
+        color: #999999;
+    }
+}
+.common-bottom-card {
+    position: relative;
+    margin-bottom: 20px;
+    .common-card {
+        margin-bottom: 0px;
+
+        .common-float-left {
+            float: left;
+            font-size: 24px;
+        }
+    }
+
+    .common-bottom-detail {
+        width: 630px;
+        max-height: 370px;
+        margin: 0 auto;
+        background: linear-gradient(270deg, rgba(255, 255, 255, 1) 0%, rgba(242, 249, 255, 1) 94.55%, rgba(240, 248, 255, 1) 100%);
+
+        .bottom-detail-card {
+            padding: 16px 20px 0;
+            box-sizing: border-box;
+            &:last-child {
+                padding-bottom: 16px;
+            }
+            .bottom-detail-card-head {
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+
+                .bottom-detail-card-head-index {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 32px;
+                    height: 30px;
+                    margin-right: 8px;
+                    background: rgba(45, 144, 237, 1);
+                    font-size: 20px;
+                    font-weight: 400;
+                    color: rgba(255, 255, 255, 1);
+                    border-radius: 8px;
+                }
+                .bottom-detail-card-head-title {
+                    flex: 1;
+                    font-size: 28px;
+                    font-weight: 700;
+                    color: #333333;
+                }
+                .bottom-detail-card-head-tag {
+                    flex: none;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-width: 120px;
+                    height: 40px;
+                    background: rgba(235, 250, 249, 1);
+                    font-size: 24px;
+                    font-weight: 400;
+                    color: rgba(0, 186, 173, 1);
+                    border-radius: 4px;
+                }
+            }
+            .bottom-detail-card-item {
+                display: flex;
+                justify-content: flex-start;
+                align-items: flex-start;
+                margin-top: 4px;
+                .bottom-detail-card-item-label {
+                    flex: none;
+                    width: 96px;
+                    margin-right: 20px;
+                    font-size: 24px;
+                    font-weight: 400;
+                    color: rgba(153, 153, 153, 1);
+                }
+                .bottom-detail-card-item-value {
+                    flex: 1;
+                    font-size: 24px;
+                    font-weight: 400;
+                    color: #333333;
+                }
+            }
+        }
+        .common-bottom-detail-border {
+            position: relative;
+            height: 32px;
+            &::after,
+            &::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                width: 18px;
+                height: 100%;
+                background: #f9f9f9;
+            }
+            &::before {
+                left: 0;
+                border-radius: 0 18px 18px 0;
+            }
+            &::after {
+                right: 0;
+                border-radius: 18px 0 0 18px;
+            }
+
+            .border {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 578px;
+                height: 2px;
+                opacity: 1;
+                background: rgba(243, 243, 243, 1);
+            }
+        }
+    }
+}
+
+// 底部公共按钮区
+.common-bottom-button {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    height: 124px;
+    padding: 16px 20px 36px;
+    background: #ffffff;
+    box-sizing: border-box;
+
+    .at-button {
+        min-width: 160px;
+        height: 72px;
+        line-height: 72px;
+        padding-left: 10px;
+        padding-right: 10px;
+        margin: 0;
+        font-size: 28px;
+        font-weight: normal;
+        &:not(:first-child) {
+            margin-left: 24px;
+        }
+    }
+}
+.common-bottom-btn {
+    position: fixed;
+    bottom: 32px;
+    left: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 32px;
+    box-sizing: border-box;
+    z-index: 100;
+
+    .at-button {
+        flex: 1;
+        height: 88px;
+        line-height: 88px;
+        margin-right: 46px;
+        font-size: 36px;
+        font-weight: 700;
+        border-radius: 8px;
+        &:last-child {
+            margin-right: 0;
+        }
+    }
+}
+
+// 底部确认按钮
+.common-confirm-btn {
+    position: fixed;
+    bottom: 64px;
+    left: 0;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    height: 96px;
+    padding: 0 32px;
+    box-sizing: border-box;
+    z-index: 100;
+
+    .common-btn-box {
+        flex: 1;
+        height: 100%;
+        background: linear-gradient(220.51deg, rgba(45, 144, 237, 1) 0%, rgba(45, 144, 237, 1) 100%);
+        color: rgba(255, 255, 255, 1);
+        border-radius: 8px;
+
+        .common-btn-confirm {
+            flex: 1;
+            .common-btn-confirm-text {
+                font-size: 36px;
+                font-weight: 700;
+            }
+            .common-btn-confirm-tip {
+                font-size: 24px;
+                font-weight: 400;
+            }
+        }
+
+        .common-btn-cancel {
+            position: relative;
+            flex: none;
+            width: 132px;
+            font-size: 20px;
+            font-weight: 400;
+
+            &::before {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 0;
+                transform: translate(0, -50%);
+                height: 24px;
+                border-left: 1px solid rgba(211, 211, 211, 1);
+            }
+
+            .common-btn-cancel-icon {
+                width: 32px;
+                height: 32px;
+                background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/cancel-choose.png') no-repeat;
+                // background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/cancel-choose.png') no-repeat;
+                background-size: 100% 100%;
+            }
+        }
+    }
+
+    .common-btn-right {
+        flex: none;
+        width: 75px;
+        height: 100%;
+        margin-left: 25px;
+        font-size: 24px;
+        font-weight: 400;
+        color: rgba(51, 51, 51, 1);
+    }
+}
+
+// notice 消息
+.common-notice {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    height: 52px;
+    background: rgba(255, 255, 255, 1);
+    padding: 0 32px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    box-sizing: border-box;
+
+    &.block {
+        background: rgba(51, 51, 51, 0.8);
+        .common-notice-text {
+            flex: 1;
+            color: #ffffff;
+        }
+    }
+
+    .common-notice-text {
+        flex: none;
+        margin-left: 8px;
+        font-size: 24px;
+        font-weight: 400;
+        color: #333333;
+
+        .notice-weight {
+            display: inline-block;
+            font-weight: 700;
+            margin: 0 8px;
+        }
+    }
+}
+
+// 步骤条
+.common-step {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .common-step-item {
+        position: relative;
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        &:first-child {
+            .common-step-item-content {
+                justify-content: flex-start;
+            }
+        }
+        &:last-child {
+            .common-step-item-content {
+                justify-content: flex-end;
+            }
+        }
+        // &:not(:last-child) {
+        //     &::after {
+        //         content: "";
+        //         position: absolute;
+        //         top: 50%;
+        //         right: 0;
+        //         width: 102px;
+        //         height: 8px;
+        //         background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/flow-line-blue.png') no-repeat;
+        //         background-size: cover;
+        //         background-position: right center;
+        //     }
+        // }
+
+        .common-step-item-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            .common-step-item-content-text {
+                margin-left: 4px;
+                font-size: 24px;
+                font-weight: 400;
+                white-space: nowrap;
+            }
+        }
+    }
+    .common-step-item-line {
+        flex: 1;
+        // min-width: 50px;
+        margin: 0 20px;
+    }
+}
+
+// 弹框修改记录 公共样式
+.common-record-card {
+    padding-bottom: 15px;
+    color: #333333;
+    box-sizing: border-box;
+    &:not(:last-child) {
+        border-bottom: 2px solid rgba(243, 243, 243, 1);
+        margin-bottom: 15px;
+    }
+
+    .common-record-head {
+        position: relative;
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-start;
+        margin-bottom: 8px;
+
+        .common-record-index {
+            position: absolute;
+            left: -10px;
+            top: -4px;
+            transform: translate(-100%, 0);
+            flex: none;
+            min-width: 36px;
+            height: 36px;
+            background: rgba(45, 144, 237, 1);
+            font-size: 28px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 1);
+            text-align: center;
+            line-height: 36px;
+            white-space: nowrap;
+            border-radius: 8px;
+        }
+        .common-record-title {
+          // margin: 0 12px;
+          font-size: 28px;
+          font-weight: 700;
+          margin-left: 30px;
+        }
+        .common-record-subtitle {
+            font-size: 28px;
+            font-weight: 400;
+        }
+    }
+
+    .common-record-item {
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-start;
+        margin-bottom: 8px;
+        font-size: 28px;
+
+        .common-record-label {
+            flex: none;
+            min-width: 112px;
+            margin-right: 20px;
+            font-weight: 400;
+            text-align: justify;
+            text-align-last: justify;
+        }
+        .common-record-value {
+          flex: 1;
+          font-weight: 1000;
+          word-break: break-all;
+        }
+        .common-record-unit {
+            display: inline-block;
+            margin-left: 30px;
+        }
+    }
+}
+
+// 详情凭证查看与上传
+.detail-upload-between {
+    width: 100%;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px solid #d5e9fb;
+
+    .detail-upload-item {
+        position: relative;
+        flex: none;
+        width: 50%;
+        &:not(:last-child) {
+            &::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                right: 0;
+                transform: translate(0, -50%);
+                height: 24px;
+                border-right: 1px solid #d5e9fb;
+            }
+        }
+
+        .detail-upload-item-text {
+            margin-left: 4px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+    }
+}
+
+// 扩大点击范围
+.expend-click {
+    position: relative;
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 110%;
+        height: 110%;
+    }
+
+    &.large {
+        &::after {
+            width: 130%;
+            height: 130%;
+        }
+    }
+}
+
+// 抽屉
+.at-drawer {
+    z-index: 999;
+    &.at-drawer--right {
+        .at-drawer__content {
+            border-radius: 20px 0 0 20px;
+        }
+    }
+    &.at-drawer--left {
+        .at-drawer__content {
+            border-radius: 0 20px 20px 0;
+        }
+    }
+
+    .at-drawer__content {
+        .at-drawer-title {
+            width: 100%;
+            height: 96px;
+            border-bottom: 2px solid rgba(211, 211, 211, 1);
+            font-size: 32px;
+            font-weight: 700;
+            color: #000000;
+            box-sizing: border-box;
+            &.no-border {
+                border-bottom: 0;
+            }
+            &.linght-border {
+                border-bottom: 2px dashed #F3F3F3;
+            }
+        }
+        .at-drawer-content {
+            // height: calc(100% - 96px - 156px);
+            padding: 40px 32px;
+            box-sizing: border-box;
+        }
+        .at-drawer-bottom {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 156px;
+            padding: 20px 32px 64px;
+            box-sizing: border-box;
+
+            .at-button {
+                flex: 1;
+                height: 72px;
+                font-size: 32px;
+                font-weight: 700;
+                line-height: 72px;
+
+                &:not(:last-child) {
+                    margin-right: 40px;
+                }
+            }
+        }
+    }
+}
+
+// tag 列表
+.g-tag-list {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    &.g-tag-auto {
+        .g-tag {
+            flex:none;
+            width: calc((100% - 40px) / 3);
+            &:nth-child(3n) {
+                margin-right: 0;
+            }
+        }
+    }
+
+    .g-tag {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        max-width: 100%;
+        padding: 4px 20px 4px 20px;
+        margin: 0 20px 20px 0;
+        background: #ffffff;
+        border: 2px solid #d3d3d3;
+        font-size: 28px;
+        font-weight: 400;
+        color: #333333;
+        border-radius: 24px;
+        box-sizing: border-box;
+
+        &.active {
+            background: #d5e9fb;
+            border: 2px solid #2d90ed;
+            color: #2d90ed;
+        }
+    }
+
+    &.new {
+        .g-tag {
+            border: 2px solid #e3e3e3;
+            border-radius: 8px;
+            &.active {
+                background: #e7f3ff;
+                border: 2px solid #1890ff;
+                color: rgba(24, 144, 255, 1);
+            }
+        }
+    }
+}
+.g-tag-history {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    .g-tag {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        max-width: 100%;
+        padding: 4px 20px 4px 20px;
+        margin: 0 20px 20px 0;
+        background: #ffffff;
+        border: 2px solid #d3d3d3;
+        font-size: 28px;
+        font-weight: 400;
+        color: #333333;
+        border-radius: 24px;
+        box-sizing: border-box;
+
+        &.active {
+            background: #d5e9fb;
+            border: 2px solid #2d90ed;
+            color: #2d90ed;
+        }
+    }
+
+    .g-tag-history-item {
+        max-width: calc(100% - 20px);
+        background: #ffffff;
+        border: 2px solid #E3E3E3;
+        white-space: wrap;
+        border-radius: 8px;
+
+        // &.last-item {
+        //     // align-self: flex-end;
+        //     margin-left: auto !important;
+        // }
+    }
+}
+
+// 报表页面
+.date-drawer {
+    position: relative;
+    margin-bottom: 20px;
+    z-index: 1;
+}
+.report-box-change {
+    flex: none !important;
+    width: 70px;
+}
+.report-page {
+    min-height: 100vh;
+    padding: 20px 32px;
+    background: #ffffff;
+    box-sizing: border-box;
+
+    &.orange {
+        &::after {
+            content: "";
+            position: absolute;
+            left: 356px;
+            top: 20px;
+            width: 394px;
+            height: 360px;
+            opacity: 1;
+            background: rgba(255, 247, 237, 1);
+            filter: blur(128px);
+            z-index: 0;
+        }
+        &::before {
+            content: "";
+            position: absolute;
+            left: -48px;
+            top: 58px;
+            width: 328px;
+            height: 318px;
+            opacity: 1;
+            background: rgba(255, 247, 240, 1);
+            filter: blur(200px);
+            z-index: 0;
+        }
+        .report-top-card {
+            background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/engineering-bg.png') no-repeat, linear-gradient(116.57deg, rgba(68, 141, 255, 1) 0%, rgba(21, 116, 255, 1) 100%) no-repeat, linear-gradient(137.48deg, rgba(230, 243, 255, 1) 0%, rgba(255, 255, 255, 1) 100%) no-repeat;
+            background-size: 180px 172px, 100% 100%, 100% 100%;
+            background-position: 532px 124px, left top, left top;
+            box-shadow: 0px 4px 32px  rgba(63, 138, 255, 0.32);
+        }
+        .report-pending-top-card {
+          background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/pending-bg.png') no-repeat, linear-gradient(116.57deg, rgba(68, 141, 255, 1) 0%, rgba(21, 116, 255, 1) 100%) no-repeat, linear-gradient(137.48deg, rgba(230, 243, 255, 1) 0%, rgba(255, 255, 255, 1) 100%) no-repeat;
+          background-size: 180px 172px, 100% 100%, 100% 100%;
+          background-position: 526px 128px, left top, left top;
+          box-shadow: 0px 4px 32px  rgba(63, 138, 255, 0.32);
+        }
+        .report-purchase-top-card {
+          background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/purchase-bg.png') no-repeat, linear-gradient(116.57deg, rgba(68, 141, 255, 1) 0%, rgba(21, 116, 255, 1) 100%) no-repeat, linear-gradient(137.48deg, rgba(230, 243, 255, 1) 0%, rgba(255, 255, 255, 1) 100%) no-repeat;
+          background-size: 180px 172px, 100% 100%, 100% 100%;
+          background-position: 548px 146px, left top, left top;
+          box-shadow: 0px 4px 32px  rgba(63, 138, 255, 0.32);
+        }
+        .report-outsource-top-card {
+          background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/outsource-bg.png') no-repeat, linear-gradient(116.57deg, rgba(68, 141, 255, 1) 0%, rgba(21, 116, 255, 1) 100%) no-repeat, linear-gradient(137.48deg, rgba(230, 243, 255, 1) 0%, rgba(255, 255, 255, 1) 100%) no-repeat;
+          background-size: 180px 172px, 100% 100%, 100% 100%;
+          background-position: 524px 142px, left top, left top;
+          box-shadow: 0px 4px 32px  rgba(63, 138, 255, 0.32);
+        }
+    }
+    &.blue {
+        &::after {
+            content: "";
+            position: absolute;
+            left: 356px;
+            top: 20px;
+            width: 394px;
+            height: 360px;
+            opacity: 1;
+            background: rgba(244, 250, 247, 1);
+            filter: blur(128px);
+            z-index: 0;
+        }
+        &::before {
+            content: "";
+            position: absolute;
+            left: -48px;
+            top: 58px;
+            width: 328px;
+            height: 318px;
+            opacity: 1;
+            background: rgba(243, 250, 246, 1);
+            filter: blur(200px);
+            z-index: 0;
+        }
+        .report-top-card {
+            background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/product-report-bg.png') no-repeat, linear-gradient(116.57deg, rgba(68, 141, 255, 1) 0%, rgba(21, 116, 255, 1) 100%) no-repeat, linear-gradient(137.48deg, rgba(230, 243, 255, 1) 0%, rgba(255, 255, 255, 1) 100%) no-repeat;
+            background-size: 180px 172px, 100% 100%, 100% 100%;
+            background-position: 540px 170px, left top, left top;
+            box-shadow: 0px 4px 32px  rgba(63, 138, 255, 0.32);
+        }
+    }
+
+    .report-top-card {
+        position: relative;
+        width: 100%;
+        height: 310px;
+        padding: 26px 32px;
+        margin: 0 auto 36px;
+        border-radius: 32px;
+        box-sizing: border-box;
+        z-index: 2;
+
+        .date-choose {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            width: 356px;
+            height: 42px;
+            margin-bottom: 56px;
+            padding: 0px 16px 0px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 32px;
+            box-sizing: border-box;
+
+            .date-choose-time {
+                flex: 1;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                color: #ffffff;
+
+                .date-choose-text {
+                    width: 128px;
+                    font-size: 24px;
+                    font-weight: 400;
+                }
+            }
+        }
+
+        .top-card-list {
+            align-items: stretch;
+            .top-card-item {
+                flex: 1;
+                .top-card-label {
+                    margin-bottom: 4px;
+                    font-size: 28px;
+                    font-weight: 500;
+                    color: rgba(255, 255, 255, 1);
+                    opacity: 0.8;
+                }
+                .top-card-value {
+                    align-items: flex-end;
+                    font-size: 48px;
+                    font-weight: 400;
+                    color: rgba(255, 255, 255, 1);
+
+                    .top-card-value-large {
+                        font-size: 64px;
+                    }
+                }
+
+                &:not(:last-child) {
+                    margin-right: 10px;
+                }
+            }
+        }
+    }
+
+    .report-box {
+        position: relative;
+        padding: 20px 0;
+        z-index: 1;
+        box-sizing: border-box;
+        &:not(:last-child) {
+            margin-bottom: 10px;
+            &::after {
+                content: "";
+                position: absolute;
+                left: -32px;
+                bottom: 0;
+                width: 750px;
+                transform: translate(0, 100%);
+                border-bottom: 10px solid rgba(245,245,245,1);
+            }
+        }
+
+        .report-box-header {
+            margin-bottom: 20px;
+        }
+        .report-box-title {
+            position: relative;
+            padding-left: 16px;
+            font-size: 32px;
+            font-weight: 700;
+            color: rgba(51, 51, 51, 1);
+            box-sizing: border-box;
+            &::before {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 0;
+                transform: translate(0, -50%);
+                width: 8px;
+                height: 20px;
+                background: rgba(45, 144, 237, 1);
+            }
+        }
+    }
+    .report-pending-top-card {
+        position: relative;
+        width: 100%;
+        height: 310px;
+        padding: 26px 32px;
+        margin: 0 auto 36px;
+        border-radius: 32px;
+        box-sizing: border-box;
+        z-index: 2;
+
+        .date-choose {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-width: 290px;
+            height: 50px;
+            margin-bottom: 64px;
+            padding: 0px 16px 0px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 32px;
+            box-sizing: border-box;
+
+            .current-time {
+                flex: 1;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                color: #ffffff;
+                font-size: 24px;
+            }
+        }
+
+        .top-card-list {
+            .top-card-item {
+                flex: 1;
+                .top-card-label {
+                margin-bottom: 4px;
+                font-size: 28px;
+                font-weight: 500;
+                color: rgba(255, 255, 255, 1);
+                opacity: 0.8;
+                }
+                .top-card-value {
+                align-items: flex-end;
+                font-size: 48px;
+                font-weight: 400;
+                color: rgba(255, 255, 255, 1);
+
+                .top-card-value-large {
+                    font-size: 64px;
+                }
+                }
+
+                &:not(:last-child) {
+                margin-right: 10px;
+                }
+            }
+        }
+  }
+    .report-purchase-top-card {
+      position: relative;
+      width: 100%;
+      height: 310px;
+      padding: 26px 32px;
+      margin: 0 auto 36px;
+      border-radius: 32px;
+      box-sizing: border-box;
+      z-index: 2;
+
+      .date-choose {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        width: 356px;
+        height: 42px;
+        margin-bottom: 56px;
+        padding: 0px 16px 0px 16px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 32px;
+        box-sizing: border-box;
+
+        .date-choose-time {
+          flex: 1;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          color: #ffffff;
+
+          .date-choose-text {
+            width: 128px;
+            font-size: 24px;
+            font-weight: 400;
+          }
+        }
+      }
+
+      .top-card-list {
+        .top-card-item {
+          flex: 1;
+          .top-card-label {
+            margin-bottom: 4px;
+            font-size: 28px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 1);
+            opacity: 0.8;
+          }
+          .top-card-value {
+            align-items: flex-end;
+            font-size: 48px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 1);
+
+            .top-card-value-large {
+              font-size: 64px;
+            }
+          }
+
+          &:not(:last-child) {
+            margin-right: 10px;
+          }
+        }
+      }
+    }
+    .report-outsource-top-card {
+      position: relative;
+      width: 100%;
+      height: 310px;
+      padding: 26px 32px;
+      margin: 0 auto 36px;
+      border-radius: 32px;
+      box-sizing: border-box;
+      z-index: 2;
+
+      .date-choose {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        width: 356px;
+        height: 42px;
+        margin-bottom: 56px;
+        padding: 0px 16px 0px 16px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 32px;
+        box-sizing: border-box;
+
+        .date-choose-time {
+          flex: 1;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          color: #ffffff;
+
+          .date-choose-text {
+            width: 128px;
+            font-size: 24px;
+            font-weight: 400;
+          }
+        }
+      }
+
+      .top-card-list {
+        .top-card-item {
+          flex: 1;
+          .top-card-label {
+            margin-bottom: 4px;
+            font-size: 28px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 1);
+            opacity: 0.8;
+          }
+          .top-card-value {
+            align-items: flex-end;
+            font-size: 48px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 1);
+
+            .top-card-value-large {
+              font-size: 64px;
+            }
+          }
+
+          &:not(:last-child) {
+            margin-right: 10px;
+          }
+        }
+      }
+    }
+}
+
+// 隐藏dom元素
+.none-dom {
+    display: none;
+}
+
+// 返回顶部
+.g-up-box {
+    position: fixed;
+    bottom: 200px;
+    right: 20px;
+    width: 80px;
+    height: 80px;
+    background-color: rgba(255,255,255,1);
+    border-radius: 50%;
+    box-shadow: 0px 0px 5px 0px rgba(132,132,132,0.33);
+    z-index: 1;
+}
+
+// 标题栏文字调大
+.nav-bar-large {
+    .at-nav-bar {
+        .at-nav-bar__title {
+            font-size: 32px;
+            font-weight: 700;
+        }
+    }
+}
+
+// loading 按钮
+.loading-btn {
+    height: 50px;
+    line-height: 50px;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+// 暂无数据展示
+.g-empty {
+  min-width: 100%;
+  padding: 20px 0;
+  font-size: 30px;
+  color: #999999;
+  text-align: center;
+  margin-top: 50%;
+
+  &.no-margin-top {
+    margin-top: 0;
+  }
+}
+
+// 空白样式 图表
+.g-empty-chart {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    font-size: 30px;
+    color: #999999;
+    text-align: center;
+    box-sizing: border-box;
+}
+// 脱敏空白样式
+.g-empty-desens {
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+// 禁用滚动
+.disabled-scroll {
+    height: 100vh !important;
+    overflow: hidden !important;
+    box-sizing: border-box;
+}
+.disabled-overflow {
+    // height: 100vh !important;
+    overflow: hidden !important;
+    box-sizing: border-box;
+}
+
+// 反馈样式
+.feedback-box {
+    width: 96px;
+    height: 80px;
+    padding-right: 16px;
+    background: rgba(255, 255, 255, 1);
+    border-radius: 48px 0px 0px 48px;
+    box-shadow: 0px 0px 8px  rgba(0, 0, 0, 0.08);
+    box-sizing: border-box;
+
+    &.right {
+        padding-left: 16px;
+        padding-right: 0;
+        border-radius: 0px 48px 48px 0px;
+    }
+}
+
+// 注册时，选择头像名称样式
+.choose-user-content {
+    .choose-avator {
+        // position: absolute;
+        // top: 0;
+        // left: 32px;
+        // transform: translate(0, -50%);
+        width: 160px !important;
+        height: 160px;
+        // background: #999;
+        padding: 0;
+        // border: 6px solid rgba(255, 255, 255, 1);
+        border-radius: 50%;
+        overflow: hidden;
+        box-sizing: border-box;
+    }
+}
+.choose-user-btn {
+    .at-modal__action {
+        padding: 0 72px 32px;
+    }
+}
+
+// 页面顶部搜索外壳
+.page-top-search {
+    padding: 20px 20px 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+}
+
+// 筛选样式
+.search-com-btn {
+    flex: none;
+    width: 92px;
+    margin-left: 20px;
+    font-size: 28px;
+    .primary-filter {
+        margin-right: 4px;
+    }
+}
+
+// 是否自定义nav-bar，需要把drawer调整到顶级显示
+.drawer-has-nav-bar {
+    // height: var(--drawer-height);
+    z-index: 9998;
+}
+
+// 灰色背景展示
+.gray-bg {
+    background: #FAFAFA;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+// 最多展示100条样式
+.max-data-length-100 {
+    position: relative;
+    width: 380px;
+    font-size: 24px;
+    font-weight: 400;
+    color: rgba(145, 145, 145, 1);
+    text-align: center;
+    margin: 0 auto;
+
+    &::after,
+    &::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        transform: translate(0, -50%);
+        width: 64px;
+        border-top: 2px solid #E3E3E3;
+    }
+    &::before {
+        left: 0;
+    }
+    &::after {
+        right: 0;
+    }
+}
+
+// 骨架屏样式
+.g-skeleton {
+    background: #f0f2f5;
+    display: inline-block;
+    height: 32px;
+    border-radius: 8px;
+    width: 100%;
+
+    &.first {
+        width: 30%;
+    }
+}
+
+// 设置 悬浮按钮
+.setting-box {
+    min-width: 96px;
+    height: 80px;
+    padding-right: 16px;
+    background: rgba(255, 255, 255, 1);
+    border-radius: 0px 48px 48px 0px;
+    box-shadow: 0px 0px 8px  rgba(0, 0, 0, 0.08);
+    box-sizing: border-box;
+}
+
+// 隐藏滚动条
+.no-scroll {
+    ::-webkit-scrollbar {
+        display: none;
+    }
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+// 隐藏列表滚动条
+.list-no-scroll {
+  ::-webkit-scrollbar {
+    display: none !important;
+  }
+}
+// 切换 柱状图 宽度固定
+.daily-card-switch-box {
+    flex: none;
+    width: 190px;
+}
+
+// // 是否自定义nav-bar，需要把drawer调整到顶级显示
+// .drawer-has-nav-bar {
+//     // height: var(--drawer-height);
+//     z-index: 9999 !important;
+// }
+// 隐藏滚动条
+.hide-srcoll {
+    ::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+// 徽标
+.at-badge {
+    &.new {
+        .at-badge__dot {
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            background: #F53F3F;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 2px rgba(245, 63, 63, 1);
+            // box-shadow: none;
+        }
+        .at-badge__num {
+            top: 5px;
+            right: 20px;
+            border-radius: 20px;
+            background: #F53F3F;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 2px rgba(245, 63, 63, 1);
+            transform: translate(100%, 0);
+            // box-shadow: none;
+        }
+
+        &.small-icon {
+            .at-badge__num {
+                top: -5px;
+            }
+        }
+    }
+}

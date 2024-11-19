@@ -2,7 +2,7 @@
   <div class="p-2 xtable-page customer-complaint">
     <el-card shadow="never" class="xtable-card">
 
-      <el-tabs type="border-card"  class="xtable-tab"  @tab-change="changeTab">
+      <el-tabs v-model="editableTabsValue" type="border-card"  class="xtable-tab"  @tab-change="changeTab">
 
         <el-tab-pane label="待发货列表"      name="0">
 
@@ -35,7 +35,7 @@
 
         </el-tab-pane>
 
-        <el-tab-pane label="已发货待确认列表" name="1" >
+        <el-tab-pane label="买方修改待确认" name="1" >
 
           <div class="global-flex flex-end" style="width: 100%;margin-bottom: 10px;">
             <el-button  plain icon="Download" @click="deliveryWaitConfirmExport">导出</el-button>
@@ -65,7 +65,7 @@
             <template #default-make="scope">
               <el-button link type="primary" @click="viewDelivery(scope.row)" >详情</el-button>
               <el-button link type="primary" @click="editDelivery(scope.row)" >确认</el-button>
-<!--              <el-button link type="primary" @click="deleteDelivery(scope.row)" >删除</el-button>-->
+              <el-button link type="primary" @click="deleteDelivery(scope.row)" >删除</el-button>
               <el-button link type="primary" @click="uReportHandle(scope.row)">打印送货单</el-button>
               <el-button link type="primary" @click="handleFile(scope.row)" >附件下载</el-button>
               <el-button link type="primary" @click="generateUrlLink(scope.row)" >分享链接</el-button>
@@ -92,7 +92,7 @@
 
         </el-tab-pane>
 
-        <el-tab-pane label="已发货已确认列表" name="2" >
+        <el-tab-pane label="已发货待买方确认" name="2" >
 
           <div class="global-flex flex-end" style="width: 100%;margin-bottom: 10px;">
             <el-button  plain icon="Download" @click="deliveryConfirmedExport">导出</el-button>
@@ -106,7 +106,7 @@
                   :data="deliveryConfirmedTableData"
                   :columnList="deliveryConfirmedColumnList"
                   :span-method="mergeCells"
-                  ref="XTableRef"
+                  ref="XTableRef2"
                   border
                   :showRefresh="true"
                   @searchChange="deliveryConfirmedSearchChange"
@@ -211,6 +211,12 @@
               />
             </el-form-item>
           </el-col>
+          <el-col :span="12">
+            <el-form-item label="收货手机号"  style="width: 100%; margin-left: 25px">
+              <el-input v-model="receiveFromData.phoneNumber" maxlength="40"
+              placeholder="顺丰物流请填写收货手机号" />
+            </el-form-item>
+          </el-col>
 
           <el-col :span="24" style="margin-top: 0px" v-if="isEdit">
             <el-form-item label="确认备注" prop="confirmRemark">
@@ -293,6 +299,8 @@
       <iframe :src="reportUrl" style="width: 100%; height: 100%; border: none;"></iframe>
     </el-drawer>
 
+    <!-- 签名列表 -->
+    <signDialog v-if="signVisible" v-model:show="signVisible" @submit="submitSign" @cancel="cancelSign" />
   </div>
 </template>
 
@@ -305,7 +313,7 @@ import {
   editOrConfirmDelivery,
   insertDelivery,
   listPurchaseDetailDelivery,
-  listWaitConfirmDelivery,
+  listWaitConfirmDeliverySup,
   viewDeliveryDetail
 } from "@/api/purchase/purchaseMaterialDelivery";
 import { ref } from "vue";
@@ -319,29 +327,36 @@ import dayjs from "dayjs";
 import { getUrlLink } from "@/api/purchase/materialOrder";
 import clipboard3 from "vue-clipboard3";
 import useUserStore from "@/store/modules/user";
+import {queryUseModule} from "@/api/basedata/sign";
+import { decryptBase64ByStr } from '@/utils/crypto'
 
+const editableTabsValue = ref('0');
+const route = useRoute();
+/**
+ * 进入页面次数
+ */
+const isFirst = ref(0)
+/**
+ * 待办跳转参数
+ */
+const pendingParams = ref()
 /** 报表预览地址 */
 let reportUrl = ref("");
 const uReportHandle = async (row) => {
   reportUrl.value = '';
   reportDrawer.title = "采购送货单预览";
   reportDrawer.visible = true;
-  if(row.status==="3"){
-    getSignPdf({bizId:row.bizId,bizType:'17'}).then(res=>{
-      let vo = res.data;
-      if (vo !== null && vo.url) {
-        reportUrl.value = '/web/viewer.html?file=' + encodeURIComponent(vo.url + '#' + vo.name);
-      }else{
-        // ElMessage.info("查询不到对应的签名文件");
-        reportUrl.value = getReportUrl() + `&_n=采购送货单&_u=file:purchaseDelivery.ureport.xml&url=purchase/materialDelivery/reportHeard/${row.id}&listUrl=purchase/materialDelivery/reportExcel/${row.id}`;
-        // reportDrawer.visible = false;
-      }
-    });
-    return;
-  }
-  reportUrl.value = getReportUrl() + `&_n=采购送货单&_u=file:purchaseDelivery.ureport.xml&url=purchase/materialDelivery/reportHeard/${row.id}&listUrl=purchase/materialDelivery/reportExcel/${row.id}`;
-  // reportUrl.value = reportUrl.value.replace("1,4,6","2,4,6");
 
+  getSignPdf({bizId: row.bizId, bizType: '17'}).then(res => {
+    let vo = res.data;
+    if (vo !== null && vo.url) {
+      reportUrl.value = '/web/viewer.html?file=' + encodeURIComponent(vo.url + '#' + vo.name);
+    } else {
+      // ElMessage.info("查询不到对应的签名文件");
+      reportUrl.value = getReportUrl() + `&_n=采购送货单&_u=file:purchaseDelivery.ureport.xml&url=purchase/materialDelivery/reportHeard/${row.id}&listUrl=purchase/materialDelivery/reportExcel/${row.id}`;
+      // reportDrawer.visible = false;
+    }
+  });
 }
 const reportDrawer = reactive({
   direction: 'left',
@@ -527,6 +542,8 @@ const startDeliveryTitle = ref("新增送货单");
 // 确认选中的采购明细单
 const confirmSelectInventoryList = ref([]);
 const purchaseOrderDeliveryRef = ref();
+const XTableRef = ref();
+const XTableRef2 = ref();
 
 //确认选中的排产单表
 const confirmSelectInventoryColumnList = ref([
@@ -698,7 +715,7 @@ const editDeliveryOrder = async () => {
       // 新增
       receiveFromData.value.purchaseMaterialDeliveryList = confirmSelectInventoryList.value;
 
-      receiveFormRef.value.validate((valid, fields) => {
+      receiveFormRef.value.validate(async (valid, fields) => {
 
         let check = false;
         let msg = "";
@@ -715,21 +732,15 @@ const editDeliveryOrder = async () => {
         if (!valid) {
           console.log('error submit!', fields)
         }else{
-
-          insertDelivery({
-            data: receiveFromData.value
-          })
-            .then((res) => {
-              if (res.code === 200) {
-                ElMessage({
-                  type: 'success',
-                  message: "提交成功",
-                });
-                // 在成功的情况下重置表单和刷新表格数据
-                resetReceiveForm();
-                refreshTableData();
-              }
-            });
+          // 查询是否存在默认签章
+          const res = await queryUseModule({useModule: '2'});
+          // 存在则自动签名
+          if(res.data) {
+            submitSign(res.data.key, res.data.signType);
+          } else {
+            // 选择签章数据
+            signVisible.value = true;
+          }
         }
 
       })
@@ -957,7 +968,7 @@ const deliveryWaitConfirmColumnList = ref([
   { title: '备注', field: 'remark', width: '116', align: 'center' ,filterType: 'input', filterParam: { placeholder: '' }},
   { title: '送货地址', field: 'deliveryAddress', width: '125', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入备注' } },
   { title: '单据状态', field: 'status', width: '125', align: 'center' },
-  { title: '操作',  align: "center", field: "make" ,fixed: 'right' , width: '400', showOverflow: false  }
+  { title: '操作',  align: "center", field: "make" ,fixed: 'right' , width: '450', showOverflow: false  }
 ]);
 
 /**
@@ -1116,7 +1127,7 @@ const deliveryWaitConfirmSearchChange = (param) => {
 const refreshWaitConfirmTableData = () => {
   deliveryWaitConfirmTableLoading.value = true;
   deliveryWaitConfirmQueryParams.value.status = ConfirmEnum.WAIT_TWO_CONFIRM;
-  listWaitConfirmDelivery(deliveryWaitConfirmQueryParams.value)
+  listWaitConfirmDeliverySup(deliveryWaitConfirmQueryParams.value)
     .then((res) => {
       deliveryWaitConfirmTableData.value = res.rows;
       deliveryWaitConfirmTableTotal.value = res.total;
@@ -1172,7 +1183,7 @@ const deliveryWaitConfirmExport = () => {
 const exportReceiveList = () => {
   proxy?.download("purchase/materialDelivery/export", {
     ...deliveryWaitConfirmQueryParams.value
-  }, `已发货待确认列表_${new Date().getTime()}.xlsx`);
+  }, `买方修改待确认_${new Date().getTime()}.xlsx`);
 }
 
 
@@ -1358,7 +1369,7 @@ const deliveryConfirmedSearchChange = (param) => {
 const refreshConfirmedTableData = () => {
   deliveryConfirmedTableLoading.value = true;
   deliveryConfirmedQueryParams.value.notStatus = ConfirmEnum.WAIT_TWO_CONFIRM;
-  listWaitConfirmDelivery(deliveryConfirmedQueryParams.value)
+  listWaitConfirmDeliverySup(deliveryConfirmedQueryParams.value)
     .then((res) => {
       deliveryConfirmedTableData.value = res.rows;
       deliveryConfirmedTableTotal.value = res.total;
@@ -1423,7 +1434,7 @@ const deliveryConfirmedExport = () => {
 const exportConfirmedList = () => {
   proxy?.download("purchase/materialDelivery/export", {
     ...deliveryConfirmedQueryParams.value
-  }, `已发货已确认列表_${new Date().getTime()}.xlsx`);
+  }, `已发货待买方确认_${new Date().getTime()}.xlsx`);
 }
 
 
@@ -1464,10 +1475,75 @@ const changeTab = (name) => {
   }
 }
 
+const signVisible = ref(false);
+
+const submitSign = async (key, signType) => {
+  proxy?.$modal.loading("加载中...");
+  receiveFromData.value.imageKey = key;
+  receiveFromData.value.signType = signType;
+  insertDelivery({
+    data: receiveFromData.value
+  })
+    .then((res) => {
+      if (res.code === 200) {
+        ElMessage({
+          type: 'success',
+          message: "操作成功",
+        });
+        // 在成功的情况下重置表单和刷新表格数据
+        resetReceiveForm();
+        refreshTableData();
+      }
+    }).finally(() => {
+    proxy?.$modal.closeLoading()
+  });
+}
+
+const cancelSign = async () => {
+  signVisible.value = false;
+}
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      let tab = !isNaN(Number(params.tab)) ? String(params.tab) : '0';
+      editableTabsValue.value = tab
+      if (tab === '0') {
+        let tempColumnList = [{field: 'purchaseCode', defaultValue: params.bizNo}]
+        purchaseOrderQueryParams.value.purchaseCode = params.bizNo
+        setTimeout(() => {
+          purchaseOrderDeliveryRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === '1') {
+        let tempColumnList = [{field: 'code', defaultValue: params.bizNo}]
+        deliveryWaitConfirmQueryParams.value.code = params.bizNo
+        setTimeout(() => {
+          XTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === '2') {
+        let tempColumnList = [{field: 'code', defaultValue: params.bizNo}]
+        deliveryConfirmedQueryParams.value.code = params.bizNo
+        setTimeout(() => {
+          XTableRef2.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      }
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
 /** 渲染完页面后刷新页面数据 */
 onMounted(async () => {
-  refreshTableData();
-
+    refreshTableData();
 });
 
 </script>

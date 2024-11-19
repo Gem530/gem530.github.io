@@ -92,7 +92,7 @@
           <el-col :span="8" v-if="!['1','2'].includes(form.payWay)">
             <el-form-item size="small" :label="typeName + '款账户'" prop="payAccount">
               <el-select v-model="form.payAccount" clearable filterable style="width: 100%;" @change="changeAccount">
-                <el-option v-for="item in payAccountList" :key="item.value" :label="item.label" :value="item.value" />
+                <el-option v-for="item in payAccountList" :key="item.id" :label="item.label" :value="item.id" />
               </el-select>
             </el-form-item>
        </el-col>
@@ -367,6 +367,8 @@
   import {deepClone} from "@/utils";
   import {submitFinishedOrder} from "@/api/order/directOrder";
   import {savePrediction} from "@/api/project/productionPlan";
+  import { listDeptBank } from "@/api/system/dept"
+
   const repaymentRecordFormRef = ref<ElFormInstance>();
   const productLoading = ref(false)
   const XTableRef = ref();
@@ -525,17 +527,15 @@
     {label: '委托书', value: '10', elTagType: 'default', elTagClass: ''},
   ]);
 
-  const payAccountList = ref([
-    {label: '中国工商银行信丰县支行', value: '1',bankNo:'1510201009000106395',account:'，行号：102428410247',type:'基本户，'},
-    {label: '江西信丰农村商业银行', value: '2',bankNo:'134649700000002476',account:'，行号：402428499993',type:'一般户，'},
-    {label: '赣州银行信丰支行', value: '3',bankNo:'2863000103000000896',account:'，行号：313428428636',type:'一般户，'},
-    {label: 'The Hongkong and Shanghai Banking Corporation Limited', value: '4',bankNo:'053-484846-838',account:'，编号：004,代码：HSBCHKHHHKH',type:'香港公司美金账户，'},
-    // {label: '企业微信', value: '5',account:'',bankNo:'1647640640',type:''},
-    // {label: '企业支付宝', value: '6',account:'',bankNo:'jx13316990051@sina.com',type:''},
-  ]);
+  // const payAccountList = ref([
+  //   {label: '中国工商银行信丰县支行', value: '1',bankNo:'1510201009000106395',account:'，行号：102428410247',type:'基本户，'},
+  //   {label: '江西信丰农村商业银行', value: '2',bankNo:'134649700000002476',account:'，行号：402428499993',type:'一般户，'},
+  //   {label: '赣州银行信丰支行', value: '3',bankNo:'2863000103000000896',account:'，行号：313428428636',type:'一般户，'},
+  //   {label: 'The Hongkong and Shanghai Banking Corporation Limited', value: '4',bankNo:'053-484846-838',account:'，编号：004,代码：HSBCHKHHHKH',type:'香港公司美金账户，'},
+  // ]);
 
   const changeAccount = async(bval:any)=>{
-    payAccountList.value.filter(pf=>pf.value==bval).forEach(va=>{
+    payAccountList.value.filter(pf=>pf.id==bval).forEach(va=>{
       form.value.accountNumber = va.bankNo;
     })
   }
@@ -564,10 +564,24 @@
         form.value.accountNumber = undefined;
       }
     }
+    console.log("================...",form.value.payAccount);
     if (!['1', '2'].includes(form.value.payAccount)) {
+      form.value.accountNumber = undefined;
       payWayList.value.filter(pf => pf.value == bval).forEach(va => {
-        if (va.bankNo) {
-          form.value.accountNumber = va.bankNo;
+        console.log("================",va);
+        console.log("================",va.label);
+        console.log("================",accountBankList.value);
+        console.log("================",accountBankList.value);
+        //配置4、5为微信支付宝
+        if(va.label.includes("支付宝")){
+          accountBankList.value.filter((pf:any)=> pf.type=='5').forEach((vaa:any)=>{
+            form.value.accountNumber = vaa.bankNo;
+          })
+        }
+        if(va.label.includes("微信")){
+          accountBankList.value.filter((pf:any)=> pf.type=='4').forEach((vaa:any)=>{
+            form.value.accountNumber = vaa.bankNo;
+          })
         }
       })
     } else {
@@ -656,7 +670,7 @@
     {               title: '备注', field: 'remark', align: 'center', },
     { width: '100', title: '对账人', field: 'accountUserName', align: 'center', },
     { width: '100', title: '创建时间', field: 'createTime', align: 'center', },
-    { width: '100', title: '对账完成时间', field: 'passTime', align: 'center', },
+    { width: '100', title: '对账完成时间', field: 'accountCompleteTime', align: 'center', },
     { width: '100', title: '应收金额', field: 'repayPayablePrice', align: 'center', fixed:'right'},
     { width: '100', title: '已收金额', field: 'repayWriteOffPrice', align: 'center', fixed:'right', visible: true },
     { width: '100', title: '剩余未收', field: 'repayRemainPrice', align: 'center', fixed:'right', visible: true},
@@ -678,7 +692,7 @@
     {               title: '备注', field: 'remark', align: 'center', },
     { width: '100', title: '对账人', field: 'accountUserName', align: 'center', },
     { width: '100', title: '创建时间', field: 'createTime', align: 'center', },
-    { width: '100', title: '对账完成时间', field: 'passTime', align: 'center', },
+    { width: '100', title: '对账完成时间', field: 'accountCompleteTime', align: 'center', },
     { width: '100', title: '应付金额', field: 'payPayablePrice', align: 'center', fixed:'right'},
     { width: '100', title: '已付金额', field: 'payWriteOffPrice', align: 'center', fixed:'right',visible: true},
     { width: '100', title: '剩余未付', field: 'payRemainPrice', align: 'center', fixed:'right',visible: true},
@@ -949,7 +963,7 @@
    */
   const getSupplierList = async () => {
     const SupplierResponse: any = await listOwnerSupplier();
-    supplierList.value = SupplierResponse.data;
+    supplierList.value = SupplierResponse.data.filter((v:any) => (!form.status && !props.isUpdate) ? v.status != '0' : v.status != null);
 
   }
 
@@ -1029,6 +1043,7 @@
           data.newFileList = deepClone((data.fileList || []).concat(data.preFileList || []));
           data.fileList = Array.from(new Set(data.newFileList.map((item: any) => item.key)))
             .map(key => data.newFileList.find((item: any) => item.key === key));
+          data.isSup = props.isSup
           emits('submit', data);
         }
       }
@@ -1058,7 +1073,7 @@
             searchChange()
           })
         } else {
-          emits('submitPass',form.value.id);
+          emits('submitPass',form.value.id, props.isSup);
         }
       }
     });
@@ -1081,7 +1096,8 @@
     }).then(({ value }) => {
       const data = {
         id: form.value.id,
-        rejectRemark: value
+        rejectRemark: value,
+        isSup: props.isSup
       }
       emits('submitReject',data);
     })
@@ -1094,19 +1110,21 @@
 
   /*设置选中*/
   const setRowCheck = ()=>{
-    const $table = XTableRef.value.xTableRef;
-    if($table){
-      console.log(recordList.value)
-      let temp = recordList.value.filter( item => item.selected =='1');
-      console.log(temp)
-      checkedAccountOrderIdList.value = temp.map(item =>  item.id);
-      if(props.type == '1'){
-        totalAmount.value = temp.reduce((total, item) => total + Number(item.payRemainPrice), 0);
-      } else if(props.type == '2'){
-        totalAmount.value = temp.reduce((total, item) => total + Number(item.repayRemainPrice), 0);
+    if(XTableRef.value){
+      const $table = XTableRef.value.xTableRef;
+      if($table){
+        console.log(recordList.value)
+        let temp = recordList.value.filter( item => item.selected =='1');
+        console.log(temp)
+        checkedAccountOrderIdList.value = temp.map(item =>  item.id);
+        if(props.type == '1'){
+          totalAmount.value = temp.reduce((total, item) => total + Number(item.payRemainPrice), 0);
+        } else if(props.type == '2'){
+          totalAmount.value = temp.reduce((total, item) => total + Number(item.repayRemainPrice), 0);
+        }
+        form.value.accountOrderIdList = checkedAccountOrderIdList.value
+        $table.setCheckboxRow(temp,true);
       }
-      form.value.accountOrderIdList = checkedAccountOrderIdList.value
-      $table.setCheckboxRow(temp,true);
     }
   }
 
@@ -1167,12 +1185,22 @@
     }
     currentFileList.value = props.form.fileList;
   }
-
+  
+  const accountBankList = ref();
+  const payAccountList = ref();
+  const getAccountTableData = async () => {
+    const bank = await listDeptBank();
+    accountBankList.value = bank.data;
+    if(accountBankList.value){
+      payAccountList.value= accountBankList.value.filter((ab:any) => ["1","2","3"].includes(ab.type));
+    }
+  }
   onMounted(() => {
     initData();
     getSupplierList();
     getCustomerList();
     getUser();
+    getAccountTableData();
   });
 </script>
 

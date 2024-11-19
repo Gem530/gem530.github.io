@@ -154,11 +154,15 @@ const deepCloneHandle = (val: any) => {
 }
 // 需要加上深拷贝，不然oldValue与newValue的值会相同 https://blog.csdn.net/m0_60976718/article/details/134290880
 watch(() => [deepCloneHandle(props.configVoList), deepCloneHandle(props.requirement), deepCloneHandle(props.remark)], ([v1, v2, v3], [old1, old2, old3]) => {
-    if (v1 != old1 || v2 != old2) {
+    // 转成字符串再进行数据对比
+    if (JSON.stringify(v1) != JSON.stringify(old1) || JSON.stringify(v2) != JSON.stringify(old2)) {
+        // console.log(222, v1 != old1, v2 != old2)
+        // console.log(333, v1, old1, v2, old2)
         requirementTemp.value = v2 || []
         nextTick(() => initFormData())
     }
-    if (v3 != old3) {
+    if (JSON.stringify(v3) != JSON.stringify(old3)) {
+        // console.log(111)
         nextTick(() => initRemark())
     }
 }, { deep: true })

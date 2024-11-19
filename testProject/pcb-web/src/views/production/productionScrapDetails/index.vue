@@ -51,12 +51,12 @@
                 :scroll-y="{enabled: true,gt: 50}"
         >
           <template #default-scrapArea="scope">
-            {{(scope.row.pcsQuantity / scope.row.saleOrderVo.unitedNumber * scope.row.saleOrderVo.unitedLength *
-            scope.row.saleOrderVo.unitedWidth / 1000000).toFixed(4)}}
+            {{Number(parseFloat((scope.row.pcsQuantity / scope.row.saleOrderVo.unitedNumber * scope.row.saleOrderVo.unitedLength *
+            scope.row.saleOrderVo.unitedWidth / 1000000).toFixed(4)).toString())}}
           </template>
-          <template #default-reasonId="scope">
-            {{reasonOptions.find(v => v.id == scope.row.reasonId)?.discardReason}}
-          </template>
+<!--          <template #default-reasonId="scope">-->
+<!--            {{reasonOptions.find(v => v.id == scope.row.reasonId)?.discardReason}}-->
+<!--          </template>-->
           <template #default-craftId="scope">
             {{craftOptions.find(v => v.id == scope.row.craftId)?.craftName}}
           </template>
@@ -117,18 +117,19 @@
             {{scope.row.pcsQuantity}}
           </template>
           <template #default-area="scope">
-            {{(scope.row.pcsQuantity / currentInfo.saleOrderVo?.unitedNumber * currentInfo.saleOrderVo?.unitedLength *
-            currentInfo.saleOrderVo?.unitedWidth / 1000000).toFixed(4)}}
+            {{Number(parseFloat((scope.row.pcsQuantity / currentInfo.saleOrderVo?.unitedNumber * currentInfo.saleOrderVo?.unitedLength *
+            currentInfo.saleOrderVo?.unitedWidth / 1000000).toFixed(4)).toString())}}
           </template>
-          <template #default-reasonId="scope">
-            {{reasonOptions.find(v => v.id == scope.row.reasonId)?.discardReason}}
-          </template>
+<!--          <template #default-reasonId="scope">-->
+<!--            {{reasonOptions.find(v => v.id == scope.row.reasonId)?.discardReason}}-->
+<!--          </template>-->
           <template #default-craftId="scope">
             {{craftOptions.find(v => v.id == scope.row.craftId)?.craftName}}
           </template>
           <template #default-responsible="scope">
             <span v-if="scope.row.type=='1'">{{scope.row.responsibleUserName}}</span>
             <span v-if="scope.row.type=='2'">{{scope.row.supplierName}}</span>
+            <span v-if="scope.row.type=='3'">{{scope.row.supplierName}}</span>
           </template>
           <template #default-singleLength="scope">
             {{currentInfo.saleOrderVo?.singleLength}}
@@ -296,14 +297,14 @@
     {
       width: "120",
       title: '报废项目',
-      field: 'reasonId',
+      field: 'discardReason',
       align: 'center',
-      filterType: 'select',
+      filterType: 'input',
       filterParam: {
-        placeholder: '请选择报废项目',filterable: true
+        placeholder: '请输入报废项目'
       },
-      filterData: () => reasonOptions.value,
-      filterCustom: {label: 'discardReason', value: 'id'}
+      // filterData: () => reasonOptions.value,
+      // filterCustom: {label: 'discardReason', value: 'discardReason'}
     },
     {
       width: "120",
@@ -443,7 +444,7 @@
     },
     {
       title: '报废项目',
-      field: 'reasonId',
+      field: 'discardReason',
       width: '120',
       align: 'center'
     },
@@ -652,7 +653,12 @@
    */
   const getListCraft = async () => {
     const res = await getCraftList();
+    let craftNames = ['物控部门', '业务部门', '总经办', '办公室', '财务部', '信息部'];
     craftOptions.value = res.data;
+    //过滤不显示的工序
+    craftOptions.value = craftOptions.value.filter(item => {
+      return !craftNames.includes(item.craftName);
+    });
   };
 
   /**
@@ -685,7 +691,7 @@
   const getListReason = async () => {
     const res = await getListDiscardReason({});
     reasonOptions.value = res.data;
-    
+
     reasonOptions.value.push({id:'0',discardReason:'订单完成自动报废'});
   };
 
@@ -716,8 +722,10 @@
         singleWidth: item.saleOrderVo.singleWidth,
         //pcs/set
         unitedNumber: item.saleOrderVo.unitedNumber,
-        //报废项目
-        reasonId: reasonOptions.value.find((v: any) => v.id == item.reasonId)?.discardReason,
+        // 报废项目
+        discardReason: item.discardReason,
+        // //报废项目
+        // reasonId: reasonOptions.value.find((v: any) => v.id == item.reasonId)?.discardReason,
         //报废工序
         craftId: craftOptions.value.find((v: any) => v.id == item.craftId)?.craftName,
         //报废次数
@@ -727,7 +735,7 @@
         //报废面积(㎡)
         // {{(scope.row.pcsQuantity / scope.row.saleOrderVo.unitedNumber * scope.row.saleOrderVo.unitedLength *
           // scope.row.saleOrderVo.unitedWidth / 1000000).toFixed(4)}}
-        scrapArea: (item.pcsQuantity / item.saleOrderVo.unitedNumber * item.saleOrderVo.unitedLength * item.saleOrderVo.unitedWidth / 1000000).toFixed(4),
+        scrapArea: Number(parseFloat((item.pcsQuantity / item.saleOrderVo.unitedNumber * item.saleOrderVo.unitedLength * item.saleOrderVo.unitedWidth / 1000000).toFixed(4)).toString()),
         //报废时间
         scrapTime: item.scrapTime
       }
@@ -859,7 +867,7 @@
         }
         if (column.field == "area") {
           // (item.pcsQuantity / item.saleOrderVo.unitedNumber * item.saleOrderVo.unitedLength * item.saleOrderVo.unitedWidth / 1000000).toFixed(4)
-          return `${(sumNum(data, "area") || 0).toFixed(4)} `;
+          return `${Number(parseFloat((sumNum(data, "area") || 0).toString()))} `;
         }
         return "";
       })

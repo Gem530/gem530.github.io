@@ -9,10 +9,10 @@
         <div class="ptable-card" v-loading="props.loading">
             <div class="global-flex flex-end" style="color: #f56c6c;">客户扫码时将看到修改后的数据，修改完成时间时请注意合理性</div>
             <div class="progress-drawer-title">工序进度:</div>
-            <el-row style="display: flex;">
+<!--            <el-row style="display: flex;">
                 <el-button type="primary" :disabled="!state?.saleOrderProcessVoList || state?.saleOrderProcessVoList.length == 0" @click="setSinkCopper">一键设置沉铜</el-button>
                 <el-button type="primary" :disabled="!state?.saleOrderProcessVoList || state?.saleOrderProcessVoList.length == 0" @click="setTest">一键设置测试架</el-button>
-            </el-row>
+            </el-row>-->
             <XTable
                 height="100%"
                 :pageShow="false"
@@ -38,15 +38,15 @@
             </XTable>
             <div class="progress-drawer-title">进度查询二维码:</div>
             <div class="global-flex flex-center">
-                <img :src="codeUrl" v-if="props.id"/>
+                <img :src="props.codeUrl" v-if="props.id"/>
             </div>
         </div>
         <template #footer>
-            <div class="global-flex flex-center" v-loading="props.loading">
-                <el-button :loading="buttonLoading" @click="open = false">取消</el-button>
+            <!-- <div class="global-flex flex-center" v-loading="props.loading"> -->
                 <el-button :loading="buttonLoading" type="primary" @click="confirmHandle('save')">保存</el-button>
-                <el-button :loading="buttonLoading" :type="state.isShowProcess == '0' ? 'primary' : 'danger'" @click="confirmHandle('')">{{state.isShowProcess == '0' ? '确定开放' : '取消开放'}}</el-button>
-            </div>
+                <el-button :loading="buttonLoading" @click="open = false">取消</el-button>
+<!--                <el-button :loading="buttonLoading" :type="state.isShowProcess == '0' ? 'primary' : 'danger'" @click="confirmHandle('')">{{state.isShowProcess == '0' ? '确定开放' : '取消开放'}}</el-button>-->
+            <!-- </div> -->
         </template>
     </el-drawer>
 </template>
@@ -54,6 +54,7 @@
 <script setup lang="ts" name="ProgressCheck">
 import * as QRCode from "qrcode";
 import { deepClone } from '@/utils'
+import { generateUrlLink } from '@/api/system/user'
 import { openProcess, closeProcess } from "@/api/order/directOrder";
 
 const emits = defineEmits(['update:show', 'confirm'])
@@ -63,15 +64,16 @@ const props = withDefaults(defineProps<{
     title?: string,
     loading: boolean,
     id: string|number,
+    codeUrl: string
 }>(), {
     id: '',
+    codeUrl: '',
     show: true,
     loading: false,
     data: () => [],
     title: '查看操作记录',
 })
 const state = ref()
-const codeUrl = ref('')
 const buttonLoading = ref(false)
 const open = computed({
     get () {
@@ -85,16 +87,31 @@ watch(() => [open.value, props.data], (val) => {
     if (val[1]) {
         state.value = val[1]
     }
-    if (val[0] && val[1]) {
-        let urlTemp = import.meta.env.VITE_APP_ENV != 'production' ? `http://pcb-test.enfccn.com:9100/?id=${props.id}` : `https://pcb.enfccn.com/?id=${props.id}`
-        console.log(import.meta.env.VITE_APP_ENV != 'production', urlTemp)
-        QRCode.toDataURL(urlTemp, {errorCorrectionLevel: 'H'}, (err: any, url: string) => {
-            if (err) {
-                console.log('Error: ' + err);
-            } else {
-                codeUrl.value = url;
+  console.log('val[0]',val[0],val[1])
+    if (val[0]) {
+       /* generateUrlLink({
+            path: 'pages/index/index',
+            query: `url=/pages/saleContract/index&id=${props.id}`,
+        }).then((res) => {
+            if (res.code == 200) {
+                QRCode.toDataURL(res.data, {errorCorrectionLevel: 'H'}, (err: any, url: string) => {
+                    if (err) {
+                        console.log('Error: ' + err);
+                    } else {
+                        codeUrl.value = url;
+                    }
+                });
             }
-        });
+        })*/
+        // let urlTemp = import.meta.env.VITE_APP_ENV != 'production' ? `http://pcb-test.enfccn.com:9100/?id=${props.id}` : `https://pcb.enfccn.com/?id=${props.id}`
+        // console.log(import.meta.env.VITE_APP_ENV != 'production', urlTemp)
+        // QRCode.toDataURL(urlTemp, {errorCorrectionLevel: 'H'}, (err: any, url: string) => {
+        //     if (err) {
+        //         console.log('Error: ' + err);
+        //     } else {
+        //         codeUrl.value = url;
+        //     }
+        // });
     }
 }, { immediate: true })
 const columnList = ref([
@@ -256,7 +273,7 @@ const setTest = ()=>{
     }
     let fzInx=state.value.saleOrderProcessVoList.findIndex(item=>item.craftNameDefault==="飞针");
     let FQCInx=state.value.saleOrderProcessVoList.findIndex(item=>item.craftNameDefault==="FQC");
-    
+
     for(let i=0;i<setList.length;i++){
         if(i>=fzInx && i<(FQCInx-1)){
             setList[i].craftNameCustomize=setList[i+1].craftNameDefault

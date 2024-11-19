@@ -54,6 +54,17 @@ export const listOutSourceSupplierList = (): AxiosPromise<SupplierVO[]> => {
   });
 };
 
+/**
+ * 查询订单外协供应商列表--订单外协供应商
+ * @returns {*}
+ */
+export const listOutSourceSupplierTypeList = (): AxiosPromise<SupplierVO[]> => {
+  return request({
+    url: '/outsource/sourceFullProcessOrder/supplierTypeList',
+    method: 'get'
+  });
+};
+
 export const listOutSourceSupplierListV2 = (craftId?: number): AxiosPromise<SupplierVO[]> => {
   return request({
     url: '/outsource/sourceFullProcessOrder/supplierListV2?craftId=' + craftId,
@@ -64,6 +75,12 @@ export const listOutSourceSupplierListV2 = (craftId?: number): AxiosPromise<Supp
 export const listOutSourceSupplierListV3 = (craftId?: string): AxiosPromise<SupplierVO[]> => {
   return request({
     url: '/outsource/sourceFullProcessOrder/supplierListV3?craftId=' + craftId,
+    method: 'get'
+  });
+};
+export const listOutSourceSupplierListV4 = (craftId?: string): AxiosPromise<SupplierVO[]> => {
+  return request({
+    url: '/outsource/sourceFullProcessOrder/supplierListV4?craftId=' + craftId,
     method: 'get'
   });
 };
@@ -126,6 +143,19 @@ export const updateSourceFullProcessOrder = (data: SourceFullProcessOrderForm) =
     data: data
   });
 };
+
+/**
+ * 修改订单外协订单
+ * @param data
+ */
+export const updateSourceCheckPer = (data: SourceFullProcessOrderForm) => {
+  return request({
+    url: '/outsource/sourceFullProcessOrder/updateCheckPer',
+    method: 'post',
+    data: data
+  });
+};
+
 
 /**
  * 外协订单对比是否修改

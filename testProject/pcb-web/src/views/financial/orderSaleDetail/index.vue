@@ -6,12 +6,12 @@
           <div class="global-flex flex-end flex-wrap" style="width: 100%;">
             <!-- <el-row :gutter="10" class="mb8" style="width:100%;margin:0;display:flex;justify-content: end;">
               <el-col :span="20"> -->
-                <p class="totalTitle">应收金额汇总：{{payablePriceTotal}}
-                  &nbsp;&nbsp;|&nbsp;&nbsp;退货金额汇总：{{backPriceTotal}}
-                  &nbsp;&nbsp;|&nbsp;&nbsp;其他金额汇总：{{otherPriceTotal}}
-                  &nbsp;&nbsp;|&nbsp;&nbsp;对账金额汇总：{{accountPriceTotal}}
-                  &nbsp;&nbsp;|&nbsp;&nbsp;回款金额汇总：{{writeOffPriceTotal}}
-                  &nbsp;&nbsp;|&nbsp;&nbsp;剩余金额汇总：{{remainPayablePriceTotal}}</p>
+                <p class="totalTitle">应收金额汇总：{{ Number(parseFloat(payablePriceTotal).toString())}}
+                  &nbsp;&nbsp;|&nbsp;&nbsp;退货金额汇总：{{ Number(parseFloat(backPriceTotal).toString())}}
+                  &nbsp;&nbsp;|&nbsp;&nbsp;其他金额汇总：{{ Number(parseFloat(otherPriceTotal).toString())}}
+                  &nbsp;&nbsp;|&nbsp;&nbsp;对账金额汇总：{{ Number(parseFloat(accountPriceTotal).toString())}}
+                  &nbsp;&nbsp;|&nbsp;&nbsp;回款金额汇总：{{ Number(parseFloat(writeOffPriceTotal).toString())}}
+                  &nbsp;&nbsp;|&nbsp;&nbsp;剩余金额汇总：{{ Number(parseFloat(remainPayablePriceTotal).toString())}}</p>
               <!-- </el-col>
               <el-col :span="1.5"> -->
               <div style="margin-left: 12px;">
@@ -237,8 +237,13 @@
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col :span="3">
-              <el-form-item size="small" label="币种："><div class="small-form-item f-12">{{ inOrOutQuery.currency }}</div></el-form-item>
+            <el-col :span="5">
+              <!-- <el-form-item size="small" label="币种："><div class="small-form-item f-12">{{ inOrOutQuery.currency }}</div></el-form-item> -->
+              <el-form-item size="small" label="月结方式：" prop="monthlyMethod">
+                <el-select  v-model="inOrOutQuery.monthlyMethod" clearable style="width: 100%" filterable>
+                  <el-option v-for="dict in monthly_method" :key="dict.value" :label="dict.label" :value="dict.label" />
+                </el-select>
+              </el-form-item>
             </el-col>
             <el-col :span="4">
               <el-form-item size="small" label="对账日期：" prop="accountTime">
@@ -246,7 +251,7 @@
                   value-format="YYYY-MM-DD 23:59:59" :clearable="false" />
               </el-form-item>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="4">
               <el-form-item size="small" label-width="100px" label="回款截止日期：" prop="endTime">
                 <el-date-picker v-model="inOrOutQuery.endTime" style="width: 100%;" type="date" placeholder="选择日期时间"
                   value-format="YYYY-MM-DD 23:59:59"   />
@@ -261,7 +266,7 @@
             </el-col>
           </el-row>
           <el-row>
-            <el-col :span="6">
+            <el-col :span="7">
               <el-form-item size="small" label="是否含税： " prop="isTax">
                 <el-radio-group v-model="inOrOutQuery.isTax" size="small" :disabled="drawerBorrow.title?.includes('修改')">
                   <el-radio-button :label="undefined">全部</el-radio-button>
@@ -271,13 +276,13 @@
                 <!--                <el-switch v-model="inOrOutQuery.isTax" active-value="1" inactive-value="0" />-->
               </el-form-item>
             </el-col>
-            <el-col :span="4">
+            <el-col :span="5">
               <el-form-item size="small" label="对账月份： " prop="accountMonth">
                 <el-date-picker v-model="inOrOutQuery.accountMonth" style="width: 100%;" type="month" placeholder="选择月份"
                   value-format="YYYY-MM-01 23:59:59" clearable />
               </el-form-item>
             </el-col>
-            <el-col :span="10">
+            <el-col :span="8">
               <el-form-item size="small" label="备注：">
                 <el-input v-model="inOrOutQuery.remark" maxLength="1000" :rows="1" type="textarea" placeholder="请输入备注" />
               </el-form-item>
@@ -305,7 +310,7 @@
                 <span>PCS</span>
               </template>
               <template #default-totalPrice="{ row }">
-                <span>{{ row.totalPrice ? Number(row.totalPrice).toFixed(2) : 0.00 }}</span>
+                <span>{{ row.totalPrice ? new Decimal(row.totalPrice).toDecimalPlaces(2).toNumber() : 0 }}</span>
               </template>
               <template #default-isTax="{ row }">
                 <span>{{ row.isTax == '1' ? '是' : '否' }}</span>
@@ -342,7 +347,7 @@
                 </div>
               </template>
               <template #default-totalPrice="{ row }">
-                <span>{{ row.totalPrice ? Number(row.totalPrice).toFixed(2) : 0.00 }}</span>
+                <span>{{ row.totalPrice ? new Decimal(row.totalPrice).toDecimalPlaces(2).toNumber() : 0 }}</span>
               </template>
               <template #default-rawOrderBackVoList[0].isTax="{ row }">
                 <span>{{ row.rawOrderBackVoList[0].isTax == '1' ? '是' : '否' }}</span>
@@ -377,73 +382,39 @@
                 <span>{{ scope.row.type == 1 ? '入金' : '出金' }}</span>
               </template>
               <template #default-price="scope">
-                <span>{{ scope.row.price ? Number(scope.row.price).toFixed(2) : 0.00 }}</span>
+                <span>{{ scope.row.price ? Number(scope.row.price).toFixed(2) : 0 }}</span>
               </template>
               <template #default-operate="scope">
                 <el-button link type="primary" @click="handleUpdateOther(scope.row)">修改</el-button>
                 <el-button link type="primary" @click="handleDeleteOther(scope.row)">删除</el-button>
               </template>
             </XTable>
-            <vxe-table align="center" border ref="otherTableRef" height="400" size="small"
-              :row-config="{ isHover: true }" :data="accountOrderOtherList" @checkbox-all="selectOtherAllChangeEvent"
-              @checkbox-change="selectOtherChangeEvent" v-if="false">
-              <vxe-column width="40" type="checkbox"
-                v-if="drawerBorrow.title?.includes('修改') || drawerBorrow.title?.includes('添加')">
-              </vxe-column>
-              <vxe-column type="seq" width="50" title="序号" field="code"> </vxe-column>
-              <vxe-column width="180" title="创建时间" field="createTime">
-                <template #default="scope">
-                  <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
-                </template>
-              </vxe-column>
-              <vxe-column field="createByName" title="创建人" width="120"></vxe-column>
-              <vxe-column field="recordTime" width="140" title="对账日期">
-                <template #default="scope">
-                  <span>{{ parseTime(scope.row.recordTime, '{y}-{m}-{d}') }}</span>
-                </template>
-              </vxe-column>
-              <vxe-column field="type" width="80" title="金额类型">
-                <template #default="scope">
-                  <span>{{ scope.row.type == 1 ? '入金' : '出金' }}</span>
-                </template>
-              </vxe-column>
-              <vxe-column field="price" width="80" title="金额">
-                <template #default="scope">
-                  <span>{{ scope.row.price ? scope.row.price.toFixed(2) : 0.00 }}</span>
-                </template>
-              </vxe-column>
-              <vxe-column field="remark" fixed="right" title="备注"> </vxe-column>
-              <vxe-column fixed="right" width="120" title="操作"
-                v-if="drawerBorrow.title?.includes('修改') || drawerBorrow.title?.includes('添加')">
-                <template #default="scope">
-                  <el-button link type="primary" @click="handleUpdateOther(scope.row)">修改</el-button>
-                  <el-button link type="primary" @click="handleDeleteOther(scope.row)">删除</el-button>
-                </template>
-              </vxe-column>
-            </vxe-table>
           </el-tab-pane>
         </el-tabs>
 
         <el-form border label-width="120px" :model="outForm" class="drawer-order-form">
           <el-row>
             <el-col :span="4">
-              <el-form-item size="small" label="对账总金额：" prop="borrowTotalPrice">{{ borrowTotalPrice }}</el-form-item>
+              <el-form-item size="small" label="对账总金额：" prop="borrowTotalPrice">{{ Number(parseFloat(borrowTotalPrice).toString()) }}</el-form-item>
             </el-col>
             <el-col :span="4">
-              <el-form-item size="small" label="退货总金额：" prop="backTotalPrice">{{ -backTotalPrice }}</el-form-item>
+              <el-form-item size="small" label="对账总面积：" prop="deliveryTotalArea">{{ Number(parseFloat(deliveryTotalArea).toString()) }}</el-form-item>
+            </el-col>
+            <el-col :span="4">
+              <el-form-item size="small" label="退货总金额：" prop="backTotalPrice">{{ -Number(parseFloat(backTotalPrice).toString()) }}</el-form-item>
             </el-col>
             <!-- <el-col :span="6">
               <el-form-item size="small" label="其他金额：" prop="backTotalPrice">{{ BigNumber(otherRecoverTotalPrice).minus(BigNumber(otherOutTotalPrice)) }}</el-form-item>
             </el-col> -->
             <el-col :span="4">
-              <el-form-item size="small" label="入金总金额：" prop="backDiscountTotalPrice">{{ otherRecoverTotalPrice
+              <el-form-item size="small" label="入金总金额：" prop="backDiscountTotalPrice">{{ Number(parseFloat(otherRecoverTotalPrice).toString())
               }}</el-form-item>
             </el-col>
             <el-col :span="4">
-              <el-form-item size="small" label="出金总金额：" prop="backDiscountTotalPrice">{{ -otherOutTotalPrice
+              <el-form-item size="small" label="出金总金额：" prop="backDiscountTotalPrice">{{ -Number(parseFloat(otherOutTotalPrice).toString())
               }}</el-form-item>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="4">
               <el-form-item size="small" label="应收总金额：" prop="accountPrice">{{
                 BigNumber(borrowTotalPrice).minus(BigNumber(backTotalPrice)).minus(BigNumber(otherOutTotalPrice)).plus(BigNumber(otherRecoverTotalPrice)).toNumber()
               }}</el-form-item>
@@ -569,6 +540,9 @@ import { deepClone } from '@/utils';
 /**销售对账预览 */
 import { getReportUrl } from '@/utils/report';
 import { Decimal } from 'decimal.js';
+import {ref} from "vue";
+import { decryptBase64ByStr } from '@/utils/crypto'
+
 
 /** 对账单按钮操作 */
 let reportUrl = ref("");
@@ -668,7 +642,9 @@ const currentAccountOrderId = ref(undefined);
 * 1:付款
 * 2:收款
 */
-const writeOffType = "2"
+const writeOffType = "2";
+
+const { monthly_method, currency_type: currencyTypeList} = toRefs<any>(proxy?.useDict( 'monthly_method','currency_type'));
 //其他金额form
 //冲销defin end
 const initFormData: OrderFilinOutDetailForm = {
@@ -790,6 +766,10 @@ const delPageChangeCheckList = ref([]) // 解决切换分页时，重置取消�
 
 const customerCodeList = ref();
 const customerNameList = ref();
+const isTaxOptions = ref([
+  {value: "1", label: "是"},
+  {value: "0", label: "否"}
+])
 const columnListAudited = ref([
   { type: 'checkbox', fixed: 'left', align: 'center', field: "checkbox", width: '50' },
   { title: '序号', field: "index", width: '50', type: 'seq', visible: true, align: 'center' },
@@ -798,15 +778,16 @@ const columnListAudited = ref([
   { title: '对账单号', width: '140', field: 'code', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入对账单号' } },
   { title: '客户代码', width: '140', field: 'customerCodeIdList',align: 'center',filterType: 'checkboxSearch' , filterData:()=>customerCodeList.value },
   { title: '客户名称', width: '140', field: 'customerNameIdList',align: 'center',filterType: 'checkboxSearch' , filterData:()=>customerNameList.value },
-  { title: '含税', width: '80', field: 'isTax', align: 'center' },
+  { title: '含税', width: '80', field: 'isTax', align: 'center' , filterType:'radioButton',  filterData:()=>isTaxOptions.value},
   { title: '税率', width: '80', field: 'tax', align: 'center' },
-  { title: '月结方式', width: '90', field: 'monthlyMethod', align: 'center' },
+  { title: '月结方式', width: '90', field: 'monthlyMethod', align: 'center', filterType: 'input' },
   { title: '汇率', width: '90', field: 'cusExchangeRate', align: 'center' },
   { title: '币种', width: '90', field: 'currency', align: 'center' },
   { title: '回款截止日期', sortable: true, width: '140', field: 'endTime', align: 'center' , filterType: 'intervalDate', filterParam: {   valueFormat: 'YYYY-MM-DD HH:mm:ss' } },
   //{ title: '制单日期', width: '140', field: 'createTime', align: 'center' , filterType: 'intervalDate', filterParam: {   valueFormat: 'YYYY-MM-DD HH:mm:ss' }},
   { title: '对账日期', sortable: true,width: '140', field: 'accountTime', align: 'center' , filterType: 'intervalDate', filterParam: {   valueFormat: 'YYYY-MM-DD HH:mm:ss' }},
   { title: '对账金额', sortable: true,width: '140', field: 'accountPrice', align: 'center', },
+  { title: '对账面积', sortable: true,width: '90', field: 'deliveryArea', align: 'center', },
   { title: '其他金额', sortable: true,width: '140', field: 'otherPrice', align: 'center', },
   { title: '退货金额', sortable: true,width: '140', field: 'backPrice', align: 'center', },
   { title: '应收金额', sortable: true,width: '140', field: 'repayPayablePrice', align: 'center', },//receivablePrice
@@ -817,7 +798,7 @@ const columnListAudited = ref([
   { title: '开票日期', width: '80', field: 'invoiceTime', align: 'center', },
   { title: '开票金额', width: '80', field: 'invoicePrice', align: 'center', },
   { title: '发票号码', width: '80', field: 'invoiceCode', align: 'center', },
-  { title: '备注', width: '240', field: 'remark', align: 'center', },
+  { title: '备注', width: '240', field: 'remark', align: 'center',filterType: 'input'},
   { title: '操作', field: 'make', align: 'center', width: '240', fixed: 'right', showOverflow: false },
 ]);
 const columnList = ref([
@@ -828,22 +809,23 @@ const columnList = ref([
   { title: '对账单号', width: '140', field: 'code', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入对账单号' } },
   { title: '客户代码', width: '140', field: 'customerCodeIdList',align: 'center',filterType: 'checkboxSearch' , filterData:()=>customerCodeList.value },
   { title: '客户名称', width: '140', field: 'customerNameIdList',align: 'center',filterType: 'checkboxSearch' , filterData:()=>customerNameList.value },
-  { title: '含税', width: '80', field: 'isTax', align: 'center' },
+  { title: '含税', width: '80', field: 'isTax', align: 'center' , filterType:'radioButton',  filterData:()=>isTaxOptions.value},
   { title: '税率', width: '80', field: 'tax', align: 'center' },
-  { title: '月结方式', width: '90', field: 'monthlyMethod', align: 'center' },
+  { title: '月结方式', width: '90', field: 'monthlyMethod', align: 'center',filterType: 'input' },
   { title: '汇率', width: '90', field: 'cusExchangeRate', align: 'center' },
   { title: '币种', width: '90', field: 'currency', align: 'center' },
   { title: '回款截止日期', sortable: true, width: '140', field: 'endTime', align: 'center' , filterType: 'intervalDate', filterParam: {   valueFormat: 'YYYY-MM-DD HH:mm:ss' } },
   //{ title: '制单日期', width: '140', field: 'createTime', align: 'center' , filterType: 'intervalDate', filterParam: {   valueFormat: 'YYYY-MM-DD HH:mm:ss' }},
   { title: '对账日期', sortable: true,width: '140', field: 'accountTime', align: 'center' , filterType: 'intervalDate', filterParam: {   valueFormat: 'YYYY-MM-DD HH:mm:ss' }},
   { title: '对账金额', sortable: true,width: '140', field: 'accountPrice', align: 'center', },
+  { title: '对账面积', sortable: true,width: '90', field: 'deliveryArea', align: 'center', },
   { title: '其他金额', sortable: true,width: '140', field: 'otherPrice', align: 'center', },
   { title: '退货金额', sortable: true,width: '140', field: 'backPrice', align: 'center', },
   { title: '应收金额', sortable: true,width: '140', field: 'repayPayablePrice', align: 'center', },//receivablePrice
   { title: '回款金额', sortable: true,width: '140', field: 'repayWriteOffPrice', align: 'center', },
   { title: '剩余应收金额', sortable: true,width: '140', field: 'repayRemainPrice', align: 'center', },
   { title: '对账人', width: '140', field: 'accountUserName', align: 'center',filterType: 'input' },
-  { title: '备注', width: '240', field: 'remark', align: 'center', },
+  { title: '备注', width: '240', field: 'remark', align: 'center',filterType: 'input' },
   { title: '操作', field: 'make', align: 'center', width: '240', fixed: 'right', showOverflow: false },
 ]);
 const isCompressionList = ref([
@@ -867,7 +849,7 @@ const tabColumnList = ref([
   { title: '客户编码', width: '120', field: 'customerCode', align: 'center',  },
   { title: '销售单号', width: '120', field: 'orderCode', align: 'center', filterType: 'input' },
   { title: '下单时间', width: '120', field: 'placeOrderTime', align: 'center',  },
-  { title: '月结方式', width: '120', field: 'cusMonthlyStatementWay', align: 'center', filterType: 'input' },
+  { title: '月结方式', width: '120', field: 'cusMonthlyStatementWay', align: 'center' },
   { title: '产品编码', width: '120', field: 'commodityCode', align: 'center', filterType: 'input' },
   { title: '产品名称', width: '120', field: 'commodityName', align: 'center', filterType: 'input' },
   { title: '订单总数', width: '120', field: 'orderQuantity', align: 'center' },
@@ -880,11 +862,13 @@ const tabColumnList = ref([
   { title: '加急费', width: '120', field: 'expeditedCost', align: 'center' },
   { title: '其他费用', width: '120', field: 'otherCost', align: 'center' },
   { title: '备品数量', width: '70', field: 'reserveQuantity', align: 'center' },
-  { title: '送货数量', width: '80', fixed: 'right', field: 'deliveryQuantity', align: 'center' },
+  { title: '送货数量', width: '60', fixed: 'right', field: 'deliveryQuantity', align: 'center' },
+  { title: '送货面积', width: '60', fixed: 'right', field: 'deliveryArea', align: 'center' },
+  { title: '核对面积', width: '60', fixed: 'right', field: 'checkDeliveryArea', align: 'center' },
   { title: '核对数量', width: '70', fixed: 'right', field: 'checkQuantity', align: 'center' },
-  { title: '单价', width: '80', fixed: 'right', field: 'orderPrice', align: 'center' },
-  { title: '扣款金额', width: '80', fixed: 'right', field: 'discountPrice', align: 'center' },
-  { title: '总金额', width: '90', fixed: 'right', field: 'totalPrice', align: 'center' },
+  { title: '单价', width: '50', fixed: 'right', field: 'orderPrice', align: 'center' },
+  { title: '扣款金额', width: '70', fixed: 'right', field: 'discountPrice', align: 'center' },
+  { title: '总金额', width: '60', fixed: 'right', field: 'totalPrice', align: 'center' },
   { title: '备注', width: '120', fixed: 'right', field: 'checkRemark', align: 'center' },
 ]);
 const backColumnList = ref([
@@ -995,6 +979,9 @@ const insertFormData = reactive<PageData<AccountOrderForm, AccountOrderQuery>>({
     customerId: [
       { required: true, message: "客户不能为空", trigger: "change" }
     ],
+    monthlyMethod: [
+      { required: true, message: "月结方式不能为空", trigger: "change" }
+    ],
     accountTime: [
       { required: true, message: "对账日期不能为空", trigger: "change" }
     ],
@@ -1064,6 +1051,15 @@ const { queryParams: inOrOutQuery, form: outForm, rules: tabRules } = toRefs(ins
 const { queryParams: otherQueryParams, form: otherForm, rules: otherRules } = toRefs(otherData);
 const { queryParams: backQueryParams } = toRefs(backData);
 const { queryParams: rQueryParams } = toRefs(rData);
+const route = useRoute();
+/**
+ * 进入页面次数
+ */
+const isFirst = ref(0)
+/**
+ * 待办跳转参数
+ */
+const pendingParams = ref()
 
 // 取消已审核列表勾选
 const cancelOrderSelect = () => {
@@ -1291,6 +1287,7 @@ const resetTab = async () => {
 
   inOrOutQuery.value = new Object();
   inOrOutQuery.value.isTax = undefined;
+  inOrOutQuery.value.cusMonthlyStatementWay = undefined;
   inOrOutQuery.value.accountTime = parseTime(new Date(), '{y}-{m}-{d} 23:59:59');
   addTabFormRef.value?.resetFields();
   tabRadioTable.value = "送货单";
@@ -1373,6 +1370,8 @@ const addTabStore = (sourceList:any,storeList:any,key:any) => {
         } else {
             // 添加新元素
             storeList.push(item);
+             //将选中的数据从delPageChangeCheckList中删除
+            delPageChangeCheckList.value = delPageChangeCheckList.value.filter((item2: any) => item2[key] != item[key]);
         }
     })
 }
@@ -1452,6 +1451,8 @@ const handleDetail = async (row?: AccountOrderVO) => {
   }
 }
 const setQueryParams = (_id: any) => {
+  inOrOutQuery.value.monthlyMethod = outForm.value.monthlyMethod;
+  inOrOutQuery.value.cusMonthlyStatementWay = inOrOutQuery.value.monthlyMethod;
   inOrOutQuery.value.accountTime = outForm.value.accountTime;
   inOrOutQuery.value.endTime = outForm.value.endTime;
   inOrOutQuery.value.accountMonth = outForm.value.accountMonth;
@@ -1463,6 +1464,8 @@ const setQueryParams = (_id: any) => {
 }
 /** 查询tab记录 */
 const getAddListRecord = async () => {
+  rQueryParams.value.cusMonthlyStatementWay = inOrOutQuery.value.monthlyMethod;
+  backQueryParams.value.cusMonthlyStatementWay = inOrOutQuery.value.monthlyMethod;
   inOrOutLoading.value = true;
   console.log("inOrOutQuery.value", inOrOutQuery.value);
   console.log("rQueryParams.value", rQueryParams.value);
@@ -1605,6 +1608,7 @@ const setPriceInfo = () => {
       item.checkPrice = item.orderPrice ? item.orderPrice : 0;
       item.checkQuantity = item.quantity ? item.quantity : 0;
       item.discountPrice = item?.discountPrice ? item.discountPrice : 0;
+      //item.checkDeliveryArea = item.deliveryArea ? item.deliveryArea : 0;
       const crtM = changeOrderList.value.find((f: any) => f.id == item.id)
       if (crtM) {
         item.checkQuantity = crtM?.checkQuantity ? crtM.checkQuantity : 0;
@@ -1624,6 +1628,9 @@ const setPriceInfo = () => {
         amount=Number(amount)+Number(_otherCost);
       }
       item.totalPrice = amount/10000;
+
+       let  _checkDeliveryArea= BigNumber(item.checkQuantity).div(BigNumber(item.unitedNumber)).times(BigNumber(item.unitedLength)).times(BigNumber(item.unitedWidth));
+       item.checkDeliveryArea = BigNumber(_checkDeliveryArea).div(BigNumber(1000000)).toFixed(4);
     });
   }
 }
@@ -1647,6 +1654,7 @@ const setSaleDetailCheckedList = () => {
         cd.id=cd.deliveryId;
         cd.checkPrice = cd.orderPrice;
         cd.checkQuantity = cd.quantity;
+        cd.checkDeliveryArea = cd.deliveryArea;
         return cd;
     })
     if(!checkedDeliverList.value||checkedDeliverList.value.length==0){
@@ -1681,6 +1689,7 @@ const setCheckedListInfo = () => {
         item.totalPrice = crtM?.totalPrice ? crtM.totalPrice : 0;
         item.checkRemark = crtM?.checkRemark;
         item.unInitEditPrice = crtM?.unInitEditPrice;
+        item.checkDeliveryArea = crtM.checkDeliveryArea?crtM.checkDeliveryArea:0;
       }
     });
   }
@@ -1714,6 +1723,7 @@ const setListPriceInfo = (item: any, obj: any) => {
     item.discountPrice = obj?.discountPrice;
     item.checkRemark = obj?.remark;
     item.totalPrice = obj?.totalPrice?obj?.totalPrice:0;
+    item.checkDeliveryArea = obj?.deliveryArea?obj?.deliveryArea:0;
   }
   return item;
 }
@@ -1778,6 +1788,7 @@ const calculatePrice = async (row: any) => {
   }
   if (!price || !quantity) {
     row.totalPrice =0;
+    row.checkDeliveryArea =0;
     return;
   }
   //非首次加载，触发一次计算后，不在设置默认值
@@ -1800,6 +1811,8 @@ const calculatePrice = async (row: any) => {
     //row.totalPrice = Number(amount) - Number(discountPrice) ;
     row.totalPrice = Decimal.sub(Number(amount),Number(discountPrice)).toDecimalPlaces(2).toNumber();
   }
+  let  _checkDeliveryArea= BigNumber(row.checkQuantity).div(BigNumber(row.unitedNumber)).times(BigNumber(row.unitedLength)).times(BigNumber(row.unitedWidth));
+  row.checkDeliveryArea = BigNumber(_checkDeliveryArea).div(BigNumber(1000000)).toFixed(4);
   //重新设置当前页选中数据使得响应式生效
   doCurRefreshCheck();
 
@@ -1856,10 +1869,35 @@ const calculateTotalPriceByType = (list: any, _type: any, fieldName: string) => 
   return resNum;
 };
 
+//计算面积
+const calculateTotalAreaByType = (list: any, _type: any, fieldName: string) => {
+  if (!list) {
+    return 0;
+  }
+  const resNum = list
+    .filter((item: any) => {
+      let validType = true;
+      if (_type) {
+        validType = item.type == _type
+      }
+      return item[fieldName] && validType
+    })
+    .reduce((total: any, item: any) => {
+      return BigNumber(total).plus(BigNumber(item[fieldName]))
+    }, 0);
+
+    console.log("resNum",resNum);
+  return Number(BigNumber(resNum).toFixed(2));
+};
+
 //外付 总金额
 const borrowTotalPrice = computed(() => {
   console.log('2222--------', checkedDeliverList.value)
   return calculateTotalPriceByType(checkedDeliverList.value, undefined, "totalPrice").toFixed(2);
+});
+//外付 总金额
+const deliveryTotalArea = computed(() => {
+  return calculateTotalAreaByType(checkedDeliverList.value, undefined, "checkDeliveryArea").toFixed(2);
 });
 //外付 总退货金额
 const backTotalPrice = computed(() => {
@@ -1893,9 +1931,12 @@ const handleSave = () => {
 }
 
 const doSave = async () => {
+
+  inOrOutLoading.value = true;
   setListInfoBefore();
   const vad = await validateForm();
   if (!vad) {
+    inOrOutLoading.value = false;
     return;
   }
   //得到供应商id
@@ -1904,6 +1945,7 @@ const doSave = async () => {
   Object.assign(outForm.value, inOrOutQuery.value);
   //类型
   outForm.value.type = TypeEnum.SALE;
+  outForm.value.deliveryArea = deliveryTotalArea.value ;
   outForm.value.accountPrice = borrowTotalPrice.value ;
   outForm.value.accountDiscountPrice = borrowDiscountTotalPrice.value;
   outForm.value.accountMonth = inOrOutQuery.value.accountMonth;
@@ -1927,7 +1969,7 @@ const doSave = async () => {
         item.id=item.oldId;
         return item;
       })
-    }).finally(() => { buttonLoading.value = false; });
+    }).finally(() => { buttonLoading.value = false; inOrOutLoading.value = false; });
   } else {
     buttonLoading.value = true;
     updateAccountOrder(outForm.value).then(res => {
@@ -1941,7 +1983,7 @@ const doSave = async () => {
         item.id=item.oldId;
         return item;
       })
-    }).finally(() => { buttonLoading.value = false; });
+    }).finally(() => { buttonLoading.value = false; inOrOutLoading.value = false; });
   }
 }
 
@@ -1957,6 +1999,7 @@ const setListInfoBefore = () => {
           item1.discountPrice = item2?.discountPrice;
           item1.totalPrice = item2?.totalPrice;
           item1.saleOrderId = item2?.bizId;
+          item1.checkDeliveryArea = item2?.checkDeliveryArea;
       }
       return item1
     });
@@ -2046,6 +2089,7 @@ const buildReceiveList = (_receiveList: any) => {
     item.remark = item.checkRemark;
     item.quantity = item.checkQuantity;
     item.discountPrice = item.discountPrice ? item.discountPrice : 0;
+    item.deliveryArea = item.checkDeliveryArea;
   });
 }
 const buildBackList = (backList: any) => {
@@ -2099,6 +2143,8 @@ const validateList = async () => {
   let wbnoList = "";
   let feiLinSupplier: any;
   let wangbanSupplier: any;
+  let monthlyMethodValid = true;
+  const monthlyMethod = inOrOutQuery.value.monthlyMethod;
   const formSupplierId = inOrOutQuery.value.customerId;
   const formIsTax = inOrOutQuery.value.isTax;
   if (checkedOrderBackOutDetailList.value.length > 0) {
@@ -2111,6 +2157,17 @@ const validateList = async () => {
     console.log("taxValid", taxValid)
     if (taxValid) {
       proxy?.$modal.msgError("主单含税类型与所选单据含税类型不一致");
+      return false;
+    }
+
+    //monthlyMethod
+    monthlyMethodValid = checkedOrderBackOutDetailList.value.some((item: any) => {
+      let itemMM = item.monthlyMethod ? item.monthlyMethod : item.rawOrderBackVoList[0].cusMonthlyStatementWay;
+      return itemMM !== monthlyMethod;
+    });
+    console.log("monthlyMethodValid", monthlyMethodValid)
+    if (monthlyMethodValid) {
+      proxy?.$modal.msgError("非"+monthlyMethod+"的单据不能一起对账");
       return false;
     }
 
@@ -2135,6 +2192,16 @@ const validateList = async () => {
     console.log("taxValid2", taxValid)
     if (taxValid) {
       proxy?.$modal.msgError("主单含税类型与所选单据含税类型不一致");
+      return false;
+    }
+
+    //monthlyMethod
+    monthlyMethodValid = checkedDeliverList.value.some((item: any) => {
+      return item.cusMonthlyStatementWay !== monthlyMethod;
+    });
+    console.log("monthlyMethodValid2", monthlyMethodValid)
+    if (monthlyMethodValid) {
+      proxy?.$modal.msgError("非"+monthlyMethod+"的单据不能一起对账");
       return false;
     }
 
@@ -2604,13 +2671,49 @@ const getListCust = async() => {
     }
 
   }
-
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      let tab = params.tab ? String(params.tab) : '对账单列表';
+      radioTable.value = tab
+      let tempColumnList = [{field: 'code', defaultValue: params.bizNo}]
+      if (tab === '对账单列表') {
+        accQueryParams.value.code = params.bizNo
+        setTimeout(() => {
+          XTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === '待审核列表') {
+        accQueryParams2.value.code = params.bizNo
+        setTimeout(() => {
+          custTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === '已审核列表') {
+        accQueryParams3.value.code = params.bizNo
+        setTimeout(() => {
+          aduitTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      }
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
 onMounted(() => {
-  getList();
-  getListCust();
-  getCustomerList();
-  getSupplierPriceList();
-  getTaxRate();
+    getList();
+    getListCust();
+    getCustomerList();
+    getSupplierPriceList();
+    getTaxRate();
 });
 </script>
 <!-- <style scoped>

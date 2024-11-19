@@ -10,44 +10,55 @@
               @rowDblClick="rowDblClick"
               @rowContextMenu="rowContextMenu" -->
     <div class="XTable-header">
-        <div class="showText">
-            <template v-if="props.searchShow">
+        <div class="showText global-flex flex-start flex-wrap">
+            <template v-if="props.searchShow && showList.length">
+                <div class="show-text-title">筛选条件</div>
                 <el-tag v-for="(item, index) in showList" :key="index" class="mx-1" closable :disable-transitions="false"
                     @close="deleteShowList(index)">
                     {{ item.label }}
                 </el-tag>
-                <el-tag class="mx-1" @click="deleteAll" v-if="showList.length">全部删除</el-tag>
+                <el-button class="show-text-item" link type="primary" v-if="showList.length" @click="deleteAll">清空筛选</el-button>
             </template>
         </div>
 
-        <div class="XTable-tool">
-            <el-icon v-if="props.showRefresh" class="pointer XTable-icon" size="20px" @click="refreshHandle"><Refresh /></el-icon>
-            <XPopover @confirm="confirm" @reset="reset" @hide="filterText = undefined" v-if="props?.toolId" :reset="true">
+        <div class="XTable-tool global-flex flex-end">
+            <slot name="header-tool"></slot>
+            <el-button type="primary" plain v-if="props.showRefresh" class="pointer XTable-item primary-color" @click="refreshHandle">刷新</el-button>
+            <XPopover :width="250" @confirm="confirm" @reset="reset" @hide="filterText = undefined" v-if="props?.toolId" :reset="true">
                 <template #reference>
-                    <el-icon class="pointer XTable-icon" size="20px"><Operation /></el-icon>
+                    <el-button type="primary" plain>
+                        表格配置
+                        <el-icon style="margin-left: 2px;" size="14px"><ArrowDown /></el-icon>
+                    </el-button>
+                    <!-- <div class="global-flex flex-end pointer XTable-item primary-color">
+                    </div> -->
                 </template>
                 <div class="XTable-tool-box">
                     <el-input v-model.trim="filterText" placeholder="请输入列名称"/>
 
-                    <div class="XTable-tool-list margin-top">
+                    <div class="XTable-tool-list margin-top border-bottom" v-if="!filterText">
                         <el-checkbox
                             v-model="checkAll"
                             :indeterminate="isIndeterminate"
                             @change="handleCheckAllChange"
-                            v-if="!filterText"
                         >全选</el-checkbox>
                     </div>
                     <el-checkbox-group v-model="defaultCheck" class="XTable-tool-list" @change="handleCheckedCitiesChange">
                         <template :key="item.title" v-for="(item, i) in toolList">
-                            <el-checkbox
-                                draggable="true"
-                                @dragend="dragend"
-                                :label="item.title"
-                                @dragstart="dragstart(i)"
-                                @dragover="dragover($event, i)"
-                                @dragenter="dragenter($event, i)"
-                                v-if="(filterText && item.title.includes(filterText)) || !filterText"
-                            >{{ item.title }}</el-checkbox>
+                            <div class="XTable-tool-item global-flex flex-between width-100" v-if="(filterText && item.title.includes(filterText)) || !filterText">
+                                <div class="XTable-tool-checkbox"><el-checkbox
+                                    draggable="true"
+                                    @dragend="dragend"
+                                    :label="item.title"
+                                    @dragstart="dragstart(i)"
+                                    @dragover="dragover($event, i)"
+                                    @dragenter="dragenter($event, i)"
+                                >{{ item.title }}</el-checkbox></div>
+                                <div class="XTable-tool-fixed global-flex flex-end">
+                                    <div class="XTable-tool-fixed-icon global-flex flex-center pointer"><el-icon size="20" :color="item?.fixed == 'left' ? 'var(--el-color-primary)' : 'rgb(192, 196, 204)'" @click="chooseFixed(item, 'left')"><Back /></el-icon></div>
+                                    <!-- <div class="XTable-tool-fixed-icon global-flex flex-center pointer"><el-icon size="20" :color="item?.fixed == 'right' ? 'var(--el-color-primary)' : 'rgb(192, 196, 204)'" @click="chooseFixed(item, 'right')"><Right /></el-icon></div> -->
+                                </div>
+                            </div>
                         </template>
                     </el-checkbox-group>
                 </div>
@@ -64,7 +75,7 @@
         @rowDblClick="rowDblClick"
         @rowContextMenu="rowContextMenu" v-if="makeFlag">
         <!-- @update="updateDom" -->
-        <GridColumnGroup :frozen="true" :width="props.leftWidth" v-if="fixedLeftColumn?.length">
+        <GridColumnGroup :frozen="true" :width="props.leftWidth || fixedWidth" v-if="fixedLeftColumn?.length">
             <GridHeaderRow>
                 <template v-for="item in fixedLeftColumn" :key="item.field">
                     <GridColumn
@@ -86,8 +97,6 @@
                         :filterable="item?.filterable"
                         :filterOperators="item?.filterOperators"
                         v-if="item?.visible">
-                        <!-- v-if="item?.visible" -->
-                        <!-- :hidden="!item?.visible" -->
                         <template #header v-if="!slots[`header-${item.field}`]">
                             <EFilter
                                 :title="item.title"
@@ -118,13 +127,6 @@
                         <template v-if="slots[`default-${item.field}`]" #body="params">
                             <slot :name="`default-${item.field}`" :="params"/>
                         </template>
-                        <!-- <template
-                            :key="key"
-                            v-slot:[key]="item"
-                            v-for="(item, key) in slots"
-                        >
-                            <slot :name="key" v-bind="item"/>
-                        </template> -->
                     </GridColumn>
                 </template>
             </GridHeaderRow>
@@ -194,7 +196,8 @@
                 </template>
             </GridHeaderRow>
         </GridColumnGroup>
-        <GridColumnGroup :frozen="true" :width="props.rightWidth" v-if="fixedRightColumn?.length">
+        <!-- 不支持存在两个冻结区 -->
+        <GridColumnGroup :frozen="true" :width="props.rightWidth || fixedRightColumn.reduce((prev, cur) => Number(prev?.width || 0) + Number(cur?.width || 0))" v-if="fixedRightColumn?.length">
             <GridHeaderRow>
                 <template v-for="item in fixedRightColumn" :key="item.field">
                     <GridColumn
@@ -216,8 +219,6 @@
                         :filterable="item?.filterable"
                         :filterOperators="item?.filterOperators"
                         v-if="item?.visible">
-                        <!-- v-if="item?.visible" -->
-                        <!-- :hidden="!item?.visible" -->
                         <template #header v-if="!slots[`header-${item.field}`]">
                             <EFilter
                                 :title="item.title"
@@ -248,13 +249,6 @@
                         <template v-if="slots[`default-${item.field}`]" #body="params">
                             <slot :name="`default-${item.field}`" :="params"/>
                         </template>
-                        <!-- <template
-                            :key="key"
-                            v-slot:[key]="item"
-                            v-for="(item, key) in slots"
-                        >
-                            <slot :name="key" v-bind="item"/>
-                        </template> -->
                     </GridColumn>
                 </template>
             </GridHeaderRow>
@@ -330,6 +324,8 @@ const fixedLeftColumn = ref<any[]>([])
 const fixedRightColumn = ref<any[]>([])
 const state = ref<any>({})
 
+const fixedWidth = ref(0)
+
 const page = ref(props.pageNumber)
 const crtPageSize = ref(props.pageSize)
 
@@ -365,6 +361,7 @@ const initData = (val: any) => {
         allCheckList.value = deepClone(tempColumnShowList || []).filter((f: any) => f.title).map((m: any) => m.title)
         tempColumnShowList.map((v: any, index: number) => {
             state.value[v.field] = undefined
+            v.fixed = v?.fixed || undefined
             v.visible = (v.visible != undefined) ? v.visible : true
             v.sortIndex = (v.sortIndex != undefined) ? v.sortIndex : index
         })
@@ -373,6 +370,7 @@ const initData = (val: any) => {
         if (props?.toolId) {
             // let data = {}
             const { data }: {data:tableConfigList} = await getTableConfig(props?.toolId)
+            let initTableConfigData = JSON.parse(JSON.stringify(data))
             // // 宽度固定
             // let tempLocal: any = localStorage.getItem(props.toolId)
             // localWidth.value = tempLocal && JSON.parse(tempLocal) || []
@@ -388,7 +386,7 @@ const initData = (val: any) => {
             // }
             // }
 
-            // // 排序，显隐功能
+            // // 排序，显隐，固定列功能
             // if (props?.toolId) {
             // let tempLocalTool: any = localStorage.getItem(props.toolId)
             // localTool.value = tempLocalTool && JSON.parse(tempLocalTool) || []
@@ -407,6 +405,18 @@ const initData = (val: any) => {
                 if (crtWidth) {
                     c.width = crtWidth
                 }
+
+                // if (crtTool?.fixed) {
+                if (initTableConfigData) {
+                    // 说明该表格已存在，从crtTool中取值
+                    c.fixed = crtTool?.fixed || undefined
+                } else {
+                    // 不存在，说明需要从代码中取值
+                    c.fixed = c?.fixed || undefined
+                }
+                // } else {
+                //     c.fixed = c?.fixed || undefined
+                // }
             })
             // }
             tempColumnShowList = tempColumnShowList.sort((a: any,b: any) => a.sortIndex - b.sortIndex)
@@ -420,9 +430,14 @@ const initData = (val: any) => {
             }
         }
 
-        columnShowList.value = tempColumnShowList
+        columnShowList.value = deepClone(tempColumnShowList)
         // 列表分为三块，左固定，中间，右固定
         fixedLeftColumn.value = columnShowList.value?.filter((v: any) => v?.fixed == 'left')
+        if (fixedLeftColumn.value?.length) {
+            fixedLeftColumn.value.map((flc) => {
+                fixedWidth.value += Number(flc.width || 10)
+            })
+        }
         centerColumn.value = columnShowList.value?.filter((v: any) => !v?.fixed)
         fixedRightColumn.value = columnShowList.value?.filter((v: any) => v?.fixed == 'right')
         columnShowList.value.forEach((v: any) => {
@@ -435,6 +450,7 @@ const initData = (val: any) => {
                     filterCustom: v?.filterCustom,
                     sorts: v?.sortable && v?.order ? {prop: v.field, order:v.order} : undefined,
                     value: undefined,
+                    fixed: v?.fixed,
                     visible: v?.visible,
                     sortIndex: v?.sortIndex,
                 })
@@ -696,6 +712,15 @@ const dragend = () => {
     // console.log('拖拽结束',toolList.value, drageIndex.value, currentSource, drageEndIndex.value)
 }
 
+// 切换当前列，左右固定
+const chooseFixed = (item, type) => {
+    if (item.fixed && (item.fixed == type)) {
+        item.fixed = undefined
+    } else {
+        item.fixed = type
+    }
+}
+
 // 全选
 const handleCheckAllChange = (val: boolean) => {
     defaultCheck.value = val ? allCheckList.value : []
@@ -717,6 +742,7 @@ const reset = async () => {
     allCheckList.value = tempColumnShowList.filter((f: any) => f.title).map((m: any) => m.title)
     tempColumnShowList.map((v: any, index: number) => {
         state.value[v.field] = undefined
+        v.fixed = v?.fixed || undefined
         v.visible = (v.visible != undefined) ? v.visible : true
         v.sortIndex = (v.sortIndex != undefined) ? v.sortIndex : index
     })
@@ -758,6 +784,12 @@ const reset = async () => {
             if (crtWidth) {
                 c.width = crtWidth
             }
+
+            if (crtTool?.fixed) {
+                c.fixed = crtTool?.fixed || undefined
+            } else {
+                c.fixed = c?.fixed || undefined
+            }
         })
         // }
         tempColumnShowList = tempColumnShowList.sort((a: any,b: any) => a.sortIndex - b.sortIndex)
@@ -771,7 +803,7 @@ const reset = async () => {
         // }
     }
 
-    columnShowList.value = tempColumnShowList
+    columnShowList.value = deepClone(tempColumnShowList)
     // 列表分为三块，左固定，中间，右固定
     fixedLeftColumn.value = columnShowList.value?.filter((v: any) => v?.fixed == 'left')
     centerColumn.value = columnShowList.value?.filter((v: any) => !v?.fixed)
@@ -786,6 +818,7 @@ const reset = async () => {
                 filterCustom: v?.filterCustom,
                 sorts: v?.sortable && v?.order ? {prop: v.field, order:v.order} : undefined,
                 value: undefined,
+                fixed: v?.fixed,
                 visible: v?.visible,
                 sortIndex: v?.sortIndex,
             })
@@ -806,8 +839,9 @@ const confirm = (flag: boolean = true) => {
         t.visible = defaultCheck.value.findIndex((d: any) => d == t.title) != -1
     })
     columnShowList.value.map((v: any) => {
-        const obj = toolList.value.find((t: any) => t.title == v.title)
+        const obj = deepClone(toolList.value).find((t: any) => t.title == v.title)
         if (obj) {
+            v.fixed = obj?.fixed
             v.visible = obj.visible
             v.sortIndex = obj.sortIndex
         }
@@ -820,6 +854,11 @@ const confirm = (flag: boolean = true) => {
     columnShowList.value = columnShowList.value.sort((a,b) => a.sortIndex - b.sortIndex)
     centerColumn.value = columnShowList.value?.filter((v: any) => !v?.fixed)
     fixedLeftColumn.value = columnShowList.value?.filter((v: any) => v?.fixed == 'left')
+    if (fixedLeftColumn.value?.length) {
+        fixedLeftColumn.value.map((flc) => {
+            fixedWidth.value += Number(flc.width || 10)
+        })
+    }
     fixedRightColumn.value = columnShowList.value?.filter((v: any) => v?.fixed == 'right')
     localTool.value = columnShowList.value
     // localStorage.setItem(props.toolId as string, JSON.stringify(localTool.value))
@@ -853,27 +892,43 @@ defineExpose({ eTableRef, state })
 .XTable-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     width: 100%;
     .showText {
         flex: 1;
         max-height: 60px;
         overflow-y: auto;
         overflow-x: hidden;
+
+        .show-text-title {
+            display: inline-block;
+            font-size: 14px;
+            line-height: 14px;
+            color: #919191;
+        }
+        .show-text-item {
+            margin-left: 8px;
+        }
     }
 
     .XTable-tool {
         flex: none;
         // width: 80px;
-        height: 20px;
-        padding: 0 5px 0;
+        min-height: 28px;
+        padding: 4px 0;
         margin-left: 20px;
+        font-size: 14px;
+        line-height: 20px;
 
         // .XTable-tool-box {
         // }
 
-        .XTable-icon {
-            margin-left: 5px;
+        .XTable-item {
+            margin-left: 8px;
+        }
+
+        .filter-box {
+            min-height: 20px;
         }
     }
 }
@@ -884,12 +939,56 @@ defineExpose({ eTableRef, state })
     // margin-top: 10px;
     overflow-y: auto;
 
+    // &.border-bottom {
+    //     border-bottom: 1px solid rgb(192, 196, 204);
+    //     margin-bottom: 5px;
+    // }
+
     .el-checkbox {
         flex: none;
     }
 
     &.margin-top {
-        margin-top: 10px;
+        margin-top: 4px;
+    }
+    
+    .XTable-tool-item {
+        height: 32px;
+        .XTable-tool-checkbox {
+            flex: 1;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            .el-checkbox {
+                max-height: 32px;
+            }
+        }
+        .XTable-tool-fixed {
+            flex: none;
+            width: 60px;
+            height: 100%;
+            font-size: 12px;
+    
+            .XTable-tool-fixed-icon {
+                position: relative;
+                flex: none;
+                width: 50%;
+                height: 100%;
+                text-align: center;
+                &:not(:last-child) {
+                    &::after {
+                        content: '';
+                        position: absolute;
+                        top: 50%;
+                        right: 0;
+                        width: 0;
+                        height: 60%;
+                        border-right: 1px solid #dedede;
+                        transform: translate(0, -50%);
+                    }
+                }
+            }
+        }
     }
 }
 // :deep(.datagrid-header-row) {

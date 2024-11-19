@@ -88,7 +88,7 @@
           <el-form-item label="名称" prop="name">
             <el-input v-model="form.name" placeholder="请输入名称" />
           </el-form-item>
-         
+
           <el-form-item label="状态" prop="status">
             <el-select v-model="form.status" :collapse-tags="true" filterable placeholder="请选择状态">
               <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
@@ -123,7 +123,7 @@ const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 const sourceHalfCountAttrList = ref<SourceHalfCountAttrVO[]>([]);
 const buttonLoading = ref(false);
 const loading = ref(true);
-const dialogLoading = ref(true);
+const dialogLoading = ref(false);
 const showSearch = ref(true);
 const ids = ref<Array<string | number>>([]);
 const single = ref(true);

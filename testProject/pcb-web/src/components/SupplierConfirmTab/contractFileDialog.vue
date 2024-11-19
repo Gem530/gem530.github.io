@@ -1,19 +1,20 @@
 <template>
-  <el-dialog title="附件下载" v-model="showFlag" width="50%" destroy-on-close :close-on-click-modal="false">
+  <el-dialog title="附件下载" v-model="showFlag" width="55%" destroy-on-close :close-on-click-modal="false">
     <el-form ref="ossFormRef" :model="form" :rules="ossRules" label-width="80px">
-      <el-form-item label="附件类型">
+      <!-- <el-form-item label="附件类型"> -->
         <!-- 单选按钮 默认单据附件 -->
-        <el-radio-group v-model="filerBizType" @change="form.fileList=[]">
+        <!-- <el-radio-group v-model="filerBizType" @change="form.fileList=[]">
           <el-radio v-for="item in fileTypeRadio" :label="item.value" :key="item.value">{{ item.label }}</el-radio>
         </el-radio-group>
-      </el-form-item>
-      <el-form-item label="">
+      </el-form-item> -->
+      <!-- <el-form-item label="">
         <div>
           <div style="color: #AAA">*注：单据附件：确认双方不同于系统签订附件的合同附件，双方只可上传一个</div>
           <div style="padding-left: 28px;color: #AAA;">凭证附件：用于佐证合同的凭证附件，双方都可以上传多个</div>
         </div>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="附件名称">
+
         <XUpload
           v-if="filerBizType == '1'"
           v-model:model-value="form.fileList"
@@ -31,47 +32,92 @@
           model="download"
           @delFile="(val, files) => delFile(val, files, 1)"
           :multiple="true"
-        ></XUpload>
+        >
+          <div class="global-flex flex-start" style="color: #AAA">
+            <el-button type="primary" slot="trigger">上传文件</el-button>
+            &nbsp;&nbsp;&nbsp;支持扩展名：.pdf .jpg .png。
+          </div>
+        </XUpload>
+         <!-- <div>
+          <div style="color: #AAA">支持扩展名：.pdf .jpg .png。</div>
+        </div> -->
       </el-form-item>
-      <el-form-item label="">
+      <!-- <el-form-item label="">
         <div>
           <div style="color: #AAA">支持扩展名：.pdf .jpg .png。</div>
         </div>
-      </el-form-item>
+      </el-form-item> -->
     </el-form>
-    <div class="expand-wrapper">
-      <vxe-table
+    <div>
+      <XTable
         border
         show-overflow
-        :row-config="{height: 45}"
+        :showHead="false"
         :column-config="{ resizable: true }"
         height="450"
         :data="fileList"
+        :pageShow="false"
         :loading="loading"
+        :columnList="columnList"
       >
-        <vxe-column align="center" width="50" field="index" title="序号" type="seq"></vxe-column>
-        <vxe-column align="center" width="90" field="bizType" title="类型">
-          <template #default="scope">
+        <!-- <vxe-column align="center" width="50" field="index" title="序号" type="seq"></vxe-column>
+        <vxe-column align="center" width="90" field="bizType" title="类型"> -->
+          <template #default-bizType="scope">
             <div v-for="item in fileTypeList">
               <span v-if="item.value == scope.row.bizType">{{ item.label }}</span>
             </div>
           </template>
-        </vxe-column>
+        <!-- </vxe-column>
         <vxe-column align="center" field="ownerName" title="单位名称"></vxe-column>
         <vxe-column align="center" width="90" field="createByName" title="上传人"></vxe-column>
         <vxe-column align="center" width="160" field="createTime" title="上传时间"></vxe-column>
-        <vxe-column field="name" title="附件">
-          <template #default="scope">
+        <vxe-column field="name" title="附件"> -->
+          <template #default-name="scope">
             <el-button type="primary" link @click="downLoadHandle(scope.row.key)">{{scope.row.name}}</el-button>
           </template>
-        </vxe-column>
-      </vxe-table>
+        <!-- </vxe-column>
+        <vxe-column align="center" width="100" title="操作"> -->
+          <template #default-make="scope">
+            <el-button v-if="scope.row.bizType == '17'" type="primary" link @click="signHistory(scope.row.key)">签章历史</el-button>
+          </template>
+        <!-- </vxe-column> -->
+      </XTable>
     </div>
     <template #footer>
       <!-- 居中显示 -->
       <div style="text-align: center;">
-        <el-button @click="cancelOSS">取 消</el-button>
         <el-button :loading="buttonLoading" type="primary" @click="submitOSSForm">保 存</el-button>
+        <el-button @click="cancelOSS">取 消</el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <el-dialog title="签章历史" v-model="signVisible" width="50%" destroy-on-close :close-on-click-modal="false">
+    <XTable
+      border
+      show-overflow
+      :row-config="{height: 45}"
+      :column-config="{ resizable: true }"
+      height="260"
+      :pageShow="false"
+      :data="signFileList"
+      :loading="signLoading"
+      :columnList="columnListHistory"
+    >
+      <!-- <vxe-column align="center" width="50" field="index" title="序号" type="seq"></vxe-column>
+      <vxe-column align="center" field="ownerName" title="单位名称"></vxe-column>
+      <vxe-column align="center" width="90" field="createByName" title="操作人"></vxe-column>
+      <vxe-column align="center" width="160" field="createTime" title="签章时间"></vxe-column>
+      <vxe-column field="name" title="附件"> -->
+        <template #default-name="scope">
+          <el-button type="primary" link @click="downLoadHandle(scope.row.key)">{{scope.row.name}}</el-button>
+        </template>
+      <!-- </vxe-column> -->
+    </XTable>
+    <template #footer>
+      <!-- 居中显示 -->
+      <div style="text-align: center;">
+        <el-button @click="signVisible = false">关 闭</el-button>
       </div>
     </template>
   </el-dialog>
@@ -92,17 +138,35 @@ import {RecordVO} from "@/api/purchase/record/types";
 
 const buttonLoading = ref(false);
 const loading = ref(false);
-
+const signLoading = ref(false);
+const signVisible = ref(false);
 const recordVisible = ref(false);
-const filerBizType = ref<string>("1");
+const filerBizType = ref<string>("20");
 
 const ossFormRef = ref<ElFormInstance>();
 const fileList = ref<FileItemVO[]>([]);
+const signFileList = ref<FileItemVO[]>([]);
 
 
 const fileTypeRadio = ref([
   { label: '单据附件', value: "1" },
   { label: '凭证', value: "20" },
+]);
+const columnList = ref([
+{ width: '50',type: 'seq',title: '序号',field: 'index',align: 'center',  },
+{ width: '90',title: '类型',field: 'bizType',align: 'center',  },
+{ title: '单位名称',field: 'ownerName',align: 'center',  },
+{ width: '90',title: '上传人',field: 'createByName',align: 'center',  },
+{ width: '160',title: '上传时间',field: 'createTime',align: 'center',  },
+{ title: '附件',field: 'name',align: 'center',  },
+{ width: '100',title: '操作',align: 'center',field: 'make'  },
+]);
+const columnListHistory = ref([
+{ width: '50',type: 'seq',title: '序号',field: 'index',align: 'center',  },
+{ title: '单位名称',field: 'ownerName',align: 'center',  },
+{ width: '90',title: '操作人',field: 'createByName',align: 'center',  },
+{ width: '160',title: '签章时间',field: 'createTime',align: 'center',  },
+{ type: 'primary',title: '附件',field: 'name',align: 'center',  },
 ]);
 
 const fileTypeList = ref([
@@ -219,6 +283,16 @@ const downLoadHandle = (key: string) => {
   }).catch((err) => {
     loadingBox.close()
   })
+}
+
+/** 签章历史按钮操作 */
+const signHistory = async (id: any) => {
+  signVisible.value = true;
+  signLoading.value = true;
+  // 查询签章历史文件
+  const res = await listFile({bizId: props.id, isSignHistory: true, bizTypeList: ['22', '23']});
+  signFileList.value = res.data;
+  signLoading.value = false;
 }
 
 /** 文件上传提交按钮 */

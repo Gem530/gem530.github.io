@@ -38,7 +38,7 @@
       <el-button link type="primary" @click="printDelivery(scope.row.id)">打印送货单</el-button>
     </template>
   </XTable>
-  <div class="text-center" style="margin-top: 10px">
+  <div class="text-right" style="margin-top: 10px">
     <el-button @click="cancel">关 闭</el-button>
   </div>
 </template>

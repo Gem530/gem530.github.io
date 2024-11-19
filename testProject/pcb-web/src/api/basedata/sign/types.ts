@@ -29,6 +29,8 @@ export interface SignVO {
    */
   ownerId: string | number;
 
+  key: string;
+
 }
 
 export interface SignForm extends BaseEntity {
@@ -62,6 +64,15 @@ export interface SignForm extends BaseEntity {
    */
   ownerId?: string | number;
 
+  /**
+   * 默认使用模块(1采购合同，2采购送货，3采购退货，4采购对账)
+   */
+  useModule?: string;
+
+  /**
+   * 是否取消之前的使用模块
+   */
+  cancelUseModule?: string;
 }
 
 export interface SignQuery extends PageQuery {

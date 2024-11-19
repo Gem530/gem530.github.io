@@ -121,3 +121,29 @@ export const doCompleteFilinOrder = (data: OutSourceFilinOrderForm) => {
     data: data
   });
 };
+
+/**
+ * 批量确认完成菲林网板外协单
+ * @param data
+ */
+export const doCompleteFilinOrderBatch = (data: OutSourceFilinOrderForm) => {
+  return request({
+    url: '/outsource/outSourceFilinOrder/doCompleteFilinOrderBatch',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
+ * 查询菲林网板外协单列表
+ * @param query
+ * @returns {*}
+ */
+
+export const listOutSourceFilinDetailList = (query?: OutSourceFilinOrderQuery): AxiosPromise<OutSourceFilinOrderVO[]> => {
+  return request({
+    url: '/outsource/outSourceFilinOrder/getDetailList',
+    method: 'get',
+    params: query
+  });
+};

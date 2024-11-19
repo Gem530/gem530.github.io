@@ -142,7 +142,7 @@
 
     <!-- 物料盘库记录 -->
     <el-dialog :title="dialogExamine.title" v-model="dialogExamine.visible" width="90%" append-to-body center>
-      <vxe-table
+      <XTable
           border
           keep-source
           size="mini"
@@ -153,83 +153,86 @@
           :edit-rules="validRules"
           show-overflow
           :loading="loading"
+          :pageShow="false"
           ref="xTableBorrowMaterial"
+          toolId="materialCheckDetailRecordDialogToolId"
           :column-config="{resizable: true}"
           :data="materialCheckList"
+          :columnList="columnListCheckRecordDialog"
       >
-        <vxe-column type="seq" title="序号"></vxe-column>
-        <vxe-column field="type" title="盘点类型">
-          <template #default="scope">
+        <!-- <vxe-column type="seq" title="序号"></vxe-column>
+        <vxe-column field="type" title="盘点类型"> -->
+          <template #default-type="scope">
             <dict-tag :options="check_detail_type" :value="scope.row.type"/>
           </template>
-        </vxe-column>
-        <vxe-column field="checkTime" title="盘库日期">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="checkTime" title="盘库日期"> -->
+          <template #edit-checkTime="{ row }">
             <el-input v-model="row.checkTime"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="materialCode" title="物料编码">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="materialCode" title="物料编码"> -->
+          <template #edit-materialCode="{ row }">
             <el-input v-model="row.materialCode"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="materialName" title="物料名称">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="materialName" title="物料名称"> -->
+          <template #edit-materialName="{ row }">
             <el-input v-model="row.materialName"></el-input>
           </template>
-        </vxe-column>
+        <!-- </vxe-column>
 
-        <vxe-column field="supplierName" title="供应商">
-          <template #edit="{ row }">
+        <vxe-column field="supplierName" title="供应商"> -->
+          <template #edit-supplierName="{ row }">
             <el-input v-model="row.supplierName"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="productionDate" title="生产日期">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="productionDate" title="生产日期"> -->
+          <template #edit-productionDate="{ row }">
             <el-input v-model="row.productionDate"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="expirationDays" title="保质期(天)">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="expirationDays" title="保质期(天)"> -->
+          <template #edit-expirationDays="{ row }">
             <el-input v-model="row.expirationDays"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="expirationDate" title="过期日期">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="expirationDate" title="过期日期"> -->
+          <template #edit-expirationDate="{ row }">
             <el-input v-model="row.expirationDate"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="storageName" title="库位">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="storageName" title="库位"> -->
+          <template #edit-storageName="{ row }">
             <el-input v-model="row.storageName"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="inventoryQuantity" title="库存数">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="inventoryQuantity" title="库存数"> -->
+          <template #edit-inventoryQuantity="{ row }">
             <el-input v-model="row.inventoryQuantity"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="quantity" title="盘点数量">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="quantity" title="盘点数量"> -->
+          <template #edit-quantity="{ row }">
             <el-input v-model="row.quantity"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="price" title="盘点单价">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="price" title="盘点单价"> -->
+          <template #edit-price="{ row }">
             <el-input v-model="row.price"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="totalAmount" title="盘点金额">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="totalAmount" title="盘点金额"> -->
+          <template #edit-totalAmount="{ row }">
             <el-input v-model="row.totalAmount"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="remark" title="备注">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="remark" title="备注"> -->
+          <template #edit-remark="{ row }">
             <el-input v-model="row.remark"></el-input>
           </template>
-        </vxe-column>
-      </vxe-table>
+        <!-- </vxe-column> -->
+      </XTable>
       <template #footer>
         <div style="display: flex; justify-content: center;">
           <span class="dialog-footer">
@@ -510,6 +513,25 @@ const checkColumnlList = ref([
   { title: '盘出数量', field: 'producedQuantity',width: '120', align: 'center',editRender:{}  },
   { title: '备注', field: 'remark',width: '220', align: 'center',editRender:{} },
   { title: '操作', field: 'make', width: '60', align: 'center', showOverflow: false, fixed: 'right',},
+]);
+
+// 物料盘库记录
+const columnListCheckRecordDialog = ref([
+{ type: 'seq',title: '序号',align: 'center',  },
+{ title: '盘点类型',field: 'type',align: 'center',  },
+{ title: '盘库日期',field: 'checkTime',align: 'center',  },
+{ title: '物料编码',field: 'materialCode',align: 'center',  },
+{ title: '物料名称',field: 'materialName',align: 'center',  },
+{ title: '供应商',field: 'supplierName',align: 'center',  },
+{ title: '生产日期',field: 'productionDate',align: 'center',  },
+{ title: '保质期(天)',field: 'expirationDays',align: 'center',  },
+{ title: '过期日期',field: 'expirationDate',align: 'center',  },
+{ title: '库位',field: 'storageName',align: 'center',  },
+{ title: '库存数',field: 'inventoryQuantity',align: 'center',  },
+{ title: '盘点数量',field: 'quantity',align: 'center',  },
+{ title: '盘点单价',field: 'price',align: 'center',  },
+{ title: '盘点金额',field: 'totalAmount',align: 'center',  },
+{ title: '备注',field: 'remark',align: 'center',  },
 ]);
 
 const checkedMaterialCheckDetailList = ref<MaterialCheckDetailVO[]>([]);

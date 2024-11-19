@@ -22,7 +22,7 @@ export const listMaterialApply = (query?: MaterialApplyQuery): AxiosPromise<Mate
  * @returns {*}
  */
 
-export const listMaterialInventory = (query?: RawMaterialQuery): AxiosPromise<RawMaterialVO[]> => {
+export const listMaterialInventoryInfo = (query?: RawMaterialQuery): AxiosPromise<RawMaterialVO[]> => {
   return request({
     url: '/purchase/materialApply/materialInventory',
     method: 'get',
@@ -72,6 +72,17 @@ export const addMaterialApply = (data: MaterialApplyForm) => {
 export const getSupplierMaterialPrice = (supplierId: number, rawMaterialId: number) => {
   return request({
     url: '/purchase/supplierBasicPrice/getSupplierMaterialPrice',
+    method: 'post',
+    data: { supplierId, rawMaterialId }
+  });
+};
+/**
+ * 根据供应商id和物料id查询供应商基价
+ * @param data
+ */
+export const getSupplierMaterialPriceInfo = (supplierId: number, rawMaterialId: number) => {
+  return request({
+    url: '/purchase/supplierBasicPrice/getSupplierMaterialPriceInfo',
     method: 'post',
     data: { supplierId, rawMaterialId }
   });

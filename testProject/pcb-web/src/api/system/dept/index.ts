@@ -11,6 +11,15 @@ export const listDept = (query?: DeptQuery) => {
   });
 };
 
+// 查询自己部门数据
+export const listOwnerDept = (query?: DeptQuery) => {
+  return request({
+    url: '/system/dept/listOwnerDept',
+    method: 'get',
+    params: query
+  });
+};
+
 // 查询客户列表
 export const listCompany = () => {
   return request({
@@ -77,5 +86,45 @@ export const updateDeptStaus = (deptId: number | string) => {
     url: '/system/dept/modifyStatus',
     method: 'post',
     data: { deptId }
+  });
+};
+
+export const listDeptByOwnerId = (ownerId: string | number): AxiosPromise<DeptVO[]> => {
+  return request({
+    url: '/system/dept/list/owner/' + ownerId,
+    method: 'get'
+  });
+};
+
+
+// 获取单位的银行账户列表
+export const listDeptBank = (query?: DeptQuery) => {
+  return request({
+    url: '/system/dept/listDeptBank',
+    method: 'get',
+  });
+};
+// 获取单位的银行账户列表
+export const updateDeptBank = (_data?: DeptQuery) => {
+  return request({
+    url: '/system/dept/updateDeptBank',
+    method: 'post',
+    data:_data
+  });
+};
+// 获取单位的银行账户列表
+export const addDeptBank = (_data?: DeptQuery) => {
+  return request({
+    url: '/system/dept/insertDeptBank',
+    method:  'post',
+    data:_data
+  });
+};
+// 获取单位的银行账户列表
+export const deleteDeptBank = (_data?: DeptQuery) => {
+  return request({
+    url: '/system/dept/deleteDeptBank',
+    method: 'post',
+    data:_data
   });
 };

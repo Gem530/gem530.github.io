@@ -21,6 +21,7 @@ export interface UserQuery extends PageQuery {
   status?: string;
   deptId?: string | number;
   roleId?: string | number;
+  ownerId?: string | number;
 }
 
 /**

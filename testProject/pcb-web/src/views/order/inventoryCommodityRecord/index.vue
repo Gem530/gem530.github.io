@@ -36,35 +36,22 @@
         </el-row>
       </template>
 
-      <el-table v-loading="loading" :data="inventoryCommodityRecordList" @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="${comment}" align="center" prop="id" v-if="true" />
-        <el-table-column label="创建部门名称" align="center" prop="createDeptName" />
-        <el-table-column label="创建者名称" align="center" prop="createByName" />
-        <el-table-column label="更新者名称" align="center" prop="updateByName" />
-        <el-table-column label="入库类型" align="center" prop="type" />
-        <el-table-column label="入库数量" align="center" prop="quantity" />
-        <el-table-column label="业务ID" align="center" prop="bizid" />
-        <el-table-column label="入库编号" align="center" prop="code" />
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-          <template #default="scope">
-            <el-tooltip content="修改" placement="top">
-              <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" ></el-button>
-            </el-tooltip>
-            <el-tooltip content="删除" placement="top">
-              <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" ></el-button>
-            </el-tooltip>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <pagination
-          v-show="total>0"
-          :total="total"
-          v-model:page="queryParams.pageNum"
-          v-model:limit="queryParams.pageSize"
-          @pagination="getList"
-      />
+      <XTable v-loading="loading" :columnList="columnList" :data="inventoryCommodityRecordList" class="xtable-content" height="100%"
+      v-model:page-size="queryParams.pageSize"
+      v-model:current-page="queryParams.pageNum"
+      :page-params="{ perfect: true, total: total }"
+      @search-change="getList"
+      @checkbox-change="handleSelectionChange" ref="xtableRef"
+      @checkbox-all="handleSelectionChange">
+        <template #default-make="scope">
+          <el-tooltip content="修改" placement="top">
+            <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" ></el-button>
+          </el-tooltip>
+          <el-tooltip content="删除" placement="top">
+            <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" ></el-button>
+          </el-tooltip>
+        </template>
+      </XTable>
     </el-card>
     <!-- 添加或修改产品入库记录对话框 -->
     <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px">
@@ -92,6 +79,7 @@ import { InventoryCommodityRecordVO, InventoryCommodityRecordQuery, InventoryCom
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
+const xtableRef = ref()
 const inventoryCommodityRecordList = ref<InventoryCommodityRecordVO[]>([]);
 const buttonLoading = ref(false);
 const loading = ref(true);
@@ -160,7 +148,18 @@ const data = reactive<PageData<InventoryCommodityRecordForm, InventoryCommodityR
 });
 
 const { queryParams, form, rules } = toRefs(data);
-
+const columnList = ref([
+{ width: '55',type: 'checkbox',align: 'center',  },
+{ title: '${comment}',field: 'id',align: 'center',  },
+{ title: '创建部门名称',field: 'createDeptName',align: 'center',  },
+{ title: '创建者名称',field: 'createByName',align: 'center',  },
+{ title: '更新者名称',field: 'updateByName',align: 'center',  },
+{ title: '入库类型',field: 'type',align: 'center',  },
+{ title: '入库数量',field: 'quantity',align: 'center',  },
+{ title: '业务ID',field: 'bizid',align: 'center',  },
+{ title: '入库编号',field: 'code',align: 'center',  },
+{ title: '操作',field: 'make',align: 'center',  },
+]);
 /** 查询产品入库记录列表 */
 const getList = async () => {
   loading.value = true;
@@ -196,9 +195,16 @@ const resetQuery = () => {
 
 /** 多选框选中数据 */
 const handleSelectionChange = (selection: InventoryCommodityRecordVO[]) => {
-  ids.value = selection.map(item => item.id);
-  single.value = selection.length != 1;
-  multiple.value = !selection.length;
+  // ids.value = selection.map(item => item.id);
+  // single.value = selection.length != 1;
+  // multiple.value = !selection.length;
+  const $table = xtableRef.value.xTableRef
+  if ($table) {
+    const selection = $table.getCheckboxReserveRecords().concat($table.getCheckboxRecords()) // 获取选择的行数据列表
+    ids.value = selection.map((item: any) => item.id);
+    single.value = selection.length != 1;
+    multiple.value = !selection.length;
+  }
 }
 
 /** 新增按钮操作 */

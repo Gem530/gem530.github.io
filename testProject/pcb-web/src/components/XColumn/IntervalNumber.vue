@@ -1,8 +1,8 @@
 <template>
     <div class="interval-number">
-        <el-input-number v-model="number1" :="{...props.startParams}" :max="props.linkPanels ? number2 : props.startParams?.max"/>
+        <el-input-number v-model="number1" :="{...props.startParams}" :max="props.linkPanels ? (number2 == '' || number2 == undefined || number2 == null ? undefined : number2) : props.startParams?.max"/>
         <span>{{ props.to }}</span>
-        <el-input-number v-model="number2" :="{...props.endParams}" :min="props.linkPanels ? number1 : props.endParams?.min"/>
+        <el-input-number v-model="number2" :="{...props.endParams}" :min="props.linkPanels ? (number1 == '' || number1 == undefined || number1 == null ? undefined : number1) : props.endParams?.min"/>
     </div>
 </template>
 

@@ -4,7 +4,7 @@
             <div class="flex-between max-width">
                 <el-checkbox v-model="crtItem.isChecked" @change="paramChange('choose')" true-label="1" false-label="0"/>
 
-                <span v-if="crtItem.type != 9">{{ crtItem.name }}</span>
+                <span v-if="crtItem.type != 9">{{ crtItem.name }}<spna class="none">-{{crtItem?.sort}}</spna></span>
             </div>
         </template>
         <el-row class="max-width">
@@ -50,7 +50,8 @@
                 <el-input v-if="crtItem.type == 2" type="textarea" v-model="crtItem.defaultValue"  @change="paramChange"
                     clearable placeholder="请输入"
                 ></el-input>
-                <el-input-number class="max-width" @change="paramChange" v-if="crtItem.type == 1" v-model="crtItem.defaultValue"></el-input-number>
+                <!-- <el-input-number class="max-width" @change="paramChange" v-if="crtItem.type == 1" v-model="crtItem.defaultValue"></el-input-number> -->
+                <el-input placeholder="请输入数字" @change="paramChange" v-if="crtItem.type == 1" v-model="crtItem.defaultValue" clearable></el-input>
             </el-col>
             <el-col :span="3" class="left">{{ crtItem.unit }}</el-col>
             <el-col :span="4" class="center"><el-checkbox v-model="crtItem.isBold" @change="paramChange" label="加粗" true-label="1" false-label="0"/></el-col>

@@ -66,7 +66,7 @@
           </el-col>
         </el-row>
       </el-form>
-      <vxe-table
+      <XTable
           border
           keep-source
           size="mini"
@@ -78,80 +78,82 @@
         show-overflow
         :loading="loading"
         ref="xTable"
+        :pageShow="false"
         :column-config="{resizable: true}"
         :data="otherReceiptList"
+        :columnList="columnListIqcDialog"
         :edit-config="{trigger: 'manual', mode: 'row', autoClear: false, showStatus: true}"
       >
-        <vxe-column type="seq" title="序号"></vxe-column>
-        <vxe-column field="code" title="检测单号">
-          <template #edit="{ row }">
+        <!-- <vxe-column type="seq" title="序号"></vxe-column>
+        <vxe-column field="code" title="检测单号"> -->
+          <template #edit-code="{ row }">
             <el-input v-model="row.code"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="baseRawMaterialCode" title="物料编码">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="baseRawMaterialCode" title="物料编码"> -->
+          <template #edit-baseRawMaterialCode="{ row }">
             <el-input v-model="row.rawMaterialCode"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="name" title="物料名称">
-            <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="name" title="物料名称"> -->
+            <template #edit-name="{ row }">
               <el-input v-model="row.name"></el-input>
             </template>
-        </vxe-column>
-        <vxe-column field="materialQuality" title="材质牌号">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="materialQuality" title="材质牌号"> -->
+          <template #edit-materialQuality="{ row }">
             <el-input v-model="row.materialQuality"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="unit" title="库存单位">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="unit" title="库存单位"> -->
+          <template #edit-unit="{ row }">
             <el-input v-model="row.unit"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="productionDate" title="生产日期">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="productionDate" title="生产日期"> -->
+          <template #edit-productionDate="{ row }">
             <el-input v-model="row.productionDate"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="storageName" title="入库仓">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="storageName" title="入库仓"> -->
+          <template #edit-storageName="{ row }">
             <el-input v-model="row.storageName"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="waitInspectionNumber" title="待检数量" sort-type="string">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="waitInspectionNumber" title="待检数量" sort-type="string"> -->
+          <template #edit-waitInspectionNumber="{ row }">
             <el-input v-model="row.waitInspectionNumber"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="quantity" title="检测数量" sort-type="string" :edit-render="{}">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="quantity" title="检测数量" sort-type="string" :edit-render="{}"> -->
+          <template #edit-quantity="{ row }">
             <el-input v-model="row.quantity" type="number" :min="0"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="inventoryQuantity" title="直接入库数" sort-type="string" :edit-render="{}">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="inventoryQuantity" title="直接入库数" sort-type="string" :edit-render="{}"> -->
+          <template #edit-inventoryQuantity="{ row }">
             <el-input v-model="row.inventoryQuantity" type="number" :min="0"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="handleType" title="处理方式" :edit-render="{}">
-          <template #edit="{ row }" #default="row">
+        <!-- </vxe-column>
+        <vxe-column field="handleType" title="处理方式" :edit-render="{}"> -->
+          <template #edit-handleType="{ row }" #default="row">
             <el-select v-model="row.handleType" placeholder="处理方式" clearable>
               <el-option v-for="dict in material_iqc_handle_type" :key="dict.value" :label="dict.label" :value="dict.value"/>
             </el-select>
           </template>
-          <template #default="{row}">
+          <template #default-handleType="{row}">
             <div v-for="dict in material_iqc_handle_type">
               <span v-if="dict.value==row.handleType">{{dict.label}}</span>
             </div>
           </template>
-        </vxe-column>
-        <vxe-column field="remark" title="备注" sort-type="string" :edit-render="{}">
-          <template #edit="{ row }">
+        <!-- </vxe-column>
+        <vxe-column field="remark" title="备注" sort-type="string" :edit-render="{}"> -->
+          <template #edit-remark="{ row }">
             <el-input v-model="row.remark"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column title="操作" width="200">
-          <template #default="{ row,rowIndex}">
+        <!-- </vxe-column>
+        <vxe-column title="操作" width="200"> -->
+          <template #default-make="{ row,rowIndex}">
             <template v-if="isActiveStatus(row)">
               <vxe-button @click="saveRowEvent(row)">保存</vxe-button>
               <vxe-button @click="cancelRowEvent(row)">取消</vxe-button>
@@ -162,8 +164,8 @@
               <el-button size="small" text="plain" @click="deleteRowEvent(row,rowIndex)">删除</el-button>
             </template>
           </template>
-        </vxe-column>
-      </vxe-table>
+        <!-- </vxe-column> -->
+      </XTable>
       <template #footer>
         <div style="display: flex; justify-content: center;">
           <span class="dialog-footer">
@@ -365,6 +367,24 @@ const materalOrdercolumnList = ref([
   { title: '品牌', field: 'manufacturer', align: 'center' },
   { title: '库存单位', field: 'unit', align: 'center' },
 ]);
+
+//IQC检测弹框
+const columnListIqcDialog = ref([
+{ type: 'seq',title: '序号',align: 'center',  },
+{ title: '检测单号',field: 'code',align: 'center',  },
+{ title: '物料编码',field: 'baseRawMaterialCode',align: 'center',  },
+{ title: '物料名称',field: 'name',align: 'center',  },
+{ title: '材质牌号',field: 'materialQuality',align: 'center',  },
+{ title: '库存单位',field: 'unit',align: 'center',  },
+{ title: '生产日期',field: 'productionDate',align: 'center',  },
+{ title: '入库仓',field: 'storageName',align: 'center',  },
+{ type: 'string',title: '待检数量',field: 'waitInspectionNumber',align: 'center',  },
+{ type: 'string',title: '检测数量',field: 'quantity',editRender: '{}',align: 'center',  },
+{ type: 'string',title: '直接入库数',field: 'inventoryQuantity',editRender: '{}',align: 'center',  },
+{ title: '处理方式',field: 'handleType',editRender: '{}',align: 'center',  },
+{ type: 'string',title: '备注',field: 'remark',editRender: '{}',align: 'center',  },
+{ width: '200',title: '操作',align: 'center', field: 'make' },
+]);
 // 新增属性
 const editableTabsValue = ref(1);
 
@@ -555,7 +575,7 @@ const handleDelivery = async (row?: MaterialReceiveVO) => {
 }
 
 const isActiveStatus = (row: MaterialOrderDetailVO) => {
-  const $table = xTable.value;
+  const $table = xTable.value.xTableRef;
   if ($table) {
     return $table.isEditByRow(row);
   }
@@ -563,7 +583,7 @@ const isActiveStatus = (row: MaterialOrderDetailVO) => {
 
 const saveRowEvent = (row: MaterialOrderDetailVO) => {
   console.log(row)
-  const $table = xTable.value;
+  const $table = xTable.value.xTableRef;
   if ($table) {
     $table.clearEdit().then(() => {
       loading.value = true;
@@ -576,7 +596,7 @@ const saveRowEvent = (row: MaterialOrderDetailVO) => {
 };
 
 const cancelRowEvent = (row: MaterialOrderDetailVO) => {
-  const $table = xTable.value;
+  const $table = xTable.value.xTableRef;
   if ($table) {
     $table.clearEdit().then(() => {
       // 还原行数据
@@ -595,7 +615,7 @@ const copyRowEvent = (row: MaterialOrderDetailVO) => {
     $table._X_ROW_KEY = otherReceiptList.value.length + 1;
     $table.id = null;
     otherReceiptList.value.push($table);
-    console.log(xTable.value)
+    console.log(xTable.value.xTableRef)
   }
   console.log(otherReceiptList.value)
 };
@@ -605,7 +625,7 @@ const copyRowEvent = (row: MaterialOrderDetailVO) => {
  * @param row
  */
 const editRowEvent = (row: MaterialOrderDetailVO) => {
-  const $table = xTable.value;
+  const $table = xTable.value.xTableRef;
   if ($table) {
     $table.setEditRow(row);
   }

@@ -5,9 +5,9 @@
         <el-col :span="24">
           <div style="float: right">
             <div style="display:flex;;line-height: 24px;font-size: 14px">
-              <div style="width: 90px;background-color: #C0FDFF">外协订单</div>
+              <!-- <div style="width: 90px;background-color: #C0FDFF">外协订单</div>
               <div style="width: 90px;background-color: #FAECD8">订单未排产</div>
-              <div style="width: 90px;background-color: #F2FFEB">排产已完成</div>
+              <div style="width: 90px;background-color: #F2FFEB">排产已完成</div> -->
               <div style="width: 20px"></div>
               <el-checkbox v-model="queryParams.showDeliverComplete" @change="getList" size="medium"
                          true-label="4" false-label="5"
@@ -21,7 +21,7 @@
         </el-col>
       </el-row>
     </div>
-    <el-card shadow="never" class="xtable-card">
+    <!-- <el-card shadow="never" class="xtable-card"> -->
       <XTable
               ref="prodTable"
               toolId="saleOrderWIP"
@@ -44,6 +44,13 @@
               :row-style="setRowStyle"
               :intervalCondition="['placeOrderTime','dispatchTime','deliveryTime','planStartTime']"
       >
+        <template #header-tool>
+          <ColorRule :list="[
+            { title: '外协订单', color: '#C0FDFF' },
+            { title: '订单未排产', color: '#FAECD8' },
+            { title: '排产已完成', color: '#F2FFEB' },
+          ]"></ColorRule>
+        </template>
         <template #default-orderType="{row}">
           <div v-for="item in resDictData.order_type">
             <span v-if="item.dictValue==row.orderType">{{item.dictLabel}}</span>
@@ -61,7 +68,7 @@
           <el-tag type="warning" v-else>{{row.isPaused}}</el-tag>
         </template>
       </XTable>
-    </el-card>
+    <!-- </el-card> -->
 
     <!--PCB制作单预览 -->
     <el-drawer destroy-on-close v-model="drawer.visible" :title="drawer.title" size="25%" visible.sync="false" >
@@ -181,7 +188,8 @@
     {width: '50', title: '丝印字符', field: 'printingCharacterNum', align: 'center',},
     {width: '50', title: '表面处理', field: 'surfaceTreatmentNum', align: 'center',},
     {width: '50', title: '成型', field: 'formingNum', align: 'center',},
-    {width: '50', title: '测试', field: 'testNum', align: 'center',},
+    {width: '50', title: '飞针', field: 'testNum', align: 'center',},
+    {width: '50', title: '测试架', field: 'testNumPcs', align: 'center',},
     {width: '50', title: 'FQC', field: 'fqcNum', align: 'center',},
     {width: '50', title: '包装', field: 'packageNum', align: 'center',},
 
@@ -326,10 +334,10 @@
         if (key == 'commodityName') tmp = tmp.filter(o => o.commodityName && o.commodityName.includes(item))
 
         //if (key == 'customerCode') tmp = tmp.filter(o => o.customerCode && o.customerCode.includes(item.toLocaleUpperCase()))
-        if (key == 'customerCode') tmp = tmp.filter(o => 
+        if (key == 'customerCode') tmp = tmp.filter(o =>
           {
             if(o.customerCode){
-              //o.customerCode&&item.find(o.customerCode) 
+              //o.customerCode&&item.find(o.customerCode)
               let tf= item.filter(it=> it.includes(o.customerCode));
               console.log("=========-???",tf)
               return tf.length>0;

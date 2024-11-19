@@ -48,6 +48,30 @@ export const checkSaleOrderByBo = (bo: any): any => {
     return true
   });
 };
+/**
+ * 检查mi制作单的Test
+ * @param query
+ * @returns {*}
+ */
+export const checkMiTestCraftByBo = (bo: any): any => {
+  return request({
+    url: '/production/production/checkMiTestCraft',
+    method: 'post',
+    data: bo
+  })
+};
+/**
+ * 校验【MI工艺单管理】合拼增加限制条件及提醒
+ * @param query
+ * @returns {*}
+ */
+export const checkMergeSaleOrderByBo = (bo: any): any => {
+  return request({
+    url: '/production/production/checkMergeSaleOrder',
+    method: 'post',
+    data: bo
+  })
+};
 
 
 /**
@@ -208,6 +232,28 @@ export const postListOrderPrediction = (query?: any) => {
 export const savePrediction = (data: any) => {
   return request({
     url: '/project/productionPlan/update',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
+ * MI单管理-修改(权限校验)
+ */
+export const updateCheckPer = (data: any) => {
+  return request({
+    url: '/project/productionPlan/updateCheckPer',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
+ * 生产投料-驳回(权限校验)
+ */
+export const refusalCheckPer = (data: any) => {
+  return request({
+    url: '/project/productionPlan/refusalCheckPer',
     method: 'post',
     data: data
   });

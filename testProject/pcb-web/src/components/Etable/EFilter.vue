@@ -2,15 +2,16 @@
     <div class="filter-box">
         <el-popover
             :width="350"
-            placement="bottom"
             trigger="click"
             :visible="flag"
+            placement="bottom"
+            popper-class="easy-filter-pop"
             @show="showPop"
             @hide="hidePop">
             <template #reference>
                 <div class="flex-title" @click.stop="openPop">
                     {{ props.title }}
-                    <el-icon><Filter /></el-icon>
+                    <svg-icon icon-class="filter-init"></svg-icon>
                 </div>
             </template>
             <div class="pop-box" v-click-outside="clickOutside">
@@ -112,8 +113,8 @@
                     <el-switch v-model="data" :="{...props.filterParam}"/>
                 </template>
                 <div class="popver-footer">
-                    <el-button link type="primary" @click="search" :disabled="data == '' || data == undefined || data == null">筛选</el-button>
-                    <el-button link type="primary" @click="reset">重置</el-button>
+                    <el-button link @click="search" :disabled="data == '' || data == undefined || data == null">筛选</el-button>
+                    <el-button link @click="reset">重置</el-button>
                 </div>
             </div>
         </el-popover>
@@ -231,6 +232,15 @@ const reset = () => {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    margin-top: 10px;
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid #F0F0F0;
+}
+</style>
+<style lang="scss">
+.easy-filter-pop {
+    width: auto !important;
+    min-width: 100px !important;
+    max-width: 350px !important;
 }
 </style>

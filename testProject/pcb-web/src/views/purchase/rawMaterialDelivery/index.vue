@@ -125,7 +125,7 @@
           </el-col>
         </el-row>
       </el-form>
-      <vxe-table
+      <XTable
           border
           keep-source
           size="small"
@@ -139,8 +139,10 @@
           :column-config="{resizable: true}"
           :data="otherDeliveryList"
           :edit-config="{trigger: 'click', mode: 'row', autoClear: true, showStatus: true}"
+          :pageShow="false"
+          :columnList="columnListDeliveryDialog"
       >
-        <vxe-column type="seq" title="序号"></vxe-column>
+        <!-- <vxe-column type="seq" title="序号"></vxe-column>
         <vxe-column field="code" title="采购单号" width="90px">
           <template #edit="{ row }">
             <el-input v-model="row.code"></el-input>
@@ -211,34 +213,27 @@
             <el-input v-model="row.units"></el-input>
           </template>
         </vxe-column>
-        <vxe-column field="editDeliveryQuantity" title="送货数量" type="number" :edit-render="{}">
-          <template #edit="{ row }">
+        <vxe-column field="editDeliveryQuantity" title="送货数量" type="number" :edit-render="{}"> -->
+          <template #edit-editDeliveryQuantity="{ row }">
             <el-input v-model="row.editDeliveryQuantity"></el-input>
           </template>
-        </vxe-column>
+        <!-- </vxe-column>
         <vxe-column field="differenceQuantity" title="差欠数量">
           <template #edit="{ row }">
             <el-input v-model="row.differenceQuantity"></el-input>
           </template>
         </vxe-column>
-<!--        <vxe-column field="productionDate" title="生产日期" sort-type="string" :edit-render="{}">
-          <template #edit="{ row }">
-            <el-date-picker style="width: 100%" size="small" v-model="row.productionDate" type="datetime"
-                            placeholder="选择日期" value-format="YYYY-MM-DD" format="YYYY-MM-DD"
-                            clearable @change="dispatchTimeChange(row)"/>
-          </template>
-        </vxe-column>-->
-        <vxe-column field="remark" title="备注" sort-type="string" :edit-render="{}">
-          <template #edit="{ row }">
+        <vxe-column field="remark" title="备注" sort-type="string" :edit-render="{}"> -->
+          <template #edit-remark="{ row }">
             <el-input v-model="row.remark"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column title="操作" width="200"  v-if="dialogExamine.title != '供应商物料发货详情'">
-          <template #default="{ row,rowIndex}">
+        <!-- </vxe-column>
+        <vxe-column title="操作" width="200"  v-if="dialogExamine.title != '供应商物料发货详情'"> -->
+          <template #default-make="{ row,rowIndex}">
             <el-button size="small" text="plain" @click="deleteRowEvent(row,rowIndex)">删除</el-button>
           </template>
-        </vxe-column>
-      </vxe-table>
+        <!-- </vxe-column> -->
+      </XTable>
       <template #footer>
         <div style="display: flex; justify-content: center;">
           <span class="dialog-footer">
@@ -471,6 +466,29 @@ const columnList2 = ref([
   { title: '送货数量', width: '120',field: 'quantity', align: 'center'},
   { title: '差欠数量',width: '120', field: 'differenceQuantity', align: 'center' },
   { title: '操作', field: 'make', align: 'center', width: '200', fixed: 'right', showOverflow: false },
+]);
+
+// 供应商送货单 弹框
+const columnListDeliveryDialog = ref([
+{ type: 'seq',title: '序号',align: 'center',  },
+{ width: '90px',title: '采购单号',field: 'code',align: 'center',  },
+{ title: '物料编码',field: 'materialCode',align: 'center',  },
+{ title: '物料名称',field: 'materialName',align: 'center',  },
+{ title: '材质牌号',field: 'materialQuality',align: 'center',  },
+{ title: '板厚',field: 'boardThickness',align: 'center',  },
+{ title: '铜厚',field: 'copperThickness',align: 'center',  },
+{ title: '颜色',field: 'color',align: 'center',  },
+{ title: '级别',field: 'level',align: 'center',  },
+{ title: '长（mm）',field: 'length',align: 'center',  },
+{ title: '宽（mm）',field: 'width',align: 'center',  },
+{ title: '品牌',field: 'manufacturer',align: 'center',  },
+{ title: '要求交期',field: 'deliverTime',align: 'center',  },
+{ title: '采购数量',field: 'quantity',align: 'center',  },
+{ title: '库存单位',field: 'units',align: 'center',  },
+{ type: 'number',title: '送货数量',field: 'editDeliveryQuantity',editRender: '{}',align: 'center',  },
+{ title: '差欠数量',field: 'differenceQuantity',align: 'center',  },
+{ type: 'string',title: '备注',field: 'remark',editRender: '{}',align: 'center',  },
+{ width: '200',title: '操作',align: 'center', field: 'make', isPermi: () => dialogExamine.title != '供应商物料发货详情' },
 ]);
 
 const { queryParams, form, rules } = toRefs(data);

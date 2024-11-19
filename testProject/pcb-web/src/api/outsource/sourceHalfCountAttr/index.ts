@@ -71,3 +71,65 @@ export const getAllAttr = (): AxiosPromise<SourceHalfCountAttrVO[]> => {
     method: 'get'
   });
 };
+
+
+/**
+ * 新增外协加工计价配置
+ * @param data
+ */
+export const addOutSourceCountConfig = (data: SourceHalfCountAttrForm) => {
+  return request({
+    url: '/outsource/sourceOrderCraft',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
+ * 查询外协加工计价配置列表
+ * @param query
+ * @returns {*}
+ */
+export const listOutSourceCountConfig = (query?: SourceHalfCountAttrQuery): AxiosPromise<SourceHalfCountAttrVO[]> => {
+  return request({
+    url: '/outsource/sourceOrderCraft/list',
+    method: 'get',
+    params: query
+  });
+};
+
+
+export const modifyConfigStatus = (data: SourceHalfCountAttrForm) => {
+  return request({
+    url: '/outsource/sourceOrderCraft/updateIsOpen',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
+ * 查询外协加工计价工序配置列表
+ * @param query
+ * @returns {*}
+ */
+
+export const getOutSourceCountCraftConfig = (id: string | number): AxiosPromise<SourceHalfCountAttrVO> => {
+  return request({
+    url: '/outsource/sourceOrderCraft/' + id,
+    method: 'get'
+  });
+};
+
+
+
+/**
+ * 修改半制程外协计价配置
+ * @param data
+ */
+export const updateAddOutSourceCountConfig = (data: SourceHalfCountAttrForm) => {
+  return request({
+    url: '/outsource/sourceOrderCraft',
+    method: 'put',
+    data: data
+  });
+};

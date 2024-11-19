@@ -110,6 +110,11 @@ export interface SourceHalfCountAttrQuery extends PageQuery {
      * 日期范围参数
      */
     params?: any;
+
+  /**
+   * 是否启用  0: 禁用  1: 启用
+   */
+  isOpen?: any;
 }
 
 

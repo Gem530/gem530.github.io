@@ -3,6 +3,19 @@ import { AxiosPromise } from 'axios';
 import { SourceHalfProcessOrderVO, SourceHalfProcessOrderForm, SourceHalfProcessOrderQuery } from '@/api/outsource/sourceHalfProcessOrder/types';
 import { AnyColumn } from 'element-plus/es/components/table-v2/src/common';
 
+
+/**
+ * 查询外协加工订单列表-根据外协单号
+ * @param query
+ * @returns {*}
+ */
+
+export const listByOutSourceCode = (code: string): AxiosPromise<SourceHalfProcessOrderVO[]> => {
+  return request({
+    url: '/outsource/sourceHalfProcessOrder/getByOutSourceCode/' + code,
+    method: 'get'
+  });
+};
 /**
  * 查询外协加工订单列表
  * @param query
@@ -150,6 +163,18 @@ export const getPrintSourceHalfProcessOrder = (id: string | number): AxiosPromis
 export const addSourceHalfProcessOrder = (data: any) => {
   return request({
     url: '/outsource/sourceHalfProcessOrder/add',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
+ * 批量修改外协加工订单
+ * @param data
+ */
+export const batchEditSourceHalfProcessOrder = (data: any) => {
+  return request({
+    url: '/outsource/sourceHalfProcessOrder/batchEdit',
     method: 'post',
     data: data
   });

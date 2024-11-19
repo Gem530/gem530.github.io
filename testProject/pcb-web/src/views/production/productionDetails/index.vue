@@ -49,38 +49,24 @@
                 <template #reference>
                   <el-button link type='primary'>{{scope.row.scrapRate}}</el-button>
                 </template>
-                <el-table :data="scope.row.saleOrderVoList">
-                  <el-table-column width="120" :show-overflow-tooltip="true" property="commodityCode" label="产品编码"/>
-                  <el-table-column width="120" :show-overflow-tooltip="true" property="commodityName" label="产品名称"/>
-                  <el-table-column width="120" :show-overflow-tooltip="true" property="productionQuantity" label="排产数量"/>
-                  <el-table-column width="120" :show-overflow-tooltip="true" property="scrapQuantity" label="报废数量"/>
-                  <el-table-column width="120" :show-overflow-tooltip="true" property="scrapRate" label="报废率(%)"/>
-                </el-table>
+                <XTable :showHead="false" :pageShow="false" :columnList="columnListScrapRate" :data="scope.row.saleOrderVoList">
+                </XTable>
               </el-popover>
             </template>
 
             <template #default-commodityName="scope">
-              <el-popover placement="right" :width="750" trigger="click">
+              <el-popover :width="750" trigger="click">
                 <template #reference>
                   <el-button link type='primary'>{{scope.row.commodityName}}</el-button>
                 </template>
-                <el-table :data="scope.row.saleOrderVoList">
-                  <el-table-column width="120" :show-overflow-tooltip="true" property="commodityCode" label="产品编码"/>
-                  <el-table-column width="120" :show-overflow-tooltip="true" property="commodityName" label="产品名称"/>
-                  <el-table-column width="120" :show-overflow-tooltip="true" property="customerCode" label="客户编码"/>
-                  <el-table-column width="100" :show-overflow-tooltip="true" property="version" label="版本号"/>
-                  <el-table-column width="100" :show-overflow-tooltip="true" property="materialQuality" label="板材"/>
-                  <el-table-column width="100" :show-overflow-tooltip="true" property="unit" label="单位">
-                    <template #default="scope">
-                      pcs
-                    </template>
-                  </el-table-column>
-                  <el-table-column width="60" label="操作" align="center" class-name="small-padding fixed-width">
-                    <template #default="scope">
-                        <el-button link type="primary" icon="Edit"  @click="openOrderDetail(scope.row)" >详情</el-button>
-                    </template>
-                  </el-table-column>
-                </el-table>
+                <XTable :showHead="false" :pageShow="false" :columnList="columnListProductName" :data="scope.row.saleOrderVoList">
+                  <template #default-unit="scope">
+                    pcs
+                  </template>
+                  <template #default-make="scope">
+                      <el-button link type="primary" icon="Edit"  @click="openOrderDetail(scope.row)" >详情</el-button>
+                  </template>
+                </XTable>
               </el-popover>
             </template>
             <template #default-saleOrderId="scope">
@@ -88,12 +74,8 @@
                 <template #reference>
                   <el-button link type='primary'>查看</el-button>
                 </template>
-                <el-table :data="scope.row.saleOrderVoList">
-                  <el-table-column width="100" property="code" label="订单编号"/>
-                  <el-table-column width="100" property="customerCode" label="客户编码"/>
-                  <el-table-column width="130" property="deliveryTime" label="客户交期"/>
-                  <el-table-column width="130" property="dispatchTime" label="最迟发货"/>
-                </el-table>
+                <XTable :showHead="false" :pageShow="false" :columnList="columnListSaleOrderId" :data="scope.row.saleOrderVoList">
+                </XTable>
               </el-popover>
             </template>
             <template #default-pnlFeedId="scope">
@@ -101,13 +83,8 @@
                 <template #reference>
                   <el-button link type='primary'>查看</el-button>
                 </template>
-                <el-table :data="scope.row.pnlBoList">
-                  <el-table-column width="100" property="name" label="Pnl"/>
-                  <el-table-column width="100" property="preFeedQuantity" label="计划投料"/>
-                  <el-table-column width="100" property="feedQuantity" label="已投数量"/>
-                  <el-table-column width="100" property="feedArea" label="已投面积">
-                  </el-table-column>
-                </el-table>
+                <XTable :showHead="false" :pageShow="false" :columnList="columnListPnlFeedId" :data="scope.row.pnlBoList">
+                </XTable>
               </el-popover>
             </template>
             <template #default-status="scope">
@@ -120,11 +97,19 @@
     <el-drawer
       v-model="orderDrawer.visible"
       :title="orderDrawer.title"
-      size="850px"
       :direction="orderDrawer.direction"
       :destroy-on-close="true"
-      modal-class="detail-prod-drawder"
+      size="45%"
+      :modal-class="`add-prod-drawder ${ownerId == '101' && 'normal-prod-drawder'}`"
     >
+      <template #header>
+        <span class="el-drawer__title no-wrap">{{orderDrawer.title}}</span>
+        <TotalTitle :start="true" :firstBorder="true" :list="[
+          { title: `总价：${ currentVo?.totalOrderPrice||0 }元` },
+          { title: `税金：${ currentVo?.tax||0 }元` },
+          { title: `总金额：${ currentVo?.totalPrice||0 }元` },
+        ]"></TotalTitle>
+      </template>
       <SaleDescriptions v-if="currentVo" :currentInfo="currentVo" :isShow="false"></SaleDescriptions>
     </el-drawer>
 
@@ -162,6 +147,9 @@
   import { ref} from "vue";
   import dayjs from "dayjs";
   import {deepClone} from "@/utils";
+  import useUserStore from '@/store/modules/user';
+
+  const { ownerId } = useUserStore();
 
   const {proxy} = getCurrentInstance() as ComponentInternalInstance;
 
@@ -291,6 +279,34 @@
     {label: '否', value: "0"},
     {label: '是', value: "1"},
   ]);
+  const columnListScrapRate = ref([
+  { width: '120',title: '产品编码',field: 'commodityCode',align: 'center',  },
+  { width: '120',title: '产品名称',field: 'commodityName',align: 'center',  },
+  { width: '120',title: '排产数量',field: 'productionQuantity',align: 'center',  },
+  { width: '120',title: '报废数量',field: 'scrapQuantity',align: 'center',  },
+  { width: '120',title: '报废率(%)',field: 'scrapRate',align: 'center',  },
+  ]);
+  const columnListProductName = ref([
+  { width: '120',title: '产品编码',field: 'commodityCode',align: 'center',  },
+  { width: '120',title: '产品名称',field: 'commodityName',align: 'center',  },
+  { width: '120',title: '客户编码',field: 'customerCode',align: 'center',  },
+  { width: '100',title: '版本号',field: 'version',align: 'center',  },
+  { width: '100',title: '板材',field: 'materialQuality',align: 'center',  },
+  { width: '100',title: '单位',field: 'unit',align: 'center',  },
+  { minWidth: '60',title: '操作',field: 'make',align: 'center',  },
+  ]);
+  const columnListSaleOrderId = ref([
+  { width: '100',title: '订单编号',field: 'code',align: 'center',  },
+  { width: '100',title: '客户编码',field: 'customerCode',align: 'center',  },
+  { width: '130',title: '客户交期',field: 'deliveryTime',align: 'center',  },
+  { width: '130',title: '最迟发货',field: 'dispatchTime',align: 'center',  },
+  ]);
+  const columnListPnlFeedId = ref([
+  { width: '100',title: 'Pnl',field: 'name',align: 'center',  },
+  { width: '100',title: '计划投料',field: 'preFeedQuantity',align: 'center',  },
+  { width: '100',title: '已投数量',field: 'feedQuantity',align: 'center',  },
+  { width: '100',title: '已投面积',field: 'feedArea',align: 'center',  },
+  ]);
 
   const XTableRef = ref()
   const recordCondition = ['createTime'];
@@ -361,6 +377,7 @@
     {width: "120", title: '当前工序', field: 'currentCraftName', align: 'center'},
     {width: "120", title: '生产面积(㎡)', field: 'setArea', align: 'center'},
     {width: "120", title: '排产数量(pcs)', field: 'productionNum', align: 'center'},
+    {width: "120", title: '生产面积(PNL)', field: 'area', align: 'center'},
     {width: "120", title: 'PNLA数量', field: 'pnlANum', align: 'center'},
     {width: "120", title: 'PNLA长', field: 'pnlALength', align: 'center'},
     {width: "120", title: 'PNLA宽', field: 'pnlAWidth', align: 'center'},

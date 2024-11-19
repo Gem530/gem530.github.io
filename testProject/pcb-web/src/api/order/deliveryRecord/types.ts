@@ -108,6 +108,7 @@ export interface DeliveryRecordForm extends BaseEntity {
   saleOrderNo?:string;
   customerPo?:string;
   commodityCode?:string;
+  fileList?:[];
 }
 
 export interface DeliveryRecordQuery extends PageQuery {

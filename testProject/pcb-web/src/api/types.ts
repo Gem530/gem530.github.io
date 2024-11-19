@@ -26,6 +26,8 @@ export interface LoginData {
   uuid?: string;
   clientId: string;
   grantType: string;
+  phoneNumber?: string
+  id?: string
 }
 
 /**

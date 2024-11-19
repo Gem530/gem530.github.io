@@ -233,37 +233,16 @@
     <el-drawer :title="drawerRecord.title" v-model="drawerRecord.visible" width="600px" size="55%" destroy-on-close="true">
       <el-form ref="orderBackInventoryRecordFormRef" :model="formRecord" :rules="rulesRecord" label-width="180px">
         <el-divider content-position="left">报废出库</el-divider>
-        <el-table v-loading="loading" :data="dataScrap1.commodityScrapVos">
-          <el-table-column width="55" align="center" />
-          <el-table-column label="序号" type="index" width="50" />
-          <el-table-column label="库存记录编码" align="center" prop="code" />
-          <el-table-column label="报废数量" align="center" prop="quantity" />
-          <el-table-column label="报废工序" align="center" prop="process" />
-          <el-table-column label="责任人" align="center" prop="responsible" />
-          <el-table-column label="操作人" align="center" prop="updateByName" />
-          <el-table-column label="操作时间" align="center" prop="updateTime" />
-        </el-table>
+        <XTable :showHead="false" :pageShow="false" :columnList="columnListScrap" v-loading="loading" :data="dataScrap1.commodityScrapVos">
+        </XTable>
 
         <el-divider content-position="left">正常品出库</el-divider>
-        <el-table v-loading="loading" :data="dataScrap1.commodityInOutRecordVos">
-          <el-table-column width="55" align="center" />
-          <el-table-column label="序号" type="index" width="50" />
-          <el-table-column label="入库编码" align="center" prop="code" />
-          <el-table-column label="入库数量" align="center" prop="quantity" />
-          <el-table-column label="操作人" align="center" prop="updateByName" />
-          <el-table-column label="操作时间" align="center" prop="updateTime" />
-          <el-table-column label="库位信息" align="center" prop="storageId" />
-        </el-table>
+        <XTable :showHead="false" :pageShow="false" :columnList="columnListNormal" v-loading="loading" :data="dataScrap1.commodityInOutRecordVos">
+        </XTable>
 
         <el-divider content-position="left">重新发货</el-divider>
-        <el-table v-loading="loading" :data="dataScrap1.deliveryRecordVos">
-          <el-table-column width="55" align="center" />
-          <el-table-column label="序号" type="index" width="50" />
-          <el-table-column label="库存记录编码" align="center" prop="code" />
-          <el-table-column label="发货数量" align="center" prop="quantity" />
-          <el-table-column label="操作人" align="center" prop="updateByName" />
-          <el-table-column label="操作时间" align="center" prop="updateTime" />
-        </el-table>
+        <XTable :showHead="false" :pageShow="false" :columnList="columnListAgain" v-loading="loading" :data="dataScrap1.deliveryRecordVos">
+        </XTable>
       </el-form>
     </el-drawer>
 
@@ -379,6 +358,33 @@ const initColumnList = [
   {title: '销售单号', field: 'saleOrderNo', align: 'center'},
   {title: '操作', field: 'make', align: 'center', minWidth: 120, showOverflow: false}
 ]
+const columnListScrap = ref([
+// { width: '55',align: 'center',  },
+{ width: '50',type: 'seq',title: '序号',align: 'center',  },
+{ title: '库存记录编码',field: 'code',align: 'center',  },
+{ title: '报废数量',field: 'quantity',align: 'center',  },
+{ title: '报废工序',field: 'process',align: 'center',  },
+{ title: '责任人',field: 'responsible',align: 'center',  },
+{ title: '操作人',field: 'updateByName',align: 'center',  },
+{ title: '操作时间',field: 'updateTime',align: 'center',  },
+]);
+const columnListNormal = ref([
+// { width: '55',align: 'center',  },
+{ width: '50',type: 'seq',title: '序号',align: 'center',  },
+{ title: '入库编码',field: 'code',align: 'center',  },
+{ title: '入库数量',field: 'quantity',align: 'center',  },
+{ title: '操作人',field: 'updateByName',align: 'center',  },
+{ title: '操作时间',field: 'updateTime',align: 'center',  },
+{ title: '库位信息',field: 'storageId',align: 'center',  },
+]);
+const columnListAgain = ref([
+// { width: '55',align: 'center',  },
+{ width: '50',type: 'seq',title: '序号',align: 'center',  },
+{ title: '库存记录编码',field: 'code',align: 'center',  },
+{ title: '发货数量',field: 'quantity',align: 'center',  },
+{ title: '操作人',field: 'updateByName',align: 'center',  },
+{ title: '操作时间',field: 'updateTime',align: 'center',  },
+]);
 
 const finishColumnList = [
   {title: '序号', field: 'sort',type:'seq', align: 'center', width: 66, sortable: true},

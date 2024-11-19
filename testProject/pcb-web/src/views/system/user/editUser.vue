@@ -4,15 +4,15 @@
       <el-form :model="form" :rules="rules" ref="userFormRef" label-width="80px">
         <el-row>
           <el-col :span="16">
-            <el-form-item label="手机号" :prop="dialog.title == '编辑用户信息' ? '' : 'phonenumber'">
-              <el-input v-model="form.phonenumber" :disabled="!!form.userId" placeholder="请输入手机号" maxlength="11" />
+            <el-form-item label="手机号" :prop="dialog.title == '编辑用户信息' ? '' : 'phonenumber'" >
+              <el-input v-model="form.phonenumber" :disabled="!!form.userId" placeholder="请输入手机号" maxlength="11" @blur="handleUserInfo"/>
             </el-form-item>
           </el-col>
           <el-col :span="8" class="tip-color">&nbsp;&nbsp;登录系统/小程序的账号</el-col>
           <template v-if="form.userId == undefined">
-            <el-col :span="16">
+            <el-col :span="16" >
                 <el-form-item label="登录密码" prop="password">
-                <el-input v-model="form.password" placeholder="请输入登录密码" type="password" maxlength="50" show-password />
+                <el-input v-model="form.password"  placeholder="请输入登录密码" type="password" maxlength="50" show-password :disabled = "passwordDialog"/>
                 </el-form-item>
             </el-col>
             <el-col :span="8" class="tip-color">&nbsp;&nbsp;登录系统/小程序的密码</el-col>
@@ -31,6 +31,7 @@
                 :data="deptOptions"
                 :props="{ value: 'id', label: 'label', children: 'children' }"
                 value-key="id"
+                @change="getDeptBydeptId(form.deptId)"
                 placeholder="请选择归属部门"
                 check-strictly
                 :disabled="!!currentRow?.deptId"
@@ -108,8 +109,14 @@
 </template>
 
 <script setup name="EditUser" lang="ts">
-import api from "@/api/system/user"
+import api, {getAccount} from "@/api/system/user"
 import {FlowTaskVo, UserForm, UserQuery, UserVO} from '@/api/system/user/types';
+import { getDept } from '@/api/system/dept';
+import { async } from 'fast-glob';
+import { getRoleLists } from '@/api/system/role';
+import { RoleForm, RoleQuery, RoleVO } from '@/api/system/role/types';
+import { PostVO } from '@/api/system/post/types';
+import { DeptVO } from '@/api/system/dept/types';
 // import { treeselect } from "@/api/system/dept";
 // import { DeptVO } from "@/api/system/dept/types";
 // import { RoleVO } from "@/api/system/role/types";
@@ -141,6 +148,7 @@ const deptOptions = ref<DeptVO[]>([]);
 const roleOptions = ref<RoleVO[]>([]);
 const postOptions = ref<PostVO[]>([]);
 const buttonLoading = ref(false);
+const passwordDialog = ref(false);
 const dialog = reactive<DialogOption>({
   visible: false,
   title: ''
@@ -172,6 +180,23 @@ const data = reactive<any>({
   }
 })
 
+const initForm: RoleForm = {
+  ownerId: '',
+}
+
+const roleData = reactive<PageData<RoleForm, RoleQuery>>({
+  form: { ...initForm },
+  queryParams: {
+    // pageNum: 1,
+    // pageSize: 200000,
+    ownerId: '',
+    roleName: '',
+    roleKey: '',
+    status: '',
+  }
+})
+const { queryParams } = toRefs(roleData)
+
 const { form, rules } = toRefs<PageData<UserForm, UserQuery>>(data)
 
 /** 查询部门下拉树结构 */
@@ -199,7 +224,40 @@ const reset = () => {
 /** 取消按钮 */
 const cancel = () => {
   dialog.visible = false;
+  passwordDialog.value = false;
   reset();
+}
+
+//查询用户信息回填表单
+const handleUserInfo = async () => {
+  console.log("接收手机号码：", form.value.phonenumber);
+  //根据手机号码查询账号信息
+  if (form.value.phonenumber){
+    const res = await getAccount(form.value.phonenumber)
+    console.log("返回参数：", res);
+    if (res && res.data){
+      passwordDialog.value = true
+      form.value.password = res.data.password
+      form.value.nickName = res.data.accName
+      form.value.email = res.data.email
+      form.value.sex = res.data.sex
+      form.value.accountId = res.data.accountId
+    }
+  }
+}
+
+
+const getDeptBydeptId = async (row) => {
+  console.log("获取部门信息",row)
+  const deptData = await getDept(row)
+  if (deptData && deptData.data.isCompany == '1'){
+    queryParams.value.ownerId = deptData.data.deptId
+  }else {
+    queryParams.value.ownerId = deptData.data.ownerId
+  }
+  const roleData = await getRoleLists(queryParams.value);
+  console.log("获取部门信息",roleData)
+  roleOptions.value = roleData.data
 }
 
 /** 新增按钮操作 */
@@ -214,7 +272,7 @@ const handleAdd = async (row) => {
   dialog.title = "新增用户信息";
   await initTreeData();
   postOptions.value = data.posts;
-  roleOptions.value = data.roles;
+  // roleOptions.value = data.roles;
   form.value.password = initPassword.value.toString();
   await getTreeSelect()
   nextTick(() => {
@@ -247,14 +305,19 @@ const handleUpdate = async (row?: UserForm) => {
 
 /** 提交按钮 */
 const submitForm = () => {
+  console.log(form.value);
   userFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
       buttonLoading.value = true;
+      if (passwordDialog.value == true){
+        form.value.password = ''
+      }
       let params = JSON.parse(JSON.stringify(form.value))
       params.userName = params.phonenumber
-      params.userId ? await api.updateUser(params).finally(() => { buttonLoading.value = false; }) : await api.addUser(params).finally(() => { buttonLoading.value = false; });
+      params.userId ? await api.updateUser(params).finally(() => { buttonLoading.value = false; }) : await api.addUser(params).finally(() => { buttonLoading.value = false;form.value.password = '123456' });
       proxy?.$modal.msgSuccess("操作成功");
       dialog.visible = false;
+      passwordDialog.value = false;
     //   await getList();
     emits('getList')
     }
@@ -265,6 +328,7 @@ const submitForm = () => {
  */
 const closeDialog = () => {
   dialog.visible = false;
+  passwordDialog.value = false;
   resetForm();
 }
 /**

@@ -1,0 +1,58 @@
+.about-us-page {
+  position: relative;
+  min-height: 100vh;
+  padding: 64px 112px;
+  box-sizing: border-box;
+
+  .company-logo {
+    width: 176px;
+    height: 176px;
+    margin: 0 auto 20px;
+    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/nosth_logo.png') no-repeat;
+    background-size: 100% 100%;
+  }
+
+  .company-name {
+    margin-bottom: 98px;
+    text-align: center;
+    font-size: 40px;
+    font-weight: 700;
+    color: #333333;
+  }
+
+  .about-us-item {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 622px;
+    height: 88px;
+    color: #333333;
+
+    &:not(:last-child) {
+      margin-bottom: 8px;
+    }
+
+    .about-us-label {
+      width: 120px;
+      margin-right: 30px;
+      font-size: 28px;
+      font-weight: 400;
+    }
+
+    .about-us-value {
+      font-size: 32px;
+      font-weight: 700;
+    }
+  }
+
+  .company-copyright {
+    position: absolute;
+    bottom: 102px;
+    left: 64px;
+    width: 622px;
+    font-size: 28px;
+    font-weight: 500;
+    color: #999999;
+    text-align: center;
+  }
+}

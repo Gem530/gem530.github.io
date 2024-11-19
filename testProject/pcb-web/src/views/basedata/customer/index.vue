@@ -1,21 +1,23 @@
 <template>
   <div class="p-2 xtable-page">
 
-    <el-card shadow="never" class="xtable-card">
-      <template #header>
-        <el-row :gutter="10" class="mb8 global-flex flex-end">
-          <el-col :span="1.5">
+    <!-- <el-card shadow="never" class="xtable-card"> -->
+      <!-- <template #header> -->
+        <div class="head-btn-flex">
+        <!-- <el-row :gutter="10" class="mb8 global-flex flex-end"> -->
+          <!-- <el-col :span="1.5"> -->
             <el-button type="primary" plain icon="Plus" @click="handleAdd" >新增
             </el-button>
-          </el-col>
-          <el-col :span="1.5">
+          <!-- </el-col>
+          <el-col :span="1.5"> -->
             <el-button type="default" plain icon="Download" @click="handleExport"
                        >导出
             </el-button>
-          </el-col>
-          <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
-        </el-row>
-      </template>
+          <!-- </el-col> -->
+          <!-- <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar> -->
+        <!-- </el-row> -->
+        </div>
+      <!-- </template> -->
 
       <XTable toolId="basedataCustomer" :pageShow="true" v-model:page-size="queryParams.pageSize" height="100%" class="xtable-content"
               :intervalCondition="['createTime']"
@@ -27,6 +29,9 @@
               @searchChange="searchChange"
               :column-config="{ resizable: true }" @checkbox-all="checkboxChangeEvent"
               @checkbox-change="checkboxChangeEvent">
+              <template #default-accountDay="scope">
+                {{ scope.row.accountDay?('每月'+scope.row.accountDay+'日'):'' }}
+              </template>
         <template #default-customerLevel="scope">
           <div v-for="item in resDictData.customer_level">
             <span>{{ item.dictValue == scope.row.customerLevel ? item.dictLabel : "" }}</span>
@@ -94,7 +99,7 @@
         </template>
 
       </XTable>
-    </el-card>
+    <!-- </el-card> -->
 
     <!-- 新增编辑 -->
     <el-drawer
@@ -104,242 +109,265 @@
       :direction="drawer.direction"
     >
       <el-form ref="customerFormRef" :model="form" :rules="rules" label-width="130px" v-loading="drawerLoading">
-        <div style="display: flex;">
-          <el-form-item size="small" style="flex: 1;" label="客户编码" prop="customerCode">
-            <el-input v-model="form.customerCode" placeholder="请输入" :disabled="drawer.title=='修改客户'"/>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="客户名称" prop="companyId">
-            <el-select v-model="form.companyId" :disabled="drawer.title !== '添加客户'" style="width: 100%" filterable allow-create default-first-option>
-              <el-option v-for="company in companyList" :key="company.deptId" :label="company.deptName" :value="company.deptId"/>
-            </el-select>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="客户级别" prop="customerLevel">
-            <el-select v-model="form.customerLevel" clearable filterable placeholder="请选择" style="width: 100%">
-              <el-option
-                v-for="item in resDictData.customer_level"
-                :key="item.dictCode"
-                :label="item.dictLabel"
-                :value="item.dictValue"
-              />
-            </el-select>
-          </el-form-item>
-        </div>
-        <div style="display: flex;">
-          <el-form-item size="small" style="flex: 1;" label="对账时间" prop="reconciliationTime">
-            <el-select v-model="form.reconciliationTime" clearable filterable placeholder="请选择" style="width: 100%">
-              <el-option
-                v-for="item in resDictData.reconciliation_time"
-                :key="item.dictCode"
-                :label="item.dictLabel"
-                :value="item.dictValue"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="付款方式" prop="paymentMethod">
-            <el-select v-model="form.paymentMethod" clearable filterable placeholder="请选择" style="width: 100%">
-              <el-option
-                v-for="item in resDictData.payment_method"
-                :key="item.dictCode"
-                :label="item.dictLabel"
-                :value="item.dictValue"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="营业执照号">
-            <el-input v-model="form.businessLicenseNumber" />
-          </el-form-item>
-        </div>
-        <div style="display: flex;">
-          <el-form-item size="small" style="flex: 1;" label="币种" prop="currency">
-            <el-select v-model="form.currency" clearable filterable placeholder="请选择" style="width: 100%">
-              <el-option
-                v-for="item in resDictData.currency_type"
-                :key="item.dictCode"
-                :label="item.dictLabel"
-                :value="item.dictValue"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="汇率(%)">
-            <el-input-number v-model="form.exchangeRate" :min="0" controls-position="right" style="width:100%"/>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="客户电话">
-            <el-input v-model="form.customerPhone" />
-          </el-form-item>
-        </div>
-        <div style="display: flex;">
-          <el-form-item size="small" style="flex: 1;" label="客户地址">
-            <el-input v-model="form.companyAddress" />
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="公司负责人" prop="companyPrincipal">
-            <el-input v-model="form.companyPrincipal" placeholder="请输入" />
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="负责人电话" prop="companyPrincipalPhone">
-            <el-input v-model="form.companyPrincipalPhone" placeholder="请输入"/>
-          </el-form-item>
-        </div>
-        <div style="display: flex;">
-          <el-form-item size="small" style="flex: 1;" label="月结方式">
-            <el-select v-model="form.monthlyMethod" clearable filterable placeholder=" " style="width: 100%">
-              <el-option
-                v-for="item in resDictData.monthly_method"
-                :key="item.dictCode"
-                :label="item.dictLabel"
-                :value="item.dictValue"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="天数限制">
-            <el-input-number v-model="form.dayNumberLimit" :min="0" controls-position="right" style="width:100%"/>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="运输方式">
-            <el-select v-model="form.shippingType" clearable filterable placeholder=" " style="width: 100%">
-              <el-option
-                v-for="item in resDictData.shipping_type"
-                :key="item.dictCode"
-                :label="item.dictLabel"
-                :value="item.dictValue"
-              />
-            </el-select>
-          </el-form-item>
-        </div>
-        <div style="display: flex;">
-          <el-form-item size="small" style="flex: 1;" label="采购负责人" prop="purchasingManager">
-            <!-- <el-select placeholder=" "
-              style="width: 100%;" filterable clearable v-model="form.purchasingManager">
-              <el-option v-for="item in userOptions" :key="item.userId" :label="item.userName" :value="item.userId"></el-option>
-            </el-select> -->
-            <el-input v-model="form.purchasingManager" placeholder="请输入" />
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="采购联系电话">
-            <el-input v-model="form.purchasingPhone" placeholder=" "/>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="采购联系Email">
-            <el-input v-model="form.purchasingEmail" placeholder=" "/>
-          </el-form-item>
-        </div>
-        <div style="display: flex;">
-          <el-form-item size="small" style="flex: 1;" label="财务联系人" prop="financeManager">
-            <!-- <el-select    placeholder=" "
-              style="width: 100%;" filterable clearable v-model="form.financeManager">
-              <el-option v-for="item in userOptions" :key="item.userId" :label="item.userName" :value="item.userId"></el-option>
-            </el-select> -->
-            <el-input v-model="form.financeManager" placeholder="请输入" />
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="财务联系电话">
-            <el-input v-model="form.financePhone" placeholder=" "/>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="财务联系Email">
-            <el-input v-model="form.financeEmail" placeholder=" "/>
-          </el-form-item>
-        </div>
-        <div style="display: flex;">
-          <el-form-item size="small" style="flex: 1;" label="仓库联系人" prop="warehouseKeeper">
-            <!-- <el-select    placeholder=" "
-              style="width: 100%;" filterable clearable v-model="form.warehouseKeeper">
-              <el-option v-for="item in userOptions" :key="item.userId" :label="item.userName" :value="item.userId"></el-option>
-            </el-select> -->
-            <el-input v-model="form.warehouseKeeper" placeholder="请输入" />
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="仓库联系电话">
-            <el-input v-model="form.warehousePhone" placeholder=" "/>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="仓库联系Email">
-            <el-input v-model="form.warehouseEmail" placeholder=" "/>
-          </el-form-item>
-        </div>
-        <div style="display: flex;">
-          <el-form-item size="small" style="flex: 1;" label="工程联系人" prop="projectManager">
-            <!-- <el-select    placeholder=" "
-              style="width: 100%;" filterable clearable v-model="form.projectManager">
-              <el-option v-for="item in userOptions" :key="item.userId" :label="item.userName" :value="item.userId"></el-option>
-            </el-select> -->
-            <el-input v-model="form.projectManager" placeholder="请输入" />
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="工程联系电话">
-            <el-input v-model="form.projectPhone" placeholder=" "/>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="工程联系Email">
-            <el-input v-model="form.projectEmail" placeholder=" "/>
-          </el-form-item>
-        </div>
-        <div style="display: flex;">
-          <el-form-item size="small" style="flex: 1;" label="其他联系人" prop="otherManager">
-            <!-- <el-select    placeholder=" "
-              style="width: 100%;" filterable clearable v-model="form.otherManager">
-              <el-option v-for="item in userOptions" :key="item.userId" :label="item.userName" :value="item.userId"></el-option>
-            </el-select> -->
-            <el-input v-model="form.otherManager" placeholder="请输入" />
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="其他联系电话">
-            <el-input v-model="form.otherPhone" placeholder=" "/>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="其他联系Email">
-            <el-input v-model="form.otherEmail" placeholder=" "/>
-          </el-form-item>
-        </div>
-        <div style="display: flex;">
-          <el-form-item size="small" style="flex: 1;" label="联系人QQ">
-            <el-input v-model="form.contactsQq" placeholder=" "/>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="开户银行">
-            <el-input v-model="form.depositBank" placeholder=" "/>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="银行账号">
-            <el-input v-model="form.bankAccount" placeholder=" "/>
-          </el-form-item>
-        </div>
-        <div style="display: flex;">
-          <el-form-item size="small" style="flex: 1;" label="检验标准">
-            <el-select v-model="form.checkStandard" clearable filterable placeholder=" " style="width: 100%">
-              <el-option
-                v-for="item in resDictData.check_standard"
-                :key="item.dictCode"
-                :label="item.dictLabel"
-                :value="item.dictValue"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="客户资料">
-            <el-select v-model="form.customerData" :collapse-tags="true" multiple clearable filterable placeholder=" " style="width: 100%">
-              <el-option
-                v-for="item in resDictData.customer_data"
-                :key="item.dictCode"
-                :label="item.dictLabel"
-                :value="item.dictValue"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item size="small" style="flex: 1;" label="是否含税">
-            <el-switch v-model="form.isTax" active-value="1" inactive-value="0"/>
-          </el-form-item>
-        </div>
-        <el-form-item size="small" label="纳税人识别号" prop="taxpayerIdentification">
-          <el-input v-model="form.taxpayerIdentification" placeholder=" "/>
-        </el-form-item>
-        <el-form-item size="small" label="邮箱">
-          <el-input v-model="form.email" placeholder=" "/>
-        </el-form-item>
-        <el-form-item size="small" label="传真">
-          <el-input v-model="form.faxes" placeholder=" "/>
-        </el-form-item>
-        <el-form-item size="small" label="销售人员">
-          <el-select v-model="form.salerList" clearable filterable multiple style="width: 100%"
-                     placeholder=" ">
-            <el-option
-              v-for="item in salerOptions"
-              :key="item.userId"
-              :label="item.nickName"
-              :value="item.userId"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item size="small" label="客户要求">
-          <el-input v-model="form.customerDemand" type="textarea" :rows="3" maxlength="2000" show-word-limit placeholder=" "/>
-        </el-form-item>
-        <el-form-item size="small" label="备注">
-          <el-input v-model="form.remark" type="textarea" :rows="3" placeholder=" "/>
-        </el-form-item>
+        <el-collapse v-model="activeNames" >
+          <el-collapse-item title="基本信息" name="1">
+            <div style="display: flex;">
+              <el-form-item size="small" style="flex: 1;" label="客户编码" prop="customerCode">
+                <el-input v-model="form.customerCode" placeholder="请输入" :disabled="drawer.title=='修改客户'"/>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="客户名称" prop="companyId">
+                <el-select v-model="form.companyId" :disabled="drawer.title !== '添加客户'" style="width: 100%" filterable allow-create default-first-option>
+                  <el-option v-for="company in companyList" :key="company.deptId" :label="company.deptName" :value="company.deptId"/>
+                </el-select>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="客户级别" prop="customerLevel">
+                <el-select v-model="form.customerLevel" clearable filterable placeholder="请选择" style="width: 100%">
+                  <el-option
+                    v-for="item in resDictData.customer_level"
+                    :key="item.dictCode"
+                    :label="item.dictLabel"
+                    :value="item.dictValue"
+                  />
+                </el-select>
+              </el-form-item>
+            </div>
+            <div style="display: flex;">
+              <el-form-item size="small" style="flex: 1;" label="对账时间" prop="reconciliationTime">
+                <el-select v-model="form.reconciliationTime" clearable filterable placeholder="请选择" style="width: 100%">
+                  <el-option
+                    v-for="item in resDictData.reconciliation_time"
+                    :key="item.dictCode"
+                    :label="item.dictLabel"
+                    :value="item.dictValue"
+                  />
+                </el-select>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="付款方式" prop="paymentMethod">
+                <el-select v-model="form.paymentMethod" clearable filterable placeholder="请选择" style="width: 100%">
+                  <el-option
+                    v-for="item in resDictData.payment_method"
+                    :key="item.dictCode"
+                    :label="item.dictLabel"
+                    :value="item.dictValue"
+                  />
+                </el-select>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="营业执照号">
+                <el-input v-model="form.businessLicenseNumber" />
+              </el-form-item>
+            </div>
+            <div style="display: flex;">
+              <el-form-item size="small" style="flex: 1;" label="币种" prop="currency">
+                <el-select v-model="form.currency" clearable filterable placeholder="请选择" style="width: 100%">
+                  <el-option
+                    v-for="item in resDictData.currency_type"
+                    :key="item.dictCode"
+                    :label="item.dictLabel"
+                    :value="item.dictValue"
+                  />
+                </el-select>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="汇率(%)">
+                <el-input-number v-model="form.exchangeRate" :min="0" controls-position="right" style="width:100%"/>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="客户电话">
+                <el-input v-model="form.customerPhone" />
+              </el-form-item>
+            </div>
+            <div style="display: flex;">
+              <el-form-item size="small" style="flex: 1;" label="客户地址">
+                <el-input v-model="form.companyAddress" />
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="公司负责人" prop="companyPrincipal">
+                <el-input v-model="form.companyPrincipal" placeholder="请输入" />
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="负责人电话" prop="companyPrincipalPhone">
+                <el-input v-model="form.companyPrincipalPhone" placeholder="请输入"/>
+              </el-form-item>
+            </div>
+            <div style="display: flex;">
+              <el-form-item size="small" style="flex: 1;" label="月结方式" prop="monthlyMethod">
+                <el-select v-model="form.monthlyMethod" clearable filterable placeholder=" " style="width: 100%">
+                  <el-option
+                    v-for="item in resDictData.monthly_method"
+                    :key="item.dictCode"
+                    :label="item.dictLabel"
+                    :value="item.dictValue"
+                  />
+                </el-select>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="天数限制">
+                <el-input-number v-model="form.dayNumberLimit" :min="0" controls-position="right" style="width:100%"/>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="运输方式">
+                <el-select v-model="form.shippingType" clearable filterable placeholder=" " style="width: 100%">
+                  <el-option
+                    v-for="item in resDictData.shipping_type"
+                    :key="item.dictCode"
+                    :label="item.dictLabel"
+                    :value="item.dictValue"
+                  />
+                </el-select>
+              </el-form-item>
+            </div>
+            <div style="display: flex;">
+              <el-form-item size="small" style="flex: 1;" label="是否含税"  prop="isTax">
+                <el-switch v-model="form.isTax" active-value="1" inactive-value="0"/>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="出账日" prop="accountDay">
+                <template #label>
+                  <span><el-tooltip placement="top" >
+                        <template #content>到达出账日后，系统会自动生成上个账单周期的对账单</template>
+                        <el-icon> <question-filled/> </el-icon>
+                  </el-tooltip>出账日</span>
+                </template>
+                <el-select v-model="form.accountDay" clearable :disabled="detailDisabled" style="width: 100%"  @change="changeAccountDay">
+                  <el-option v-for="dict in dayList" :key="dict.value" :label="dict.label" :value="dict.value"  />
+                </el-select>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="账单周期" prop="accountPeriod">
+                <el-input v-model="form.accountPeriod" :disabled="true"/>
+              </el-form-item>
+            </div>
+            <div style="display: flex;">
+              <el-form-item size="small" style="flex: 1;" label="银行账号">
+                <el-input v-model="form.bankAccount" placeholder=" "/>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="开户银行">
+                <el-input v-model="form.depositBank" placeholder=" "/>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="纳税人识别号" prop="taxpayerIdentification">
+                <el-input v-model="form.taxpayerIdentification" placeholder=" "/>
+              </el-form-item>
+            </div>
+            <div style="display: flex;">
+                <el-form-item size="small" style="flex: 1;" label="客户类型" prop="customerOutType">
+                  <el-select v-model="form.customerOutType" multiple clearable style="width: 100%" >
+                    <el-option v-for="item in types" :key="item.value" :label="item.label" :value="item.value" />
+                  </el-select>
+                </el-form-item>
+            </div>
+            <div style="display: flex;">
+                <el-form-item size="small" style="flex: 1;" label="开启协同模块" prop="module">
+                  <el-select v-model="form.module" multiple clearable style="width: 100%" >
+                    <el-option v-for="item in modules" :key="item.value" :label="item.label" :value="item.value" />
+                  </el-select>
+                </el-form-item>
+            </div>
+
+          </el-collapse-item>
+          <el-collapse-item title="补充信息" name="2">
+            <div style="display: flex;">
+              <el-form-item size="small" style="flex: 1;" label="采购联系人" prop="purchasingManager">
+                <el-input v-model="form.purchasingManager" placeholder="请输入" />
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="采购联系电话">
+                <el-input v-model="form.purchasingPhone" placeholder=" "/>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="采购联系Email">
+                <el-input v-model="form.purchasingEmail" placeholder=" "/>
+              </el-form-item>
+            </div>
+            <div style="display: flex;">
+              <el-form-item size="small" style="flex: 1;" label="财务联系人" prop="financeManager">
+                <el-input v-model="form.financeManager" placeholder="请输入" />
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="财务联系电话">
+                <el-input v-model="form.financePhone" placeholder=" "/>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="财务联系Email">
+                <el-input v-model="form.financeEmail" placeholder=" "/>
+              </el-form-item>
+            </div>
+            <div style="display: flex;">
+              <el-form-item size="small" style="flex: 1;" label="仓库联系人" prop="warehouseKeeper">
+                <el-input v-model="form.warehouseKeeper" placeholder="请输入" />
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="仓库联系电话">
+                <el-input v-model="form.warehousePhone" placeholder=" "/>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="仓库联系Email">
+                <el-input v-model="form.warehouseEmail" placeholder=" "/>
+              </el-form-item>
+            </div>
+            <div style="display: flex;">
+              <el-form-item size="small" style="flex: 1;" label="工程联系人" prop="projectManager">
+                <el-input v-model="form.projectManager" placeholder="请输入" />
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="工程联系电话">
+                <el-input v-model="form.projectPhone" placeholder=" "/>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="工程联系Email">
+                <el-input v-model="form.projectEmail" placeholder=" "/>
+              </el-form-item>
+            </div>
+            <div style="display: flex;">
+              <el-form-item size="small" style="flex: 1;" label="其他联系人" prop="otherManager">
+                <el-input v-model="form.otherManager" placeholder="请输入" />
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="其他联系电话">
+                <el-input v-model="form.otherPhone" placeholder=" "/>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="其他联系Email">
+                <el-input v-model="form.otherEmail" placeholder=" "/>
+              </el-form-item>
+            </div>
+            <div style="display: flex;">
+              <el-form-item size="small" style="flex: 1;" label="联系人QQ">
+                <el-input v-model="form.contactsQq" placeholder=" "/>
+              </el-form-item>
+              <el-form-item size="small"  style="flex: 1;" label="邮箱">
+                <el-input v-model="form.email" placeholder=" "/>
+              </el-form-item>
+              <el-form-item size="small"  style="flex: 1;" label="传真">
+                <el-input v-model="form.faxes" placeholder=" "/>
+              </el-form-item>
+            </div>
+            <div style="display: flex;">
+              <el-form-item size="small" style="flex: 1;" label="检验标准">
+                <el-select v-model="form.checkStandard" clearable filterable placeholder=" " style="width: 100%">
+                  <el-option
+                    v-for="item in resDictData.check_standard"
+                    :key="item.dictCode"
+                    :label="item.dictLabel"
+                    :value="item.dictValue"
+                  />
+                </el-select>
+              </el-form-item>
+              <el-form-item size="small" style="flex: 1;" label="客户资料">
+                <el-select v-model="form.customerData" :collapse-tags="true" multiple clearable filterable placeholder=" " style="width: 100%">
+                  <el-option
+                    v-for="item in resDictData.customer_data"
+                    :key="item.dictCode"
+                    :label="item.dictLabel"
+                    :value="item.dictValue"
+                  />
+                </el-select>
+              </el-form-item>
+              <el-form-item size="small"  style="flex: 1;" label="销售人员">
+                <el-select v-model="form.salerList" clearable filterable multiple style="width: 100%"
+                           placeholder=" ">
+                  <el-option
+                    v-for="item in salerOptions"
+                    :key="item.userId"
+                    :label="item.nickName"
+                    :value="item.userId"
+                  />
+                </el-select>
+              </el-form-item>
+            </div>
+            <div style="display: flex;">
+              <el-form-item size="small"  style="flex: 2;" label="客户要求">
+                <el-input v-model="form.customerDemand" type="textarea" :rows="3" maxlength="2000" show-word-limit placeholder=" "/>
+              </el-form-item>
+            </div>
+            <div style="display: flex;">
+              <el-form-item size="small"  style="flex: 2;" label="备注">
+                <el-input v-model="form.remark" type="textarea" :rows="3" placeholder=" "/>
+              </el-form-item>
+            </div>
+          </el-collapse-item>
+        </el-collapse>
       </el-form>
       <template #footer>
         <div class="text-center" v-if="!drawerLoading">
@@ -354,8 +382,8 @@
                :title="addressDrawer.title"
                size="75%"
                :direction="addressDrawer.direction">
-      <el-card shadow="never">
-        <template #header>
+      <!-- <el-card shadow="never">
+        <template #header> -->
           <el-row :gutter="10" class="mb8">
             <el-col :span="1.5">
               <el-button type="primary" plain icon="Plus" @click="handleAddAddress"
@@ -364,7 +392,7 @@
             </el-col>
             <right-toolbar v-model:showSearch="showSearch" @queryTable="getAddressList"></right-toolbar>
           </el-row>
-        </template>
+        <!-- </template> -->
 
         <el-table v-loading="loading" :data="customerAddressList" @selection-change="handleSelectionChange">
           <el-table-column label="联系人" align="center" prop="name" width="100"/>
@@ -402,7 +430,7 @@
           v-model:limit="queryParamsAddress.pageSize"
           @pagination="getAddressList"
         />
-      </el-card>
+      <!-- </el-card> -->
     </el-drawer>
 
     <el-dialog v-model="addressDialog.visible" :title="addressDialog.title" destroy-on-close
@@ -633,6 +661,18 @@
       taxpayerIdentification: [
         { max:50, message: "纳税人识别号输入不能超过50个字符", trigger: "change" }
       ],
+      monthlyMethod: [
+        {required: true, message: "月结方式不能为空", trigger: "change" }
+      ],
+      isTax: [
+        {required: true, message: "含税不能为空", trigger: "change" }
+      ],
+      accountDay: [
+        {required: true, message: "出账日不能为空", trigger: "change" }
+      ],
+      customerOutType: [
+        {required: true, message: "客户类型不能为空", trigger: "change" }
+      ],
     }
   });
 
@@ -834,10 +874,7 @@ const { queryParams:userQueryParams } = toRefs<PageData<UserForm, UserQuery>>(us
       title: '公司地址', width: "120", field: 'companyAddress', align: 'center', filterType: 'input',
       filterParam: {placeholder: '请输入公司地址'}
     },
-    {
-      title: '纳税人识别号', width: "120", field: 'taxpayerIdentification', align: 'center', filterType: 'input',
-      filterParam: {placeholder: '请输入纳税人识别号'}
-    },
+    
     {
       title: '公司负责人', width: "120", field: 'companyPrincipal', align: 'center', filterType: 'input',
       filterParam: {placeholder: '请输入公司负责人'}
@@ -845,6 +882,10 @@ const { queryParams:userQueryParams } = toRefs<PageData<UserForm, UserQuery>>(us
     {
       title: '负责人电话', width: "120", field: 'companyPrincipalPhone', align: 'center', filterType: 'input',
       filterParam: {placeholder: '请输入负责人电话'}
+    },
+    {
+      title: '纳税人识别号', width: "120", field: 'taxpayerIdentification', align: 'center', filterType: 'input',
+      filterParam: {placeholder: '请输入纳税人识别号'}
     },
     {
       title: '销售人员', width: "120", field: 'userNames', align: 'center', filterType: 'input',
@@ -857,6 +898,12 @@ const { queryParams:userQueryParams } = toRefs<PageData<UserForm, UserQuery>>(us
       filterParam: {placeholder: '请输入客户要求'}
     },
     {
+      title: '币种', width: "120", field: 'currency', align: 'center', filterType: 'radioButton',
+      filterParam: {placeholder: '请输入币种'},
+      filterData: () => [{dictLabel:"全部",dictValue:"0",},...resDictData.value.currency_type],
+      filterCustom: {label: 'dictLabel', value: 'dictValue'}
+    },
+    {
       title: '月结方式', width: "120", field: 'monthlyMethod', align: 'center',
       filterType: 'select',
       filterParam: {placeholder: '请输入月结方式'},
@@ -864,72 +911,18 @@ const { queryParams:userQueryParams } = toRefs<PageData<UserForm, UserQuery>>(us
       filterCustom: {label: 'dictLabel', value: 'dictValue'}
     },
     {
-      title: '天数限制', width: "120", field: 'dayNumberLimit', align: 'center', filterType: 'input',
-      filterParam: {placeholder: '请输入天数限制'}
-    },
-    {
-      title: '对账时间', width: "120", field: 'reconciliationTime', align: 'center', filterType: 'input',
-      filterParam: {placeholder: '请输入对账时间'}
-    },
-    {
-      title: '付款方式', width: "120", field: 'paymentMethod', align: 'center', filterType: 'radioButton',
-      filterParam: {placeholder: '请输入付款方式'},
-      filterData: () => [{dictLabel:"全部",dictValue:"0",},...resDictData.value.payment_method],
-      filterCustom: {label: 'dictLabel', value: 'dictValue'}
-    },
-    {
-      title: '币种', width: "120", field: 'currency', align: 'center', filterType: 'radioButton',
-      filterParam: {placeholder: '请输入币种'},
-      filterData: () => [{dictLabel:"全部",dictValue:"0",},...resDictData.value.currency_type],
-      filterCustom: {label: 'dictLabel', value: 'dictValue'}
-    },
-    {
-      title: '汇率(%)', width: "120", field: 'exchangeRate', align: 'center'
-    },
-    {
-      title: '运输方式', width: "120", field: 'shippingType', align: 'center', filterType: 'radioButton',
-      filterParam: {
-        placeholder: '请选择运输方式',
-      },
-      filterData: () => [{dictLabel:"全部",dictValue:"0",},...resDictData.value.shipping_type],
-      filterCustom: {label: 'dictLabel', value: 'dictValue'}
-    },
-    {
-      title: '检验标准', width: "120", field: 'checkStandard', align: 'center', filterType: 'radioButton',
-      filterParam: {placeholder: '请输入检验标准'},
-      filterData: () => [{dictLabel:"全部",dictValue:"0",},...resDictData.value.check_standard],
-      filterCustom: {label: 'dictLabel', value: 'dictValue'}
-    },
-    {
-      title: '客户资料', width: "120", field: 'customerData', align: 'center', filterType: 'radioButton',
-      filterParam: {placeholder: '请输入客户资料'},
-      filterData: () => [{dictLabel:"全部",dictValue:"0",},...resDictData.value.customer_data],
-      filterCustom: {label: 'dictLabel', value: 'dictValue'}
-    },
-    {
       title: '是否含税', width: "120", field: 'isTax', align: 'center'
     },
     {
-      title: '营业执照', width: "120", field: 'businessLicenseNumber', align: 'center', filterType: 'input',
-      filterParam: {placeholder: '请输入营业执照'}
+      title: '出账日', width: "120", field: 'accountDay', align: 'center', filterType: 'input',
+      filterParam: {placeholder: '请输入对账时间'}
     },
     {
-      title: '邮箱', width: "120", field: 'email', align: 'center', filterType: 'input',
-      filterParam: {placeholder: '请输入邮箱'}
+      title: '账单周期', width: "120", field: 'accountPeriod', align: 'center', filterType: 'input',
+      filterParam: {placeholder: '请输入对账时间'}
     },
     {
-      title: '传真', width: "120", field: 'faxes', align: 'center', filterType: 'input',
-      filterParam: {placeholder: '请输入传真'}
-    },
-    {
-      title: '备注', width: "120", field: 'remark', align: 'center', filterType: 'input',
-      filterParam: {placeholder: '请输入备注'}
-    },
-    {
-      title: '是否禁用', width: "120", field: 'isDisabled', align: 'center'
-    },
-    {
-      title: '新增时间', width: "120", field: 'createTime', align: 'center', filterType: 'intervalDate',
+      title: '创建时间', width: "120", field: 'createTime', align: 'center', filterType: 'intervalDate',
       filterParam: {
         startParams: {placeholder: '请输入开始时间', ...intervalDateParam.value},
         endParams: {placeholder: '请输入结束时间', ...intervalDateParam.value},
@@ -1181,8 +1174,39 @@ const { queryParams:userQueryParams } = toRefs<PageData<UserForm, UserQuery>>(us
       customerNameList.value = resCust.map(item=>{ return { value:item.id, label:item.customerName } });
     }
 }
+const dayList=ref([]);
+const activeNames = ref(['1','2']);
+const types = ref([
+  { value: "1", label: "普通客户" },
+  { value: "2", label: "外协加工客户" },
+]);
+
+const modules = ref([
+  { value: "1", label: "外协加工对账" },
+]);
+const accountDayList = () =>{
+    dayList.value=[];
+    for(let i=1;i<29;i++){
+      let obj={label:'每月'+i+'日',value:i+""};
+      dayList.value.push(obj);
+    }
+  }
+
+const changeAccountDay = (params:any) => {
+  if(!params){
+    form.value.accountPeriod = '';
+  }else{
+    let endNub=Number(params)-1;
+    if(endNub==0){
+      form.value.accountPeriod = '上月'+params+'日-上月底';
+    }else{
+      form.value.accountPeriod = '上月'+params+'日-本月'+endNub+'日';
+    }
+  }
+}
 
   onMounted(() => {
+    accountDayList();
     getListCust();
     getDictOptions().then(res => {
       getList();

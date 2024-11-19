@@ -1,23 +1,25 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
+    <!-- <el-card shadow="never" class="xtable-card">
       <template #header>
         <el-row :gutter="10" class="mb8 global-flex flex-end">
-          <el-col :span="1.5">
+          <el-col :span="1.5"> -->
+          <div class="head-btn-flex">
             <el-button type="primary" plain icon="Plus" @click="handleAdd" >新增</el-button>
-          </el-col>
-          <el-col :span="1.5">
+          <!-- </el-col>
+          <el-col :span="1.5"> -->
             <el-button type="primary" plain icon="Edit" :disabled="single" @click="handleUpdate()"
               >修改</el-button
             >
-          </el-col>
-          <el-col :span="1.5">
+          <!-- </el-col>
+          <el-col :span="1.5"> -->
             <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete()"
               >删除</el-button
             >
-          </el-col>
+          </div>
+          <!-- </el-col>
         </el-row>
-      </template>
+      </template> -->
 
       <XTable toolId="basedataRawMaterialCategory"
         :pageShow="true"
@@ -48,7 +50,7 @@
           <el-button link type="primary" @click="handleDelete(scope.row)" >删除</el-button>
         </template>
       </XTable>
-    </el-card>
+    <!-- </el-card> -->
 
     <!-- 添加或修改原料对话框 -->
     <el-drawer :title="dialog.title" v-model="dialog.visible" size="30%" style="min-width: 450px;">
@@ -92,7 +94,8 @@
           <el-col :span="12">
             <el-form-item size="small" label="保存期限：" prop="defaultExpirationDays">
               <el-input-number
-                style="width: 80%; text-align: left;"
+                style="width: 80%;"
+                class="number-left"
                 :precision="0"
                 :controls="false"
                 v-model="form.defaultExpirationDays"
@@ -125,9 +128,18 @@
               </el-radio-group>
             </el-form-item>
           </el-col>
-         
+
           <el-col :span="24">
-            <el-form-item label="角色" prop="managerRole" >
+
+            <el-form-item label="关联角色" prop="roleIds" >
+              <template #label>
+                <span>
+              <el-tooltip content="被关联的角色,可以对该物料进行受理和审核操作" placement="top">
+              <el-icon> <question-filled />  </el-icon>
+            </el-tooltip>
+                 关联角色
+                </span>
+              </template>
               <el-select style="width: 100%;" v-model="form.roleIds" filterable multiple placeholder="请选择">
                 <el-option
                   v-for="item in craftRoles"
@@ -138,14 +150,35 @@
               </el-select>
             </el-form-item>
           </el-col>
-     
+
+          <el-col :span="24">
+            <el-form-item label="关联工序" prop="craftIds" >
+              <template #label>
+                <span>
+              <el-tooltip content="在进行生产领料时,只能选择该物料类别所适用的工艺" placement="top">
+              <el-icon> <question-filled />  </el-icon>
+            </el-tooltip>
+                 适用工序
+                </span>
+              </template>
+              <el-select style="width: 100%;" v-model="form.craftIds" filterable multiple placeholder="请选择">
+                <el-option
+                  v-for="item in crafts"
+                  :key="item.id"
+                  :label="item.craftName"
+                  :value="item.id"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+
         </el-row>
       </el-form>
       <template #footer>
-        <div class="dialog-footer" style="text-align: center">
-          <el-button :loading="buttonLoading" @click="cancel">取 消</el-button>
+        <!-- <div class="dialog-footer" style="text-align: center"> -->
           <el-button :loading="buttonLoading" type="primary" v-show="!dialog.title?.includes('详情')" @click="submitForm">保存</el-button>
-        </div>
+          <el-button :loading="buttonLoading" @click="cancel">取 消</el-button>
+        <!-- </div> -->
       </template>
     </el-drawer>
   </div>
@@ -158,8 +191,9 @@ import { RawMaterialCategoryVO, RawMaterialCategoryQuery, RawMaterialCategoryFor
 import { listMaterialStorageNoPage } from '@/api/purchase/materialStorage';
 import { MaterialStorageVO } from '@/api/purchase/materialStorage/types';
 import { getDicts } from '@/api/system/dict/data';
-import {getRoleLists } from "@/api/basedata/craft";
+import {getRoleLists, listCraft} from "@/api/basedata/craft";
 import {RoleVO} from "@/api/system/role/types";
+import {CraftVO} from "@/api/basedata/craft/types";
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
 let unitList :DictDataOption[]=[];
@@ -241,6 +275,12 @@ const data = reactive<PageData<RawMaterialCategoryForm, RawMaterialCategoryQuery
     isIqc: [
       { required: true, message: "是否IQC检测不能为空", trigger: "change" }
     ],
+    roleIds: [
+      { required: true, message: "关联角色不能为空", trigger: "blur" }
+    ],
+    craftIds: [
+      { required: true, message: "关联工序不能为空", trigger: "blur" }
+    ],
     defaultExpirationDays: [
       {validator:(rule: any, value: any, callback: any)=>validatePass(rule, value, callback),trigger: 'change'},
       { required: true, message: "保存期限不能为空", trigger: "change" }
@@ -266,6 +306,7 @@ const columnList = ref([
   { title: '库存单位', field: 'unit', align: 'center', },
   { title: '保存期限（天）', field: 'defaultExpirationDays', align: 'center',  },
   { title: '所属仓库', field: 'defaultStorageId', align: 'center', filterType: 'radioButton', filterParam: { placeholder: '请选择所属仓库'}, filterData: ()=>materialStorageList.value, filterCustom: { label: 'name', value: 'id' } },
+  { title: '适用工序', field: 'craftNames', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入适用工序名称' } },
   { title: '是否IQC检测', field: 'isIqc', align: 'center', },
   { title: '操作',field:'make', width: '180', align: 'center', },
 ]);
@@ -429,12 +470,37 @@ const handleExport = () => {
     });
     console.log(craftRoles);
   };
+  /**
+   * 查询工艺列表
+   */
+  let crafts: CraftVO[]= [];
+  const getCraftList = async () => {
+    const res = await listCraft({isOpen : "1"});
+    console.log(res);
+    crafts = res.rows;
+    crafts.forEach(item => {
+      item.craftName = String(item.craftName);
+    });
+  };
 
 onMounted(() => {
    getStorageList();
   getList();
   getCraftRoleLists();
-
+  getCraftList();
   getUnitsType();
 });
 </script>
+
+<style lang="scss" scoped>
+
+  :deep(.number-left) {
+    .el-input__wrapper {
+      padding-left: 7px;
+      padding-right: 7px;
+    }
+    .el-input__inner {
+      text-align: left;
+    }
+  }
+</style>

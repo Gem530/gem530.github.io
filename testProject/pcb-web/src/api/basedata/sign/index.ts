@@ -21,10 +21,11 @@ export const listSign = (query?: SignQuery): AxiosPromise<SignVO[]> => {
  * @returns {*}
  */
 
-export const signList = (): AxiosPromise<SignVO[]> => {
+export const signList = (query?: SignQuery): AxiosPromise<SignVO[]> => {
   return request({
     url: '/pdf/sign/signList',
-    method: 'get'
+    method: 'get',
+    params: query
   });
 };
 
@@ -95,5 +96,16 @@ export const getSignPdf = (query?: any): AxiosPromise<any> => {
     method: 'get',
     responseType:'blob',
     params: query,
+  });
+};
+
+/**
+ * 查询是否使用默认模块
+ */
+export const queryUseModule = (query?: SignQuery): AxiosPromise<SignVO> => {
+  return request({
+    url: '/pdf/sign/queryUseModule',
+    method: 'get',
+    params: query
   });
 };

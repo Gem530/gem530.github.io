@@ -18,12 +18,13 @@
 <template>
   <ul>
     <template v-for="item in paras" :key="item.id">
-      <li style="text-align:left;" v-if="item.isChecked == '1'">
+      <li style="text-align:left;">
+        <!--  v-if="item.isChecked == '1'" -->
         <!-- 公共参数的显示 -->
-        <div v-if="!(item.isDifferentiatePnl == '1')" :style="getParaStyle(item)">
+        <div v-if="!(item.isDifferentiatePnl == '1') && item.isChecked == '1'" :style="getParaStyle(item)">
           <!-- 参数名 -->
           <span :style="{ fontWeight: item.isParameterNameBold ? 'bolder' : 'normal' }">
-            {{ item.name }}
+            {{ item.name }}<spna class="none">-{{item?.sort}}</spna>
           </span>
           <!-- 是否显示 ： -->
           <span v-if="item.type != 9">：</span>
@@ -35,10 +36,10 @@
           <span v-if="item.type != 9">{{ item.unit }}</span>
         </div>
         <!-- 非公共参数的显示 -->
-        <div v-else :style="getParaStyle(item)">
+        <div v-if="item.isDifferentiatePnl == '1' && item.isChecked == '1'" :style="getParaStyle(item)">
           <!-- 参数名 -->
           <span :style="{ fontWeight: item.isParameterNameBold ? 'bolder' : 'normal' }">
-            {{ item.name }}
+            {{ item.name }}<spna class="none">-{{item?.sort}}</spna>
           </span>
           <!-- 是否显示 ： -->
           <span>：</span>

@@ -123,43 +123,44 @@
               <el-col :span="24">
                 <!-- <el-button @click="addChangeRow" type="primary">新增</el-button> -->
                 <!-- <el-button @click="fullValidEvent" type="primary">test</el-button> -->
-                <vxe-table border show-overflow keep-source ref="_tableRef" :data="form.changeItem" size="mini"
-                  :edit-rules="validRules" :edit-config="{ trigger: 'click', mode: 'row', showStatus: true }">
-                  <vxe-column field="make" title="操作" width="60" align="center">
-                    <template #header>
+                <XTable border show-overflow keep-source ref="_tableRef" :data="form.changeItem" size="mini"
+                  :edit-rules="validRules" :edit-config="{ trigger: 'click', mode: 'row', showStatus: true }"
+                  :pageShow="false" :columnList="columnListChangeCategory">
+                  <!-- <vxe-column field="make" title="操作" width="60" align="center"> -->
+                    <template #header-make>
                       <el-icon @click="addChangeRow" style="color: rgb(64, 158, 255);font-size:19px">
                         <CirclePlusFilled />
                       </el-icon>
                     </template>
-                    <template #edit="scope">
+                    <template #edit-make="scope">
                       <el-icon @click="removeChange(scope.row)" color="red" size="19px">
                         <RemoveFilled />
                       </el-icon>
                     </template>
-                    <template #default="scope">
+                    <template #default-make="scope">
                       <el-icon @click="removeChange(scope.row)" color="red" size="19px">
                         <RemoveFilled />
                       </el-icon>
                     </template>
-                  </vxe-column>
+                  <!-- </vxe-column>
                   <vxe-column type="seq" title="序号" width="60"></vxe-column>
-                  <vxe-column field="project" title="项目" :edit-render="{}">
-                    <template #edit="params">
-                      <vxe-input v-model="params.row.project" type="text" @change="changeCellEvent(params)"></vxe-input>
+                  <vxe-column field="project" title="项目" :edit-render="{}"> -->
+                    <template #edit-project="params">
+                      <el-input v-model="params.row.project" type="text" @change="changeCellEvent(params)"></el-input>
                     </template>
-                  </vxe-column>
-                  <vxe-column field="content" title="变更内容" :edit-render="{}">
-                    <template #edit="params">
-                      <vxe-input v-model="params.row.content" type="text" @change="changeCellEvent(params)"></vxe-input>
+                  <!-- </vxe-column>
+                  <vxe-column field="content" title="变更内容" :edit-render="{}"> -->
+                    <template #edit-content="params">
+                      <el-input v-model="params.row.content" type="text" @change="changeCellEvent(params)"></el-input>
                     </template>
-                  </vxe-column>
-                  <vxe-column field="craftName" title="工艺" :edit-render="{}">
-                    <template #edit="scope">
+                  <!-- </vxe-column>
+                  <vxe-column field="craftName" title="工艺" :edit-render="{}"> -->
+                    <template #edit-craftName="scope">
                       <vxe-select v-model="scope.row.workflow" @change="changeCraft(scope.row)" placeholder="请选择工艺"
                          :options="craftMap" clearable filterable transfer popup-class-name="pop-select"></vxe-select>
                     </template>
-                  </vxe-column>
-                </vxe-table>
+                  <!-- </vxe-column> -->
+                </XTable>
 
               </el-col>
             </el-form-item>
@@ -190,39 +191,39 @@
             <el-form-item size="small" label="治工具菲林:">
               <el-col :span="24">
                 <!-- <el-button @click="addFLRow" type="primary">新增</el-button> -->
-                <vxe-table border show-overflow keep-source ref="XTableRefFL" :data="form.toolFilin" size="mini"
+                <XTable border show-overflow keep-source ref="XTableRefFL" :data="form.toolFilin" size="mini"
                   align="center" :edit-rules="validRules"
+                  :pageShow="false" :columnList="columnListToolFiin"
                   :edit-config="{ trigger: 'click', mode: 'row', showStatus: true }">
-                  <vxe-column field="make" title="操作" width="60">
-
-                    <template #header>
+                  <!-- <vxe-column field="make" title="操作" width="60"> -->
+                    <template #header-make>
                       <el-icon @click="addFLRow" style="color: rgb(64, 158, 255);font-size:19px">
                         <CirclePlusFilled />
                       </el-icon>
                     </template>
-                    <template #edit="scope">
+                    <template #edit-make="scope">
                       <el-icon @click="removeToolFilin(scope.row)" color="red" size="19px">
                         <RemoveFilled />
                       </el-icon>
                     </template>
-                    <template #default="scope">
+                    <template #default-make="scope">
                       <el-icon @click="removeToolFilin(scope.row)" color="red" size="19px">
                         <RemoveFilled />
                       </el-icon>
                     </template>
-                  </vxe-column>
+                  <!-- </vxe-column>
                   <vxe-column type="seq" title="序号" width="60"></vxe-column>
-                  <vxe-column field="project" title="项目" :edit-render="{}">
-                    <template #edit="params">
-                      <vxe-input v-model="params.row.project" type="text" @change="changeCellEvent(params)"></vxe-input>
+                  <vxe-column field="project" title="项目" :edit-render="{}"> -->
+                    <template #edit-project="params">
+                      <el-input v-model="params.row.project" type="text" @change="changeCellEvent(params)"></el-input>
                     </template>
-                  </vxe-column>
-                  <vxe-column field="content" title="变更内容" :edit-render="{}">
-                    <template #edit="params">
-                      <vxe-input v-model="params.row.content" type="text" @change="changeCellEvent(params)"></vxe-input>
+                  <!-- </vxe-column>
+                  <vxe-column field="content" title="变更内容" :edit-render="{}"> -->
+                    <template #edit-content="params">
+                      <el-input v-model="params.row.content" type="text" @change="changeCellEvent(params)"></el-input>
                     </template>
-                  </vxe-column>
-                </vxe-table>
+                  <!-- </vxe-column> -->
+                </XTable>
 
               </el-col>
             </el-form-item>
@@ -490,6 +491,23 @@ const commodityColumnList = ref([
   { title: '单位', field: 'unit', align: 'center' },
 ]);
 
+// ecn弹框变更类别
+const columnListChangeCategory = ref([
+{ width: '60',title: '操作',field: 'make',align: 'center',  },
+{ width: '60',type: 'seq',title: '序号',align: 'center',  },
+{ type: 'text',title: '项目',field: 'project',editRender: '{}',align: 'center',  },
+{ type: 'text',title: '变更内容',field: 'content',editRender: '{}',align: 'center',  },
+{ title: '工艺',field: 'craftName',editRender: '{}',align: 'center',  },
+]);
+
+// ecn弹框治工具菲林
+const columnListToolFiin = ref([
+{ width: '60',title: '操作',field: 'make',align: 'center',  },
+{ width: '60',type: 'seq',title: '序号',align: 'center',  },
+{ type: 'text',title: '项目',field: 'project',editRender: '{}',align: 'center',  },
+{ type: 'text',title: '变更内容',field: 'content',editRender: '{}',align: 'center',  },
+]);
+
 
 //变更列表校验
 const validRules = ref<VxeTablePropTypes.EditRules<changeItemVO>>({
@@ -506,7 +524,7 @@ const validRules = ref<VxeTablePropTypes.EditRules<changeItemVO>>({
 const _tableRef = ref<VxeTableInstance<changeItemVO>>();
 
 const addChangeRow = async () => {
-  const $table = _tableRef.value
+  const $table = _tableRef.value.xTableRef
   if ($table) {
     const { row: newRow } = await $table.insert({})
     // 插入一条数据并触发校验
@@ -518,14 +536,14 @@ const addChangeRow = async () => {
 }
 //删除变更行
 const removeChange = async (_row: number) => {
-  const $table = _tableRef.value
+  const $table = _tableRef.value.xTableRef
   if ($table) {
     const { row: newRow } = await $table.remove(_row)
   }
 }
 
 const addFLRow = async () => {
-  const $table = XTableRefFL.value;
+  const $table = XTableRefFL.value.xTableRef;
   if ($table) {
     const { row: newRow } = await $table.insert({})
     // 插入一条数据并触发校验
@@ -538,7 +556,7 @@ const addFLRow = async () => {
 
 //删除治工具菲林行
 const removeToolFilin = async (_row: number) => {
-  const $table = XTableRefFL.value;
+  const $table = XTableRefFL.value.xTableRef;
   if ($table) {
     const { row: newRow } = await $table.remove(_row)
   }
@@ -546,8 +564,8 @@ const removeToolFilin = async (_row: number) => {
 
 //完整校验
 const fullValidEvent = async () => {
-  const $table = _tableRef.value;
-  const $table2 = XTableRefFL.value;
+  const $table = _tableRef.value.xTableRef;
+  const $table2 = XTableRefFL.value.xTableRef;
   let result = true;
   if ($table || $table2) {
     const errMap = await $table.fullValidate();
@@ -598,7 +616,7 @@ const fullValidEvent = async () => {
 }
 
 const changeCellEvent = (params: any) => {
-  const $table = _tableRef.value
+  const $table = _tableRef.value.xTableRef
   if ($table) {
     $table.updateStatus(params)
   }

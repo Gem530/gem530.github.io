@@ -1,0 +1,48 @@
+.nav-bar-mask {
+    padding-bottom: 15px;
+}
+.nav-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding-bottom: 15px;
+    background: #fff;
+    z-index: 9999;
+    &.transparent {
+        background: transparent;
+        .at-nav-bar {
+            background: transparent;
+        }
+    }
+    .fixed-nav-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+    }
+    .at-nav-bar {
+        height: 100%;
+
+        .at-nav-bar__title {
+            font-size: 28px;
+        }
+
+        .at-nav-bar__right-view {
+            padding: 9px 5px;
+        }
+
+        .at-nav-bar__left-view {
+            /* 重置当按钮处于活跃状态时的样式 */
+            &:active,
+            &:focus {
+                background-color: transparent; /* 设置为透明 */
+                outline: none; /* 取消轮廓线 */
+            }
+            .at-icon-home {
+                margin-left: 15px;
+            }
+        }
+    }
+}

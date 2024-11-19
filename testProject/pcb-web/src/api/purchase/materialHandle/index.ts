@@ -77,6 +77,18 @@ export const modifyStatus = (id: number, status: string, supplierId: number, sup
 };
 
 /**
+ * 修改物料申请状态
+ * @param data
+ */
+export const modifyDetailStatus = (data: MaterialOrderVO | undefined) => {
+  return request({
+    url: '/purchase/materialHandle/modifyStatus',
+    method: 'put',
+    data: data
+  });
+};
+
+/**
  * 删除采购订单
  * @param id
  */

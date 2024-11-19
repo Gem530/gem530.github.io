@@ -27,6 +27,7 @@ import { getPrintOrder, getCardSum} from '@/api/production/card';
 import { ref } from "vue";
 import * as QRCode from "qrcode";
 import { loadFile } from '@/utils/pdfToImg'
+import { sortRequirment } from '@/components/ProductionPlanDrawer/util'
 
   const printType = ref("noOutsideImages");
   const code = ref("");
@@ -129,8 +130,9 @@ let currentNode = ref();
         if (req.differPNL && req.differPNL.length > 0) {
 
           req.differPNL.forEach((diff: any) => {
-            let val = diff.parameterValue ? diff.parameterValue : diff.defaultValue;
-            let showVal = val + unit;
+            let pnlName = (req.differPNL.length > 1 && diff.pnlName) ? (diff.pnlName + ":") : '';
+            let val = diff.defaultValue;
+            let showVal = pnlName + val + unit;
             if (val == null || val == undefined || val == 'null') {
               showVal = '';
             }
@@ -171,14 +173,15 @@ let currentNode = ref();
       })
       return detail;
     })
-      //sort
-    productionDetailsObj.forEach((pd:any)=>{
-      pd.params=pd.params.sort((a: any, b: any) => {
-        let nameA = a.name.toUpperCase(); // 转换为大写以忽略大小写
-        let nameB = b.name.toUpperCase();
-        return nameA.localeCompare(nameB);
-      });
-    });
+    // 在前面使用 sortRequirment 排过序了，这里不需要了
+    //   //sort
+    // productionDetailsObj.forEach((pd:any)=>{
+    //   pd.params=pd.params.sort((a: any, b: any) => {
+    //     let nameA = a.name.toUpperCase(); // 转换为大写以忽略大小写
+    //     let nameB = b.name.toUpperCase();
+    //     return nameA.localeCompare(nameB);
+    //   });
+    // });
     console.log('productionDetails', productionDetailsObj);
     console.log('laminateInfo', laminateInfo.value);
     productionDetails.value = productionDetailsObj;
@@ -390,6 +393,7 @@ let currentNode = ref();
         productionArea: result.commodityInfos[0].productionArea,
         area: result.commodityInfos[0].area,
         placeOrderTime: result.commodityInfos[0].placeOrderTime,
+        materialNumber: result.commodityInfos[0].materialNumber,
       };
     }
   }
@@ -402,7 +406,10 @@ let currentNode = ref();
     try {
       proxy?.$modal.loading('加载中...')
       let res = await getPrintOrder(data.id);
-      let result = res;
+      let result: any = res;
+      (result?.productionCardNodeList || []).map((item: any) => {
+        sortRequirment(item?.requirement)
+      })
       console.log('allData', result);
       allData.value = result;
       commodityInfos.value = result.commodityInfos;

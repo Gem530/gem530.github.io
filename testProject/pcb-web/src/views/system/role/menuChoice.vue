@@ -104,7 +104,8 @@ const recursion = (val: any, lev: number) => {
             resLev = m.level
         }
         if (m.children?.length) {
-            resLev = recursion(m, m.level)
+            let tempResLev = recursion(m, m.level)
+            resLev = (tempResLev > resLev) ? tempResLev : resLev
             if (parentFlag.value) {
                 m.flag = m.children.every((s: any) => s.flag) // 都满足条件就返回true，否则返回false
             }

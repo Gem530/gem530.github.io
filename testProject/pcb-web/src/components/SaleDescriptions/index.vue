@@ -442,7 +442,6 @@
                        suffix-icon="" class="height-light"
                        v-model="currentInfo.commodityTestWay"
                        filterable
-                       allow-create
                        default-first-option
                        :reserve-keyword="false"
                        clearable
@@ -460,7 +459,6 @@
             <el-select placeholder=" " suffix-icon=""
                        v-model="currentInfo.testFrame"
                        filterable
-                       allow-create
                        default-first-option
                        :reserve-keyword="false"
                        clearable
@@ -803,303 +801,16 @@
         </el-col>
       </el-row>
     </el-form>
-    <!-- <el-descriptions size="small" :column="24" border>
-      <el-descriptions-item label-align="left" align="center" :span="12" label="产品编码">
-        <div>{{currentInfo?.commodityCode}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="12" label="产品名称">
-        <div>{{currentInfo?.commodityName}}</div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="12" label="客户">
-        <div>{{ currentInfo.customerCode + '-' + currentInfo.cusName }}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="4" label="表面处理">
-        <template v-for="item in resDictData?.order_surface_treatment">
-          <div v-if="item.dictValue== currentInfo?.surfaceTreatment">{{item.dictLabel}}</div>
-        </template>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="2" label="批量/样品">
-        <template v-for="item in resDictData?.order_model">
-          <div v-if="item.dictValue== currentInfo?.model">{{item.dictLabel}}</div>
-        </template>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="3" label="层数">
-          <div>{{currentInfo?.materialLayer}} </div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="3" label="版本号">
-        <div>{{currentInfo?.version}}</div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="6" label="产品类型">
-        <div v-for="item in resDictData?.sys_commodity_type">
-          <span v-if="item.dictValue== currentInfo?.commodityType">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="包装要求">
-        <div v-for="item in resDictData?.order_packaging_requirements">
-          <span v-if="item.dictValue== currentInfo?.packRequirement">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="板材">
-        <div v-for="item in resDictData?.order_material_quality">
-          <span v-if="item.dictValue== currentInfo?.materialQuality">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="板材品牌">
-        <div v-for="item in resDictData?.order_plate_brand">
-          <span v-if="item.dictValue== currentInfo?.materialBrand">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="6" label="板材级别">
-        <div v-for="item in resDictData?.order_material_level">
-          <span v-if="item.dictValue== currentInfo?.materialLevel">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="成品板厚">
-        <div v-for="item in resDictData?.finish_plate_thickness">
-          <span v-if="item.dictValue== currentInfo?.commodityThickness">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="外层铜厚">
-        <div v-for="item in resDictData?.order_material_copperoutside">
-          <span v-if="item.dictValue== currentInfo?.materialCopperOutside">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="内层铜厚">
-        <div v-for="item in resDictData?.order_material_copperinside">
-          <span v-if="item.dictValue== currentInfo?.materialCopperInside">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="6" label="单片尺寸">
-        <div>{{currentInfo?.singleLength}} x {{currentInfo?.singleWidth}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="联片尺寸">
-        <div>{{currentInfo?.unitedLength}} x {{currentInfo?.unitedWidth}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="连片方式">
-        <div>{{currentInfo?.unitedWayLength}} x {{currentInfo?.unitedWayWidth}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="联片数量">
-        <div>{{currentInfo?.unitedWayLength * currentInfo?.unitedWayWidth}} pcs</div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="24" label="产品备注">
-        <div>{{currentInfo?.commodityRemark}}</div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="6" label="客户PO">
-        <div>{{currentInfo?.customerPo}} </div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="加急">
-        <div v-for="item in resDictData?.order_urgent">
-          <span v-if="item.dictValue== currentInfo?.urgent">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="交货日期">
-        <div>{{currentInfo?.dispatchTime}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="订单类型">
-        <div v-for="item in resDictData?.order_type">
-          <span v-if="item.dictValue== currentInfo?.orderType">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="24" label="市场备注">
-        <div></div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="6" label="订购数量">
-        <div>{{currentInfo?.quantity}} pcs</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="面积">
-        <div>{{currentInfo?.area}} ㎡</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="平米价">
-        <div>{{currentInfo?.areaPrice}} 元/㎡</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="单价">
-        <div>{{currentInfo?.price}} 元/pcs</div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="6" label="库存发货">
-        <div></div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="18" label="安排生产">
-        <div>{{currentInfo?.quantity}}</div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="6" label="模具费">
-        <div>{{currentInfo?.mouldCost}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="3" label="测试架费">
-        <div>{{currentInfo?.testFrameCost}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="3" label="飞针费">
-        <div>{{currentInfo?.flyProbeCost}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="工程费">
-        <div>{{currentInfo?.engineeringCost}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="3" label="样板费">
-        <div>{{currentInfo?.sampleCost}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="3" label="加急费">
-        <div>{{currentInfo?.expeditedCost}}</div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="6" label="总价">
-        <div>{{currentInfo?.totalPrice}} 元</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="税金">
-        <div>{{currentInfo?.tax}} 元</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="12" label="合计金额">
-        <div>{{currentInfo?.totalOrderPrice}} 元</div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="12" label="原订单备注"> </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="12" label="原产品编码"> </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="6" label="阻焊颜色">
-        <div v-for="item in resDictData?.order_commodity_solder">
-          <span v-if="item.dictValue== currentInfo?.commoditySolder">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="阻焊面数">
-        <div v-for="item in resDictData?.order_commodity_solder_count">
-          <span v-if="item.dictValue== currentInfo?.commoditySolderCount">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="金厚 u''">
-        <div>{{currentInfo?.goldenThickness}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="阻焊光泽">
-        <div v-for="item in resDictData?.order_commodity_solder_gloss">
-          <span v-if="item.dictValue== currentInfo?.commoditySolderGloss">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="6" label="阻焊要求">
-        <div>{{currentInfo?.commoditySolderRequirement}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="孔铜厚">
-        <div>{{currentInfo?.poreCopper}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="字符">
-        <div v-for="item in resDictData?.order_character">
-          <span v-if="item.dictValue== currentInfo?.characterColor">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="字符面数">
-        <div v-for="item in resDictData?.order_character_count">
-          <span v-if="item.dictValue== currentInfo?.characterCount">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="6" label="成形方式">
-        <div v-for="item in resDictData?.order_commodity_form">
-          <span v-if="item.dictValue== currentInfo?.commodityForm">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="字符要求">
-        <div>{{currentInfo?.characterRequirement}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="SET打叉">
-        <div>{{currentInfo?.setCross}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="板翘曲度">
-        <div>{{currentInfo?.warpagePlate}}</div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="12" label="测试方式">
-        <div v-for="item in resDictData?.order_commodity_testway">
-          <span v-if="item.dictValue== currentInfo?.commodityTestWay">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="测试点">
-        <div>{{currentInfo?.testPoint}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="备品数量"> </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="6" label="铜箔">
-        <div>{{currentInfo?.copperFoil}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="V-CUT">
-        <div>{{currentInfo?.vcut}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="过孔要求">
-        <div v-for="item in resDictData?.order_hole_requirement">
-          <span v-if="item.dictValue== currentInfo?.holeRequirement">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="检验标准">
-        <div v-for="item in resDictData?.order_inspection_standard">
-          <span v-if="item.dictValue== currentInfo?.inspectionStandard">{{item.dictLabel}}</span>
-        </div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="6" label="金面积">
-        <div>{{currentInfo?.goldArea}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="外形要求">
-        <div>{{currentInfo?.appearanceRequirements}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="PP">
-        <div>{{currentInfo?.pp}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="镍厚">
-        <div>{{currentInfo?.nickelThickness}}</div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="12" label="客户物料编码">
-        <div>{{currentInfo?.materialNumber}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="12" label="客户物料名称">
-        <div>{{currentInfo?.materialName}}</div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" min-width="100px" :span="24" label="订单特殊要求">
-        <div>{{currentInfo?.specialRequirement}}</div>
-      </el-descriptions-item>
-
-      <el-descriptions-item label-align="left" align="center" :span="6" label="最小线宽mm">
-        <div>{{currentInfo?.mouldCost}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="3" label="最小线距mm">
-        <div>{{currentInfo?.testFrameCost}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="3" label="最小孔径mm">
-        <div>{{currentInfo?.flyProbeCost}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="总孔数/连板(SLOT)">
-        <div>{{currentInfo?.engineeringCost}}</div>
-      </el-descriptions-item>
-      <el-descriptions-item label-align="left" align="center" :span="6" label="孔密度 万/m²">
-        <div>{{currentInfo?.sampleCost}}</div>
-      </el-descriptions-item>
-    </el-descriptions> -->
-    <!-- <el-table class="mt5" size="small" :data="currentInfo?.fileList" style="width: 100%;font-size: x-small">
-      <el-table-column prop="name" label="文件名" align="center"/>
-      <el-table-column prop="createByName" label="上传人" align="center"/>
-      <el-table-column prop="size" label="上传大小" align="center"/>
-      <el-table-column prop="createTime" label="上传日期" align="center"/>
-      <el-table-column prop="address" label="操作" align="center">
-        <template #default="scope">
-          <div style="text-align:center">
-            <el-button type="primary" link size="small" @click="downLoadHandle(scope.row.key)">下载</el-button>
-          </div>
-        </template>
-      </el-table-column>
-    </el-table> -->
-
     <XTable ref="popFileRef" :data="currentInfo?.fileList"  border :columnList="quotionFileList" :pageShow="false">
       <template #default-make="{row}">
         <el-button link type="primary" @click="downLoadHandle(row.key)">下载</el-button>
       </template>
     </XTable>
+    <!-- <TotalTitle :list="[
+      { title: `总价：${ currentInfo.totalOrderPrice }元` },
+      { title: `税金：${ currentInfo.tax }元` },
+      { title: `总金额：${ currentInfo.totalPrice }元` },
+    ]"></TotalTitle> -->
   </main>
 </template>
 
@@ -1112,7 +823,10 @@
   import {ref} from "vue";
   import dayjs from "dayjs";
   import { queryInventoryByCommodity } from '@/api/inventory/inventory/index'
+  import useUserStore from '@/store/modules/user';
 
+  // const { ownerId } = useUserStore();
+  // const ownerId = 1001;
   const productLoading = ref(false)
   let resDictData = ref({
     //加急
@@ -1381,13 +1095,88 @@
       }
     }
   }
+  :deep(.normal-detail-sale) {
+    .prod-card {
+      padding: 8px 16px 0;
+      background: #fff;
+      &:not(:last-child) {
+        margin-bottom: 8px;
+      }
+    }
+
+    .el-form-item {
+
+      .el-form-item__content {
+        .el-form-item {
+          margin-bottom: 0 !important;
+        }
+
+        .el-textarea,
+        .el-input__wrapper,
+        .el-textarea__inner {
+          background-color: transparent !important;
+        }
+        .el-input {
+          &.input-append-bg {
+            .el-input-group__append, .el-input-group__prepend {
+              background: var(--el-fill-color-light) !important;
+            }
+          }
+          &.height-light {
+            .el-input__wrapper, .el-input-group__append, .el-input-group__prepend {
+              background: #F8E3C5 !important;
+              border-radius: 0;
+              box-shadow: none;
+            }
+          }
+          box-shadow: 0 0 0 1px #E9E9E9;
+          border-radius: 2px;
+          .el-input__wrapper {
+            box-shadow: none;
+          }
+          .el-input-group__append, .el-input-group__prepend {
+            background: transparent !important;
+            border-radius: 0;
+            padding: 0 2px !important;
+            color: var(--el-color-primary);
+            box-shadow: none;
+          }
+        }
+        .height-light {
+          box-shadow: 0 0 0 1px #E9E9E9;
+          border-radius: 2px;
+          .el-input__wrapper, .el-input-group__append, .el-input-group__prepend {
+            background: #F8E3C5 !important;
+            border-radius: 0;
+            box-shadow: none;
+          }
+        }
+        .el-input__inner {
+          -webkit-text-fill-color: #000000;
+          color: #000000 !important;
+          // 去除 数字表单 上下按钮
+          &::-webkit-outer-spin-button,
+          &::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+          }
+
+          &[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+          }
+
+          border: none;
+        }
+      }
+    }
+  }
   .checkbox-disable-normal {
     :deep(.el-checkbox) {
       .el-checkbox__input.is-disabled.is-checked {
         .el-checkbox__inner {
           background-color: var(--el-checkbox-checked-bg-color);
           border-color: var(--el-checkbox-checked-input-border-color);
-  
+
           &::after {
             border-color: var(--el-checkbox-checked-icon-color);
           }

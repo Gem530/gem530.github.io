@@ -1,7 +1,7 @@
 import request from '@/utils/request';
 import { AxiosPromise } from 'axios';
 import { LoginData, LoginResult, VerifyCodeResult, TenantInfo } from './types';
-import { UserInfo } from '@/api/system/user/types';
+import { UserInfo, UserVO } from '@/api/system/user/types';
 
 // pc端固定客户端授权id
 const clientId = import.meta.env.VITE_APP_CLIENT_ID;
@@ -15,6 +15,46 @@ export function login(data: LoginData): AxiosPromise<LoginResult> {
     ...data,
     clientId: data.clientId || clientId,
     grantType: data.grantType || 'password'
+  };
+  return request({
+    url: '/auth/login',
+    headers: {
+      isToken: false,
+      isEncrypt: true
+    },
+    method: 'post',
+    data: params
+  });
+}
+/**
+ * @param data {LoginData}
+ * @returns
+ */
+export function switchLogin(data: LoginData): AxiosPromise<LoginResult> {
+  const params = {
+    ...data,
+     clientId: data.clientId || clientId,
+     grantType: data.grantType || 'password'
+  };
+  return request({
+    url: '/auth/switchingUnit',
+    headers: {
+      isEncrypt: true
+    },
+    method: 'post',
+    data: params
+  });
+}
+
+/**
+ * @param data {LoginData}
+ * @returns
+ */
+export function scanCodeLogin(data: LoginData): AxiosPromise<LoginResult> {
+  const params = {
+    ...data,
+    clientId: data.clientId || clientId,
+    grantType: data.grantType || 'scanCode'
   };
   return request({
     url: '/auth/login',
@@ -101,5 +141,60 @@ export function getTenantList(): AxiosPromise<TenantInfo> {
       isToken: false
     },
     method: 'get'
+  });
+}
+// 获取单位列表
+export function getOwnerList(): AxiosPromise<any> {
+  return request({
+    url: '/system/user/getOwnerList',
+    method: 'get'
+  });
+}
+
+
+// 获取登录二维码地址
+export function getCodeLoginUrl(): AxiosPromise<any> {
+  return request({
+    url: '/wx/getWXQRCode',
+    headers: {
+      isToken: false
+    },
+    method: 'get'
+  });
+}
+
+// 获取二维码唯一标识
+export function getLoginQRCodeValue(id: string): AxiosPromise<any> {
+  return request({
+    url: '/wx/getLoginQRCodeValue',
+    headers: {
+      isToken: false
+    },
+    method: 'get',
+    params: id,
+  });
+}
+
+// 获取二维码唯一标识
+export function getScanLoginQRCodeValue(id: string): AxiosPromise<any> {
+  return request({
+    url: '/wx/getScanValue',
+    headers: {
+      isToken: false
+    },
+    method: 'get',
+    params: id,
+  });
+}
+
+// 获取扫码人的手机号
+export function getLoginQRCodePhone(id: string): AxiosPromise<any> {
+  return request({
+    url: '/wx/getLoginQRCodePhone',
+    headers: {
+      isToken: false
+    },
+    method: 'get',
+    params: id,
   });
 }

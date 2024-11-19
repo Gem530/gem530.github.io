@@ -47,9 +47,26 @@
           </el-col>
         </el-row>
       </el-form>
-
+ <div style="height: calc(100% - 168px);">
+      <div style="flex: none;height: 50% !important;" class="ptable-card">
       <XTable :pageShow="false" ref="confirmTable" :data="confirmSelectInventoryList" border :columnList="confirmSelectInventoryColumnList"
-              :loading="dialogTableLoading">
+              :loading="dialogTableLoading"
+               class="ptable-content"
+               style="height: 100%;"
+               height="100%"
+              >
+        <template v-if="dialogConfirm.title === '采购合同确认'" #default-monthlyMethod="{ row }">
+          <el-select v-model="row.monthlyMethod" filterable placeholder="请选择月结方式" style="width: 100%;">
+            <el-option v-for="dict in monthly_method" :key="dict.value" :label="dict.label" :value="dict.label"></el-option>
+          </el-select>
+        </template>
+        <template v-if="dialogConfirm.title === '采购合同确认'" #default-isTax="{ row }">
+            <el-select placeholder=" " suffix-icon="" class="height-light font-14" v-model="row.isTax" >
+              <el-option label="是" value="1"/>
+              <el-option label="否" value="0"/>
+            </el-select>
+        </template>
+        
         <template v-if="dialogConfirm.title === '采购合同确认'" #default-deliverTime="scope">
           <el-date-picker style="width: 100%;" v-model="scope.row.deliverTime" type="date" placeholder="选择日期时间"
             value-format="YYYY-MM-DD 23:59:59" format="YYYY-MM-DD" clearable />
@@ -64,6 +81,30 @@
           <el-button link type="primary" @click="handleSelectDelete(scope.row)">删除</el-button>
         </template>
       </XTable>
+        </div>
+      <div  style="flex: none;height: 50% !important;" class="ptable-card">
+      <!-- 确认记录 -->
+      <el-divider content-position="left">确认记录</el-divider>
+       <XTable
+        :pageShow="false"
+        :loading="confirmationRecordLoading"
+        height="100%"
+        class="ptable-content"
+        style="height: 100%;"
+        :column-config="{resizable: true}"
+        size="mini"
+        :data="queryRecordList"
+        :border="true"
+
+        :columnList="orderRecordColumnList"
+        border
+      >
+      <template #default-operateContent="scope">
+       <div style="text-align: left">{{scope.row.operateContent}}</div>
+      </template>
+      </XTable>
+          </div>
+      </div>
 
       <template #footer>
         <div style="display: flex; justify-content: center;">
@@ -95,14 +136,19 @@ import {
   cancelOrder,
   compareList,
   confirmOrderApp, confirmOrderFinish, getMaterialOrderDetil,
-  getMaterialOrderDetilList
+  getMaterialOrderDetilList,
+  operateRecordList
 } from "@/api/purchase/materialOrder";
 import {MaterialOrderForm, MaterialOrderQuery, MaterialOrderVO} from "@/api/purchase/materialOrder/types";
 import {ref} from "vue";
 import {MaterialOrderDetailVO} from "@/api/purchase/materialOrderDetail/types";
 import {getSignPdf} from "@/api/financial/accountOrder";
 import {getReportUrl} from "@/utils/report";
+import {RecordVO} from "@/api/purchase/record/types";
+import {queryUseModule} from "@/api/basedata/sign";
+
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
+const { monthly_method} = toRefs<any>(proxy?.useDict( 'monthly_method'));
 const dataList = ref<any[]>([]);
 const loading = ref(false);
 const total = ref(0);
@@ -130,6 +176,8 @@ const columnList = ref([
       endParams: { placeholder: '请输入结束时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss' },
     }
   },
+  { width:'80',title:'月结方式',field:'monthlyMethod', align:'center',},
+  { width:'100',title:'是否含税',field:'isTax', align:'center', },
   {
     title: '收货地址', field: 'addressName', width: '300', align: 'center'
     , filterType: 'input', filterParam: { placeholder: '' },
@@ -209,13 +257,25 @@ const confirmSelectInventoryColumnList = ref([
   { title: '长(mm)', field: 'length', width: '70', align: 'center', },
   { title: '宽(mm)', field: 'width', width: '70', align: 'center', },
   { title: '品牌', field: 'manufacturer', width: '60', align: 'center', },
-  { title: '要求交期', field: 'deliverTime', fixed:'right', width: '180', align: 'center', },
+
+  { title: '月结方式', field: 'monthlyMethod', fixed:'right', width: '120', align: 'center', },
+  { title: '含税', field: 'isTax', fixed:'right', width: '40', align: 'center', },
+  { title: '要求交期', field: 'deliverTime', fixed:'right', width: '150', align: 'center', },
   { title: '采购数量', field: 'quantity', fixed:'right', width: '80', align: 'center' },
   { title: '单位', field: 'units', width: '80', align: 'center' },
   { title: '采购单价', field: 'price', fixed:'right', width: '80', align: 'center' },
   { title: '采购金额', field: 'totalPrice', fixed:'right', width: '80', align: 'center' },
   { title: '采购备注', field: 'applyRemark', fixed:'right', width: '80', align: 'center' },
   { title: '操作',field:'make', fixed: 'right', width:'60', align: 'center', showOverflow:false},
+]);
+const orderRecordColumnList = ref([
+ { width:'60',title:'序号',align:'center',type:'seq'},
+{ title:'所属单位',field:'ownerName',align:'center',  },
+{ width:'140',title:'物料名称',field:'materialName',align:'center',  },
+{ width:'80',title:'操作人',field:'createByName',align:'center',  },
+{ width:'160',title:'操作时间',field:'createTime',align:'center',  },
+{ title:'操作内容',field:'operateContent',align:'center',  },
+{ width:'160',title:'确认备注',field:'remark',align:'center',  },
 ]);
 
 // 获取 搜索条件
@@ -263,6 +323,7 @@ const dialogConfirm = reactive<DialogOption>({
   title: ''
 });
 const dialogTableLoading = ref(false);
+const confirmationRecordLoading = ref(true);
 const materialOrderUpdate = ref<MaterialOrderVO>();
 const initFormData: MaterialOrderForm = {
   id: undefined,
@@ -300,6 +361,8 @@ const data = reactive<PageData<MaterialOrderForm, MaterialOrderQuery>>({
 const { form, rules } = toRefs(data);
 const buttonLoading = ref(false);
 const confirmSelectInventoryList = ref<MaterialOrderDetailVO[]>([]);
+// 查询操作记录
+const queryRecordList = ref<RecordVO[]>([]);
 
 /** 表单重置 */
 const reset = () => {
@@ -316,6 +379,9 @@ const cancelConfirm = async () => {
 const handleConfirm = async (row?: MaterialOrderVO) => {
   reset();
   dialogTableLoading.value = true;
+  dialogConfirm.visible = true;
+  confirmationRecordLoading.value = true;
+  queryRecordList.value = [];
   form.value.orderCode = row?.orderCode;
   form.value.supplierCode = row?.supplierCode;
   form.value.supplierName = row?.supplierName;
@@ -335,8 +401,13 @@ const handleConfirm = async (row?: MaterialOrderVO) => {
     materialOrderUpdate.value = res.data;
     confirmSelectInventoryList.value = res.data.orderDetailVoList;
     form.value.confirmRemark = res.data.confirmRemark;
-    dialogConfirm.visible = true;
+
+
   });
+  const res = await operateRecordList({id: row?.orderId});
+      queryRecordList.value = res.rows;
+      confirmationRecordLoading.value = false;
+
   dialogTableLoading.value = false;
 }
 
@@ -352,12 +423,12 @@ const submitConfirmForm = async () => {
     //判断item.applyNum>0
     if (item.quantity <= 0) {
       check = true;
-      msg="申请数量必须大于0"
+      msg="采购数量必须大于0"
       return;
     }
     if (item.price <= 0) {
       check = true;
-      msg="采购单间必须大于0"
+      msg="采购单价必须大于0"
       return;
     }
     if (item.deliverTime == undefined) {
@@ -384,7 +455,14 @@ const submitConfirmForm = async () => {
     await getSupplierOrderDetailList();
   } else {
     confirmId.value = form.value.id;
-    querySignList();
+    // 查询是否存在默认签章
+    const res = await queryUseModule({useModule: '1'});
+    // 存在则自动签名
+    if(res.data) {
+      submitSign(res.data.key, res.data.signType);
+    } else {
+      querySignList();
+    }
   }
 }
 
@@ -399,7 +477,9 @@ const querySignList = async () => {
 const submitSign = async (key : any, signType : any) => {
   //await proxy?.$modal.confirm('是否确认提交数据项？').finally(() => loading.value = false);
   proxy?.$modal.loading("加载中...");
-  await confirmOrderFinish({id: confirmId.value, imageKey: key, signType: signType}).finally(() => proxy?.$modal.closeLoading());
+
+
+  await confirmOrderFinish({id: confirmId.value, imageKey: key, signType: signType,orderDetailBoList:confirmSelectInventoryList.value}).finally(() => proxy?.$modal.closeLoading());
   proxy?.$modal.msgSuccess("操作成功");
   dialogConfirm.visible = false;
   await getSupplierOrderDetailList();
@@ -442,16 +522,16 @@ const reportDrawer = reactive<DrawerOption>({
 const purchaseReportHandle = async (row: any) => {
   reportDrawer.title = "采购订单报表预览";
   reportDrawer.visible = true;
-  if(row.confirmStatus=="3"){
-    getSignPdf({bizCode:row.orderCode}).then(res=>{
-      let vo = res.data;
-      if (vo.url) {
-        let url = '/web/viewer.html?file=' + encodeURIComponent(vo.url + '#' + vo.name);
-        reportUrl.value = url;
-        return;
-      }
-    });
-  }
+
+  getSignPdf({bizCode: row.orderCode}).then(res => {
+    let vo = res.data;
+    if (vo.url) {
+      let url = '/web/viewer.html?file=' + encodeURIComponent(vo.url + '#' + vo.name);
+      reportUrl.value = url;
+      return;
+    }
+  });
+
   reportUrl.value = getReportUrl() + `&_n=采购单&_u=file:procure.ureport.xml&url=purchase/materialHandle/uReportReview/${row.orderId}&listUrl=purchase/materialHandle/uReportReviewList/${row.orderId}`;
   console.log("reportUrl", reportUrl.value);
 }

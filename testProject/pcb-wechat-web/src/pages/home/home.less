@@ -1,0 +1,320 @@
+.home-page {
+    position: relative;
+    min-height: 100vh;
+    background: linear-gradient(144.43deg, rgba(0, 186, 173, 0.11) 0%, rgba(48, 83, 238, 0.11) 32.95%, rgba(42, 130, 228, 0.2) 100%);
+    padding-bottom: 310px;
+    box-sizing: border-box;
+    // background-size: 100% 100%, 182px 172px;
+    // background-position: 0 0, 166px 112px;
+
+    .loginout-button {
+        // position: fixed;
+        // bottom: 50px;
+        // left: 0;
+        // width: 100%;
+        // padding: 20px;
+        // box-sizing: border-box;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .home-card {
+        position: relative;
+        width: 686px;
+        min-height: 1056px;
+        border-radius: 32px;
+        background: rgba(255, 255, 255, 1);
+        padding: 28px 32px;
+        margin: 80px auto 0;
+        box-shadow: 0px 0px 16px  rgba(0, 0, 0, 0.08);
+        box-sizing: border-box;
+        z-index: 1;
+
+        &::after {
+            content: "";
+            position: absolute;
+            top: -104px;
+            right: -42px;
+            width: 366px;
+            height: 344px;
+            // transform: rotate(-13.39deg);
+            background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/home/bg-logo.png') no-repeat;
+            background-size: 100% 100%;
+            z-index: -1;
+        }
+
+        .home-avator {
+            position: absolute;
+            top: 0;
+            left: 32px;
+            transform: translate(0, -50%);
+            width: 160px;
+            height: 160px;
+            // background: #999;
+            padding: 0;
+            // border: 6px solid rgba(255, 255, 255, 1);
+            border-radius: 50%;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .home-usertime {
+            box-sizing: border-box;
+
+            .flex-grow {
+                flex-grow: 1;
+            }
+            .home-usertime-box {
+                position: relative;
+                background: linear-gradient(-90deg, rgba(42, 130, 228, 0.2) 0%, rgba(0, 186, 173, 0.05) 99.31%);
+                padding: 11px 20px 9px 72px;
+                font-size: 24px;
+                font-weight: 400;
+                color: rgba(153, 153, 153, 1);
+                text-align: right;
+                margin-bottom: 18px;
+                border-radius: 8px;
+                box-sizing: border-box;
+
+                &::before {
+                    content: "";
+                    position: absolute;
+                    top: 50%;
+                    left: 0;
+                    width: 56px;
+                    height: 64px;
+                    transform: translate(0, -50%);
+                    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/home/usertime.png') no-repeat;
+                    background-size: 100% 100%;
+                }
+            }
+        }
+        .login-out {
+            float: right;
+            width: 120px;
+            padding: 0 0 20px 20px;
+            // margin-bottom: 20px;
+            font-size: 28px;
+            font-weight: 700;
+            // opacity: 0;
+
+            .login-out-text {
+                margin-left: 8px;
+            }
+        }
+
+        .home-name {
+            // align-items: flex-end;
+            // margin-bottom: 4px;
+            margin-bottom: 14px;
+            padding-left: 16px;
+            box-sizing: border-box;
+
+            .home-name-box {
+                max-width: 430px;
+                // margin-right: 20px;
+                font-size: 48px;
+                font-weight: 700;
+                letter-spacing: 0px;
+                color: #333333;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+            }
+
+            .home-settings {
+                width: 200px;
+                padding: 15px 10px 5px;
+                // padding-bottom: 5px;
+                font-size: 28px;
+                font-weight: 700;
+                letter-spacing: 0px;
+                line-height: 0px;
+                color: #2d90ed;
+
+                .home-right {
+                    width: 28px;
+                    height: 28px;
+                    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/right.png') no-repeat;
+                    background-size: 100% 100%;
+                    margin-left: 8px;
+                }
+            }
+        }
+
+        .home-sex-time {
+            margin-bottom: 14px;
+            padding-left: 16px;
+            font-size: 28px;
+            font-weight: 400;
+            letter-spacing: 0px;
+            color: #999999;
+            box-sizing: border-box;
+
+            .home-sex {
+                position: relative;
+                padding-right: 18px;
+                margin-right: 18px;
+                // border-right: 1px solid #999999;
+
+                &::after {
+                    content: "";
+                    position: absolute;
+                    top: 50%;
+                    right: 0;
+                    transform: translate(0, -50%);
+                    height: 26px;
+                    border-right: 1px solid #999999;
+                }
+            }
+        }
+
+        .container {
+          padding: 20px;
+        }
+
+        .temperature-list {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .temperature-item {
+          margin-bottom: 10px;
+          font-size: 18px;
+        }
+
+        .home-company {
+            position: relative;
+            width: 100%;
+            height: 86px;
+            color: #ffffff;
+            padding: 24px 0 0 20px;
+            // background: linear-gradient(-90deg, rgba(45, 89, 235, 0.6) 0%, rgba(0, 186, 173, 0.4) 100%);
+            // border: 2px solid rgba(43, 59, 114, 0.1);
+            background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/home/company-bg.png') no-repeat;
+            background-size: 100% 100%;
+            // margin-bottom: 44px;
+            font-size: 32px;
+            font-weight: 500;
+            border-radius: 16px;
+            box-sizing: border-box;
+
+            &::after {
+                content: "";
+                position: absolute;
+                bottom: 0;
+                right: 30px;
+                width: 104px;
+                height: 104px;
+                background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/home/company.png') no-repeat;
+                background-size: 100% 100%;
+            }
+
+            .home-company-tag {
+                position: absolute;
+                top: 2px;
+                left: 2px;
+                width: 68px;
+                height: 24px;
+                opacity: 1;
+                background: #2d90ed;
+                border: 2px solid #ffffff;
+                border-top: none;
+                border-left: none;
+                font-size: 16px;
+                font-weight: 500;
+                border-radius: 16px 0px 16px 0px;
+            }
+        }
+
+        .notice-bar {
+            height: 52px;
+            margin-bottom: 20px;
+            overflow: hidden;
+
+            .notice-bar-locale {
+                flex: none;
+                width: calc(100% - 36px);
+                height: 100%;
+                padding: 0;
+                background: transparent;
+                margin-left: 8px;
+                .at-noticebar__content {
+                    height: 100%;
+                    .at-noticebar__content-text {
+                        height: 100%;
+                        line-height: 52px;
+                        font-size: 24px;
+                        font-weight: 400;
+                        color: rgba(51, 51, 51, 1);
+                    }
+                }
+            }
+        }
+
+        .home-menu {
+            margin-top: 40px;
+            &.no-top {
+                margin-top: 0;
+            }
+
+            .home-menu-title {
+                margin-bottom: 8px;
+                font-size: 32px;
+                font-weight: 700;
+                color: rgba(51, 51, 51, 1);
+            }
+
+            .home-nav {
+                flex-wrap: wrap;
+                align-items: stretch;
+                .home-nav-item {
+                    flex: none;
+                    justify-content: flex-start;
+                    width: 112px;
+                    margin-bottom: 20px;
+                    // padding: 24px 0;
+
+                    &:not(:nth-child(4n)) {
+                        margin-right: 58px;
+                    }
+
+                    .nav-item-icon {
+                        width: 80px;
+                        height: 80px;
+                        margin-bottom: 4px;
+                    }
+                    .nav-item-text {
+                        font-size: 28px;
+                        font-weight: 500;
+                        color: #333333;
+                        text-align: center;
+                    }
+                }
+            }
+        }
+    }
+
+    .home-bottom {
+        position: absolute;
+        left: 0;
+        bottom: 82px;
+        width: 100%;
+        height: 158px;
+        // margin-top: 72px;
+        background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/home/bottom-line.png') no-repeat;
+        background-size: 100% 50%;
+        background-position: center bottom;
+
+        .home-bottom-logo {
+            width: 244px;
+            height: 100%;
+            background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/home/bottom-logo.png') no-repeat;
+            background-size: 100% 100%;
+        }
+    }
+
+    // .home-bottom-mask {
+    //     height: 240px;
+    // }
+}

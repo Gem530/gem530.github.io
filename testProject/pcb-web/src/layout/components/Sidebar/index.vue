@@ -4,6 +4,7 @@
     <el-scrollbar :class="sideTheme" wrap-class="scrollbar-wrapper">
       <transition :enter-active-class="proxy?.animate.menuSearchAnimate.enter" mode="out-in">
         <el-menu
+          ref="menuRef"
           :default-active="activeMenu"
           :collapse="isCollapse"
           :background-color="bgColor"
@@ -11,9 +12,21 @@
           :unique-opened="false"
           :active-text-color="theme"
           :collapse-transition="false"
+          menu-trigger="click"
           mode="vertical"
         >
-          <sidebar-item v-for="(route, index) in sidebarRouters" :key="route.path + index" :item="route" :base-path="route.path" />
+          <el-menu-item ref="searchMenuDomRef" index="searchMenuDom" :class="{ 'sub-menu-title-noDropdown': !isNest }">
+            <template v-if="isCollapse">
+              <div class="menu-svg-icon" style="margin: 0 auto;">
+                <svg-icon icon-class="search" />
+              </div>
+              <div class="menu-collapse-title">{{'搜索'}}</div>
+            </template>
+            <template #title>
+              <search-menu ref="searchMenuRef" :isCollapse="isCollapse" @closeMenuItem="closeMenuItem"/>
+            </template>
+          </el-menu-item>
+          <sidebar-item v-for="(route, index) in sidebarRouters" :key="route.path + index" :item="route" :base-path="route.path" :isCollapse="isCollapse" :showIcon="true" />
         </el-menu>
       </transition>
     </el-scrollbar>
@@ -23,6 +36,7 @@
 <script setup lang="ts">
 import Logo from './Logo.vue'
 import SidebarItem from './SidebarItem.vue'
+import SearchMenu from '../TopBar/search.vue'
 import variables from '@/assets/styles/variables.module.scss'
 import useAppStore from '@/store/modules/app'
 import useSettingsStore from '@/store/modules/settings'
@@ -30,15 +44,19 @@ import usePermissionStore from '@/store/modules/permission'
 import { RouteOption } from "vue-router";
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
+const menuRef = ref()
 const route = useRoute();
 const appStore = useAppStore()
+const searchMenuDomRef = ref()
 const settingsStore = useSettingsStore()
 const permissionStore = usePermissionStore()
 
 const sidebarRouters =  computed<RouteOption[]>(() => permissionStore.sidebarRouters);
 const showLogo = computed(() => settingsStore.sidebarLogo);
-const sideTheme = computed(() => settingsStore.sideTheme);
-const theme = computed(() => settingsStore.theme);
+// const sideTheme = computed(() => settingsStore.sideTheme);
+// const theme = computed(() => settingsStore.theme);
+const sideTheme = ref('theme-dark');
+const theme = ref('#5D7DB3');
 const isCollapse = computed(() => !appStore.sidebar.opened);
 
 const activeMenu = computed(() => {
@@ -52,4 +70,14 @@ const activeMenu = computed(() => {
 
 const bgColor = computed(() => sideTheme.value === 'theme-dark' ? variables.menuBackground : variables.menuLightBackground);
 const textColor = computed(() => sideTheme.value === 'theme-dark' ? variables.menuColor : variables.menuLightColor);
+
+// 折叠时，关闭搜索菜单
+const closeMenuItem = () => {
+  if (isCollapse.value) {
+    // console.log('menuRef', menuRef.value)
+    // menuRef.value.close('searchMenuDom')
+    // document.body.focus()
+    searchMenuDomRef.value.blur()
+  }
+}
 </script>

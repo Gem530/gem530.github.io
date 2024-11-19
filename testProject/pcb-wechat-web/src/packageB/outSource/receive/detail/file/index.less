@@ -1,0 +1,18 @@
+.receive-card {
+  //min-height: 100vh;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 20px 32px;
+  box-sizing: border-box;
+
+  .receiveFile {
+    flex: none;
+    width: calc((100% - 20px) / 3);
+    height: 200px;
+    margin-bottom: 20px;
+
+    &:not(:nth-child(3n)) {
+      margin-right: 10px;
+    }
+  }
+}

@@ -24,6 +24,8 @@ export interface DeptVO extends BaseEntity {
   delFlag: string;
   ancestors: string;
   menuId: string | number;
+  fileList: [];
+  isProduction: string;
 }
 
 /**
@@ -44,4 +46,6 @@ export interface DeptForm {
   delFlag?: string;
   ancestors?: string;
   isCompany?: string;
+  fileList?: [];
+  isProduction?: string;
 }

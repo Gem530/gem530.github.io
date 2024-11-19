@@ -229,7 +229,7 @@ import IntervalNumber from './IntervalNumber.vue';
 import CheckboxSearch from './checkboxSearch.vue';
 
 interface filterElement {
-    filterType?: string, // 类型，element-plus的表单类型，目前有：input/number/radio/radioButton/checkbox/checkboxButton/time/date/select/selectMultiple/switch/intervalNumber/intervalDate/intervalTime
+    filterType?: string, // 类型，element-plus的表单类型，目前有：input/number/radio/radioButton/checkbox/checkboxButton/time/date/select/selectMultiple/switch/intervalNumber/intervalDate/intervalTime/checkboxSearch
     filterData?: any,
     filterParam?: any,
     filterCustom?: {
@@ -259,7 +259,7 @@ defineExpose({  })
   
 <style lang="scss" scoped>
 .filter-box-search {
-    padding: 2px 5px;
+    // padding: 2px 5px;
 }
 
 .tooltip-mask {

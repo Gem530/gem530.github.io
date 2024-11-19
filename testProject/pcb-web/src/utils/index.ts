@@ -321,3 +321,30 @@ export const removeClass = (ele: HTMLElement, cls: string) => {
 export const isExternal = (path: string) => {
   return /^(https?:|http?:|mailto:|tel:)/.test(path);
 };
+
+// js下载图片
+export const downloadImg = (url: string) => {
+  let a = document.createElement('a')
+  a.href = url
+  a.style.display = 'none'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  // let img = new Image()
+  // let dataUrl = ''
+  // let start = url.lastIndexOf('/')
+  // let end = url.indexOf('?')
+  // let fileName = url.slice(start + 1, end)
+  // console.log(fileName)
+  // img.src = url
+  // img.crossOrigin = 'anonymous'
+  // img.onload = () => {
+  //   let canvas = document.createElement('canvas')
+  //   let width = img.width
+  //   let height = img.height
+  //   canvas.width = width
+  //   canvas.height = height
+  //   canvas.getContext('2d')?.drawImage(img, 0, 0, width, height)
+  //   dataUrl = canvas.toDataURL('image/png')
+  // }
+}

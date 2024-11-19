@@ -27,7 +27,7 @@
             <el-col :span="24" align="right">
               <!-- <div style="">已发数量：{{(tableData[0] || {}).outTotal || 0}}</div> -->
               <p class="totalTitle">已发数量：{{ tableTotal }}</p>
-              <el-button type="primary" @click="handleAddOrder">新增 </el-button>
+              <el-button type="primary"  v-if="checkPermi(['outsource:halfProcess:edit'])" @click="handleAddOrder">新增 </el-button>
               <el-button plain @click="handleExportBefore">导出 </el-button>
             </el-col>
           </el-row>
@@ -54,26 +54,28 @@
           <div>{{ unitOptions.find(v => v.value == row.unit)?.label }}</div>
         </template>
         <template #default-prodQuantity="{ row }">
-          <div>{{ row.prodQuantity?Number(row.prodQuantity).toFixed(0):0 }}</div>
+          <div>{{ row.prodQuantity?Number(row.prodQuantity):0 }}</div>
         </template>
         <template #default-sendQuantity="{ row }">
-          <div>{{ row.sendQuantity?Number(row.sendQuantity).toFixed(0):0 }}</div>
+          <div>{{ row.sendQuantity?Number(row.sendQuantity):0 }}</div>
         </template>
         <template #default-waitQuantity="{ row }">
-          <div>{{ row.waitQuantity?Number(row.waitQuantity).toFixed(0):0 }}</div>
+          <div>{{ row.waitQuantity?Number(row.waitQuantity):0 }}</div>
         </template>
         <template #default-quantity="{ row }">
-          <div>{{ row.quantity?Number(row.quantity).toFixed(2):0 }}</div>
+          <div>{{ row.quantity?Number(row.quantity):0 }}</div>
         </template>
         <template #default-make="scope">
           <el-button link type="primary" v-show="wxhSwitch && scope.row.quantity-scope.row.sendQuantity > 0
                   && scope.row.detailStatus === '1'" @click="handleStatement(scope.row)">结单</el-button>
           <el-button link type="primary" @click="doPrint(scope.row)">打印 </el-button>
-          <el-button link type="primary" v-show="scope.row.isReceive != '1' && scope.row.isConfirmed == '0'" @click="handleUpdate(scope.row)" >编辑
+          <el-button link type="primary" v-show="scope.row.isReceive != '1' && scope.row.isConfirmed == '0'"
+          v-if="checkPermi(['outsource:halfProcess:edit'])" @click="handleUpdateOrder(scope.row)" >编辑
           </el-button>
           <el-button link type="primary" v-show="scope.row.isReceive != '1' && scope.row.isConfirmed == '0'" @click="handleDelete(scope.row)"  v-if="checkPermi(['outsource:halfProcess:del'])">删除
           </el-button>
-          <el-button link type="primary" v-show="scope.row.isReceive != '1'&&scope.row.businessType=='0'&&Number(scope.row.waitReworkQuantity)>0" @click="handleRework(scope.row)" >
+          <!-- <el-button link type="primary" v-show="scope.row.isReceive != '1'&&scope.row.businessType=='0'&&Number(scope.row.waitReworkQuantity)>0" @click="handleUpdateReworkOrder(scope.row)" v-if="checkPermi(['outsource:halfProcess:rework'])" > -->
+          <el-button link type="primary"  @click="handleUpdateReworkOrder(scope.row)">
             返工
           </el-button>
               <!-- <el-button link type="primary" @click="handleSelect(scope.row)"
@@ -108,7 +110,7 @@
               <div>{{ row.waitQuantity?Number(row.waitQuantity).toFixed(0):0 }}</div>
             </template>
             <template #default-quantity="{ row }">
-              <div>{{ row.quantity?Number(row.quantity).toFixed(2):0 }}</div>
+              <div>{{ row.quantity ? Number(parseFloat(row.quantity).toFixed(2)).toString() : 0 }}</div>
             </template>
             <template #default-confirmStatus="scope">
               <div v-for="item in confirmStatusOptions">
@@ -151,7 +153,7 @@
               <div>{{ row.waitQuantity?Number(row.waitQuantity).toFixed(0):0 }}</div>
             </template>
             <template #default-quantity="{ row }">
-              <div>{{ row.quantity?Number(row.quantity).toFixed(2):0 }}</div>
+              <div>{{ row.quantity ? Number(parseFloat(row.quantity).toFixed(2)).toString() : 0 }}</div>
             </template>
             <template #default-confirmStatus="scope">
               <div v-for="item in confirmStatusOptions">
@@ -210,23 +212,53 @@
             <el-form-item v-show="unitSchemeShow" label="外发单位" prop="unit">
               <el-radio-group :disabled="unitCheck" v-model="form.unit" @change="unitChange">
                 <el-radio v-for="unit in unitList" :key="unit.unit" :label="unit.unit" :disabled="unit.disabled">{{
-                  unit.unitName }}{{ unit.disabled }}</el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24"></el-col>
-          <el-col :span="24">
-            <el-form-item v-show="typeShow" label="外发类型" prop="type" @change="typeChange">
-              <el-radio-group v-model="form.type" :disabled="!dialog.title?.includes('添加')&&!dialog.title?.includes('返工')">
-                <el-radio v-for="type in typeList" :key="type.id" :label="type.id">{{ type.typeName }}</el-radio>
+                  unit.unitName }}</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-col>
 
           <el-col :span="24">
+            <el-form-item v-show="typeShow" label="外发类型" prop="type" @change="typeChange">
+              <el-radio-group v-model="form.type" :disabled="!dialog.title?.includes('添加')&&!dialog.title?.includes('返工')">
+                <el-radio v-for="item in typeList" :key="item.id" :label="item.id">{{ item.typeName }}</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+            <el-col :span="24">
+              <el-form-item v-show="typeTipShow && !drawer.title?.includes('返工')" >
+                <!-- 显示【前工序【xxx】已接单】【已发】【待发】，并在待发后面加个？ -->
+              <div class="global-flex flex-start" v-if="beforeCraftOpenFlag=='1'" >前工序【{{form.outSourcePreCraftName}}】已接单数量：{{form.total}} 已发：{{form.alreadySendQuantity}} 待发：{{form?.maxQuantity}} <el-tooltip
+                      effect="dark"
+                      placement="top-start"
+                      content="待发数量=前工序已接单数量-已发数量"
+                    >
+                      <el-icon style="margin-left:5px;"><QuestionFilled /></el-icon>
+                    </el-tooltip></div>
+              <div  class="global-flex flex-start"  v-else>排产总量：{{form.total}} 已发：{{form.alreadySendQuantity}} 待发：{{form?.maxQuantity}} <el-tooltip
+                      effect="dark"
+                      placement="top-start"
+                      content="待发数量=排产总量-已发数量"
+                    >
+                      <el-icon style="margin-left:5px;"><QuestionFilled /></el-icon>
+                    </el-tooltip></div>
+            </el-form-item>
+              <el-form-item v-show="typeTipShow && drawer.title?.includes('返工')" >
+                <!-- 显示【前工序【xxx】已接单】【已发】【待发】，并在待发后面加个？ -->
+              <div class="global-flex flex-start">本单外发：{{form.total}}{{unitOptions.find(v => v.value == form.orderUnit)?.label }} 本单已返工：{{form.alreadySendQuantity}} 本单可返工：{{form?.maxQuantity}} <el-tooltip
+                      effect="dark"
+                      placement="top-start"
+                      content="本单可返工 = 本单外发 - 本单已返工"
+                    >
+                      <el-icon style="margin-left:5px;"><QuestionFilled /></el-icon>
+                    </el-tooltip></div>
+            </el-form-item>
+
+              </el-col>
+
+          <el-col :span="24">
             <el-form-item label="加工数量" prop="quantity">
-              <el-input type="number" :max="form.maxQuantity" v-model="form.quantity" placeholder="请输入加工数量">
-                <template #append>{{ form.maxQuantity }}</template>
+              <el-input type="number" :max="form?.maxQuantity" v-model="form.quantity" placeholder="请输入加工数量">
+                <template #append>{{ form?.maxQuantity }}</template>
               </el-input>
             </el-form-item>
           </el-col>
@@ -251,6 +283,9 @@
           <el-col :span="24">
             <el-form-item label="备注">
               <el-input v-model="form.remark" type="textarea" :rows="3"  maxlength="2000" placeholder="请输入备注"></el-input>
+              <!-- <div style="color: red;">
+              备注内禁止填写加工要求，否则无法自动计价，如需修改请联系工程修改工艺单后重新外发。
+              </div> -->
             </el-form-item>
           </el-col>
         </el-row>
@@ -259,7 +294,7 @@
         <div style="display: flex; justify-content: center;">
           <el-button v-show="dialog.title?.includes('添加')" :loading="buttonLoading" type="primary" @click="submitForm">确 定
           </el-button>
-          <el-button v-show="dialog.title?.includes('返工')" :loading="buttonLoading" type="primary" @click="submitReworkForm">确 定 </el-button>
+          <el-button v-show="dialog.title?.includes('返工')" :loading="buttonLoading" type="primary" @click="confirmEditForm">确 定 </el-button>
           <el-button v-show="dialog.title?.includes('修改')" :loading="buttonLoading" type="primary"
             @click="submitEditForm">确 定 </el-button>
           <el-button :loading="buttonLoading" @click="cancel">取 消</el-button>
@@ -267,20 +302,26 @@
       </template>
     </el-dialog>
 
-    <el-drawer :title="drawer.title" v-model="drawer.visible" size="80%">
+    <el-drawer :title="drawer.title" v-model="drawer.visible" size="80%" destroy-on-close>
       <el-card class="mb8">
-        <XTable :pageShow="false" ref="confirmTable" :data="halfOrderList" border :columnList="orderColumnList" class="mb8">
+        <XTable :pageShow="false" ref="confirmTable" :data="halfOrderList" border :columnList="orderColumnList" class="mb8" toolId="outsourceSourceHalfProcessOrderDrawer" :loading="halfOrderListLoading">
           <template #default-make="scope">
-            <el-button v-if="!drawer.title?.includes('详情') || drawer.title?.includes('审核')" link type="primary"
-              @click="handleDeleteForm(scope.row)">删除
-            </el-button>
+            <el-button link type="primary" v-show="scope.row.isReceive != '1' " v-if="checkPermi(['outsource:halfProcess:edit']) && drawer.title?.includes('编辑外协加工返工单')" @click="handleUpdateRework(scope.row)" >编辑
+          </el-button>
+           <el-button link type="primary"  v-if="checkPermi(['outsource:halfProcess:edit']) && drawer.title?.includes('外协加工订单返工')" @click="handleRework(scope.row,false)" >编辑
+          </el-button>
+            <el-button link type="primary" v-show="scope.row.isReceive != '1' " v-if="checkPermi(['outsource:halfProcess:edit']) && !drawer.title?.includes('返工')" @click="handleUpdate(scope.row)" >编辑
+          </el-button>
+          <el-button link type="primary" v-show="scope.row.isReceive != '1'" @click="handleDeleteForm(scope.row)"  v-if=" (drawer.title?.includes('新增') || (drawer.title?.includes('编辑')) && !drawer.title.includes('返工')&&checkPermi(['outsource:halfProcess:del']))">删除
+          </el-button>
           </template>
           <template #default-unit="{ row }">
             <div>{{ unitOptions.find(v => v.value == row.unit)?.label }}</div>
           </template>
         </XTable>
-        <el-row>
+        <el-row v-if="!drawer.title?.includes('返工')">
           <el-button type="primary" plain v-show="!(drawer.title?.includes('详情') || drawer.title?.includes('审核'))"
+            :loading="buttonLoading"
             @click="handleAdd">新增记录
           </el-button>
         </el-row>
@@ -292,7 +333,7 @@
           <el-row :gutter="10">
             <el-col :span="8">
               <el-form-item label="供应商名称：" :label-width="formLabelWidth" prop="supplierId">
-                <el-select v-model="form.supplierId" placeholder="请选择供应商"  style="width: 100%" @change="supplierChange" filterable>
+                <el-select v-model="form.supplierId" placeholder="请选择供应商" :disabled="supplierDisable" style="width: 100%" @change="supplierChange" filterable>
                   <el-option v-for="item in supplierList" :key="item.id" :label="item.supplierName" :value="item.id" />
                 </el-select>
               </el-form-item>
@@ -305,7 +346,7 @@
             </el-col>
             <el-col :span="10">
               <el-form-item label="收货地址:" :label-width="formLabelWidth" prop="addressId">
-                <el-select v-model="form.addressId" :collapse-tags="true"  style="width: 100%" filterable placeholder="请选择地址">
+                <el-select v-model="form.addressId" :collapse-tags="true" :disabled="supplierDisable" style="width: 100%" filterable placeholder="请选择地址">
                   <el-option v-for="item in addressList"
                   :key="item.id"
                   :disabled="item.status==0"
@@ -321,8 +362,12 @@
         <div style="display: flex; justify-content: center;">
           <span class="dialog-footer">
             <el-button :loading="buttonLoading" @click="drawerCancel">取消</el-button>
-            <el-button v-if="!(drawer.title?.includes('详情') || drawer.title?.includes('审核'))" :loading="buttonLoading"
-              type="primary" @click="submitAddForm">确 定</el-button>
+            <el-button v-if="drawer.title=='新增外协加工单'" :loading="buttonLoading"
+              type="primary" @click="submitAddForm">确定</el-button>
+            <el-button v-if="drawer.title?.includes('编辑')" :loading="buttonLoading"
+              type="primary" @click="submitUpdateForm">确定</el-button>
+            <el-button v-if="drawer.title=='外协加工订单返工'" :loading="buttonLoading"
+              type="primary" @click="submitReworkForm">确 定</el-button>
           </span>
         </div>
       </template>
@@ -552,7 +597,9 @@ import {
   confirmSourceHalfProcessOrder,
   supplierOrderDetail,
   compareList,
-  sourceHalfStatementDetail, sourceHalfCancelOrder
+  sourceHalfStatementDetail, sourceHalfCancelOrder,
+  listByOutSourceCode,
+  batchEditSourceHalfProcessOrder
 } from '@/api/outsource/sourceHalfProcessOrder';
 import {
   SourceHalfProcessOrderVO,
@@ -603,11 +650,13 @@ const planCommodityList = ref<any[]>([]);
 const halfOrderList = ref<SourceHalfProcessOrderForm[]>([]);
 
 const buttonLoading = ref(false);
+const halfOrderListLoading = ref(false);
 const productionCardShowFlag = ref(false);
 
 const typeSetShow = ref(false);
 const typePnlShow = ref(false);
 const typeShow = ref(false);
+const typeTipShow = ref(false);
 const unitSchemeShow = ref(false);
 const unitCheck = ref(true);
 const loading = ref(true);
@@ -616,12 +665,14 @@ const showSearch = ref(true);
 const ids = ref<Array<string | number>>([]);
 const single = ref(true);
 const multiple = ref(true);
+const beforeCraftOpenFlag = ref('0');
 const total = ref(0);
 const orderFormRef = ref<ElFormInstance>();
 const formLabelWidth = '140px'
 const queryFormRef = ref<ElFormInstance>();
 const sourceHalfProcessOrderFormRef = ref<ElFormInstance>();
 const typeList = ref<any>([]);
+const supplierDisable = ref(false);
 const reduceList = ref<any>(
   {
     pnlList: [],
@@ -707,7 +758,7 @@ const checkQuantity = (rule: any, value: any, callback: any) => {
     return callback(new Error('请输入合理的数据'))
   }
 
-  if (form.value.maxQuantity) {
+  if (form.value.maxQuantity!=undefined && form.value.maxQuantity != null) {
     if (Number(value) > Number(form.value.maxQuantity)) {
       return callback(new Error('请输入不大于' + form.value.maxQuantity + '的数字'))
     } else {
@@ -919,14 +970,16 @@ const columnList = ref([
   { title: '待发数量', width: '100', field: 'waitQuantity', align: 'center', },
   { title: '本单数量', width: '100', field: 'quantity', align: 'center', },
   { title: '返工数量', width: '100', field: 'reworkQuantity', align: 'center', },
-  { title: '加工类型', width: '60', field: 'businessType', align: 'center', },
+  { title: '加工类型', width: '80', field: 'businessType', align: 'center',
+  filterType: 'radioButton',filterData: () => typeOptions.value
+},
   { title: '长', width: '100', field: 'length', align: 'center', },
   { title: '宽', width: '100', field: 'width', align: 'center', },
   { title: '外发单位', width: '100', field: 'unit', align: 'center', },
   { title: '外发类型', width: '100', field: 'typeName', align: 'center', },
   { title: '加工要求', width: '100', field: 'requirement', align: 'center', },
   { title: '备注', width: '100', field: 'remark', align: 'center', },
-  { title: '表面处理类型', width: '100', field: 'surfaceTreatment', align: 'center', },
+  { title: '表面处理类型', width: '100', field: 'surfaceTreatment', align: 'center' },
   {
     title: '下单人', width: '100', field: 'createByName', align: 'center', fixed: 'right', filterType: 'input',
     filterParam: { placeholder: '请输入下单人' }
@@ -1146,6 +1199,11 @@ const commodityChange = (commodityId: any) => {
   let detailList = proItem.reduce((acc, item) => acc.concat(item.planProductionList), []);
   let uniqueDetailList = Array.from(new Set(detailList));
   productionList.value = uniqueDetailList;
+  // 将productionList按照对象中的productionCode这个string进行倒序排序
+  productionList.value.sort((a, b) => {
+    return b.productionCode.localeCompare(a.productionCode);
+  });
+
   form.value.productionId = undefined;
 
 }
@@ -1193,9 +1251,14 @@ const geTenantVal = (info: any) => {
     info.values = info.values ? info.values[0] : "";
     info.defaultValue = info.defaultValue ? info.defaultValue[0] : "";
   }
+  //数字类型判断需要单独处理
   if (info.type == '8') {
-    info.values = Number(info.values ? info.values[0] : 0);
-    info.defaultValue = Number(info.defaultValue ? info.defaultValue[0] : 0);
+      info.defaultValue = Number(info.defaultValue ? info.defaultValue[0] : 0);
+      if(info.values == undefined || info.values == 'null' || info.values == null){
+        info.values = info.defaultValue
+      }else{
+        info.values = Number(info.values[0]);
+      }
   }
   info.value = info.values ? info.values : info.defaultValue;
   return info;
@@ -1222,6 +1285,7 @@ const sumNum = (list: QuotationVO[], field: string) => {
   });
   return count;
 };
+
 // 获取 搜索条件
 const craftChange = async () => {
   console.log("craftChange...")
@@ -1238,6 +1302,7 @@ const craftChange = async () => {
   await getUnitList({ productionId: form.value.productionId, craftId: form.value.craftId }).then(res => {
     unitList.value = res.data.unitList;
     unitSchemeShow.value = true;
+    beforeCraftOpenFlag.value = res.data.beforeCraftOpenFlag;
   });
 
   //判断halfOrderList是否有数据
@@ -1286,7 +1351,7 @@ const craftChange = async () => {
             + item.name + ':';
           if (item.differPNL && item.differPNL.length > 0) {
             item.differPNL.forEach(differ => {
-              requirement += (differ.pnlName == null ? ' ' : differ.pnlName) + ':' + (differ.parameterValue == null ? differ.defaultValue : differ.parameterValue);
+              requirement += (differ.pnlName == null ? ' ' : differ.pnlName) + ':' +  differ.defaultValue ;
               + (differ.unit == null ? '' : differ.unit) + '\n';
             })
           }
@@ -1344,10 +1409,12 @@ const craftChange = async () => {
 const unitChange = () => {
   if (!form.value.unit) {
     typeShow.value = false;
+
     unitSchemeShow.value = false;
     return;
   }
   typeShow.value = true;
+  typeTipShow.value = false;
   let unit = unitList.value.filter(item => item.unit == form.value.unit);
   typeList.value = unit[0].typeList;
   cancelLengthWidth();
@@ -1384,6 +1451,7 @@ const cancelLengthWidth = () => {
 }
 const cancelType = () => {
   typeShow.value = false;
+  typeTipShow.value = false;
 
   form.value.unit = undefined;
   form.value.type = undefined;
@@ -1401,20 +1469,36 @@ const typeChange = () => {
   }
   let type = typeList.value.filter((item: any) => item.id == form.value.type);
 
+  typeTipShow.value = true;
   setReduceWL(type);
-  console.log("type[0]", type[0]);
+
   if (type[0]) {
     const rVal = reduceVal.value ? reduceVal.value : 0;
     const length = type[0].length ? type[0].length : 0;
     const width = type[0].width ? type[0].width : 0;
-    console.log("扣减前length,w",length,width)
-    console.log("扣减 length,w",rVal)
-    console.log("扣减后length,w",form.value.length,form.value.width)
     form.value.length = length - rVal;
     form.value.width = width - rVal;
     form.value.quantity = type[0].quantity;
     form.value.maxQuantity = type[0].quantity;
     form.value.typeName = type[0].typeName;
+    form.value.total = type[0].total;
+    form.value.outSourcePreCraftName = type[0].outSourcePreCraftName;
+
+    //
+    if(!dialog.title.includes("返工")){
+
+       form.value.alreadySendQuantity = type[0].alreadySendQuantity;
+
+    }else{
+       if(type[0].reworkQty){
+        form.value.alreadySendQuantity = Number(type[0].reworkQty);
+      }else{
+       form.value.alreadySendQuantity = 0;
+        }
+    }
+     if(!form.value.alreadySendQuantity){
+        form.value.alreadySendQuantity = 0;
+      }
   }
 
 }
@@ -1518,7 +1602,6 @@ const setReduceWL = (_type: any) => {
     } else if (typeCJ) {
       matchKey = ReduceCodeENUM.GX_OUT_PNL_CJ;
     }
-    console.log("matchKey",matchKey);
     const pnl = reduceList.value.pnlList.filter((rd: any) => rd.code == matchKey);
     WLObj = pnl[0] ? pnl[0] : 0;
   }
@@ -1540,6 +1623,7 @@ const setReduceWL = (_type: any) => {
   } else {
     return;
   }
+  console.log("WLObj", WLObj);
   reduceVal.value = WLObj.value;
 }
 // 获取 搜索条件
@@ -1615,8 +1699,13 @@ const drawerCancel = () => {
 
 /** 表单重置 */
 const reset = () => {
+  //记录 供应商 与地址
+  let supplierId = form.value.supplierId;
+  let addressId = form.value.addressId;
   form.value = { ...initFormData };
   sourceHalfProcessOrderFormRef.value?.resetFields();
+  form.value.supplierId = supplierId;
+  form.value.addressId = addressId;
 }
 
 /** 搜索按钮操作 */
@@ -1640,6 +1729,7 @@ const handleSelectionChange = (selection: SourceHalfProcessOrderVO[]) => {
 
 /** 新增按钮操作 */
 const handleAdd = () => {
+  typeTipShow.value = false;
   reset();
   unitCheck.value = true;
   productionList.value = [];
@@ -1648,22 +1738,58 @@ const handleAdd = () => {
 
   unitChange();
   dialog.visible = true;
-
-
   dialog.title = "添加外协加工订单";
 }
 
 
 
-
-
 /** 新增按钮操作 */
 const handleAddOrder = () => {
+  supplierDisable.value = false;
   getAddressList();
   halfOrderList.value = [];
   reset();
+  form.value.supplierId = undefined;
+  form.value.addressId = undefined;
   drawer.visible = true;
-  drawer.title = "外协加工单";
+  drawer.title = "新增外协加工单";
+  //查询外协供应商列表
+  queryOutSourceSupplierList();
+}
+const editOrderCode = ref('');
+/** 编辑按钮操作 */
+const handleUpdateOrder = (row?: SourceHalfProcessOrderVO) => {
+  supplierDisable.value = false;
+  console.log("row", row);
+
+  getAddressList();
+  halfOrderList.value = [];
+  reset();
+  //loading
+  buttonLoading.value = true;
+  halfOrderListLoading.value = true;
+  drawer.visible = true;
+  if(row?.businessType=='1'){
+    drawer.title = "编辑外协加工返工单";
+  }else{
+  drawer.title = "编辑外协加工单";
+  }
+  editOrderCode.value = row?.code?row?.code:'';
+  listByOutSourceCode(editOrderCode.value).then(res => {
+    halfOrderList.value = res.data;
+    halfOrderListLoading.value = false;
+    //遍历halfOrderList 判断是否收过货
+    halfOrderList.value.forEach(item => {
+      if(item.isReceive && item.isReceive=='1'){
+        supplierDisable.value = true;
+      }
+    });
+    queryOutSourceSupplierList()
+    handleUpdate(row);
+
+    buttonLoading.value = false;
+  });
+
 }
 
 /** 详情按钮操作 */
@@ -1699,34 +1825,51 @@ const handleSelect = async (row?: SourceHalfProcessOrderVO) => {
 }
 /** 修改按钮操作 */
 const handleUpdate = async (row?: SourceHalfProcessOrderVO) => {
+  typeTipShow.value = true;
   reset();
-  const product = ref<any>();
   //先查排产单
   dialog.visible = true;
+  if(row?.businessType=='1'){
+    dialog.title = "编辑外协加工返工订单";
+  }else{
   dialog.title = "修改外协加工订单";
+  }
   dialogTableLoading.value = true
   let res;
   if(row?.businessType=='1'){
-    res = await getReworkAllUnitList({ id: row?.businessId }).finally(() => { dialogTableLoading.value = false });
+    res = await getReworkAllUnitList({ id: row?.businessId, businessId:row.id }).finally(() => { dialogTableLoading.value = false });
   }else{
-    res = await getUnitList({ id: row?.id }).finally(() => { dialogTableLoading.value = false });
+    if(row?.id){
+      res = await getUnitList({ id: row?.id }).finally(() => { dialogTableLoading.value = false });
+    }else{
+      res = await getUnitList({ productionId: row.productionId, craftId: row.craftId }).finally(() => { dialogTableLoading.value = false });
+    }
+    // res = await getUnitList({ id: row?.id }).finally(() => { dialogTableLoading.value = false });
   }
-  Object.assign(form.value, row);
+  form.value = deepClone(row);
   //把form.value中的tyep 转成number
   // form.value.type = Number(form.value.type);
   form.value.type = String(form.value.type);
   if (res.data.unitList) {
-    form.value.maxQuantity = res.data.unitList[0].typeList[0].quantity;
-    //返工编辑要加订单数量
-    if(form.value.businessType=='1'){
-      form.value.maxQuantity =Number(form.value.maxQuantity)+Number(form.value.quantity);
-    }
-    typeList.value = res.data.unitList[0].typeList;
+    //找到对应的unitList
+    form.value.maxQuantity = res.data.unitList.find(item => item.unit == form.value.unit).typeList.find(item => item.id == form.value.type).quantity;
+    typeList.value = res.data.unitList.find(item => item.unit == form.value.unit).typeList;
     unitList.value = res.data.unitList;
     typeShow.value = true;
     unitSchemeShow.value = true;
+    let type = typeList.value.filter((item: any) => item.id == form.value.type);
+     form.value.total = type[0].total;
+    form.value.outSourcePreCraftName = type[0].outSourcePreCraftName;
+    form.value.orderUnit = type[0].orderUnit;
+    if(form.value.businessType=='1'){
+    //已发数量
+    form.value.alreadySendQuantity = Number(type[0].reworkQty);
+    }else{
+      //已发数量
+    form.value.alreadySendQuantity = Number(type[0].alreadySendQuantity);
+    }
+    beforeCraftOpenFlag.value = res.data.beforeCraftOpenFlag;
   }
-  console.log(typeList.value);
   typeList.value.forEach(item => {
     item.id = String(item.id);
   });
@@ -1737,45 +1880,156 @@ const handleUpdate = async (row?: SourceHalfProcessOrderVO) => {
     }
   }
   unitCheck.value = true;
+  //检测form中的supplierId是否在supplierList中
+  checkSupplier();
 }
 
-const handleRework = async (row?: AnalyserOptions) => {
+/**返工按钮操作 */
+const handleUpdateReworkOrder = (item?: SourceHalfProcessOrderVO) => {
+  //拷贝row
+ let row = deepClone(item);
+  getAddressList();
+  halfOrderList.value = [];
   reset();
-  const product = ref<any>();
+  //loading
+  buttonLoading.value = true;
+
+  drawer.visible = true;
+  drawer.title = "外协加工订单返工";
+  let code = row?.code?row?.code:'';
+  //添加row
+    halfOrderList.value.push(row);
+
+    queryOutSourceSupplierList()
+
+    // 延迟0.5秒 后调用 handleRework(row);
+    setTimeout(() => {
+      handleRework(row,true);
+    }, 500);
+
+    buttonLoading.value = false;
+}
+/**
+ * 返工单的修改
+ * @param row
+ */
+const handleUpdateRework = async (row?: AnalyserOptions) => {
+   reset();
+  //先查排产单
+  dialog.visible = true;
+  dialog.title = "编辑外协加工返工订单";
+  dialogTableLoading.value = true;
+
+  const res = await getReworkAllUnitList({id: row?.businessId,businessId:row.id }).finally(() => { dialogTableLoading.value = false });
+  Object.assign(form.value, row);
+
+  //把form.value中的tyep 转成number
+  form.value.type = String(form.value.type);
+  if (res.data.unitList) {
+
+    unitList.value = res.data.unitList;
+
+    let unit = unitList.value.filter(item => item.unit == form.value.unit);
+    console.log("unit",unit.length);
+
+    if(unit?.length){
+      typeList.value = unit[0].typeList;
+    }else{
+      form.value.unit = unitList.value[0].unit;
+      typeList.value = unitList.value[0].typeList;
+      form.value.type = typeList.value[0].id;
+    }
+    typeList.value.forEach(item => {
+      item.id = String(item.id);
+    });
+    let type = typeList.value.filter((item: any) => item.id == form.value.type);
+    if(!type.length){
+      type = typeList.value[0];
+    }
+    let typeQuantity = type[0].quantity;
+    if(row.quantity > typeQuantity){
+      form.value.quantity = typeQuantity;
+    }
+    //默认已发数量为选中的类型的已发数量
+    form.value.alreadySendQuantity = Number(type[0].reworkQty);
+    form.value.maxQuantity = Number(type[0].quantity);
+    form.value.total = type[0].total;
+    form.value.orderUnit = type[0].orderUnit;
+
+    typeShow.value = true;
+    typeTipShow.value = true;
+    unitSchemeShow.value = true;
+  }
+
+  typeList.value.forEach(item => {
+    item.id = String(item.id);
+  });
+
+  if(form.value.unit=='2'||form.value.unit=='3'){
+    if(form.value.quantity){
+      form.value.quantity=Number(form.value.quantity).toFixed(0);
+    }
+  }
+  unitCheck.value = true;
+
+}
+/**
+ * 新增返工单
+ */
+const handleRework = async (row: AnalyserOptions,isAdd?:boolean) => {
+  reset();
   //先查排产单
   dialog.visible = true;
   dialog.title = "外协加工订单返工";
   dialogTableLoading.value = true;
+  const res = await getReworkAllUnitList({id: row?.id }).finally(() => { dialogTableLoading.value = false });
+  form.value= deepClone(row);
 
-  const res = await getReworkAllUnitList({  id: row?.id }).finally(() => { dialogTableLoading.value = false });
-  Object.assign(form.value, row);
   //把form.value中的tyep 转成number
   form.value.type = String(form.value.type);
   if (res.data.unitList) {
-    form.value.maxQuantity = res.data.unitList[0].typeList[0].quantity;
-    typeList.value = res.data.unitList[0].typeList;
+
     unitList.value = res.data.unitList;
+
+    let unit = unitList.value.filter(item => item.unit == form.value.unit);
+
+    if(unit?.length){
+      typeList.value = unit[0].typeList;
+    }else{
+      form.value.unit = unitList.value[0].unit;
+      typeList.value = unitList.value[0].typeList;
+      form.value.type = typeList.value[0].id;
+    }
+    typeList.value.forEach(item => {
+      item.id = String(item.id);
+    });
+    let type = typeList.value.filter((item: any) => item.id == form.value.type);
+    if(!type.length){
+      type = typeList.value[0];
+    }
+    // if (isAdd) {
+    //   form.value.length = type[0].length;
+    //   form.value.width = type[0].width;
+    // }
+    let typeQuantity = Number(type[0].quantity);
+
+     if(form.value.quantity){
+      form.value.quantity = Number(form.value.quantity);
+    } else {
+      form.value.quantity = 0;
+    }
+    if(form.value.quantity > typeQuantity){
+      form.value.quantity = typeQuantity;
+    }
+    //默认已发数量为选中的类型的已发数量
+    form.value.alreadySendQuantity = Number(type[0].reworkQty);
+    form.value.maxQuantity = Number(type[0].quantity);
+    form.value.total = type[0].total;
+    form.value.orderUnit = type[0].orderUnit;
+
     typeShow.value = true;
+    typeTipShow.value = true;
     unitSchemeShow.value = true;
-    form.value.quantity = form.value.maxQuantity;
-  }
-  console.log(typeList.value);
-  console.log(unitList.value);
-  typeList.value.forEach(item => {
-    item.id = String(item.id);
-  });
-  //如果返工单位不匹配，选中第一个单位与第一个类型
-  const allNotMatchedUnit =  unitList.value.every(unitObj => {
-    return unitObj.unit !== form.value.unit;
-  });
-  const allNotMatched =  typeList.value.every(typeObj => {
-    return typeObj.id !== form.value.type;
-  });
-  if(allNotMatchedUnit){
-    form.value.unit = unitList.value[0].unit;
-  }
-  if(allNotMatched){
-    form.value.type = typeList.value[0].id;
   }
 
   if(form.value.unit=='2'||form.value.unit=='3'){
@@ -1854,11 +2108,11 @@ const checkHandle = (): any => {
   })
 }
 
-/** 提交按钮 */
+/** 添加提交按钮 */
 const submitAddForm = () => {
   orderFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
-      if (halfOrderList.value.length == 0) {
+      if (halfOrderList.value.length == 0 && drawer.title?.includes('添加')) {
         proxy?.$modal.msgError("请添加外协加工单");
         return;
       }
@@ -1883,8 +2137,6 @@ const submitAddForm = () => {
       buttonLoading.value = false;
       return;
     }
-
-
       await addSourceHalfProcessOrder(halfOrderList.value).finally(() => buttonLoading.value = false);
       proxy?.$modal.msgSuccess("添加成功");
       getList();
@@ -1896,10 +2148,70 @@ const submitAddForm = () => {
     }
   });
 }
+/** 编辑提交按钮 */
+const submitUpdateForm = () => {
+  orderFormRef.value?.validate(async (valid: boolean) => {
+    if (valid) {
 
-/** 提交按钮 */
+      buttonLoading.value = true;
+        //提示 此单所有外发记录已删除，将会同步删除外协单，是否确认？
+      if (!halfOrderList.value || halfOrderList.value.length == 0) {
+        proxy?.$modal.confirm('此单所有外发记录已删除，将会同步删除外协单，是否确认？').then(()=>{
+          let bo= {supplierId:form.value.supplierId,addressId:form.value.addressId,outSourceHalfProcessOrderBoList:halfOrderList.value,code:editOrderCode.value};
+         batchEditSourceHalfProcessOrder(bo).then(()=>{
+            proxy?.$modal.msgSuccess("修改成功");
+            getList();
+            drawer.visible = false;
+            buttonLoading.value = false;
+            halfOrderList.value = [];
+        }).finally(() => buttonLoading.value = false);
+        }).catch(()=>{
+          buttonLoading.value = false;
+          return;
+        });
+      }else{
+        //遍历halfOrderList 设置supplier_id
+        halfOrderList.value.forEach(item => {
+          item.supplierId = form.value.supplierId;
+          item.addressId = form.value.addressId;
+        });
+        let bo= {supplierId:form.value.supplierId,addressId:form.value.addressId,outSourceHalfProcessOrderBoList:halfOrderList.value,code:editOrderCode.value};
+        await batchEditSourceHalfProcessOrder(bo).finally(() => buttonLoading.value = false);
+        proxy?.$modal.msgSuccess("修改成功");
+        getList();
+        drawer.visible = false;
+        buttonLoading.value = false;
+        halfOrderList.value = [];
+      }
+    }
+  });
+}
+/** 确认返工按钮 */
+const confirmEditForm = () => {
+  sourceHalfProcessOrderFormRef.value?.validate(async (valid: boolean) => {
+    if (valid) {
+      //修改halfOrderList中的数据
+      halfOrderList.value.forEach(item => {
+        if (item.id == form.value.id) {
+          item.quantity = form.value.quantity;
+          item.length = form.value.length;
+          item.width = form.value.width;
+          item.type = form.value.type;
+          item.unit = form.value.unit;
+          item.remark = form.value.remark;
+          item.typeName = form.value.typeName;
+         }
+      });
+      dialog.visible = false;
+      buttonLoading.value = false;
+    }
+  });
+}
+
+/** 返工提交按钮 */
 const submitReworkForm = () => {
   halfOrderList.value=[];
+
   sourceHalfProcessOrderFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
 
@@ -1925,6 +2237,7 @@ const submitReworkForm = () => {
       getList();
       dialog.visible = false;
       buttonLoading.value = false;
+      drawer.visible = false;
     }
   });
 
@@ -1958,6 +2271,7 @@ const submitForm = () => {
     }
   });
 }
+
 /** 提交按钮 */
 const submitEditForm = () => {
   sourceHalfProcessOrderFormRef.value?.validate(async (valid: boolean) => {
@@ -1968,9 +2282,24 @@ const submitEditForm = () => {
         form.value.businessType = '1'
       };
       //放工
-      await updateSourceHalfProcessOrder(form.value).finally(() => buttonLoading.value = false);
-      proxy?.$modal.msgSuccess("修改成功");
-      radioTableHandle();
+      // await updateSourceHalfProcessOrder(form.value).finally(() => buttonLoading.value = false);
+      // proxy?.$modal.msgSuccess("修改成功");
+      // radioTableHandle();
+      // editDataMap.value.push(form.value);
+      //修改halfOrderList中的数据
+      halfOrderList.value.forEach(item => {
+
+        if((!form.value.id && form.value.index == item.index) || (form.value.id && form.value.id == item.id)){
+          item.quantity = form.value.quantity;
+          item.length = form.value.length;
+          item.width = form.value.width;
+          item.type = form.value.type;
+          item.unit = form.value.unit;
+          item.remark = form.value.remark;
+          item.requirement = form.value.requirement;
+          item.typeName = form.value.typeName;
+        }
+      });
       dialog.visible = false;
       buttonLoading.value = false;
     }
@@ -1979,8 +2308,15 @@ const submitEditForm = () => {
 
 /** 删除未提交的请求 */
 const handleDeleteForm = async (row?: SourceHalfProcessOrderForm) => {
+  if (row?.id) {
+  //从halfOrderList中删除，
+  halfOrderList.value = halfOrderList.value.filter(item => item.id != row?.id);
+  }else{
   //从halfOrderList中删除，
   halfOrderList.value = halfOrderList.value.filter(item => item.index != row?.index);
+  //查询供应商
+  }
+   queryOutSourceSupplierList()
 }
 
 /** 删除按钮操作 */
@@ -2059,7 +2395,7 @@ function updateCurrentTime() {
   update(); // 启动更新
 }
 
-import {listOutSourceSupplierListV2} from "@/api/outsource/sourceFullProcessOrder";
+import {listOutSourceSupplierListV2,listOutSourceSupplierListV4} from "@/api/outsource/sourceFullProcessOrder";
 import { deepClone } from '@/utils';
 
 const supplierList: any = ref([]);
@@ -2070,7 +2406,6 @@ const proList = ref<any[]>([]);
 const commodityList = async () => {
   const res = await listSourceHalfCommodityList();
   // commodityVoList.value = res.data
-console.log("commodityList",res.data);
 
   let comList: any = [];
   proList.value = res.data;
@@ -2088,16 +2423,34 @@ console.log("commodityList",res.data);
       hasCom.planList.push(item.planId);
     }
   })
-  console.log("commoditySetList", commoditySetList);
 
   commodityVoList.value = commoditySetList;
 
 }
 /** 查询外协供应商列表 */
 const queryOutSourceSupplierList = async () => {
-  const res = await listOutSourceSupplierListV2(form.value.craftId || -1);
-  supplierList.value = res.data
+  let craftIdStr = '';
+  if(halfOrderList.value){
+  //拼接craftId
+  halfOrderList.value.forEach((item: any) => {
+    craftIdStr += item.craftId + ',';
+  });
 }
+  const res = await listOutSourceSupplierListV4(craftIdStr);
+  supplierList.value = res.data
+  //检测form中的supplierId是否在supplierList中
+  checkSupplier();
+}
+/**
+ * 检测供应商是否在供应商列表中
+ */
+const checkSupplier = () => {
+  let hasSupplier =supplierList.value?.length&& supplierList.value.find((item: any) => item.id === form.value.supplierId);
+  if (!hasSupplier) {
+    form.value.supplierId = undefined;
+  }
+}
+
 const addressList: any = ref([]);
 
 import { listOutSourceAddressList } from "@/api/outsource/sourceFullProcessOrder";

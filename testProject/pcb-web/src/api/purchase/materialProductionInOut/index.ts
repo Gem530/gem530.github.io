@@ -100,3 +100,14 @@ export const delMaterialProductionInOut = (id: string | number | Array<string | 
     method: 'delete'
   });
 };
+
+/**
+ * 校验排产完成
+ * @param data
+ */
+export const checkProductionFinish = (data: any) => {
+  return request({
+    url: '/production/production/checkProductionFinish?productionId=' + data,
+    method: 'get',
+  });
+};

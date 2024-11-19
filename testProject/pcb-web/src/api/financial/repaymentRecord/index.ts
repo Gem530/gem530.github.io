@@ -234,6 +234,32 @@ export const approvePaymentAccount = (data:any) => {
 };
 
 /**
+ * 付款单审核通过(权限校验)
+ * @param query
+ * @returns {*}
+ */
+export const approvePaymentCheckPer = (data:any) => {
+  return request({
+    url: '/financial/repaymentRecord/approvePaymentCheckPer',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
+ * 收款单审核通过(权限校验)
+ * @param query
+ * @returns {*}
+ */
+export const approveRepaymentCheckPer = (data:any) => {
+  return request({
+    url: '/financial/repaymentRecord/approveRepaymentCheckPer',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
  * 审核通过预收
  * @param query
  * @returns {*}
@@ -248,6 +274,32 @@ export const approvePrePaymentAccount = (data:any) => {
 };
 
 /**
+ * 预付款单审核通过(权限校验)
+ * @param query
+ * @returns {*}
+ */
+export const approvePrePaymentCheckPer = (data:any) => {
+  return request({
+    url: '/financial/repaymentRecord/approvePrePaymentCheckPer',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
+ * 预收款单审核通过(权限校验)
+ * @param query
+ * @returns {*}
+ */
+export const approvePreRepaymentCheckPer = (data:any) => {
+  return request({
+    url: '/financial/repaymentRecord/approvePreRepaymentCheckPer',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
  * 审核驳回
  * @param query
  * @returns {*}
@@ -256,6 +308,32 @@ export const approvePrePaymentAccount = (data:any) => {
 export const rejectPaymentAccount = (data:any) => {
   return request({
     url: '/financial/repaymentRecord/rejectPaymentAccount',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
+ * 付款单驳回(权限校验)
+ * @param query
+ * @returns {*}
+ */
+export const rejectPaymentCheckPer = (data:any) => {
+  return request({
+    url: '/financial/repaymentRecord/rejectPaymentCheckPer',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
+ * 收款单驳回(权限校验)
+ * @param query
+ * @returns {*}
+ */
+export const rejectRepaymentCheckPer = (data:any) => {
+  return request({
+    url: '/financial/repaymentRecord/rejectRepaymentCheckPer',
     method: 'post',
     data: data
   });

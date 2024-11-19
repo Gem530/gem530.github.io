@@ -6,7 +6,7 @@
             <el-step title="导入" />
             <el-step :status="resInfo.isSuccess ? (active == 3 ? 'finish' : 'process') : 'error'" :title="resInfo.isSuccess ? '导入成功' : '导入失败'" />
         </el-steps>
-        <div style="width: 380px;margin: 20px auto 0;">
+        <div style="width: 410px;margin: 20px auto 0;">
             <XUpload drag v-model:model-value="fileList" model="download" :fileSize="20" :fileType="['xls', 'xlsx']" @fileChange="fileChange" @delFile="delFile">
                 <div class="upload-content global-flex flex-center flex-column">
                     <template v-if="active == 1">
@@ -34,6 +34,7 @@
                     </template>
                 </div>
             </XUpload>
+            <slot name="export-tip" v-if="tipShowByStep.includes(active)"></slot>
         </div>
       </div>
       <template #footer>
@@ -62,10 +63,12 @@ const props = withDefaults(defineProps<{
     open: boolean
     title?: string
     loading?: boolean,
+    tipShowByStep?: number[] // [1,2,3]
 }>(), {
     title: '',
     open: false,
     loading: false,
+    tipShowByStep: () => [1, 2, 3]
 })
 
 const active = ref(1)

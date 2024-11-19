@@ -61,3 +61,16 @@ export const delCommodity = (id: string | number | Array<string | number>) => {
     method: 'delete'
   });
 };
+
+/**
+ * 查询产品库存列表
+ * @param query
+ * @returns {*}
+ */
+export const listCommodityInventory = (query?: CommodityQuery): AxiosPromise<CommodityVO[]> => {
+  return request({
+    url: '/order/commodity/inventoryList',
+    method: 'get',
+    params: query
+  });
+};

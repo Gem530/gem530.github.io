@@ -171,54 +171,6 @@
                   <el-button link type="primary"  @click="handleTransfer(scope.row)" >转办</el-button>
               </template>
           </XTable>
-          <!-- <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange" height="100%">
-            <el-table-column type="selection" width="50" align="center" />
-            <el-table-column label="用户编号" align="center" key="userId" prop="userId" v-if="columns[0].visible" />
-            <el-table-column label="用户名" align="center" key="userName" prop="userName" v-if="columns[1].visible" :show-overflow-tooltip="true" />
-            <el-table-column label="姓名" align="center" key="nickName" prop="nickName" v-if="columns[2].visible" :show-overflow-tooltip="true" />
-            <el-table-column
-              label="部门"
-              align="center"
-              key="deptName"
-              prop="dept.deptName"
-              v-if="columns[3].visible"
-              :show-overflow-tooltip="true"
-            />
-            <el-table-column label="手机号码" align="center" key="phonenumber" prop="phonenumber" v-if="columns[4].visible" width="120" />
-            <el-table-column label="状态" align="center" key="status" v-if="columns[5].visible">
-              <template #default="scope">
-                <el-switch v-model="scope.row.status" active-value="0" inactive-value="1" @change="handleStatusChange(scope.row)"></el-switch>
-              </template>
-            </el-table-column>
-
-            <el-table-column label="创建时间" align="center" prop="createTime" v-if="columns[6].visible" width="170">
-              <template #default="scope">
-                <span>{{ scope.row.createTime }}</span>
-              </template>
-            </el-table-column>
-
-            <el-table-column label="操作" fixed="right" width="320" align="center"  class-name="small-padding fixed-width">
-              <template #default="scope">
-                  <el-button link type="primary"  @click="handleUpdate(scope.row)" >修改</el-button>
-                  <el-button link type="primary"  @click="handleDelete(scope.row)" >删除</el-button>
-
-                  <el-button link type="primary"  @click="handleResetPwd(scope.row)" >重置密码</el-button>
-
-                  <el-button link type="primary"  @click="handleAuthRole(scope.row)" >分配角色</el-button>
-
-                  <el-button link type="primary"  @click="handleTransfer(scope.row)" >转办</el-button>
-
-              </template>
-            </el-table-column>
-          </el-table>
-
-          <pagination
-            v-show="total > 0"
-            :total="total"
-            v-model:page="queryParams.pageNum"
-            v-model:limit="queryParams.pageSize"
-            @pagination="getList"
-          /> -->
         </el-card>
         </div>
       </el-col>
@@ -764,6 +716,7 @@ const handleAdd = async () => {
   // roleOptions.value = data.roles;
   // form.value.password = initPassword.value.toString();
   editUserRef.value.handleAdd()
+  //查询用户现在手机号信息
 }
 /** 修改按钮操作 */
 const handleUpdate = async (row?: UserForm) => {

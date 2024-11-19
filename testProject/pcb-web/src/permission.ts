@@ -61,7 +61,10 @@ router.beforeEach(async (to, from, next) => {
   NProgress.start();
   const flag = await checkAppNewVersion((version: any) => {
     localStorage.setItem('APP_VERSION', version)
-    window.location.href = to.fullPath
+    window.location.reload(true)
+    setTimeout(() => {
+      window.location.href = to.fullPath
+    }, 10)
   })
   if (!flag) {
     next(false)

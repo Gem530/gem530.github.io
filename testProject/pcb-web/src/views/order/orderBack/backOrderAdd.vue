@@ -1,5 +1,5 @@
 <template>
-  <el-card shadow="never" class="ptable-card">
+  <div class="ptable-card">
     <el-form
       ref="formRef"
       :model="formData"
@@ -17,7 +17,7 @@
         </el-col>
         <el-col :span="6">
           <el-form-item label="退货时间" style="width: 100%" prop="backTime">
-            <el-date-picker
+            <el-date-picker value-format="YYYY-MM-DD HH:mm:ss"
               v-model="formData.backTime"
               type="datetime"
               placeholder="请选择"
@@ -55,11 +55,11 @@
         <el-input v-model="scope.row.reason" :maxlength="1000"/>
       </template>
     </XTable>
-    <div class="text-center" style="margin-top: 10px">
+    <div class="text-right" style="margin-top: 10px">
       <el-button type="primary" @click="submitForm(formRef)" :loading="submitLoading">确 定</el-button>
       <el-button @click="cancel" :loading="submitLoading">取 消</el-button>
     </div>
-  </el-card>
+  </div>
 
   <el-dialog
     v-model="orderSelectVisible"

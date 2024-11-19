@@ -1,0 +1,113 @@
+.related-page {
+    min-height: 100vh;
+    padding: 20px 32px 200px;
+    background: rgba(249, 249, 249, 1);
+    box-sizing: border-box;
+    
+    .related-card {
+        padding: 20px 32px;
+        background: rgba(255, 255, 255, 1);
+        color: #333333;
+        border-radius: 20px;
+        box-shadow: 0px 0px 8px  rgba(0, 0, 0, 0.08);
+        box-sizing: border-box;
+
+        &:not(:last-child) {
+            margin-bottom: 20px;
+        }
+
+        .related-card-title {
+            margin-bottom: 20px;
+            font-size: 40px;
+            font-weight: 700;
+
+            .related-card-subtitle {
+                margin-left: 10px;
+                font-size: 30px;
+            }
+        }
+
+        .related-card-item {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 28px;
+
+            .related-card-label {
+                width: 150px;
+                margin-right: 20px;
+            }
+            .related-card-value {
+                flex: 1;
+            }
+            .related-card-tag {
+                background: rgba(45, 144, 237, 1);
+                color: #fff;
+                padding: 10px 20px;
+                border-radius: 4px;
+            }
+        }
+
+        .at-input {
+            margin-left: 0;
+            &::after {
+                display: none;
+                // border: none !important;
+            }
+            .at-input__container {
+                &.at-input--disabled {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+
+    .related-btn {
+        margin: 20px 0;
+
+        &.related-btn-bottom {
+            position: fixed;
+            bottom: 50px;
+            left: 32px;
+            width: 682px;
+            background: rgba(45, 144, 237, 1);
+            z-index: 500;
+        }
+
+        &.line-height {
+            line-height: normal;
+            .at-button__text {
+                .flex {
+                    View:last-child {
+                        font-size: 26px;
+                    }
+                }
+            }
+        }
+    }
+    .common-card{
+        margin-bottom: 20px;
+        padding: 20px 32px;
+        background: #fff;
+    }
+    .common-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        box-sizing: border-box;
+        &.border-bottom {
+            border-bottom: 2px solid rgba(243, 243, 243, 1);
+        }
+    }
+    .half{
+        .detail-left{
+            width: 50%;
+        }
+    }
+    .related-label label{
+        flex: none;
+        font-size: 28px;
+        font-weight: 400;
+    }
+}

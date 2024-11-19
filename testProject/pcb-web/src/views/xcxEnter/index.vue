@@ -7,7 +7,7 @@
             <div class="register-text-primary">请联系分享人重新分享</div>
             <div class="register-text-company">
                 <div class="register-text-logo"></div>
-                深圳立国信工业互联科技有限公司
+                深圳诺思特工业互联科技有限公司
             </div>
         </div>
     </div>

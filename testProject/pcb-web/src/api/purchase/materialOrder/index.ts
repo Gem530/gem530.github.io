@@ -273,3 +273,23 @@ export const getMaterialOrderDetil= (query?: MaterialOrderQuery): AxiosPromise<M
     params: query
   });
 };
+/**
+ * 根据明细id查询采购信息
+ * @param data
+ */
+export const getMaterialOrderLogisticsDetail = (id: string | number) => {
+  return request({
+    url: '/purchase/materialHandle/getOrderLogistics/'+id,
+    method: 'get'
+  });
+};
+/**
+ * 订单关联物流信息
+ */
+export const addLogisticNo = async (data?: any) => {
+  return request({
+    url: '/purchase/materialDelivery/updateLogisticsNo',
+    method: 'post',
+    data: data
+  });
+}

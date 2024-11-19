@@ -36,6 +36,8 @@ export interface FileQuery extends PageQuery {
     bizType?: string;
     type?: string;
     modulesCode?: string;
+    isSignHistory?: boolean;
+    bizTypeList?: string[];
 }
 export interface FileItemForm extends BaseEntity {
     url?: string;

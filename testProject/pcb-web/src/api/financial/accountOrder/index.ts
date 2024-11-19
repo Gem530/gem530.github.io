@@ -321,6 +321,17 @@ export const listRawBorrowInOutRecord = (query?: AccountOrderQuery): AxiosPromis
 };
 
 /**
+ * 钻咀对账明细查询
+ */
+export const listDrillerAbradeRecord = (query?: AccountOrderQuery): AxiosPromise<AccountMaterialInOutVo[]> => {
+  return request({
+    url: '/financial/accountOrder/queryDrillerAbradeRecord',
+    method: 'get',
+    params: query
+  });
+};
+
+/**
  * feilin对账明细查询
  */
 export const listAccountFilinOrder = (query?: AccountOrderQuery): AxiosPromise<AccountMaterialInOutVo[]> => {
@@ -598,5 +609,116 @@ export const confirmAccountFinish = (data: any) => {
     url: '/financial/accountOrder/sign',
     method: 'post',
     data: data
+  });
+};
+
+/**
+ * 成本调整-选择对账单
+ */
+export const constAdjustList = (query?: AccountOrderQuery): AxiosPromise<AccountOrderVO[]> => {
+  return request({
+    url: '/financial/accountOrder/constAdjustList',
+    method: 'get',
+    params: query
+  });
+};
+
+
+
+/**
+ * 关联扣款
+ * @param data
+ */
+export const getAdjustList = (data: any) => {
+  return request({
+    url: '/financial/accountOrder/adjustList',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
+ * 修改对账单-供应商自动对账
+ * @param data
+ */
+export const updateAutoSupplierAccount = (data: InOrOutForm) => {
+  return request({
+    url: '/financial/accountOrder/updateAutoSupplierAccount',
+    method: 'post',
+    data: data
+  });
+};
+
+//反审核
+export const doReverseAudit = (data: any) => {
+  return request({
+    url: '/financial/accountOrder/doReverseAudit',
+    method: 'post',
+    data: data
+  });
+};
+/**
+ * 申请修改-供应商自动对账
+ * @param data
+ */
+export const updateApplyAutoSupplierAccount = (data: InOrOutForm) => {
+  return request({
+    url: '/financial/accountOrder/updateApplyAutoSupplierAccount',
+    method: 'post',
+    data: data
+  });
+};
+
+
+/**
+ * 查询对账单列表
+ * @param query
+ * @returns {*}
+ */
+
+export const listApplyList = (query?: any): AxiosPromise<any[]> => {
+  return request({
+    url: '/financial/accountOrder/applyList',
+    method: 'get',
+    params: query
+  });
+};
+
+/**
+ * 自动对账确认对账单修改对账单状态
+ * @param data
+ */
+export const autoAccountSign = (data: AccountOrderForm) => {
+  return request({
+    url: '/financial/accountOrder/autoAccountSign',
+    method: 'put',
+    data: data
+  });
+};
+/**
+ * 自动对账供应商签名
+ * @param data
+ */
+export const autoAccountSignSupplier = (data: AccountOrderForm) => {
+  return request({
+    url: '/financial/accountOrder/signV2',
+    method: 'post',
+    data: data
+  });
+};
+
+export const accountPayList = (query?: any): AxiosPromise<any[]> => {
+  return request({
+    url: '/financial/repaymentRecord/accountPayList',
+    method: 'post',
+    data: query
+  });
+};
+
+export const accountInvoiceList = (query?: any): AxiosPromise<any[]> => {
+  return request({
+    url: '/financial/invoice/accountInvoiceList',
+    method: 'post',
+    data: query
   });
 };

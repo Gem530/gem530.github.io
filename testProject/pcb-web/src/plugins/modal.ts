@@ -59,6 +59,15 @@ export default {
     }, params)
     return ElMessageBox.confirm(content, '系统提示', obj);
   },
+  // 确认窗体
+  confirmNew(content: any, params?: any): Promise<MessageBoxData> {
+    let obj = Object.assign({
+      confirmButtonText: '确认继续',
+      cancelButtonText: '我再想想',
+      type: 'warning'
+    }, params)
+    return ElMessageBox.confirm(content, '提示', obj);
+  },
   // 提交内容
   prompt(content: any) {
     return ElMessageBox.prompt(content, '系统提示', {

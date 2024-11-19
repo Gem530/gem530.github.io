@@ -1,7 +1,7 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
-      <el-tabs class="xtable-tab" type="border-card" @tab-click="tabChange" v-model="tabValue">
+    <!-- <el-card shadow="never" class="xtable-card"> -->
+      <el-tabs class="xtable-tab" @tab-click="tabChange" v-model="tabValue">
         <el-tab-pane label="未完成" name="未完成">
           <XTable toolId="orderBackHandleUndoTable" height="100%" class="xtable-content"
                   v-model:page-size="undoQueryParams.pageSize"
@@ -10,7 +10,6 @@
                   :page-params="{ perfect: true, total: undoTableTotal }"
                   :data="undoTableData"
                   :columnList="undoColumnList"
-                  show-footer="true"
                   ref="XTableRef"
                   border :showRefresh="true"
                   @searchChange="undoSearchChange"
@@ -34,8 +33,7 @@
                   :page-params="{ perfect: true, total: doneTableTotal }"
                   :data="doneTableData"
                   :columnList="doneColumnList"
-                  show-footer="true"
-                  ref="XTableRef"
+                  ref="XTableRef2"
                   border :showRefresh="true"
                   @searchChange="doneSearchChange"
                   :column-config="{ resizable: true }"
@@ -49,7 +47,7 @@
           </XTable>
         </el-tab-pane>
       </el-tabs>
-    </el-card>
+    <!-- </el-card> -->
 
     <el-drawer
       v-model="handleRecordVisible"
@@ -68,7 +66,6 @@
     <el-dialog
       v-model="scrapVisible"
       width="30%"
-      append-to-body
       destroy-on-close
     >
       <template #header="{ close, titleId, titleClass }">
@@ -82,7 +79,6 @@
     <el-dialog
       v-model="reDeliveryVisible"
       width="40%"
-      append-to-body
       destroy-on-close
     >
       <template #header="{ close, titleId, titleClass }">
@@ -90,13 +86,12 @@
           {{selectedBackOrder.value.code + '  ' + selectedBackOrder.value.commodityCode + '  重新发货(' + calcMaxReDeliveryQuantity() +')'}}
         </div>
       </template>
-      <ReDelivery @close="cancleReDelivery" :backOrder="selectedBackOrder" @confirm="submitReDelivery" :maxReDeliveryQuantity="calcMaxReDeliveryQuantity()"/>
+      <ReDelivery @close="cancleReDelivery" :backOrder="selectedBackOrder" @confirm="submitReDelivery" @check="checkInventory" :maxReDeliveryQuantity="calcMaxReDeliveryQuantity()"/>
     </el-dialog>
 
     <el-dialog
       v-model="reInventoryVisible"
       width="30%"
-      append-to-body
       destroy-on-close
     >
       <template #header="{ close, titleId, titleClass }">
@@ -104,11 +99,14 @@
           {{selectedBackOrder.value.code + '  ' + selectedBackOrder.value.commodityCode + '  重新入库(' + selectedBackOrder.value.undoQuantity +')'}}
         </div>
       </template>
-      <ReInventory @close="closeReInventory" :backOrder="selectedBackOrder" @confirm="closeReInventory"/>
+      <ReInventory @close="closeReInventory" :backOrder="selectedBackOrder" @confirm="closeReInventory" @check="checkInventory"/>
     </el-dialog>
 
+    <!-- 库存锁定提示框 -->
+    <InventoryLock title="产品盘点提示" inventoryType="1" v-model:show="inventoryCheck" :data="inventoryRes" @close="inventoryCheck = false"/>
+
     <div v-show="false">
-      <DeliveryPrint ref="printRef"/>
+      <DeliveryPrintOrderBack ref="printRef"/>
     </div>
 
   </div>
@@ -122,6 +120,9 @@ import Scrap from "@/views/order/orderBackHandle/scrap.vue";
 import ReInventory from "@/views/order/orderBackHandle/reInventory.vue";
 import ReDelivery from "@/views/order/orderBackHandle/reDelivery.vue";
 import PrintDelivery from "@/views/order/orderBackHandle/printDelivery.vue";
+import {listCommodityInventory} from "@/api/order/commodity";
+import {ref} from "vue";
+import { decryptBase64ByStr } from '@/utils/crypto'
 
 const tabValue = ref("未完成");
 const intervalCondition = ['backTime', 'placeOrderTime'];
@@ -207,9 +208,20 @@ const selectedBackOrder = reactive({
     id: undefined,
     code: undefined,
     commodityCode: undefined,
+    commodityId: undefined,
   }
 });
-
+const XTableRef = ref();
+const XTableRef2 = ref();
+const route = useRoute();
+/**
+ * 进入页面次数
+ */
+const isFirst = ref(0)
+/**
+ * 待办跳转参数
+ */
+const pendingParams = ref()
 const resetSelectedBackOrder = () => {
   selectedBackOrder.value = {
     id: undefined,
@@ -347,8 +359,61 @@ const refreshDoneTableData = () => {
     })
 }
 
+const inventoryCheck = ref(false);
+const inventoryRes = ref([]);
+
+const checkInventory = async (fn) => {
+  // 查询是否存在盘点中产品
+  let query = {
+    pageNum: 1,
+    pageSize: 20,
+    IdList: selectedBackOrder.value.commodityId,
+    status: '1'
+  }
+  let bol = false
+  const res = await listCommodityInventory(query);
+  if (res.rows && res.rows.length > 0) {
+    inventoryRes.value = res.rows;
+    inventoryCheck.value = true;
+    // return;
+    bol = true
+  }
+  fn && fn(bol)
+}
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      let tab = params.tab ? params.tab : '未完成';
+      tabValue.value = tab
+      let tempColumnList = [{field: 'code', defaultValue: params.bizNo}]
+      if (tab === '未完成') {
+        undoQueryParams.value.code = params.bizNo
+        setTimeout(() => {
+          XTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === '已完成') {
+        doneQueryParams.value.orderCode = params.bizNo
+        setTimeout(() => {
+          XTableRef2.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      }
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
 onMounted(() => {
-  refreshUndoTableData();
+    refreshUndoTableData();
 });
 </script>
 

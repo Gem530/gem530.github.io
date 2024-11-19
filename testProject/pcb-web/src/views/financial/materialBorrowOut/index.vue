@@ -21,7 +21,7 @@
         <div style="display: flex; justify-content: center;">
           <span class="dialog-footer">
             <el-button :loading="buttonLoading" @click="drawerBorrow.visible = false">取消</el-button>
-            <el-button :loading="buttonLoading" type="danger" v-show="drawerBorrow.title?.includes('修改') || drawerBorrow.title?.includes('添加')"
+            <el-button :loading="buttonLoading" v-show="drawerBorrow.title?.includes('修改') || drawerBorrow.title?.includes('添加')"
               @click="handleSave">
               保存
             </el-button>

@@ -56,11 +56,16 @@
                         }}</span>
                     </div>
                     </td>
-                    <td style="width: 200pt; text-align: center">
+                    <td style="width: 250pt; text-align: center">
                     <span style="font-size: 25px;">{{ props.allData?.miName }}</span>
                     </td>
-                    <td style="width: 200pt; text-align: center">
+                    <td style="width: 100pt; text-align: right">
                     <img :src="props.qcCodeImage" alt="条形码" style="height: 60px" v-if="props.qcCodeImage" />
+                    </td>
+                    <td style="width: 100pt; text-align: right" >
+                        <span v-if="props.allData?.relationQuantity" style="font-size: 18px;">库存板：</span>
+                        <span v-if="props.allData?.relationQuantity" style="font-size: 18px;">
+                            {{ props.allData?.relationQuantity }}</span>
                     </td>
                 </tr>
                 </tbody>
@@ -101,9 +106,18 @@
                         }}</span>
                     </td>
                     <td style="border: 1px solid black; text-align: left; width: 500pt" colspan="2"><span
-                        style="font-size: 14px;">客户型号：</span><span style="font-size: 14px;">{{
-                        props.allData?.commodityName }}</span></td>
+                        style="font-size: 14px;">客户物料编码：</span><span style="font-size: 14px;">{{
+                        props.allData?.materialNumber }}</span></td>
                 </tr>
+
+                <tr>
+                    <td colspan="4" style="border: 1px solid black; text-align: left;width: 250pt"><span
+                        style="font-size: 14px;">客户型号：</span><span style="font-size: 14px;">{{
+                        props.allData?.commodityName
+                        }}</span>
+                    </td>
+                </tr>
+
                 <tr>
                     <td style="border: 1px solid black; text-align: left; width: 250pt"><span
                         style="font-size: 14px;">成形方式：</span><span style="font-size: 14px;">{{
@@ -236,6 +250,8 @@
                         style="font-size: 14px; font-weight: bold">产品编号</span></td>
                     <td style="border: 1px solid black; text-align: center; max-width: 80pt; white-space: normal"><span
                         style="font-size: 14px; font-weight: bold">产品名称</span></td>
+                    <td style="border: 1px solid black; text-align: center; max-width: 40pt; white-space: normal"><span
+                        style="font-size: 14px; font-weight: bold">客户物料编码</span></td>
                     <td style="border: 1px solid black; text-align: center; max-width: 30pt; white-space: normal"><span
                         style="font-size: 14px; font-weight: bold">类型</span></td>
                     <td style="border: 1px solid black; text-align: center; max-width: 30pt; white-space: normal"><span
@@ -248,13 +264,13 @@
                         style="font-size: 14px; font-weight: bold">本卡数量</span></td>
                     <td style="border: 1px solid black; text-align: center; max-width: 40pt; white-space: normal"><span
                         style="font-size: 14px; font-weight: bold">PCS尺寸</span></td>
-                    <td style="border: 1px solid black; text-align: center; max-width: 35pt; white-space: normal"><span
+                    <td style="border: 1px solid black; text-align: center; max-width: 25pt; white-space: normal"><span
                         style="font-size: 14px; font-weight: bold">连片方式</span></td>
                     <td style="border: 1px solid black; text-align: center; max-width: 40pt; white-space: normal"><span
                         style="font-size: 14px; font-weight: bold">SET尺寸</span></td>
-                    <td style="border: 1px solid black; text-align: center; max-width: 50pt; white-space: normal"><span
+                    <td style="border: 1px solid black; text-align: center; max-width: 35pt; white-space: normal"><span
                         style="font-size: 14px; font-weight: bold">本卡净面积(㎡)</span></td>
-                    <td style="border: 1px solid black; text-align: center; max-width: 50pt; white-space: normal"><span
+                    <td style="border: 1px solid black; text-align: center; max-width: 35pt; white-space: normal"><span
                         style="font-size: 14px; font-weight: bold">订单净面积(㎡)</span></td>
                     <td style="border: 1px solid black; text-align: center; max-width: 35pt; white-space: normal"><span
                         style="font-size: 14px; font-weight: bold">下单日期</span></td>
@@ -269,6 +285,10 @@
                     <td
                     style="border: 1px solid black; text-align: center; max-width: 80pt; white-space: normal; word-wrap: break-word">
                     <span style="font-size: 14px; font-weight: bold">{{ commodity.commodityName }}</span>
+                    </td>
+                    <td
+                    style="border: 1px solid black; text-align: center; max-width: 40pt; white-space: normal; word-wrap: break-word">
+                    <span style="font-size: 14px; font-weight: bold">{{ commodity.materialNumber }}</span>
                     </td>
                     <td
                     style="border: 1px solid black; text-align: center; max-width: 30pt; white-space: normal; word-wrap: break-word">
@@ -295,7 +315,7 @@
                     <span style="font-size: 14px; font-weight: bold">{{ Number(commodity.singleLength).toFixed(2) + "*" + Number(commodity.singleWidth).toFixed(2)}}</span>
                     </td>
                     <td
-                    style="border: 1px solid black; text-align: center; max-width: 35pt; white-space: normal; word-wrap: break-word">
+                    style="border: 1px solid black; text-align: center; max-width: 25pt; white-space: normal; word-wrap: break-word">
                     <span style="font-size: 14px; font-weight: bold">{{ commodity.unitedWayLength+"*"+commodity.unitedWayWidth}}</span>
                     </td>
                     <td

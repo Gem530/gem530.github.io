@@ -109,10 +109,10 @@
           <span>{{ scope.row.payCode?scope.row.payCode:'--' }}</span>
         </template>
         <template #default-transferredAmount="scope">
-          <span>{{ scope.row.transferredAmount==='0.0000'?'':Number(scope.row.transferredAmount).toFixed(2) }}</span>
+          <span>{{ scope.row.transferredAmount==='0.0000'?'':Number(parseFloat(scope.row.transferredAmount).toString()) }}</span>
         </template>
         <template #default-totalPrice="scope">
-          <span>{{ scope.row.totalPrice?Number(scope.row.totalPrice).toFixed(2):'0.00' }}</span>
+          <span>{{ scope.row.totalPrice?Number(parseFloat(scope.row.totalPrice).toString()):'0' }}</span>
         </template>
         <template #default-status="scope">
           <div v-for="(item,index) in statusFilterData">
@@ -256,6 +256,8 @@ import {listOrderSaleDetail} from "@/api/financial/orderSaleDetail";
 import {listAccountOrderOther} from "@/api/financial/accountOrderOther";
 import {accountList} from "@/api/order/deliveryRecord";
 import {OrderFilinOutDetailForm, OrderFilinOutDetailQuery} from "@/api/financial/orderFilinOutDetail/types";
+import { decryptBase64ByStr } from '@/utils/crypto'
+import { listDeptBank } from "@/api/system/dept"
 
 let customerList = ref([]);
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
@@ -325,14 +327,14 @@ const payWayList = ref([
 {label: '委托书', value: '10', elTagType: 'default', elTagClass: ''},
 ]);
 
-const payAccountList = ref([
-  {label: '中国工商银行信丰县支行', value: '1',bankNo:'1510201009000106395',account:'，行号：102428410247',type:'基本户，'},
-  {label: '江西信丰农村商业银行股份有限公司', value: '2',bankNo:'134649700000002476',account:'，行号：402428499993',type:'一般户，'},
-  {label: '赣州银行信丰支行', value: '3',bankNo:'2863000103000000896',account:'，行号：313428428636',type:'一般户，'},
-  {label: 'The Hongkong and Shanghai Banking Corporation Limited', value: '4',bankNo:'053-484846-838',account:'，编号：004,代码：HSBCHKHHHKH',type:'香港公司美金账户，'},
-  // {label: '企业微信', value: '5',account:'',bankNo:'1647640640',type:''},
-  // {label: '企业支付宝', value: '6',account:'',bankNo:'jx13316990051@sina.com',type:''},
-]);
+// const payAccountList = ref([
+//   {label: '中国工商银行信丰县支行', value: '1',bankNo:'1510201009000106395',account:'，行号：102428410247',type:'基本户，'},
+//   {label: '江西信丰农村商业银行股份有限公司', value: '2',bankNo:'134649700000002476',account:'，行号：402428499993',type:'一般户，'},
+//   {label: '赣州银行信丰支行', value: '3',bankNo:'2863000103000000896',account:'，行号：313428428636',type:'一般户，'},
+//   {label: 'The Hongkong and Shanghai Banking Corporation Limited', value: '4',bankNo:'053-484846-838',account:'，编号：004,代码：HSBCHKHHHKH',type:'香港公司美金账户，'},
+//   // {label: '企业微信', value: '5',account:'',bankNo:'1647640640',type:''},
+//   // {label: '企业支付宝', value: '6',account:'',bankNo:'jx13316990051@sina.com',type:''},
+// ]);
 
 // 文件 列表
 const fileList = ref([
@@ -357,7 +359,7 @@ const columnList = ref([
   { title: '客户代码', field: 'customerCode', width: '100', align: 'center', filterType: undefined},
   { title: '收款方式', field: 'payWay', width: '100', align: 'center' , filterType: undefined, filterParam: { placeholder: '请选择收款方式' } ,filterData: () => optionPayWayList.value },
   { title: '收款金额', field: 'totalPrice', width: '100', align: 'center'},
-  { title: '收款账户', field: 'payAccount', width: '100', align: 'center' , filterType: 'checkboxButton', filterParam: { placeholder: '请选择收款账户' } ,filterData: () => payAccountList.value  },
+  { title: '收款账户', field: 'payAccount', width: '100', align: 'center' , filterType: 'checkboxButton', filterParam: { placeholder: '请选择收款账户' } , filterData: () => payAccountList.value },
   { title: '银行/收款账号', field: 'accountNumber', width: '100', align: 'center' , filterType: 'input', filterParam: { placeholder: '请输入银行/收款账号' } },
   { title: '票据号码', field: 'payCode', width: '120', align: 'center' , filterType: 'input', filterParam: { placeholder: '请输入票据号码' } },
   { title: '票据到期日', field: 'payExpireDate', width: '120', align: 'center' , filterType: 'intervalDate', filterParam: {  placeholder: '请选择票据到期日' , valueFormat:'YYYY-MM-DD' } },
@@ -370,7 +372,16 @@ const columnList = ref([
 
   { title: '操作', field: 'make',  align: 'center', fixed: 'right', width: '220' },
 ])
-
+const XTableRef = ref();
+const route = useRoute();
+/**
+ * 进入页面次数
+ */
+const isFirst = ref(0)
+/**
+ * 待办跳转参数
+ */
+const pendingParams = ref()
 
 const recordList = ref<OrderWriteOffRecordVO[]>([]);
   // 获取 搜索条件
@@ -573,7 +584,7 @@ const paymentId = ref<number|string>("");
         getList();
       })
     } else {
-      submitPaymentAccount({id: row.id}).then(res => {
+      submitPaymentAccount({id: row.id, isSup: true}).then(res => {
         proxy?.$modal.msgSuccess("操作成功");
         getList();
         paymentTable.visible = false;
@@ -596,9 +607,9 @@ const submit = (row: any) => {
 }
 
   /*审核通过*/
-  const submitPass = (id: any) => {
+  const submitPass = (id: any, isSup: boolean) => {
     buttonLoading.value = true;
-    approvePaymentAccount({id: id}).then(res => {
+    approvePaymentAccount({id: id, isSup: isSup}).then(res => {
       proxy?.$modal.msgSuccess("操作成功");
       paymentTable.visible = false;
       getList();
@@ -1448,13 +1459,44 @@ const changeCust = async () => {
 const getCustomerList = async () => {
   const SupplierResponse: any = await listCompany();
   customerList.value = SupplierResponse.data;
-
-
 }
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      queryParams.value.code = params.bizNo
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
+
+const payAccountList = ref();
+const getAccountTableData = async () => {
+  const bank = await listDeptBank();
+  payAccountList.value =  deepClone( bank.data);
+  if(payAccountList.value&&payAccountList.value.length>0){
+    payAccountList.value.forEach(item=>{
+      item.value=item.id;
+    })
+  }
+  console.log("...............payAccountList.value",payAccountList.value);
+}
+
 onMounted(() => {
   getList();
   getSupplierList();
   getCustomerList();
+  getAccountTableData();
 });
 </script>
 

@@ -1,14 +1,32 @@
 <template>
-  <el-dialog title="选择签章" v-model="showFlag" width="50%" destroy-on-close :close-on-click-modal="false" @close="cancel">
-    <div v-if="!existSignList" style="text-align: center;">您还没有新增签章，请去【基础数据】==》【签章管理】模块设置您的签章。</div>
-    <el-form v-else label-width="110px" class="custom-form" v-loading="loading">
-      <el-form-item label="签章列表:" class="custom-form-item">
-        <ImgChoice :data="listSignVo" @choose="choose"></ImgChoice>
-      </el-form-item>
-      <el-form-item>
-        <span style="color:#AAA">*: 选中后点击确认即可</span>
-      </el-form-item>
-    </el-form>
+  <el-dialog title="选择签名/印章" v-model="showFlag" width="50%" destroy-on-close :close-on-click-modal="false" @close="cancel">
+    <el-tabs v-model="tabRadioTable" @tab-change="list" type="border-card">
+      <div>
+        <span>*点击选择一个签名/印章</span>
+      </div>
+      <el-tab-pane label="电子签名" :name="2">
+        <div v-if="!existSignList" style="text-align: center;">您还没有新增签名，请去【基础数据】==》【签章管理】模块设置您的签章。</div>
+        <el-form v-else label-width="0px" class="custom-form" v-loading="loading">
+          <el-form-item label="" class="custom-form-item">
+            <ImgChoice :data="listSignVo" @choose="choose"></ImgChoice>
+          </el-form-item>
+        </el-form>
+      </el-tab-pane>
+
+      <el-tab-pane label="电子印章" :name="1">
+        <div v-if="!existSignList" style="text-align: center;">您还没有新增印章，请去【基础数据】==》【签章管理】模块设置您的签章。</div>
+        <el-form v-else label-width="0px" class="custom-form" v-loading="loading">
+          <el-form-item label="" class="custom-form-item">
+            <ImgChoice :data="listSignVo" @choose="choose"></ImgChoice>
+          </el-form-item>
+        </el-form>
+      </el-tab-pane>
+      <el-tab-pane :disabled="true" :name="3">
+        <template #label>
+          <span style="color: rgba(64, 158, 255, 1)">*点击选择一个签名/印章</span>
+        </template>
+      </el-tab-pane>
+    </el-tabs>
 
     <template #footer>
       <!-- 居中显示 -->
@@ -32,6 +50,8 @@ const loading = ref(false);
 
 const signRef = ref<ElFormInstance>();
 
+const tabRadioTable = ref(2);
+
 const listSignVo = ref<SignVO[]>([]);
 const existSignList = ref(false);
 const key = ref<string>('');
@@ -40,7 +60,7 @@ const name = ref<string>('');
 
 /** 数据查询 */
 function list() {
-  console.log(123);
+  console.log('tabRadioTable.value', tabRadioTable.value)
   loading.value = true;
   /**
    *
@@ -51,8 +71,7 @@ signName :  "印章2"
 signType : "1"
 url: "https://pcb-test.oss-cn-shen"
    */
-  signList().then(res => {
-    console.log(res)
+  signList({signType: tabRadioTable.value}).then(res => {
     listSignVo.value = res.data;
     existSignList.value = res.data?.length > 0;
     loading.value = false;

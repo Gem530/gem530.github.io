@@ -1,0 +1,50 @@
+.notice-list-page {
+  position: relative;
+  min-height: 100vh;
+  // padding: 24px 32px;
+  background: #f9f9f9;
+  box-sizing: border-box;
+
+  .notice-menu-title {
+    margin-bottom: 8px;
+    font-size: 32px;
+    font-weight: 700;
+    color: rgba(51, 51, 51, 1);
+  }
+
+  .notice-box {
+    height: calc(100vh - 40px);
+    padding: 24px 32px;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+  .notice-card {
+    .common-item {
+      padding: 10px 0 10px 28px;
+
+      &.head {
+        padding: 10px 0;
+      }
+    }
+  }
+
+  .tag-btn-list {
+    .tag-btn-item {
+      padding: 6px 20px;
+      background: #ffffff;
+      border: 2px solid #dddddd;
+      font-size: 28px;
+      color: #333333;
+
+      &:not(:last-child) {
+        border-right: none;
+      }
+
+      &.active {
+        background: #1890ff;
+        border-color: #1890ff;
+        color: #ffffff;
+      }
+    }
+  }
+}

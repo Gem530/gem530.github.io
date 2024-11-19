@@ -1,0 +1,53 @@
+.g-time-dialog {
+    .time-dialog-contnent {
+        .time-dialog-item {
+            width: 540px;
+            height: 80px;
+            color: #333333;
+            box-sizing: border-box;
+
+            &:not(:last-child) {
+                margin-bottom: 32px;
+            }
+
+            .time-dialog-label {
+                width: 112px;
+                height: 40px;
+                margin-right: 20px;
+                font-size: 28px;
+                font-weight: 400;
+            }
+
+            .time-dialog-value {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 408px;
+                height: 80px;
+                background: rgba(243, 243, 243, 1);
+                border-radius: 8px;
+
+                &>View {
+                    font-size: 28px;
+                    font-weight: 400;
+                    &:not(:last-child) {
+                        margin-right: 20px;
+                    }
+                    &:nth-child(odd) {
+                        font-weight: 700;
+                        padding: 6px 8px;
+                    }
+                    &:nth-child(1) {
+                        width: 84px;
+                        box-sizing: border-box;
+                    }
+                    &:nth-child(3),
+                    &:nth-child(5) {
+                        width: 50px;
+                        box-sizing: border-box;
+                    }
+                }
+            }
+        }
+    }
+}

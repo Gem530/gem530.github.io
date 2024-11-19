@@ -2,7 +2,7 @@ import { to } from 'await-to-js';
 import defAva from '@/assets/images/profile.jpg';
 import store from '@/store';
 import { getToken, removeToken, setToken } from '@/utils/auth';
-import { login as loginApi, logout as logoutApi, getInfo as getUserInfo } from '@/api/login';
+import {login as loginApi, logout as logoutApi, getInfo as getUserInfo, scanCodeLogin as codeLogin} from '@/api/login';
 import { LoginData } from '@/api/types';
 
 export const useUserStore = defineStore('user', () => {
@@ -35,6 +35,26 @@ export const useUserStore = defineStore('user', () => {
     return Promise.reject(err);
   };
 
+  /**
+   * 登录
+   * @param userInfo
+   * @returns
+   */
+  const scanCodeLogin = async (userInfo: LoginData): Promise<void> => {
+    const [err, res] = await to(codeLogin(userInfo));
+    if (res) {
+      const data = res.data;
+      setToken(data.access_token);
+      token.value = data.access_token;
+      return Promise.resolve();
+    }
+    return Promise.reject(err);
+  };
+
+  // 更新token
+  const setUserToken = async (token: any): Promise<void> => {
+    token.value = getToken();
+  };
   // 获取用户信息
   const getInfo = async (): Promise<void> => {
     const [err, res] = await to(getUserInfo());
@@ -77,6 +97,7 @@ export const useUserStore = defineStore('user', () => {
 
 
   return {
+    name,
     userId,
     token,
     nickname,
@@ -87,10 +108,12 @@ export const useUserStore = defineStore('user', () => {
     permissions,
     ownerId,
     supplier,
+    scanCodeLogin,
     login,
     getInfo,
     logout,
-    setSupplier
+    setSupplier,
+    setUserToken
   };
 });
 

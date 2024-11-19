@@ -1,0 +1,78 @@
+@import '../../assets/custom.less';
+.area-box {
+    height: 100% !important;
+    background: #fff;
+    // padding: 20px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    .area-table {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+        .area-tr {
+            display: flex;
+            width: 100%;
+            &:nth-child(1) {
+                .area-td {
+                    border-top: 1px solid #ddd;
+                }
+            }
+            .area-td {
+                &:nth-child(1) {
+                    flex: none;
+                    width: 70px;
+                    border-left: 1px solid #ddd;
+                }
+                // &:nth-child(2) {
+                //     flex: none;
+                //     width: 100px;
+                // }
+                &:nth-child(3) {
+                    flex: none;
+                    width: 135px;
+                }
+                &:nth-child(4) {
+                    flex: none;
+                    width: 155px;
+                }
+                &:nth-child(5) {
+                    flex: none;
+                    width: 225px !important;
+                }
+                flex: 1;
+                padding: 5px 0;
+                font-size: 26px;
+                text-align: center;
+                word-break: break-all;
+                // white-space: nowrap;
+                // text-overflow: ellipsis;
+                // overflow: hidden;
+                border-right: 1px solid #ddd;
+                border-bottom: 1px solid #ddd;
+            }
+        }
+        .area-body {
+            width: 100%;
+            flex: 1;
+            // max-height: 550px;
+            overflow-y: auto;
+            .area-tr:nth-child(1) {
+                .area-td {
+                    border-top: 0px;
+                }
+            }
+        }
+    }
+
+    .area-table-empty {
+        padding: 20px 0;
+        font-size: 30px;
+        border: 1px solid #ddd;
+        border-right: 1px solid #ddd !important;
+        border-top: none;
+        box-sizing: border-box;
+    }
+} 

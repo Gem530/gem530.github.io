@@ -278,11 +278,8 @@
     <el-dialog v-model="relatedInvoiceDialog.visible" :title="relatedInvoiceDialog.title" width="90%" draggable>
       <el-row>
         <el-col :span="6">
-          <el-table size="small" :data="selectInvoiceVOList" height="470" :border="true">
-            <el-table-column property="code" fixed />
-            <el-table-column v-show="false" property="amount" label="已选发票" />
-            <el-table-column align="center">
-              <template #default="scope">
+          <XTable :pageShow="false" :columnList="columnListChooseInvoice" :data="selectInvoiceVOList" height="440" :border="true">
+              <template #default-make="scope">
                 <el-tooltip content="删除" placement="top">
                   <el-button
                     link
@@ -293,8 +290,7 @@
                   ></el-button>
                 </el-tooltip>
               </template>
-            </el-table-column>
-          </el-table>
+          </XTable>
         </el-col>
         <el-col :span="18">
           <XTable
@@ -365,6 +361,8 @@ import { listDept } from "@/api/system/dept";
 import { listCompany } from '@/api/basedata/customer';
 import { deepClone } from '@/utils';
 
+import { listDeptBank } from "@/api/system/dept"
+
 let customerList:any = [];
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 const isCust =ref(false);
@@ -416,14 +414,6 @@ const payWayList = ref([
 {label: '委托书', value: '10', elTagType: 'default', elTagClass: ''},
 ]);
 
-const payAccountList = ref([
-{label: '工行基本户', value: '1'},
-{label: '农商行一般户', value: '2'},
-{label: '赣州银行一般户', value: '3'},
-{label: '汇丰银行', value: '4'},
-{label: '企业微信', value: '6'},
-{label: '企业支付宝', value: '7'},
-]);
 
 // 文件 列表
 const fileList = ref([
@@ -503,6 +493,11 @@ const invoiceColumnList = ref([
   { field: 'riskLevel', width: '120', title: '发票风险等级', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入发票风险等级' } },
   { field: 'issuerName', width: '80', title: '开票人', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入开票人' } },
   { field: 'addressId', width: '50', title: '备注', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入备注' } },
+]);
+const columnListChooseInvoice = ref([
+{ title: '',field: 'code',align: 'center', },
+{ title: '已选发票',field: 'amount',align: 'center',  },
+{ title: '',field: 'make',align: 'center',  },
 ]);
 //冲销记录集合
 
@@ -1098,10 +1093,23 @@ const getCustomerList = async () => {
 
 
 }
+
+const payAccountList = ref();
+const getAccountTableData = async () => {
+  const bank = await listDeptBank();
+  payAccountList.value =  deepClone( bank.data);
+  if(payAccountList.value&&payAccountList.value.length>0){
+    payAccountList.value.forEach(item=>{
+      item.value=item.id;
+    })
+  }
+  console.log("...............payAccountList.value",payAccountList.value);
+}
 onMounted(() => {
   getList();
   getSupplierList();
   getCustomerList();
+  getAccountTableData()
 });
 </script>
 

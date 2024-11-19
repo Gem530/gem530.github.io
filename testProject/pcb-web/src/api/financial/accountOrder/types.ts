@@ -621,9 +621,23 @@ export interface AccountOrderQuery extends PageQuery {
   accountUserName?: string;
 
   /**
+   * 币种
+   */
+  cusCurrency: string;
+
+  /**
+   * 客户编码
+   */
+  version: string;
+
+  /**
    * 日期范围参数
    */
   params?: any;
+  /**
+   * 供应商编码
+   */
+  supplierCode?: string;
   remark?: string;
   currency?: string | number,
   id?: string | number,
@@ -716,7 +730,11 @@ export enum TypeEnum {
   /**
    * 销售
    */
-  SALE = "8"
+  SALE = "8",
+  /**
+   * 钻咀
+   */
+  DRILLER = "9",
 }
 export const typeStrings = {
   [TypeEnum.ALL_PROCESSING_OUTSOURCING]: '订单外协',
@@ -794,3 +812,24 @@ export enum HalfOrderTypeEnum {
   HALF_RECEIVE="2",// "收货"),
   HALF_SCRAP="1", //"报废");
 }
+
+export enum AccopuntStatusEnum {
+  /**
+   * 未对账
+   */
+  BE_SUBMITTED = '1',
+  /**
+   * 已对账
+   */
+  BE_AUDITED = '2',
+  /**
+   * 调整中
+   */
+  ADJUST = '9',
+}
+export const accountStatusStrings = {
+  [AccopuntStatusEnum.BE_SUBMITTED]: '未对账',
+  [AccopuntStatusEnum.BE_AUDITED]: '对账完成',
+  [AccopuntStatusEnum.ADJUST]: '调整中',
+};
+

@@ -88,6 +88,8 @@ export interface InventoryQuery extends PageQuery {
    */
   ownerId?: string | number;
 
+  yearMonth?: string;
+
   /**
    * 日期范围参数
    */
@@ -154,18 +156,36 @@ export const enum InventoryTypeEnum {
 }
 
 export const inventoryTypeStrings = {
-  [InventoryTypeEnum.OUTSOURCE_RECEIVE]: '订单外协收货入库',
-  [InventoryTypeEnum.OUTSOURCE_RETURN]: '订单外协退货出库',
+  [InventoryTypeEnum.OUTSOURCE_RECEIVE]: '订单外协收货',
+  [InventoryTypeEnum.OUTSOURCE_RETURN]: '订单外协退货',
   [InventoryTypeEnum.PRODUCTION_IN]: '生产入库',
-  [InventoryTypeEnum.ORDER_OUT]: '订单出库',
-  [InventoryTypeEnum.RETURN_IN]: '退货入库',
-  [InventoryTypeEnum.CHECK_IN]: '盘点入库',
-  [InventoryTypeEnum.CHECK_OUT]: '盘点出库',
+  [InventoryTypeEnum.ORDER_OUT]: '销售出库',
+  [InventoryTypeEnum.RETURN_IN]: '销售退货',
+  [InventoryTypeEnum.CHECK_IN]: '盘盈入库',
+  [InventoryTypeEnum.CHECK_OUT]: '盘亏出库',
   [InventoryTypeEnum.SCRAP]: '成品报废',
-  [InventoryTypeEnum.PRODUCTION_OUT]: '使用历史库存',
+  [InventoryTypeEnum.PRODUCTION_OUT]: '投料占用库存',
   [InventoryTypeEnum.RESERVE_OUT]: '备品出库',
-  [InventoryTypeEnum.RETURN_OUT]: '退货重发',
-  [InventoryTypeEnum.OUTSOURCE_RESERVE_RECEIVE]: '订单外协备品收货入库',
-  [InventoryTypeEnum.PRODUCTION_RELA_IN]: '历史库存解锁入库',
-  [InventoryTypeEnum.PRODUCTION_REJECT_IN]: '投料驳回入库'
+  [InventoryTypeEnum.RETURN_OUT]: '销售退货重发',
+  [InventoryTypeEnum.OUTSOURCE_RESERVE_RECEIVE]: '订单外协备品收货',
+  [InventoryTypeEnum.PRODUCTION_RELA_IN]: '投料占用解锁',
+  [InventoryTypeEnum.PRODUCTION_REJECT_IN]: '投料驳回'
 };
+
+export const inventoryTypeList =
+    [
+      {value: InventoryTypeEnum.ORDER_OUT, label: "销售出库"},
+      {value: InventoryTypeEnum.RESERVE_OUT, label: "备品出库"},
+      {value: InventoryTypeEnum.RETURN_IN, label: "销售退货"},
+      {value: InventoryTypeEnum.RETURN_OUT, label: "销售退货重发"},
+      {value: InventoryTypeEnum.OUTSOURCE_RECEIVE, label: "订单外协收货"},
+      {value: InventoryTypeEnum.OUTSOURCE_RETURN, label: "订单外协退货"},
+      {value: InventoryTypeEnum.OUTSOURCE_RESERVE_RECEIVE, label: "订单外协备品收货"},
+      {value: InventoryTypeEnum.PRODUCTION_OUT, label: "投料占用库存"},
+      {value: InventoryTypeEnum.PRODUCTION_RELA_IN, label: "投料占用解锁"},
+      {value: InventoryTypeEnum.PRODUCTION_REJECT_IN, label: "投料驳回"},
+      {value: InventoryTypeEnum.PRODUCTION_IN, label: "生产入库"},
+      {value: InventoryTypeEnum.SCRAP, label: "成品报废"},
+      {value: InventoryTypeEnum.CHECK_IN, label: "盘盈入库"},
+      {value: InventoryTypeEnum.CHECK_OUT, label: "盘亏出库"},
+    ]

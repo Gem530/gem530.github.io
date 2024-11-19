@@ -66,27 +66,15 @@
           <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
         </el-row>
       </template>
-
-      <el-table v-loading="loading" size="small" :data="orderBorrowDetailList" @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="单据状态" align="center" prop="code" />
-        <el-table-column label="类型" align="center" prop="type" />
-        <el-table-column label="状态" align="center" prop="status" />
-        <el-table-column label="是否含税" align="center" prop="isTax" />
-        <el-table-column label="对账人id" align="center" prop="accountUserId" />
-        <el-table-column label="对账人名称" align="center" prop="accountUserName" />
-        <el-table-column label="备注" align="center" prop="remark" />
-        <el-table-column label="借料记录ID" align="center" prop="rawMaterialBorrowId" />
-        <el-table-column label="币种" align="center" prop="currency" />
-        <el-table-column label="数量" align="center" prop="quantity" />
-        <el-table-column label="单价" align="center" prop="price" />
-        <el-table-column label="折扣金额" align="center" prop="discountPrice" />
-        <el-table-column label="总金额" align="center" prop="totalPrice" />
-        <el-table-column label="物料ID" align="center" prop="rawMaterialId" />
-        <el-table-column label="对账单id" align="center" prop="accountOrderId" />
-        <el-table-column label="出入库记录ID" align="center" prop="rawMaterialInOutRecordId" />
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-          <template #default="scope">
+      
+      <XTable v-loading="loading" :columnList="columnList" :data="orderBorrowDetailList" class="xtable-content" height="100%"
+      v-model:page-size="queryParams.pageSize"
+      v-model:current-page="queryParams.pageNum"
+      :page-params="{ perfect: true, total: total }"
+      @search-change="getList"
+      @checkbox-change="handleSelectionChange" ref="xtableRef"
+        @checkbox-all="handleSelectionChange">
+        <template #default-make="scope">
             <el-tooltip content="修改" placement="top">
               <el-button
                 link
@@ -106,10 +94,7 @@
               ></el-button>
             </el-tooltip>
           </template>
-        </el-table-column>
-      </el-table>
-
-      <pagination v-show="total>0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" @pagination="getList" />
+      </XTable>
     </el-card>
     <!-- 添加或修改借料对账单明细对话框 -->
     <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px">
@@ -158,6 +143,7 @@ import { OrderBorrowDetailVO, OrderBorrowDetailQuery, OrderBorrowDetailForm } fr
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
+const xtableRef = ref()
 const orderBorrowDetailList = ref<OrderBorrowDetailVO[]>([]);
 const buttonLoading = ref(false);
 const loading = ref(true);
@@ -274,6 +260,27 @@ const data = reactive<PageData<OrderBorrowDetailForm, OrderBorrowDetailQuery>>({
 
 const { queryParams, form, rules } = toRefs(data);
 
+const columnList = ref([
+{ width: '55',type: 'checkbox',align: 'center',  },
+{ title: '单据状态',field: 'code',align: 'center',  },
+{ title: '类型',field: 'type',align: 'center',  },
+{ title: '状态',field: 'status',align: 'center',  },
+{ title: '是否含税',field: 'isTax',align: 'center',  },
+{ title: '对账人id',field: 'accountUserId',align: 'center',  },
+{ title: '对账人名称',field: 'accountUserName',align: 'center',  },
+{ title: '备注',field: 'remark',align: 'center',  },
+{ title: '借料记录ID',field: 'rawMaterialBorrowId',align: 'center',  },
+{ title: '币种',field: 'currency',align: 'center',  },
+{ title: '数量',field: 'quantity',align: 'center',  },
+{ title: '单价',field: 'price',align: 'center',  },
+{ title: '折扣金额',field: 'discountPrice',align: 'center',  },
+{ title: '总金额',field: 'totalPrice',align: 'center',  },
+{ title: '物料ID',field: 'rawMaterialId',align: 'center',  },
+{ title: '对账单id',field: 'accountOrderId',align: 'center',  },
+{ title: '出入库记录ID',field: 'rawMaterialInOutRecordId',align: 'center',  },
+{ title: '操作',field: 'make',align: 'center',  },
+]);
+
 /** 查询借料对账单明细列表 */
 const getList = async () => {
   loading.value = true;
@@ -309,9 +316,16 @@ const resetQuery = () => {
 
 /** 多选框选中数据 */
 const handleSelectionChange = (selection: OrderBorrowDetailVO[]) => {
-  ids.value = selection.map(item => item.id);
-  single.value = selection.length != 1;
-  multiple.value = !selection.length;
+  // ids.value = selection.map(item => item.id);
+  // single.value = selection.length != 1;
+  // multiple.value = !selection.length;
+  const $table = xtableRef.value.xTableRef
+  if ($table) {
+    const selection = $table.getCheckboxReserveRecords().concat($table.getCheckboxRecords()) // 获取选择的行数据列表
+    ids.value = selection.map((item: any) => item.id);
+    single.value = selection.length != 1;
+    multiple.value = !selection.length;
+  }
 }
 
 /** 新增按钮操作 */

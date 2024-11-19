@@ -465,7 +465,7 @@ const editQueryDetails =()=>{
     .finally(() => {
     viewTableLoading.value = false;
     nextTick(()=>{
-      re.value.focus();
+      //re.value.focus();
     })
 
   })

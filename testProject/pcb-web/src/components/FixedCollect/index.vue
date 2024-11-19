@@ -139,6 +139,9 @@ onMounted(() => {
     window.addEventListener('mouseup', mouseup)
     // window.addEventListener('mousemove', mousemove)
 })
+onBeforeUnmount(() => {
+    window.removeEventListener('mouseup', mouseup)
+})
 </script>
 
 <style lang="scss" scoped>

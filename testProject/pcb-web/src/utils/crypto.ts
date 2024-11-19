@@ -29,7 +29,24 @@ export const generateAesKey = () => {
 export const encryptBase64 = (str: CryptoJS.lib.WordArray) => {
   return CryptoJS.enc.Base64.stringify(str);
 };
-
+/**
+ * 加密base64
+ * @param str - 原始字符串
+ * @returns {string} - base64 编码的字符串
+ */
+export const encryptBase64ByStr = (str: string) => {
+  const wordArray = CryptoJS.enc.Utf8.parse(str);
+  return CryptoJS.enc.Base64.stringify(wordArray);
+};
+/**
+ * 解密base64
+ * @param {string} encodedStr - base64 编码的字符串
+ * @returns {string} - 原始字符串
+ */
+export const decryptBase64ByStr = (encodedStr: string): CryptoJS.lib.WordArray => {
+  const wordArray = CryptoJS.enc.Base64.parse(encodedStr);
+  return wordArray.toString(CryptoJS.enc.Utf8);
+};
 /**
  * 使用密钥对数据进行加密
  * @param message

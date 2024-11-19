@@ -36,7 +36,7 @@
                 <tr>
                     <td style="width: 200pt; text-align: left">
                         <div>
-                            
+
                         </div>
                     </td>
                     <td style="width: 200pt; text-align: center">
@@ -153,7 +153,7 @@
                     <td style="border: 1px solid black; text-align: left; width: 500pt" colspan="2">
                     </td>
                 </tr>
-                    
+
                 </tbody>
                 <tbody v-if="props.commodityInfos?.length > 1">
                 <tr>
@@ -251,7 +251,7 @@
                     </td>
                     <td
                     style="border: 1px solid black; text-align: center; max-width: 40pt; white-space: normal; word-wrap: break-word">
-                    <span style="font-size: 14px; font-weight: bold">{{ Number(commodity.singleLength).toFixed(2) + "*" + Number(commodity.singleWidth).toFixed(2)}}</span>
+                    <span style="font-size: 14px; font-weight: bold">{{ commodity.singleLength + "*" + commodity.singleWidth}}</span>
                     </td>
                     <td
                     style="border: 1px solid black; text-align: center; max-width: 35pt; white-space: normal; word-wrap: break-word">
@@ -259,7 +259,7 @@
                     </td>
                     <td
                     style="border: 1px solid black; text-align: center; max-width: 40pt; white-space: normal; word-wrap: break-word">
-                    <span style="font-size: 14px; font-weight: bold">{{ Number(commodity.unitedLength).toFixed(2) + "*" + Number(commodity.unitedWidth).toFixed(2)}}</span>
+                    <span style="font-size: 14px; font-weight: bold">{{ commodity.unitedLength + "*" + commodity.unitedWidth}}</span>
                     </td>
                     <td
                     style="border: 1px solid black; text-align: center; max-width: 50pt; white-space: normal; word-wrap: break-word">
@@ -427,11 +427,11 @@
                     <tr>
                         <td style="width: 200pt; border: 1px solid black;"><span>{{ '工序名称：' + props.laminateInfo?.craftName }}</span>
                         </td>
-                        <td style="width: 200pt; border: 1px solid black;"><span>{{ '压合板厚：' 
+                        <td style="width: 200pt; border: 1px solid black;"><span>{{ '压合板厚：'
                             + (props.laminateInfo?.pressedThickness?props.laminateInfo?.pressedThickness:'')
                         }}</span>
                         </td>
-                        <td style="width: 200pt; border: 1px solid black;"><span>{{ '公差：' 
+                        <td style="width: 200pt; border: 1px solid black;"><span>{{ '公差：'
                             + (props.laminateInfo?.pressedTolerance?props.laminateInfo?.pressedTolerance:'')
                         }}</span></td>
                         <td style="width: 200pt; border: 1px solid black;">

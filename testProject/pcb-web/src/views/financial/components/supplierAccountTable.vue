@@ -8,31 +8,31 @@
           <p class="totalTitle">
             <template v-if="!props.titleLabel?.labelHide1">
               {{ props.titleLabel && props.titleLabel.label1 ? (' ' + props.titleLabel.label1 + ':') : ' 应收金额汇总：' }}
-              {{ payablePriceTotal }}
+              {{ Number(parseFloat(payablePriceTotal).toString()) }}
             </template>
             <template v-if="!props.titleLabel?.labelHide2">
               &nbsp;&nbsp;|&nbsp;&nbsp;{{ props.titleLabel && props.titleLabel.label2 ? (' ' + props.titleLabel.label2 + ':') : ' 退货金额汇总：' }}
-              {{ backPriceTotal }}
+              {{ Number(parseFloat(backPriceTotal).toString()) }}
             </template>
             <template v-if="!props.titleLabel?.labelHide3">
               &nbsp;&nbsp;|&nbsp;&nbsp;{{ props.titleLabel && props.titleLabel.label3 ? (' ' + props.titleLabel.label3 + ':') : ' 折损金额汇总：' }}
-              {{ accountDiscountPriceTotal }}
+              {{ Number(parseFloat(accountDiscountPriceTotal).toString()) }}
             </template>
             <template v-if="!props.titleLabel?.labelHide4">
               &nbsp;&nbsp;|&nbsp;&nbsp;{{ props.titleLabel && props.titleLabel.label4 ? (' ' + props.titleLabel.label4 + ':') : ' 其他金额汇总：' }}
-              {{ otherPriceTotal }}
+              {{ Number(parseFloat(otherPriceTotal).toString()) }}
             </template>
             <template v-if="!props.titleLabel?.labelHide5">
               &nbsp;&nbsp;|&nbsp;&nbsp;{{ props.titleLabel && props.titleLabel.label5 ? (' ' + props.titleLabel.label5 + ':') : ' 对账金额汇总：' }}
-              {{ accountPriceTotal }}
+              {{ Number(parseFloat(accountPriceTotal).toString()) }}
             </template>
             <template v-if="!props.titleLabel?.labelHide6">
               &nbsp;&nbsp;|&nbsp;&nbsp;{{ props.titleLabel && props.titleLabel.label6 ? (' ' + props.titleLabel.label6 + ':') : ' 回款金额汇总：' }}
-              {{ writeOffPriceTotal }}
+              {{ Number(parseFloat(writeOffPriceTotal).toString()) }}
             </template>
             <template v-if="!props.titleLabel?.labelHide7">
               &nbsp;&nbsp;|&nbsp;&nbsp;{{ props.titleLabel && props.titleLabel.label7 ? (' ' + props.titleLabel.label7 + ':') : ' 剩余金额汇总：' }}
-              {{ remainPayablePriceTotal }}
+              {{ Number(parseFloat(remainPayablePriceTotal).toString()) }}
             </template>
           </p>
           <!-- </el-col>
@@ -66,30 +66,30 @@
           :loading="loading"
         >
           <template #default-accountPrice="scope">
-            <span>{{ Number(scope.row.accountPrice?scope.row.accountPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.accountPrice?scope.row.accountPrice:0).toString()) }}</span>
           </template>
           <template #default-otherPrice="scope">
-            <span>{{ Number(scope.row.otherPrice?scope.row.otherPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.otherPrice?scope.row.otherPrice:0).toString()) }}</span>
           </template>
           <template #default-payablePrice="scope">
-            <span>{{ Number(scope.row.payablePrice?scope.row.payablePrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.payablePrice?scope.row.payablePrice:0).toString()) }}</span>
           </template>
           <template #default-remainPayablePrice="scope">
-            <span>{{ Number(scope.row.remainPayablePrice?scope.row.remainPayablePrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.remainPayablePrice?scope.row.remainPayablePrice:0).toString()) }}</span>
           </template>
           <template #default-accountDiscountPrice="scope">
-            <span>{{ Number(scope.row.accountDiscountPrice?scope.row.accountDiscountPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.accountDiscountPrice?scope.row.accountDiscountPrice:0).toString()) }}</span>
           </template>
           <template #default-backPrice="scope">
-            <span>{{ Number(scope.row.backPrice?scope.row.backPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.backPrice?scope.row.backPrice:0).toString()) }}</span>
           </template>
 
           <template #default-writeOffPrice="scope">
             <span v-if="scope.row.type == '3' || scope.row.type == '4'">
-              {{ Number(scope.row.payablePrice) < 0 && Number(scope.row.writeOffPrice) > 0 ? ('-' + Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2)) :
-              Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2) }}
+              {{ Number(scope.row.payablePrice) < 0 && Number(scope.row.writeOffPrice) > 0 ? ('-' + Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString())) :
+              Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString()) }}
             </span>
-            <span v-else>{{  Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2) }}</span>
+            <span v-else>{{  Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString()) }}</span>
           </template>
 
           <template #default-code="scope">
@@ -132,54 +132,50 @@
 
           <template #default-make="scope">
             <el-button
-              v-if="props.supplierQuery"
+              v-if="props.supplierQuery && (scope.row.supplierSwitch == '1' && scope.row.confirmStatus == '3' && scope.row.status!='5' && ((Number(scope.row.repayWriteOffPrice) == 0 &&
+              Number(scope.row.payWriteOffPrice) == 0 && Number(scope.row.payablePrice) > 0)|| Number(scope.row.payablePrice) < 0))"
               link
               type="primary"
-              v-show="scope.row.supplierSwitch == '1' && scope.row.confirmStatus == '3' && scope.row.status!='5' && ((Number(scope.row.repayWriteOffPrice) == 0 &&
-              Number(scope.row.payWriteOffPrice) == 0 && Number(scope.row.payablePrice) > 0)|| Number(scope.row.payablePrice) < 0)"
               @click="handleCancel(scope.row)"
               >取消</el-button
             >
             <el-button
-              v-if="props.supplierQuery"
+              v-if="props.supplierQuery && scope.row.status == '4' && scope.row.confirmStatus == '2'"
               link
               type="primary"
-              v-show="scope.row.status == '4' && scope.row.confirmStatus == '2'"
               @click="handle(HandleEnum.CONFIRM, scope.row)"
               >确认</el-button
             >
-            <el-button link type="primary" v-show="scope.row.confirmCancelFlag" @click="handle(HandleEnum.CONFIRM_CANCEL, scope.row)"
+            <el-button link type="primary" v-if="scope.row.confirmCancelFlag" @click="handle(HandleEnum.CONFIRM_CANCEL, scope.row)"
               >确认取消</el-button
             >
-            <el-button v-if="props.supplierQuery" link type="primary" v-show="scope.row.status == '4'" @click="handleFile(scope.row)"
+            <el-button v-if="props.supplierQuery && scope.row.status == '4'" link type="primary" @click="handleFile(scope.row)"
               >上传附件</el-button
             >
             <el-button
-              v-if="props.supplierQuery"
+              v-if="props.supplierQuery && (scope.row.status == '4' || scope.row.status == '5'|| scope.row.confirmStatus)"
               link
               type="primary"
-              v-show="scope.row.status == '4' || scope.row.status == '5'|| scope.row.confirmStatus "
               @click="handleRecord(scope.row)"
               >确认记录</el-button
             >
-            <el-button link type="primary" v-show="scope.row.status != '5'" @click="accountUReportHandle(scope.row)">打印</el-button>
-            <el-button link type="primary" v-show="scope.row.status == '1' || scope.row.status == '3'" @click="handle(HandleEnum.EDIT, scope.row)"
+            <el-button link type="primary" v-if="scope.row.status != '5'" @click="accountUReportHandle(scope.row)">打印</el-button>
+            <el-button link type="primary" v-if="scope.row.status == '1' || scope.row.status == '3'" @click="handle(HandleEnum.EDIT, scope.row)"
               >编辑</el-button
             >
-            <el-button link type="primary" v-show="scope.row.status == '1' || scope.row.status == '3'" @click="checkPass(scope.row)">提交</el-button>
-            <el-button link type="primary" v-show="scope.row.status == '2'" @click="handle(HandleEnum.EXAMINE, scope.row)">审核</el-button>
-            <el-button v-if="props.supplierQuery" link type="primary" v-show="scope.row.rejectFlag" @click="handleReject(scope.row)">驳回</el-button>
+            <el-button link type="primary" v-if="scope.row.status == '1' || scope.row.status == '3'" @click="checkPass(scope.row)">提交</el-button>
+            <el-button link type="primary" v-if="scope.row.status == '2'" @click="handle(HandleEnum.EXAMINE, scope.row)">审核</el-button>
+            <el-button v-if="props.supplierQuery && scope.row.rejectFlag" link type="primary" @click="handleReject(scope.row)">驳回</el-button>
             <el-button link type="primary" @click="handle(HandleEnum.INFO, scope.row)">详情</el-button>
             <el-button
-              v-if="props.supplierQuery"
+              v-if="props.supplierQuery && (scope.row.status !== '1' && scope.row.status !== '2' && scope.row.status !== '3')"
               link
               type="primary"
-              v-show="scope.row.status !== '1' && scope.row.status !== '2' && scope.row.status !== '3'"
               @click="generateUrlLink(scope.row)"
               >分享链接</el-button
             >
 
-            <el-button link type="primary" v-show="scope.row.status == '1' || scope.row.status == '3'" @click="handleDelete(scope.row)"
+            <el-button link type="primary" v-if="scope.row.status == '1' || scope.row.status == '3'" @click="handleDelete(scope.row)"
               >删除</el-button
             >
           </template>
@@ -206,30 +202,30 @@
           :row-config="{ keyField: 'id' }"
         >
           <template #default-accountPrice="scope">
-            <span>{{ Number(scope.row.accountPrice?scope.row.accountPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.accountPrice?scope.row.accountPrice:0).toString()) }}</span>
           </template>
           <template #default-otherPrice="scope">
-            <span>{{ Number(scope.row.otherPrice?scope.row.otherPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.otherPrice?scope.row.otherPrice:0).toString()) }}</span>
           </template>
           <template #default-payablePrice="scope">
-            <span>{{ Number(scope.row.payablePrice?scope.row.payablePrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.payablePrice?scope.row.payablePrice:0).toString()) }}</span>
           </template>
           <template #default-remainPayablePrice="scope">
-            <span>{{ Number(scope.row.remainPayablePrice?scope.row.remainPayablePrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.remainPayablePrice?scope.row.remainPayablePrice:0).toString()) }}</span>
           </template>
           <template #default-accountDiscountPrice="scope">
-            <span>{{ Number(scope.row.accountDiscountPrice?scope.row.accountDiscountPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.accountDiscountPrice?scope.row.accountDiscountPrice:0).toString()) }}</span>
           </template>
           <template #default-backPrice="scope">
-            <span>{{ Number(scope.row.backPrice?scope.row.backPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.backPrice?scope.row.backPrice:0).toString()) }}</span>
           </template>
 
           <template #default-writeOffPrice="scope">
             <span v-if="scope.row.type == '3' || scope.row.type == '4'">
-              {{ Number(scope.row.payablePrice) < 0 && Number(scope.row.writeOffPrice) > 0 ? ('-' + Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2)) :
-              Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2) }}
+              {{ Number(scope.row.payablePrice) < 0 && Number(scope.row.writeOffPrice) > 0 ? ('-' + Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString())) :
+              Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString()) }}
             </span>
-            <span v-else>{{  Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2) }}</span>
+            <span v-else>{{  Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString()) }}</span>
           </template>
 
           <template #default-code="scope">
@@ -265,6 +261,7 @@
             <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
           </template>
           <template #default-make="scope">
+            <el-button link type="primary" v-show="scope.row.status == '2' && scope.row.confirmStatus" @click="handleFile(scope.row)">上传附件</el-button>
             <el-button link type="primary" v-show="scope.row.status == '2'" @click="handle(HandleEnum.EXAMINE, scope.row)">审核</el-button>
             <el-button link type="primary" @click="handle(HandleEnum.INFO, scope.row)">详情</el-button>
           </template>
@@ -302,22 +299,22 @@
           :row-config="{ keyField: 'id' }"
         >
           <template #default-accountPrice="scope">
-            <span>{{ Number(scope.row.accountPrice?scope.row.accountPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.accountPrice?scope.row.accountPrice:0).toString()) }}</span>
           </template>
           <template #default-otherPrice="scope">
-            <span>{{ Number(scope.row.otherPrice?scope.row.otherPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.otherPrice?scope.row.otherPrice:0).toString()) }}</span>
           </template>
           <template #default-payablePrice="scope">
-            <span>{{ Number(scope.row.payablePrice?scope.row.payablePrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.payablePrice?scope.row.payablePrice:0).toString()) }}</span>
           </template>
           <template #default-remainPayablePrice="scope">
-            <span>{{ Number(scope.row.remainPayablePrice?scope.row.remainPayablePrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.remainPayablePrice?scope.row.remainPayablePrice:0).toString()) }}</span>
           </template>
           <template #default-accountDiscountPrice="scope">
-            <span>{{ Number(scope.row.accountDiscountPrice?scope.row.accountDiscountPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.accountDiscountPrice?scope.row.accountDiscountPrice:0).toString()) }}</span>
           </template>
           <template #default-backPrice="scope">
-            <span>{{ Number(scope.row.backPrice?scope.row.backPrice:0).toFixed(2) }}</span>
+            <span>{{ Number(parseFloat(scope.row.backPrice?scope.row.backPrice:0).toString()) }}</span>
           </template>
           <template #default-isInvoice="scope">
             <span>{{ scope.row.isInvoice == '1' ? '是' : '否' }}</span>
@@ -325,10 +322,10 @@
 
           <template #default-writeOffPrice="scope">
             <span v-if="scope.row.type == '3' || scope.row.type == '4'">
-              {{ Number(scope.row.payablePrice) < 0 && Number(scope.row.writeOffPrice) > 0 ? ('-' + Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2)) :
-              Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2) }}
+              {{ Number(scope.row.payablePrice) < 0 && Number(scope.row.writeOffPrice) > 0 ? ('-' + Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString())) :
+              Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString()) }}
             </span>
-            <span v-else>{{  Number(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toFixed(2) }}</span>
+            <span v-else>{{  Number(parseFloat(scope.row.writeOffPrice?scope.row.writeOffPrice:0).toString()) }}</span>
           </template>
 
           <template #default-code="scope">
@@ -369,23 +366,21 @@
 
           <template #default-make="scope">
             <el-button
-              v-if="props.supplierQuery"
+              v-if="props.supplierQuery && scope.row.status == '4' && scope.row.confirmStatus == '2'"
               link
               type="primary"
-              v-show="scope.row.status == '4' && scope.row.confirmStatus == '2'"
               @click="handle(HandleEnum.CONFIRM, scope.row)"
               >确认</el-button
             >
             <el-button
-              v-if="props.supplierQuery"
+              v-if="props.supplierQuery && (scope.row.supplierSwitch == '1' && scope.row.confirmStatus == '3' && ((Number(scope.row.repayWriteOffPrice) == 0 &&
+              Number(scope.row.payWriteOffPrice) == 0 && Number(scope.row.payablePrice) > 0)|| Number(scope.row.payablePrice) < 0))"
               link
               type="primary"
-              v-show="scope.row.supplierSwitch == '1' && scope.row.confirmStatus == '3' && ((Number(scope.row.repayWriteOffPrice) == 0 &&
-              Number(scope.row.payWriteOffPrice) == 0 && Number(scope.row.payablePrice) > 0)|| Number(scope.row.payablePrice) < 0)"
               @click="handleCancel(scope.row)"
               >取消</el-button
             >
-            <el-button v-if="props.supplierQuery" link type="primary" v-show="scope.row.confirmCancelFlag" @click="handleConfirmCancel(scope.row)"
+            <el-button v-if="props.supplierQuery && scope.row.confirmCancelFlag" link type="primary" @click="handleConfirmCancel(scope.row)"
               >确认取消</el-button
             >
             <el-button v-if="props.supplierQuery" link type="primary" @click="handleFile(scope.row)">上传附件</el-button>
@@ -728,7 +723,7 @@ const getListCount = async (queryAny: any) => {
 }
 
 const toFixTwoPrice = (queryAny: any) => {
-  return queryAny ? Number(queryAny).toFixed(2) : 0;
+  return queryAny ? Number(parseFloat(queryAny).toString()) : 0;
 }
 
 

@@ -15,6 +15,18 @@ export const listSupplier = (query?: SupplierQuery): AxiosPromise<SupplierVO[]> 
     params: query
   });
 };
+/**
+ * 查询物料或综合供应商列表
+ * @param query
+ * @returns {*}
+ */
+
+export const listByMaterial = (): AxiosPromise<SupplierVO[]> => {
+  return request({
+    url: '/basedata/supplier/listByMaterial',
+    method: 'get'
+  });
+};
 
 /**
  * 查询供应商列表

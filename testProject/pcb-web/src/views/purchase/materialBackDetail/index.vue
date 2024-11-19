@@ -1,13 +1,11 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
-      <el-tabs type="border-card" v-model="editableTabsValue" @tab-change="getVoidedList()" class="xtable-tab">
+    <!-- <el-card shadow="never" class="xtable-card"> -->
+      <el-tabs v-if="checkPermi(['purchase:back:listView'])" v-model="editableTabsValue" @tab-change="getVoidedList()" class="xtable-tab">
         <el-tab-pane label="待审核列表" :name="1">
-          <el-row style=" justify-content: end; width: 100%;">
-            <div style="text-align: right">
-              <el-button :loading="buttonLoading" type="primary" @click="borrowingMaterialReview">审核</el-button>
-            </div>
-          </el-row>
+          <div class="head-btn-flex" v-if="checkPermi(['purchase:back:audit'])">
+              <el-button :loading="buttonLoading" v-if="checkPermi(['purchase:back:audit'])" type="primary" @click="borrowingMaterialReview">审核</el-button>
+          </div>
           <XTable
             toolId="purchaseMaterialBackDetailWait"
             v-model:page-size="queryParams.pageSize"
@@ -34,16 +32,15 @@
               <dict-tag :options="back_detail_type" :value="scope.row.type" />
             </template>
             <template #default-make="scope">
-              <el-button link type="primary" @click="handleExamine(scope.row)">审核 </el-button>
+              <el-button link type="primary" v-if="checkPermi(['purchase:back:audit'])" @click="handleExamine(scope.row)">审核 </el-button>
             </template>
           </XTable>
         </el-tab-pane>
         <el-tab-pane label="退货列表" :name="2">
-          <el-row :gutter="10" class="mb8" style="width:100%;margin:0;display:flex;justify-content: end;">
-            <el-col :span="1.5">
-              <el-button type="primary" plain icon="Plus" @click="handleRoll">物料退货</el-button>
-            </el-col>
-          </el-row>
+          <div class="head-btn-flex">
+              <el-button type="primary" @click="handleRoll">物料退货</el-button>
+              <el-button :loading="buttonLoading" v-if="checkPermi(['purchase:back:adjust'])" type="primary" @click="handleAdjustList()">批量退货调整</el-button>
+          </div>
           <XTable
             toolId="purchaseMaterialBackDetailReturn"
             v-model:page-size="backQueryParams.pageSize"
@@ -54,17 +51,18 @@
             :page-params="{ perfect: true, total: totalList }"
             :data="materialBackDetailListALl"
             :columnList="columnList2"
-            ref="xTable222"
+            ref="xAdjustTableHandle"
             size="mini"
             border
             @searchChange="searchMaterialChange"
             :column-config="{ resizable: true }"
+            :checkbox-config="{ checkMethod: tabCheckMethod, highlight: true }"
             :row-config="{ keyField: 'id' }"
             :intervalCondition="['backTime']"
             :showRefresh="true"
           >
-            <template #default-status="{ row }">
-              <div>{{ statusOptions.find(v => v.value == row.status)?.label }}</div>
+            <template #default-status="scope">
+              <div>{{ statusOptions.find(v => v.value == scope.row.status)?.label }}</div>
             </template>
             <template #default-confirmStatus="scope">
               <div v-for="item in confirmStatusList">
@@ -78,40 +76,71 @@
 <!--
               <el-button link type="primary" v-if="scope.row.confirmStatus == '3' && scope.row.status =='4'" @click="handleCancel(scope.row)">取消</el-button>
 -->
-              <el-button
-                link
-                type="primary"
-                v-show="scope.row.status==statusOptions[0].value ||scope.row.status==statusOptions[2].value"
-                @click="handleEdit(scope.row)"
-                v-if="scope.row.backStatus != '4'"
-                >编辑
-              </el-button>
-              <el-button
-                link
-                type="primary"
-                v-show="scope.row.status==statusOptions[0].value ||scope.row.status==statusOptions[2].value"
-                @click="handleDelete(scope.row)"
-                v-if="scope.row.backStatus != '4'"
-                >删除
-              </el-button>
-              <el-button
-                link
-                type="primary"
-                v-show="scope.row.status==statusOptions[0].value ||scope.row.status==statusOptions[2].value"
-                @click="handleUpdateBackDetailStatus(scope.row)"
-                v-if="scope.row.backStatus != '4'"
-                >提交
-              </el-button>
-              <el-button link type="primary" v-if="scope.row.confirmStatus == '1' && scope.row.status =='4'" @click="handleConfirm(scope.row)">退货确认</el-button>
-              <el-button link type="primary" v-if="scope.row.status =='4'" @click="handleUpload(scope.row)">附件下载</el-button>
-              <el-button link type="primary" v-if="scope.row.status =='4'" @click="generateUrlLink(scope.row)">分享链接</el-button>
-              <el-button link type="primary" v-if="scope.row.status =='4'" @click="handleRecord(scope.row.id)">确认记录</el-button>
-              <el-button link type="primary" v-if="scope.row.status =='4'" @click="uReportHandle(scope.row)" >打印</el-button>
+              <el-button link type="primary" v-if="checkPermi(['purchase:back:file'])" @click="handleUpload(scope.row)">附件下载</el-button>
+              <el-button link type="primary" v-if="checkPermi(['purchase:back:share'])" @click="generateUrlLink(scope.row)">分享链接</el-button>
+
+              <el-dropdown  v-if="scope.row.status != '2'" trigger="click" style="margin-left:12px;padding-top: 3px">
+                <el-button link type="primary">更多
+                  <el-icon class="el-icon--right">
+                    <arrow-down />
+                  </el-icon>
+                </el-button>
+                   <template #dropdown>
+                     <el-dropdown-menu>
+                       <el-dropdown-item
+                         link class="button_morn"
+                         type="primary"
+                         v-if="scope.row.backStatus != '4' && (scope.row.status==statusOptions[0].value ||scope.row.status==statusOptions[2].value)"
+                         @click="handleEdit(scope.row)"
+                       >编辑
+                       </el-dropdown-item>
+                       <el-dropdown-item
+                         link class="button_morn"
+                         type="primary"
+                         v-if="scope.row.backStatus != '4' && (scope.row.status==statusOptions[0].value ||scope.row.status==statusOptions[2].value)"
+                         @click="handleDelete(scope.row)"
+                       >删除
+                       </el-dropdown-item>
+                       <el-dropdown-item
+                         link class="button_morn"
+                         type="primary"
+                         v-if="scope.row.backStatus != '4' && (scope.row.status==statusOptions[0].value ||scope.row.status==statusOptions[2].value)"
+                         @click="handleUpdateBackDetailStatus(scope.row)"
+                       >提交
+                       </el-dropdown-item>
+                       <el-dropdown-item link class="button_morn" type="primary" v-if="scope.row.confirmStatus == '1' && scope.row.status =='4'" @click="handleConfirm(scope.row)">退货确认</el-dropdown-item>
+                       <el-dropdown-item link class="button_morn" type="primary" v-if="checkPermi(['purchase:back:adjust']) && scope.row.confirmStatus == '3'" @click="handleAdjust(scope.row)">退货调整</el-dropdown-item>
+                       <el-dropdown-item link class="button_morn" type="primary" v-if="checkPermi(['purchase:back:record']) && scope.row.confirmStatus == '3'" @click="handleAdjustRecord(scope.row)">调整记录</el-dropdown-item>
+                       <el-dropdown-item link class="button_morn" type="primary" v-if="checkPermi(['purchase:back:confirmRecord']) && scope.row.status =='4'" @click="handleRecord(scope.row.id)">确认记录</el-dropdown-item>
+                       <el-dropdown-item link class="button_morn" type="primary" v-if="checkPermi(['purchase:back:print']) && scope.row.status =='4'" @click="uReportHandle(scope.row)" >打印</el-dropdown-item>
+                     </el-dropdown-menu>
+                   </template>
+              </el-dropdown>
+            </template>
+          </XTable>
+        </el-tab-pane>
+        <el-tab-pane label="退货调整审核" width="100%" :name="3">
+          <div class="head-btn-flex" v-if="checkPermi(['purchase:back:adjustAudit'])">
+            <el-button :loading="buttonLoading" v-if="checkPermi(['purchase:back:adjustAudit'])" type="primary" @click="handleBatchAudit()">批量审核</el-button>
+          </div>
+          <XTable toolId="purchaseMaterialAdjustBack" v-model:page-size="adjustQueryParams.pageSize" v-model:current-page="adjustQueryParams.pageNum"
+                  :checkbox-config="{ checkMethod: auditCheckMethod, highlight: true }" :showRefresh="true"
+                  :page-params="{ perfect: true, total: adjustTotal }" :data="adjustList" :columnList="adjustColumnList" ref="xAuditTableHandle"
+                  :scroll-x="{enabled: true}" height="100%" class="xtable-content"
+                  :intervalCondition="['purchaseTime', 'createTime', 'auditTime', 'beforeQuantity', 'quantity']"
+                  :scroll-y="{enabled: true}"
+                  :loading="loading"
+                  border @searchChange="searchChangeAdjust" :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }">
+            <template #default-status="scope">
+              {{ statusList.find(item => item.value == scope.row.status)?.label }}
+            </template>
+            <template #default-make="scope">
+              <el-button v-if="checkPermi(['purchase:back:adjustAudit']) && scope.row.status == '1'" link type="primary" @click="handleAudit(scope.row)">审核</el-button>
             </template>
           </XTable>
         </el-tab-pane>
       </el-tabs>
-    </el-card>
+    <!-- </el-card> -->
     <el-drawer title="物料新增退货" v-model="dialogExamine.visible" size="80%" draggable destroy-on-close>
       <!-- 物料退货 -->
       <!-- <el-dialog v-model="dialogExamine.visible" title="物料新增退货" center width="70%" draggable> -->
@@ -164,17 +193,18 @@
         :edit-config="{ trigger: 'click', mode: 'row', autoClear: false, showStatus: true }"
         :edit-rules="editRules"
       >
-        <template #edit-returnOfGoodsQuantity="{ row }">
+        <template #edit-returnOfGoodsQuantity="params">
           <el-input-number
             maxLength="11"
             :min="0"
-            :max="row.quantity"
-            placeholder="0"
+            :max="params.row.quantity"
             :precision="0"
             style="width: 99%;"
             :controls="false"
-            v-model="row.returnOfGoodsQuantity"
+            v-model="params.row.returnOfGoodsQuantity"
+            v-inputNumber="(val:any) => inputHandle(val, params)"
           />
+            <!-- @change="changeCellEvent(params)" -->
         </template>
         <template #default-returnOfGoodsQuantity="{ row }">
           {{ row.returnOfGoodsQuantity }}
@@ -194,9 +224,9 @@
       <template #footer>
         <div style="display: flex; justify-content: center;">
           <span class="dialog-footer">
-            <el-button :loading="buttonLoading" @click="dialogExamine.visible = false">关闭</el-button>
             <el-button :loading="buttonLoading" type="primary" @click="onSubmitCheckBtnClick('1')">保存</el-button>
             <el-button :loading="buttonLoading" type="primary" @click="onSubmitCheckBtnClick('2')">提交</el-button>
+            <el-button :loading="buttonLoading" @click="dialogExamine.visible = false">关闭</el-button>
           </span>
         </div>
       </template>
@@ -238,9 +268,12 @@
           <template #edit-remark="{ row }">
             <el-input maxLength="100" style="width: 99%;" v-model="row.remark" />
           </template>
+          <template #edit-orderCode="{ row }">
+            <el-input :readonly="true" @click="selectPurchaseOrderList(row)" style="width: 99%;" v-model="row.orderCode" />
+          </template>
 
           <template #default-make="scope">
-            <el-button size="small" type="primary"  link @click="selectPurchaseOrderList(scope.row)">关联采购订单</el-button>
+<!--            <el-button size="small" type="primary"  link @click="selectPurchaseOrderList(scope.row)">关联采购订单</el-button>-->
             <el-button size="small" type="primary"  link @click="delTableDataList(scope.row)">删除</el-button>
           </template>
         </XTable>
@@ -248,101 +281,26 @@
       <template #footer>
         <div style="display: flex; justify-content: center;">
           <span class="dialog-footer">
-            <el-button :loading="buttonLoading" @click="dialogReturnApproval.visible = false">取消</el-button>
-            <el-button :loading="buttonLoading" type="primary" @click="onpassCheckBtnClick('3')">驳回 </el-button>
+            <el-button :loading="buttonLoading" type="danger" @click="onpassCheckBtnClick('3')">驳回 </el-button>
             <el-button :loading="buttonLoading" type="primary" @click="onpassCheckBtnClick('4')">通过</el-button>
+            <el-button :loading="buttonLoading" @click="dialogReturnApproval.visible = false">取消</el-button>
           </span>
         </div>
       </template>
     </el-drawer>
 
     <!--选择物料弹窗-->
-    <el-dialog
-      v-model="purchaseDialog.visible"
-      v-if="false"
-      :title="purchaseDialog.title"
-      :destroy-on-close="true"
-      :close-on-click-modal="false"
-      width="98%"
-    >
-      <el-container>
-        <el-aside width="310px" style="background-color: rgb(238, 241, 246)">
-          <div style=" font-size:medium; font-weight:600">已选物料</div>
-          <el-table :data="alreadySelectPurchase" tooltip-effect="dark" style="width: 100%;height: calc(100% - 40px);" :show-header="false">
-            <el-table-column prop="materialCode" label="物料编码">
-              <template #default="scope"> {{ scope.row.materialCode }} - {{ scope.row.name }} </template>
-            </el-table-column>
-            <el-table-column label="操作" width="50">
-              <template #default="scope">
-                <div style="text-align:center">
-                  <el-button @click="removeDataOrder(scope.row)" type="text" size="small">X</el-button>
-                </div>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-aside>
-        <el-main style="padding:0px;overflow-x:hidden;">
-          <el-table
-            ref="purchaseTable"
-            v-loading="loading"
-            :data="materialInventoryList"
-            tooltip-effect="dark"
-            style="width: 100%;"
-            height="450"
-            :row-key="(row: any) => row.id"
-            @select="handleSelectionChangePurchase"
-          >
-            <el-table-column type="selection" width="45" :reserve-selection="true" align="center" fixed> </el-table-column>
-            <el-table-column prop="materialCode" width="80" label="物料编码" align="center" :show-overflow-tooltip="true"> </el-table-column>
-            <el-table-column prop="name" width="150" label="物料名称" align="center" :show-overflow-tooltip="true"> </el-table-column>
-            <el-table-column prop="boardThickness" width="150" label="板厚" align="center" :show-overflow-tooltip="true"> </el-table-column>
-            <el-table-column prop="copperThickness" width="150" label="铜厚" align="center" :show-overflow-tooltip="true"> </el-table-column>
-            <el-table-column prop="level" width="150" label="级别" align="center" :show-overflow-tooltip="true"> </el-table-column>
-            <el-table-column prop="color" width="150" label="颜色" align="center" :show-overflow-tooltip="true"> </el-table-column>
-            <el-table-column prop="length" width="150" label="长（mm）" align="center" :show-overflow-tooltip="true"> </el-table-column>
-            <el-table-column prop="width" width="150" label="宽（mm）" align="center" :show-overflow-tooltip="true"> </el-table-column>
-            <el-table-column prop="manufacturer" width="70" label="品牌" :show-overflow-tooltip="true" align="center"></el-table-column>
-            <el-table-column prop="materialQuality" label="材质牌号" align="center" min-width="100" show-overflow-tooltip> </el-table-column>
-            <el-table-column prop="unit" label="单位" align="center" min-width="100" show-overflow-tooltip> </el-table-column>
-            <el-table-column prop="productionDate" label="生产日期" align="center" min-width="150" show-overflow-tooltip> </el-table-column>
-            <el-table-column prop="expirationDays" width="110" align="center" label="保质期（天）" :show-overflow-tooltip="true"> </el-table-column>
-            <el-table-column prop="expirationDate" width="80" align="center" label="过期日期" :show-overflow-tooltip="true"> </el-table-column>
-            <el-table-column prop="quantity" width="110" align="right" label="实际库存"> </el-table-column>
-            <el-table-column prop="quantity" width="120" align="right" label="可用库存"> </el-table-column>
-            <el-table-column prop="inTransitNumber" width="100" align="right" label="在途数"> </el-table-column>
-          </el-table>
-
-          <pagination
-            v-show="total>0"
-            :total="total"
-            v-model:page="queryParamsCommodity.pageNum"
-            v-model:limit="queryParamsCommodity.pageSize"
-            @pagination="choosePurchase"
-          />
-        </el-main>
-      </el-container>
-      <template #footer>
-        <div class="text-center">
-          <el-button @click="purchaseDialog.visible = false">取 消</el-button>
-          <el-button :loading="buttonLoading" type="primary" @click="submitPurchase">确 定</el-button>
-        </div>
-      </template>
-    </el-dialog>
 
     <el-dialog v-model="purchaseDialog.visible" :title="purchaseDialog.title" width="80%" draggable destroy-on-close>
       <el-row>
         <el-col :span="5">
-          <el-table size="small" :data="alreadySelectPurchase" height="440" :border="true">
-            <el-table-column property="materialCode" fixed />
-            <el-table-column v-show="false" property="name" label="已选物料" />
-            <el-table-column align="center">
-              <template #default="scope">
+          <XTable :pageShow="false" :columnList="columnListChooseMaterial" :data="alreadySelectPurchase" height="440">
+              <template #default-make="scope">
                 <el-tooltip content="删除" placement="top">
                   <el-button link type="primary" icon="CloseBold" @click="handleInventoryListDelete(scope.row)"></el-button>
                 </el-tooltip>
               </template>
-            </el-table-column>
-          </el-table>
+          </XTable>
         </el-col>
         <el-col :span="19">
           <XTable
@@ -377,12 +335,12 @@
         </el-col>
       </el-row>
       <template #footer>
-        <div style="display: flex; justify-content: center;">
-          <span class="dialog-footer">
-            <el-button @click="clearInventoryForm">取消</el-button>
+        <!-- <div style="display: flex; justify-content: center;">
+          <span class="dialog-footer"> -->
             <el-button :loading="buttonLoading" type="primary" @click="submitPurchase">确 定</el-button>
-          </span>
-        </div>
+            <el-button @click="clearInventoryForm">取消</el-button>
+          <!-- </span>
+        </div> -->
       </template>
     </el-dialog>
 
@@ -403,10 +361,10 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <div class="dialog-footer">
+        <!-- <div class="dialog-footer"> -->
           <el-button :loading="buttonLoading" type="primary" @click="submitBackForm">确 定</el-button>
           <el-button :loading="buttonLoading" @click="dialog.visible = false">取 消</el-button>
-        </div>
+        <!-- </div> -->
       </template>
     </el-dialog>
 
@@ -417,6 +375,7 @@
         ref="selectOrderRef"
         size="mini"
         :data="purchaseOrderList"
+        :loading="purchaseLoading"
         height="400"
         :column-config="{ resizable: true }"
         :columnList="purchaseOrderColumnList"
@@ -492,8 +451,8 @@
       <template #footer>
         <div style="display: flex; justify-content: center;">
           <span class="dialog-footer">
-            <el-button :loading="buttonLoading" @click="dialogConfirm.visible = false">取消</el-button>
             <el-button :loading="buttonLoading" type="primary" @click="submitConfirmForm">确认</el-button>
+            <el-button :loading="buttonLoading" @click="dialogConfirm.visible = false">取消</el-button>
           </span>
         </div>
       </template>
@@ -527,11 +486,96 @@
       </el-row>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="statement.visible = false">取消</el-button>
           <el-button v-if="statement.title === '申请取消'" type="primary" @click="cancelAccount">确认</el-button>
+          <el-button @click="statement.visible = false">取消</el-button>
         </span>
       </template>
     </el-dialog>
+
+    <!-- 签名列表 -->
+    <signDialog v-if="signVisible" v-model:show="signVisible" @submit="submitSign" @cancel="cancelSign" />
+
+    <!-- 库存锁定提示框 -->
+    <InventoryLock title="物料盘点提示" inventoryType="2" v-model:show="inventoryCheck" :data="inventoryRes" @close="inventoryCheck = false"/>
+
+    <!-- 校验提示信息 -->
+    <el-dialog v-model="dialogVerify.visible" :title="dialogVerify.title" width="40%" draggable destroy-on-clos>
+      <div class="p-2" style="font-weight: 600;">
+        以下单据中物料的上一个调整申请正在审核中，请等待调整结束后再进行操作：
+      </div>
+      <XTable :pageShow="false" :showHead="false" max-height="500px" :data="verifyList" :columnList="verifyColumnList">
+        <template #default-errorDetail="{ row }">
+          <template v-if="row.errorDetail?.length">
+            <div v-for="item in row.errorDetail">{{ item }}</div>
+          </template>
+        </template>
+      </XTable>
+
+      <template #footer>
+        <div style="display: flex; justify-content: center;">
+          <el-button @click="dialogVerify.visible = false">我知道了</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 校验库存提示信息 -->
+    <el-dialog v-model="dialogQuantity.visible" :title="dialogQuantity.title" width="40%" draggable destroy-on-clos>
+      <div class="p-2" style="font-weight: 600;">
+        <span style="color: rgba(93, 125, 179, 1);">*以下物料的当前库存不足扣减，请手动还料后再进行操作</span>
+      </div>
+      <XTable :pageShow="false" :showHead="false" max-height="500px" :data="quantityList" :columnList="quantityColumnList" />
+
+      <template #footer>
+        <div style="display: flex; justify-content: center;">
+          <el-button @click="dialogQuantity.visible = false">我知道了</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 退货调整审核 -->
+    <AdjustMaterial v-if="isAudit" :isAudit="isAudit"
+                    :tableToolId="auditToolId"
+                    :total="auditTotal"
+                    :data="auditAdjustList"
+                    :title="drawer.title"
+                    :type="'2'"
+                    :queryParams="backAdjustQueryParams"
+                    v-model:loading="backLoading"
+                    v-model:show="drawer.visible"
+                    :columnList="adjustAuditColumnList"
+                    :buttonLoading="adjustLoading"
+                    @confirm="submitAdjust"
+                    @remove="removeRow"
+                    @audit="auditAdjust('2')"
+                    @reject="auditAdjust('3')"
+                    @close="drawer.visible = false">
+    </AdjustMaterial>
+
+    <!-- 退货调整 -->
+    <AdjustMaterial v-else :isAudit="isAudit"
+                    :tableToolId="backToolId"
+                    :total="backTotal"
+                    :data="receiptAdjustList"
+                    :title="drawer.title"
+                    :type="'2'"
+                    :queryParams="backAdjustQueryParams"
+                    v-model:loading="backLoading"
+                    v-model:show="drawer.visible"
+                    :columnList="adjustAddColumnList"
+                    :buttonLoading="adjustLoading"
+                    @confirm="submitAdjust"
+                    @remove="removeRow"
+                    @close="drawer.visible = false">
+    </AdjustMaterial>
+
+    <!-- 物料调整记录 -->
+    <AdjustMaterialRecord
+      :title="dialogRecord.title"
+      :type="'2'"
+      :selectMaterial="selectRawMaterial"
+      v-model:show="dialogRecord.visible"
+      @close="dialogRecord.visible = false">
+    </AdjustMaterialRecord>
   </div>
 </template>
 
@@ -559,7 +603,7 @@ import {ref} from "vue";
 import {MaterialInventoryVO} from "@/api/purchase/materialInventory/types";
 import dayjs from "dayjs";
 import {OrderVO} from "@/api/order/directOrder/types";
-import {addOperateRecord, listPurchaseOrderDetail} from "@/api/purchase/materialOrderDetail";
+import {listPurchaseOrderDetailByBack} from "@/api/purchase/materialOrderDetail";
 
 
 import { VXETable, VxeTableEvents, VxeTableInstance, VxeTablePropTypes } from "vxe-table";
@@ -573,11 +617,22 @@ import {
 import {CustomerAddressVO} from "@/api/basedata/customerAddress/types";
 import {getReportUrl} from "@/utils/report";
 import {getSignPdf} from "@/api/financial/accountOrder";
-import {MaterialOrderForm, MaterialOrderQuery} from "@/api/purchase/materialOrder/types";
 import useUserStore from "@/store/modules/user";
 import { MaterialApplyVO } from "@/api/purchase/materialApply/types";
 import clipboard3 from "vue-clipboard3";
 import { getUrlLink } from "@/api/purchase/materialOrder";
+import {ElMessage} from "element-plus";
+import {listMaterialInventoryInfo} from "@/api/purchase/materialApply";
+import {checkPermi} from "@/utils/permission";
+import {MaterialQuantityAdjustVO} from "@/api/purchase/materialQuantityAdjust/types";
+import {
+  addQuantityAdjustList, auditQuantityAdjust, listBackQuantityAdjust,
+  listQuantityAdjust,
+  listReceiveQuantityAdjust
+} from "@/api/purchase/materialQuantityAdjust";
+import {queryUseModule} from "@/api/basedata/sign";
+import { decryptBase64ByStr } from '@/utils/crypto'
+
 const {proxy} = getCurrentInstance() as ComponentInternalInstance;
 const purchaseTable = ref<ElFormInstance>();
 
@@ -598,6 +653,7 @@ const buttonLoading = ref(false);
 const loading = ref(true);
 const loadingList = ref(true);
 const waitLoading = ref(false);
+const purchaseLoading = ref(false);
 
 const showSearch = ref(true);
 const ids = ref<Array<string | number>>([]);
@@ -817,6 +873,15 @@ const selectPurchaseData = reactive<PageData<MaterialBackDetailForm, MaterialBac
    ],
   }
 );
+const route = useRoute();
+/**
+ * 进入页面次数
+ */
+const isFirst = ref(0)
+/**
+ * 待办跳转参数
+ */
+const pendingParams = ref()
 // 0+正数且小数点后最多4位校验
 const nullOrPositiveNumberWithTwoDecimals = (cellValue: any) => {
    if (!cellValue ) {
@@ -831,6 +896,13 @@ VXETable.validators.add('nullOrPositiveNumberWithTwoDecimals', {
   }
 })
 
+const inputHandle = (val:any, params:any) => {
+  params.row.returnOfGoodsQuantity = val
+  const $table = xTableAdd.value.xTableRef
+  if ($table) {
+    $table.updateStatus(params)
+  }
+}
 const editRules = ref<VxeTablePropTypes.EditRules>({
 
   returnOfGoodsQuantity: [
@@ -839,13 +911,20 @@ const editRules = ref<VxeTablePropTypes.EditRules>({
     price: [
     { required: true, validator: 'nullOrPositiveNumberWithTwoDecimals' }
   ],
+  orderCode: [
+    {required: true, trigger: 'blur', message: '请关联采购订单'}
+  ]
 })
 
 const {queryParams, form, rules} = toRefs(data);
 const {queryParams:backQueryParams} = toRefs(backData);
 const {queryParams:selectPurchaseQueryParams} = toRefs(selectPurchaseData);
 
-
+const columnListChooseMaterial = ref([
+{ field: 'materialCode',align: 'center',  },
+{ title: '已选物料',field: 'name',align: 'center',  },
+{ field: 'make',align: 'center',  },
+]);
 const columnList = ref([
   { type: 'checkbox', fixed: 'left', width: '60', align: 'center', showOverflow: false },
   { title: "序号", fixed: 'left', width: '60', type: 'seq', align: 'center', showOverflow: false },
@@ -856,6 +935,7 @@ const columnList = ref([
       { title: '供应商名称',width: '160', field: 'supplierName', align: 'center' ,  filterType: 'input', filterParam: { placeholder: '' } },
   { title: '物料编码', width: '80',field: 'materialCode', align: 'center',  filterType: 'input', filterParam: { placeholder: '' } },
   { title: '物料名称',width: '80', field: 'name', align: 'center',  filterType: 'input', filterParam: { placeholder: '' } },
+  { title: '物料类别', field: 'categoryName',  width: '80',align: 'center',filterType: 'input', filterParam: {placeholder: ''},   },
   { title: '板厚', width: '60',field: 'boardThickness', align: 'center',  filterType: 'input', filterParam: { placeholder: '' }  },
   { title: '铜厚', width: '60',field: 'copperThickness', align: 'center',  filterType: 'input', filterParam: { placeholder: '' } },
   { title: '级别', width: '60',field: 'level', align: 'center' ,  filterType: 'input', filterParam: { placeholder: '' } },
@@ -866,13 +946,14 @@ const columnList = ref([
   { title: '材质牌号',width: '80', field: 'materialQuality', align: 'center' ,  filterType: 'input', filterParam: { placeholder: '' } },
   { title: '厚度', field: 'thickness', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '' } },
   { title: '规格型号', field: 'specification', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '' } },
+  { title: '采购单位', field: 'unit', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '' } },
   { title: '直径', field: 'diameter', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '' } },
 
-  { title: '退货数量', width: '80', field: 'quantity', align: 'center' },
-  { title: '退货单价', width: '80',field: 'price', align: 'center' },
-  { title: '退货总价', width: '80',field: 'totalPrice', align: 'center' },
+  { title: '退货数量', width: '80', field: 'quantity', align: 'center',fixed: 'right', },
+  { title: '退货单价', width: '80',field: 'price', align: 'center',fixed: 'right', },
+  { title: '退货总价', width: '80',field: 'totalPrice', align: 'center',fixed: 'right', },
   { title: '退货人员',width:'120', field: 'backUserName', align: 'center' , filterType: 'input', filterParam: { placeholder: '' }},
-  { title: '退货时间',width: '120', field: 'backTime', align: 'center'
+  { title: '退货时间',width: '130', field: 'backTime', align: 'center'
   , filterType: 'intervalDate',  filterParam: {
       startParams: { placeholder: '请输入开始时间', clearable: true, type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss' },
       endParams: { placeholder: '请输入结束时间', clearable: true, type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss' },
@@ -883,6 +964,7 @@ const columnList = ref([
 ]);
 
 const columnList2 = ref([
+  { type: 'checkbox', align: 'center', field: "checkbox",fixed: 'left', width: '40', },
   { title: "序号", fixed: 'left',width: '60',type: 'seq', align: 'center', showOverflow: false },
 
   { title: '退货状态',width: '80', field: 'status', align: 'center'
@@ -901,6 +983,7 @@ const columnList2 = ref([
    { title: '供应商名称',width: '160', field: 'supplierName', align: 'center' ,filterType: 'input', filterParam: { placeholder: '' }},
   { title: '物料编码', width: '80',field: 'materialCode', align: 'center',filterType: 'input', filterParam: { placeholder: '' }},
   { title: '物料名称',width: '80', field: 'name', align: 'center',filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '物料类别', field: 'categoryName',  width: '80',align: 'center',filterType: 'input', filterParam: {placeholder: ''},   },
   { title: '板厚', width: '60',field: 'boardThickness', align: 'center' ,filterType: 'input', filterParam: { placeholder: '' }},
   { title: '铜厚', width: '60',field: 'copperThickness', align: 'center',filterType: 'input', filterParam: { placeholder: '' }},
   { title: '级别', width: '60',field: 'level', align: 'center' ,filterType: 'input', filterParam: { placeholder: '' }},
@@ -911,21 +994,22 @@ const columnList2 = ref([
   { title: '材质牌号',width: '80', field: 'materialQuality', align: 'center' ,filterType: 'input', filterParam: { placeholder: '' }},
   { title: '厚度', field: 'thickness', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '' } },
   { title: '规格型号', field: 'specification', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '' } },
+  { title: '采购单位', field: 'unit', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '' } },
   { title: '直径', field: 'diameter', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '' } },
 
   { title: '库存数', width: '80', field: 'rawMaterialInvontoryQuantity', align: 'center' },
-  { title: '退货数量', width: '80', field: 'quantity', align: 'center' },
-  { title: '退货单价', width: '80',field: 'price', align: 'center' },
-  { title: '退货总价', width: '80',field: 'totalPrice', align: 'center' },
+  { title: '退货总数', width: '80', field: 'quantity', align: 'center',fixed: 'right', },
+  { title: '退货单价(元)', width: '80',field: 'price', align: 'center',fixed: 'right', },
+  { title: '退货总价(元)', width: '80',field: 'totalPrice', align: 'center',fixed: 'right', },
   { title: '退货人员',width:'120', field: 'backUserName', align: 'center'  , filterType: 'input', filterParam: { placeholder: '' }},
-  { title: '退货时间',width: '120', field: 'backTime', align: 'center'
+  { title: '退货时间',width: '130', field: 'backTime', align: 'center'
 , filterType: 'intervalDate',  filterParam: {
       startParams: { placeholder: '请输入开始时间', clearable: true, type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss' },
       endParams: { placeholder: '请输入结束时间', clearable: true, type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss' },
     }
 },
   { title: '备注', width: '200',field: 'remark', align: 'center' },
-  { title: '操作', field: 'make', align: 'center', width: '335', fixed: 'right', showOverflow: false },
+  { title: '操作', field: 'make', align: 'center', width: '220', fixed: 'right', showOverflow: false },
 ]);
 
 const selectedMaterialColumnList = ref([
@@ -970,7 +1054,7 @@ const addTableColumnList = ref([
   { title: '级别', field: 'level', width: '80', align: 'center'  },
 { title:'材质牌号',field:'materialQuality',align:'center',   width: '80',},
 { title:'库存数',field:'quantity',align:'center',    width: '80',fixed: 'right',},
-{ title:'退货数',field:'returnOfGoodsQuantity',align:'center', editRender: {} , width: '80',fixed: 'right',  },
+{ title:'退货数',field:'returnOfGoodsQuantity',align:'center', editRender: {name: 'VxeInput'} , width: '80',fixed: 'right',  },
 { title:'备注',field:'remark',align:'center',  editRender: {}, width: '80',fixed: 'right', },
 { width:'200',title:'操作',align:'center', field:'make', width: '80',fixed: 'right',  },
 ]);
@@ -999,9 +1083,10 @@ const auditColumnList = ref([
 { title:'物料规格',field:'materialInfo',align:'center',  },
 { title:'退货数',field:'quantity',align:'center', width:'80' },
 { title:'退货单价',field:'price',align:'center',  editRender: {} ,width:'100'},
-{ title:'总金额',field:'totalPrice',align:'center', width:'120' },
+{ title:'总金额',field:'totalPrice',align:'center', width:'100' },
 { title:'备注',field:'remark',align:'center',  editRender: {} ,width:'120'},
-{ title:'操作',field:'make',align:'center',   width:'120'},
+{ title:'关联采购订单',field:'orderCode',align:'center',  editRender: {}, width:'140'},
+{ title:'操作',field:'make',align:'center',  width:'120'},
 ]);
 
 const purchaseOrderColumnList =ref([
@@ -1367,30 +1452,73 @@ const onSubmitCheckBtnClick = async (type: string) => {
   await getListAll();
 }
 
+const inventoryCheck = ref(false);
+const inventoryRes = ref<any[]>([]);
 /**
  * 通过 驳回
  * @param type
  */
 const onpassCheckBtnClick = async (type: string) => {
-
-  let check =true;
-  if(type=="4"){
-    //判断是否填了单价
-   tableDataList.value.forEach((item,index)=>{
-     if(!item.price){
-
-        check=false;
-       return;
-     }
-   })
+  // 查询是否存在盘点中物料
+  let ids = tableDataList.value.map(item => item.rawMaterialId);
+  let query = {
+    pageNum: 1,
+    pageSize: 20,
+    idList: ids,
+    isCheck: '1'
   }
-  if(!check){
-     proxy?.$modal.msgError("请填写单价");
+  const res = await listMaterialInventoryInfo(query);
+  if (res.rows && res.rows.length > 0) {
+    inventoryRes.value = res.rows;
+    inventoryCheck.value = true;
     return;
   }
-  tableDataList.value.forEach(info => {
-    info.status = type;
-  })
+
+  let check =true;
+  let sign = true;
+  let relevancy = true;
+  if(type=="4"){
+    //判断是否填了单价
+    tableDataList.value.forEach((item, index) => {
+      if (!item.price) {
+
+        check = false;
+        return;
+      }
+      if (!item.materialOrderDetailId) {
+        relevancy = false;
+        return;
+      }
+    })
+    //判断是否签过名
+    tableDataList.value.forEach((item) => {
+      if (!item.existSignHistory) {
+        sign = false;
+        return;
+      }
+    })
+    if (!check) {
+      proxy?.$modal.msgError("请填写单价");
+      return;
+    }
+    if (!relevancy) {
+      proxy?.$modal.msgError("请关联采购订单");
+      return;
+    }
+    // 如果没签过名需要选择签章
+    if(!sign) {
+      // 查询是否存在默认签章
+      const res = await queryUseModule({useModule: '3'});
+      // 存在则自动签名
+      if(res.data) {
+        submitSign(res.data.key, res.data.signType);
+      } else {
+        signVisible.value = true;
+      }
+      return;
+    }
+  }
+
   const directPurchase: DirectPurchase = {
     purchaseList: [],
     supplierId: "",
@@ -1432,18 +1560,17 @@ let reportUrl = ref("");
 const uReportHandle = async (row : any) => {
   reportDrawer.title = "采购退货单预览";
   reportDrawer.visible = true;
-  if(row.confirmStatus=="3"){
-    getSignPdf({bizCode:row.code}).then(res=>{
-      let vo = res.data;
-      if (vo.url) {
-        let url = '/web/viewer.html?file=' + encodeURIComponent(vo.url + '#' + vo.name);
-        reportUrl.value = url;
-        return;
-      }
-    });
-  }
+
+  getSignPdf({bizCode: row.code}).then(res => {
+    let vo = res.data;
+    if (vo.url) {
+      let url = '/web/viewer.html?file=' + encodeURIComponent(vo.url + '#' + vo.name);
+      reportUrl.value = url;
+      return;
+    }
+  });
+
   reportUrl.value = getReportUrl() + `&_n=采购退货单&_u=file:purchaseOrderBack.ureport.xml&url=system/materialBackDetail/materialBackPreview/${row.code}&listUrl=system/materialBackDetail/materialBackPreview?xyz=y&code=${row.code}&confirmStatus=${row.confirmStatus}`;
-  console.log(reportUrl.value)
   reportUrl.value = reportUrl.value.replace("1,4,6","2,4,6");
 }
 
@@ -1488,7 +1615,6 @@ const xTable = ref<VxeTableInstance<MaterialInventoryVO>>();
  */
 const saveRowEvent = (row: MaterialInventoryVO) => {
   // row.unitedNumber = row.unitedWayLength * row.unitedWayWidth;
-  console.log(row)
   const $table = xTable.value;
   if ($table) {
     $table.clearEdit().then(() => {
@@ -1537,7 +1663,7 @@ const searchPurchaseOrderChange = async (params: any) => {
 
   selectPurchaseQueryParams.value = params
    selectPurchaseQueryParams.value.rawMaterialId = selectedPurchaseOrder.value.rawMaterialId;
-  const res = await listPurchaseOrderDetail(selectPurchaseQueryParams.value);
+  const res = await listPurchaseOrderDetailByBack(selectPurchaseQueryParams.value);
   purchaseOrderList.value = res.rows;
   selectPurchaseTotal.value = res.total;
   setTableSelectPurchase();
@@ -1579,16 +1705,17 @@ const setTableSelectPurchase = () => {
 
 /** 查询采购订单明细 */
 const selectPurchaseOrderList = async (row?: any) => {
-selectedPurchaseOrder.value = row;
+  purchaseOrderDialog.visible = true;
+  purchaseLoading.value = true;
+  selectedPurchaseOrder.value = row;
   const _id = row?.rawMaterialId
 
   selectPurchaseQueryParams.value.rawMaterialId = _id;
   selectPurchaseQueryParams.value.orderStatus = '3';
-  const res = await listPurchaseOrderDetail(selectPurchaseQueryParams.value);
+  const res = await listPurchaseOrderDetailByBack(selectPurchaseQueryParams.value).finally(() => purchaseLoading.value = false);
   purchaseOrderList.value = res.rows;
   selectPurchaseTotal.value = res.total;
   setTableSelectPurchase();
-  purchaseOrderDialog.visible = true;
   // dialog.title = "修改物料退货明细";
 }
 
@@ -1668,7 +1795,6 @@ const submitPurchase = () => {
     let materialInventoryVO: any = deepClone(item);
 
     if(tableDataCopy){
-      console.log(tableDataCopy.value);
       let temp = tableDataCopy.value.find(item2 => item2.id == item.id);
       if(temp){
           materialInventoryVO.returnOfGoodsQuantity=temp.returnOfGoodsQuantity;
@@ -1794,6 +1920,7 @@ const selectOneChangeSubmit = () => {
        tableDataList.value.forEach(item => {
     if (selectedPurchaseOrder.value.id == item.id) {
       item.materialOrderDetailId = selectRecords[0].id;
+      item.orderCode = selectRecords[0].orderCode;
       item.price = selectRecords[0].price;
       totalPriceCount(item);
     }
@@ -1868,9 +1995,11 @@ const getVoidedList = async () => {
   if (editableTabsValue.value == 1) {
     queryParams.value.status = statusOptions.value[1].value;
      getList();
-  }else{
+  }else if (editableTabsValue.value == 2) {
     queryParams.value.status = undefined;
     getListAll();
+  } else {
+    getAdjustList();
   }
   // console.log(queryParams.value.status);
 
@@ -1885,6 +2014,7 @@ watch(() => customerAddressList.value, (val) => {
 const getCustomerAddressList = async () => {
   customerAddressList.value = [];
   formReturnOfGoods.addressName = undefined;
+  formReturnOfGoods.addressId = undefined;
   if (formReturnOfGoods.supplierId) {
     const res = await listCustomerSupplierAddress(formReturnOfGoods.supplierId);
     customerAddressList.value = res.data;
@@ -1903,13 +2033,12 @@ const productSelect = async (e) => {
  */
 let suppliers: SupplierVO[] = [];
 const getSupplierLists = async () => {
+  console.log('getSupplierLists===>>>', getSupplierLists)
   const res = await listSupplierNoPage();
-  console.log(res);
   suppliers = res;
   suppliers.forEach(item => {
     item.supplierName = String(item.supplierName)
   })
-  console.log(suppliers);
 }
 
 /** 退货确认操作 */
@@ -1977,7 +2106,6 @@ const generateUrlLink = async (row : any) => {
   let path = 'pages/subOne/procurementSignature/returnOrder/detail/index';
   let query = 'id='+row.code+'&status=' + row.confirmStatus+'&companyId=' + row.supplierCompanyId+'&shareUserId=' + userId;
   const res = await getUrlLink({path: path,query: query});
-  console.log(res)
   try {
     await toClipboard(res.data);
     proxy?.$modal.msgSuccess("复制成功!");
@@ -2040,9 +2168,472 @@ const cancelAccount = async () => {
   });
 }
 
-onMounted(() => {
-  getVoidedList();
-  getSupplierLists();
+const signVisible = ref(false);
+
+const submitSign = async (key : any, signType :any) => {
+  const directPurchase: DirectPurchase = {
+    purchaseList: [],
+    supplierId: "",
+  };
+  directPurchase.purchaseList = tableDataList.value;
+  directPurchase.status = '4';
+  directPurchase.imageKey = key;
+  directPurchase.signType = signType;
+
+  proxy?.$modal.loading("加载中...");
+  await updateMaterialBackStatus(directPurchase).then((res) => {
+    if (res && res.data && res.data.length > 0) {
+      proxy?.$modal.msgError("库存不足，退货失败");
+      //将tableDataList.value中库存数据修改为res.rows中的数据
+      tableDataList.value.forEach((item, index) => {
+        let temp = res.data.find((item2) => {
+          return item2.id == item.rawMaterialInvontoryId;
+        });
+        if (temp) {
+          item.rawMaterialInvontoryQuantity = temp.quantity;
+        }
+      })
+    } else {
+      proxy?.$modal.msgSuccess("操作成功");
+      dialogReturnApproval.visible = false;
+      clearSelection();
+    }
+  }).catch(() => {
+    proxy?.$modal.msgError("操作失败");
+  }).finally(() => {
+    proxy?.$modal.closeLoading()
+  });
+  await getList();
+}
+
+const cancelSign = async () => {
+  signVisible.value = false;
+}
+
+const backToolId = ref('purchaseBackReceiptAdjustTab');
+const auditToolId = ref('purchaseBackAuditAdjustTab');
+
+const xAdjustTableHandle = ref();
+const xAuditTableHandle = ref();
+
+const receiptAdjustList = ref<MaterialQuantityAdjustVO[]>([]);
+const verifyList = ref<MaterialQuantityAdjustVO[]>([]);
+const quantityList = ref<MaterialQuantityAdjustVO[]>([]);
+const adjustList = ref<MaterialQuantityAdjustVO[]>([]);
+const auditAdjustList = ref<MaterialQuantityAdjustVO[]>([]);
+const selectRawMaterial = ref();
+
+const backTotal = ref(0);
+const adjustTotal = ref(0);
+const auditTotal = ref(0);
+
+const backLoading = ref(false);
+const adjustLoading = ref(false);
+
+const isAudit = ref(false);
+
+const dialogVerify = reactive<DialogOption>({
+  visible: false,
+  title: '提示'
 });
-</script>import useUserStore from '@/store/modules/user';
+
+const dialogQuantity = reactive<DialogOption>({
+  visible: false,
+  title: '库存不足提醒'
+});
+
+
+const drawer = reactive<DialogOption>({
+  visible: false,
+  title: '物料退货调整'
+});
+
+const dialogRecord = reactive<DialogOption>({
+  visible: false,
+  title: '修改记录'
+});
+
+const backAdjustQueryParams = ref({
+  pageNum: 1,
+  pageSize: 99999,
+  type: '1',
+  params: {}
+});
+
+const adjustQueryParams = ref({
+  pageNum: 1,
+  pageSize: 20,
+  type: '2',
+  params: {}
+});
+
+const statusList = ref([
+  { label: '待审核', value: "1" },
+  { label: '审核通过', value: "2" },
+  { label: '审核驳回', value: "3" },
+]);
+
+const adjustAddColumnList = ref([
+  { title: '退货单号', field: 'code',  width: '140',align: 'center' ,},
+  { title: '供应商名称',width: '160', field: 'supplierName', align: 'center' ,},
+  { title: '供应商编码',width: '100', field: 'supplierCode', align: 'center' ,},
+  { title: '物料类别', field: 'categoryName',  width: '80',align: 'center',},
+  { title: '物料编码', width: '80',field: 'materialCode', align: 'center',},
+  { title: '物料名称',width: '80', field: 'name', align: 'center',},
+  { title: '材质牌号',width: '80', field: 'materialQuality', align: 'center' ,},
+  { title: '板厚(㎜)', width: '60',field: 'boardThickness', align: 'center' ,},
+  { title: '铜厚(OZ)', width: '60',field: 'copperThickness', align: 'center',},
+  { title: '颜色',width: '60', field: 'color', align: 'center', },
+  { title: '级别', width: '60',field: 'level', align: 'center' ,},
+  { title: '长(㎜)',width: '60', field: 'length', align: 'center' ,},
+  { title: '宽(㎜)', width: '60',field: 'width', align: 'center' ,},
+  { title: '厚度', field: 'thickness', width: '80', align: 'center', },
+  { title: '品牌',width: '80', field: 'manufacturer', align: 'center' ,},
+  { title: '规格型号', field: 'specification', width: '80', align: 'center',  },
+  { title: '采购单位', field: 'unit', width: '80', align: 'center', },
+  { title: '直径', field: 'diameter', width: '80', align: 'center',  },
+  { title: '退货单价(元)', width: '80',field: 'price', align: 'center' },
+  { title: '退货总价(元)', width: '80',field: 'totalPrice', align: 'center' },
+  { title: '备注信息', width: '200',field: 'remark', align: 'center' },
+  { title: '本次退货', width: '80', field: 'backQuantity', align: 'center',fixed: 'right', },
+  { title: '重新退货数量', field: 'quantity',  width: '100',align: 'center',editRender:{}, fixed: 'right', },
+  { title: '操作', field: 'make',  width: '80',align: 'center',fixed: 'right', },
+]);
+
+const adjustColumnList = ref([
+  { type: 'checkbox', align: 'center', field: "checkbox", fixed: 'left', width: '40', },
+  { title: "序号", type: 'seq', align: 'center', width: '60', fixed: 'left',  },
+  { title: '状态', field: 'status', align: 'center', width: '80', filterType: 'radio', filterParam: { placeholder: '请选择状态' }, filterData: () => statusList.value },
+  { title: '退货单号',width: '140', field: 'code', align: 'center',  filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '供应商编码',width: '100', field: 'supplierCode', align: 'center' ,filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '供应商名称',width: '160', field: 'supplierName', align: 'center' ,filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '物料编码', width: '80',field: 'materialCode', align: 'center',filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '物料名称',width: '80', field: 'name', align: 'center',filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '物料类别', field: 'categoryName',  width: '80',align: 'center',filterType: 'input', filterParam: {placeholder: ''},   },
+  { title: '材质牌号',width: '80', field: 'materialQuality', align: 'center' ,filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '板厚(㎜)', width: '60',field: 'boardThickness', align: 'center' ,filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '铜厚(OZ)', width: '60',field: 'copperThickness', align: 'center',filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '颜色',width: '60', field: 'color', align: 'center',filterType: 'input', filterParam: { placeholder: '' } },
+  { title: '级别', width: '60',field: 'level', align: 'center' ,filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '长(㎜)',width: '60', field: 'length', align: 'center' ,filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '宽(㎜)', width: '60',field: 'width', align: 'center' ,filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '品牌',width: '80', field: 'manufacturer', align: 'center' ,filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '规格型号', field: 'specification', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '' } },
+  { title: '采购单位', field: 'unit', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '' } },
+  { title: '直径', field: 'diameter', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '' } },
+  { title: '退货单价(元)', width: '80',field: 'price', align: 'center' },
+  { title: '退货总价(元)', width: '80',field: 'totalPrice', align: 'center' },
+  { title: '退货人',width:'120', field: 'backUserName', align: 'center'  , filterType: 'input', filterParam: { placeholder: '' }},
+  { title: '退货时间',width: '130', field: 'backTime', align: 'center'
+    , filterType: 'intervalDate',  filterParam: {
+      startParams: { placeholder: '请输入开始时间', clearable: true, type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss' },
+      endParams: { placeholder: '请输入结束时间', clearable: true, type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss' },
+    }
+  },
+  { title: '备注', width: '200',field: 'remark', align: 'center' },
+  { title: '本次退货', field: 'beforeQuantity',  width: '80',align: 'center', fixed: 'right', filterType: 'intervalNumber',},
+  { title: '重新退货数量', field: 'quantity',  width: '100',align: 'center', fixed: 'right', filterType: 'intervalNumber',},
+  { title: '操作', field: 'make',  width: '80',align: 'center',fixed: 'right', },
+]);
+
+const adjustAuditColumnList = ref([
+  { title: '退货单号',width: '140', field: 'code', align: 'center', },
+  { title: '供应商编码',width: '100', field: 'supplierCode', align: 'center' ,},
+  { title: '供应商名称',width: '160', field: 'supplierName', align: 'center' ,},
+  { title: '物料编码', width: '80',field: 'materialCode', align: 'center',},
+  { title: '物料名称',width: '80', field: 'name', align: 'center',},
+  { title: '物料类别', field: 'categoryName',  width: '80',align: 'center',},
+  { title: '材质牌号',width: '80', field: 'materialQuality', align: 'center' ,},
+  { title: '板厚(㎜)', width: '60',field: 'boardThickness', align: 'center' ,},
+  { title: '铜厚(OZ)', width: '60',field: 'copperThickness', align: 'center',},
+  { title: '颜色',width: '60', field: 'color', align: 'center',},
+  { title: '级别', width: '60',field: 'level', align: 'center' ,},
+  { title: '长(㎜)',width: '60', field: 'length', align: 'center' ,},
+  { title: '宽(㎜)', width: '60',field: 'width', align: 'center' ,},
+  { title: '品牌',width: '80', field: 'manufacturer', align: 'center' ,},
+  { title: '规格型号', field: 'specification', width: '80', align: 'center',},
+  { title: '采购单位', field: 'unit', width: '80', align: 'center',},
+  { title: '直径', field: 'diameter', width: '80', align: 'center', },
+  { title: '退货单价(元)', width: '80',field: 'price', align: 'center' },
+  { title: '退货总价(元)', width: '80',field: 'totalPrice', align: 'center' },
+  { title: '退货人',width:'120', field: 'backUserName', align: 'center'  , },
+  { title: '退货时间',width: '130', field: 'backTime', align: 'center' },
+  { title: '备注', width: '200',field: 'remark', align: 'center' },
+  { title: '本次退货', field: 'beforeQuantity',  width: '80',align: 'center', fixed: 'right', },
+  { title: '重新退货数量', field: 'quantity',  width: '100',align: 'center', fixed: 'right', },
+]);
+
+const verifyColumnList = ref([
+  { title: '退货单号', field: 'code',  minWidth: '160',align: 'center' },
+  { title: '物料编码', field: 'materialCode', minWidth: '100', align: 'center' },
+  { title: '本次退货', field: 'backQuantity',  minWidth: '80',align: 'center', fixed: 'right', },
+]);
+
+const quantityColumnList = ref([
+  { title: "序号", type: 'seq', align: 'center', width: '60', fixed: 'left',  },
+  { title: '物料名称', field: 'name',  minWidth: '160',align: 'center' },
+  { title: '物料编码', field: 'materialCode', minWidth: '100', align: 'center' },
+  { title: '当前库存', field: 'quantity',  minWidth: '80',align: 'center', },
+  { title: '所属仓库', field: 'storageName',  minWidth: '80',align: 'center', },
+  { title: '仍需还料/退料', field: 'beforeQuantity',  minWidth: '80',align: 'center', },
+]);
+
+/** 是否允许勾选 */
+const tabCheckMethod = (scope: any) => {
+  // 已确认状态可以勾选
+  if (scope.row.confirmStatus == '3') {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/** 是否允许勾选 */
+const auditCheckMethod = (scope: any) => {
+  // 已确认状态可以勾选
+  if (scope.row.status == '1') {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/** 批量调整退货单 */
+const handleAdjustList = async () => {
+  const $table = xAdjustTableHandle?.value.xTableRef;
+  if ($table) {
+    const selectRecords = $table.getCheckboxRecords();
+    if (selectRecords.length < 1) {
+      proxy?.$modal.msgError("请选择退货列表");
+      return;
+    }
+    loading.value = true;
+    selectRecords.values().remark = undefined;
+    receiptAdjustList.value = deepClone(selectRecords);
+    receiptAdjustList.value.map((row: any) => {
+      row.backQuantity = row.quantity;
+      row.quantity = undefined;
+    })
+  }
+  // 校验是否存在待审核的调整单
+  let ids = receiptAdjustList.value.map(item => item.rawMaterialId);
+  let bizIds = receiptAdjustList.value.map(item => item.id);
+  let query = {
+    rawMaterialIdList: ids,
+    bizIdList: bizIds,
+    status: '1',
+    type: '2'
+  }
+  // 如果存在数据则提示校验成功
+  const res = await listQuantityAdjust(query).finally(() => loading.value = false);
+  if (res.data.length > 0) {
+    let ids = res.data.map(item => item.bizId);
+    verifyList.value = receiptAdjustList.value.filter(item => ids.includes(item.id))
+    dialogVerify.visible = true;
+    return;
+  }
+  isAudit.value = false;
+  backTotal.value = receiptAdjustList.value.length;
+  drawer.visible = true;
+}
+
+/** 退货调整 */
+const handleAdjust = async(row: any) => {
+  let adjust = deepClone(row);
+  adjust.backQuantity = row.quantity;
+  adjust.quantity = undefined;
+  receiptAdjustList.value = [];
+  receiptAdjustList.value.push(adjust)
+  // 校验
+  let query = {
+    rawMaterialId: row.rawMaterialId,
+    bizId: row.id,
+    status: '1',
+    type: '2'
+  }
+  loading.value = true;
+  // 如果存在数据则提示校验成功
+  const res = await listQuantityAdjust(query).finally(() => loading.value = false);
+  if (res.data.length > 0) {
+    await proxy?.$modal.msgError('当前单据中物料的上一个调整申请正在审核中，请等待调整结束后再进行操作');
+    return;
+  }
+  isAudit.value = false;
+  backTotal.value = receiptAdjustList.value.length;
+  drawer.visible = true;
+}
+
+/** 提交调整单 */
+const submitAdjust = async() => {
+  // 校验数量是否填写
+  let flag = false;
+  receiptAdjustList.value.forEach((item: any) => {
+    if (!item.quantity || item.quantity <= 0) {
+      flag = true;
+      return;
+    }
+  });
+  if(flag) {
+    proxy?.$modal.msgError("部分明细未填写数量，请填写数量后再提交");
+    return;
+  }
+
+  loading.value = true;
+  adjustLoading.value = true;
+  let adjustList = deepClone(receiptAdjustList.value);
+  adjustList.map(item => {
+    item.bizId = item.id;
+    item.status = '1';
+    item.type = '2';
+    item.beforeQuantity = item.backQuantity;
+    item.id = undefined;
+  })
+  await addQuantityAdjustList(adjustList).finally(() => {
+    loading.value = false;
+    adjustLoading.value = false;
+  });
+  proxy?.$modal.msgSuccess("提交成功");
+  drawer.visible = false;
+  receiptAdjustList.value = [];
+  // 清空多选
+  if (xAdjustTableHandle.value) {
+    xAdjustTableHandle.value.xTableRef.clearCheckboxRow()
+  }
+  await getListAll();
+}
+
+/** 移除选项 */
+const removeRow = async(rowIndex: number) => {
+  if (receiptAdjustList.value.length == 1) {
+    proxy?.$modal.msgError("至少保留一条收货记录");
+    return;
+  }
+  receiptAdjustList.value.splice(rowIndex, 1);
+}
+
+// 获取 搜索条件
+const searchChangeAdjust = (params: any) => {
+  params.type = '2';
+  adjustQueryParams.value = params;
+  getAdjustList();
+}
+
+/**
+ * 查询退货调整单列表
+ * */
+const getAdjustList = async () => {
+  loading.value = true;
+  const res = await listBackQuantityAdjust(adjustQueryParams.value).finally(() => loading.value = false);
+  adjustList.value = res.rows;
+  adjustTotal.value = res.total;
+}
+
+/** 审核调整单 */
+const auditAdjust = async (status: string) => {
+  adjustLoading.value = true;
+  auditAdjustList.value.map(item => item.status = status);
+  const res = await auditQuantityAdjust(auditAdjustList.value).finally(() => adjustLoading.value = false);
+  // 如果有数据返回则库存不足提示
+  if(res.data && res.data.length > 0) {
+    auditAdjustList.value.map(item => item.status = '1');
+    quantityList.value = res.data;
+    dialogQuantity.visible = true;
+    return;
+  }
+  proxy?.$modal.msgSuccess("操作成功");
+  drawer.visible = false;
+  auditAdjustList.value = [];
+  // 清空多选
+  if (xAuditTableHandle.value) {
+    xAuditTableHandle.value.xTableRef.clearCheckboxRow()
+  }
+  await getAdjustList();
+}
+
+/** 审核按钮 */
+const handleAudit = async(row: any) => {
+  isAudit.value = true;
+  auditAdjustList.value = [];
+  auditAdjustList.value.push(row);
+  auditTotal.value = auditAdjustList.value.length;
+  drawer.visible = true;
+  drawer.title = "退货调整审核";
+}
+
+/** 批量审核按钮 */
+const handleBatchAudit = async() => {
+  const $table = xAuditTableHandle?.value.xTableRef;
+  if ($table) {
+    const selectRecords = $table.getCheckboxRecords();
+    if (selectRecords.length < 1) {
+      proxy?.$modal.msgError("请选择退货调整列表");
+      return;
+    }
+    isAudit.value = true;
+    auditAdjustList.value = selectRecords;
+    auditTotal.value = auditAdjustList.value.length;
+    drawer.visible = true;
+    drawer.title = "退货调整审核";
+  }
+}
+
+/** 修改记录按钮 */
+const handleAdjustRecord = (row: any) => {
+  dialogRecord.visible = true;
+  dialogRecord.title = '修改记录';
+  selectRawMaterial.value = row;
+}
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      let tab = !isNaN(Number(params.tab)) ? Number(params.tab) : 1;
+      editableTabsValue.value = tab
+      let tempColumnList = [{field: 'code', defaultValue: params.bizNo}]
+      if (tab === 1) {
+        queryParams.value.code = params.bizNo
+        setTimeout(() => {
+          xTableAuditList.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === 2) {
+        backQueryParams.value.code = params.bizNo
+        setTimeout(() => {
+          xAdjustTableHandle.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === 3) {
+        adjustQueryParams.value.code = params.bizNo
+        setTimeout(() => {
+          xAuditTableHandle.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      }
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
+onMounted(() => {
+    getVoidedList();
+    getSupplierLists();
+});
+</script>
+
+<style lang="scss" scoped>
+
+.button_morn {
+  display: block;
+  align-content: center;
+  margin: auto;
+  margin-bottom: 3px;
+}
+
+</style>
 

@@ -1,13 +1,17 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
-      <el-tabs v-model="editableTabsValue" @tab-change="getVoidedList()" type="border-card" class="xtable-tab">
+      <el-tabs v-model="editableTabsValue" @tab-change="getVoidedList()" class="xtable-tab">
         <el-tab-pane label="按订单展示" :name="1">
           <XTable toolId="purchasePurchaseOrder" v-model:page-size="queryParams.pageSize"
             v-model:current-page="queryParams.pageNum" height="100%" class="xtable-content"
             :page-params="{ perfect: true, total: total }" :data="materialOrderList" :columnList="columnList"
             ref="XTableRef" @toggle-row-expand="toggleExpandChangeEvent" border :showRefresh="true"
-            @searchChange="searchChange" :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }">
+            @searchChange="searchChange" :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }"
+            :loading="loading"
+            >
+<template #default-isTax="scope">
+              <span>{{ scope.row.isTax == '1' ? '是' : '否' }}</span>
+            </template>
             <template #default-make="scope">
               <el-button link type="primary" v-if="scope.row.confirmStatus == '3' && scope.row.status =='3'
                   && Number(scope.row.receiveQuantity) == '0'" @click="handleCancel(scope.row)">取消</el-button>
@@ -41,13 +45,18 @@
             </template>
             <template #content-expand="{ row }">
               <div class="expand-wrapper">
-                <vxe-table border :data="row.otherList">
-                  <vxe-column label="${}" align="center" prop="id" v-if="false" />
-                  <vxe-column field="detailStatus" title="详情状态" width="105" align="center">
-                    <template #default="scope">
+                <XTable border min-height="143px" :data="row.otherList" :pageShow="false" :showHead="false" :columnList="columnListOrderExpend">
+                  <!-- <vxe-column label="${}" align="center" prop="id" v-if="false" />
+                  <vxe-column field="detailStatus" title="详情状态" width="105" align="center"> -->
+                    <template #default-detailStatus="scope">
                       <dict-tag :options="material_order_detail_status" :value="scope.row.detailStatus" />
                     </template>
-                  </vxe-column>
+<!-- <vxe-column field="monthlyMethod" title="月结方式"></vxe-column> -->
+                  <!-- <vxe-column field="isTax" title="是否含税"> -->
+                    <template #default-isTax="scope">
+                      <span>{{ scope.row.isTax == '1' ? '是' : '否' }}</span>
+                    </template>
+                  <!-- </vxe-column>
                   <vxe-column field="categoryName" title="物料类别"></vxe-column>
                   <vxe-column field="materialCode" title="物料编码"></vxe-column>
                   <vxe-column field="materialName" title="物料名称"></vxe-column>
@@ -63,6 +72,12 @@
                   <vxe-column field="units" title="库存单位"></vxe-column>
                   <vxe-column field="applyRemark" title="申请备注"></vxe-column>
                   <vxe-column field="deliverTime" title="要求交期"></vxe-column>
+<vxe-column field="monthlyMethod" title="月结方式"></vxe-column>
+                  <vxe-column field="isTax" title="是否含税">
+                    <template #default="scope">
+                      <span>{{ scope.row.isTax == '1' ? '是' : '否' }}</span>
+                    </template>
+                  </vxe-column>
                   <vxe-column field="quantity" title="采购数量"></vxe-column>
                   <vxe-column field="receiveQuantity" title="收货数量"></vxe-column>
                   <vxe-column field="receiveQuantity" title="入库数量"></vxe-column>
@@ -70,8 +85,8 @@
                   <vxe-column field="backResendQuantity" title="退货重收数" width="65"></vxe-column>
                   <vxe-column field="price" title="单价"></vxe-column>
                   <vxe-column field="totalPrice" title="采购总金额" width="65"></vxe-column>
-                  <vxe-column align="center" title="操作" width="80">
-                    <template #default="scope">
+                  <vxe-column align="center" title="操作" width="80"> -->
+                    <template #default-make="scope">
                       <el-button link type="primary" v-if="isConfirmed && !(scope.row.receiveQuantity > Number.EPSILON)"
                         @click="handleDeleteDetailOrder(scope.row, row)">删除</el-button>
                       <el-button link type="primary"
@@ -82,27 +97,41 @@
 <!--                      <el-button link type="primary"
                         v-if="scope.row.detailStatus === '2' && scope.row.quantity != scope.row.receiveQuantity && isConfirmed"
                         @click="closeStatementOfAccount(scope.row)">取消结单</el-button>-->
+                        <el-button  v-if="row.status === '3' && row.confirmStatus === '3'" link type="primary"  @click="handleLogistics(scope.row)">物流信息</el-button>
                     </template>
-                  </vxe-column>
-                </vxe-table>
+                  <!-- </vxe-column> -->
+                </XTable>
               </div>
             </template>
           </XTable>
         </el-tab-pane>
         <el-tab-pane label="按物料展示" :name="2">
-          <div class="p-2" style="text-align: right;width: 100%">
-            <el-button :loading="buttonLoading" type="primary" @click="exportExcelBefore">导出</el-button>
+          <TotalTitle :list="[
+            { title: `采购总量：${headData.quantity}` },
+            { title: `收货总量：${headData.receiveQuantity}` },
+            { title: `入库总数：${headData.inventoryQuantity}` },
+            { title: `退货重收总数：${headData.backResendQuantity}` },
+            { title: `采购金额汇总：${headData.price}` },
+          ]"></TotalTitle>
+          <div class="head-btn-flex">
+<!-- <div class="totalTitle">采购总量：{{headData.quantity}}&nbsp;&nbsp;|&nbsp;&nbsp; 收货总量：{{headData.receiveQuantity}}&nbsp;&nbsp;|&nbsp;&nbsp; 入库总数：{{headData.inventoryQuantity}}&nbsp;&nbsp;|&nbsp;&nbsp; 退货重收总数：{{headData.backResendQuantity}}&nbsp;&nbsp;|&nbsp;&nbsp; 采购金额汇总：{{headData.price}}</div> -->
+            <el-button  :loading="buttonLoading" type="primary" @click="exportExcelBefore">导出</el-button>
           </div>
           <XTable toolId="purchasePurchaseOrderDetails" v-model:page-size="queryParamsDetail.pageSize"
             v-model:current-page="queryParamsDetail.pageNum" :intervalCondition="['createTime']" height="100%"
             class="xtable-content" :page-params="{ perfect: true, total: total }" :data="materialOrderDetailList"
-            :columnList="columnList2" @toggle-row-expand="toggleExpandChangeEvent" border :showRefresh="true"
-            @searchChange="searchDetailsChange" :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }">
+            ref="XTableRef2" :columnList="columnList2" @toggle-row-expand="toggleExpandChangeEvent" border :showRefresh="true"
+            @searchChange="searchDetailsChange" :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }"
+            :loading="loading"
+            >
             <!--            <template #default-make="scope">
               <el-button link type="primary">打印</el-button>
               <el-button link type="primary" @click="handleDelete(scope.row)">删除</el-button>
               &lt;!&ndash;          <el-button link type="primary" @click="dialogExamine.visible = true">查看</el-button>&ndash;&gt;
             </template>-->
+<template #default-isTax="scope">
+              <span>{{ scope.row.isTax == '1' ? '是' : '否' }}</span>
+            </template>
             <template #default-status="scope">
               <dict-tag :options="material_order_detail_status" :value="scope.row.status" />
             </template>
@@ -113,22 +142,24 @@
             <template #default-orderStatus="scope">
               <dict-tag :options="statusList" :value="scope.row.orderStatus" />
             </template>
+
+            <template #default-make="scope">
+                <el-button link type="primary" v-if="scope.row.orderStatus === '3' && scope.row.confirmStatus === '3'"  @click="handleLogistics(scope.row)">物流信息</el-button>
+            </template>
+
           </XTable>
         </el-tab-pane>
       </el-tabs>
-    </el-card>
 
     <el-dialog v-model="exportVisible" title="导出提示" width="20%" align-center destroy-on-close>
       <span>
         没有设置起始时间，将默认导出30天内的数据
       </span>
       <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="exportVisible = false">取消</el-button>
-          <el-button type="primary" @click="exportExcel">
-            确认
-          </el-button>
-        </span>
+        <el-button type="primary" @click="exportExcel">
+          确认
+        </el-button>
+        <el-button @click="exportVisible = false">取消</el-button>
       </template>
     </el-dialog>
 
@@ -151,14 +182,48 @@
           <h3 style="margin: 0;">受理时间: {{ currentTime }}</h3>
         </el-col>
         <el-col :span="5" class="global-flex flex-end">
-          <el-button :loading="buttonLoading" plain @click="copyDialogMaterial.visible = false"> 关闭 </el-button>
           <el-button :loading="buttonLoading" type="primary" @click="handleSave()">保存 </el-button>
           <el-button :loading="buttonLoading" plain @click="handleApply()">提交审核 </el-button>
+          <el-button :loading="buttonLoading" plain @click="copyDialogMaterial.visible = false"> 关闭 </el-button>
         </el-col>
       </el-row>
 
       <XTable :pageShow="false" height="500" :column-config="{ resizable: true }" size="mini" :data="waitHandleDetailList"
         :border="true" :columnList="handleColumnList" border>
+
+        <template #default-make="scope">
+          <el-button v-if="waitHandleDetailList.length > 1 && copyDialogMaterial.title?.includes('采购订单复制')" link type="primary"
+            @click="handleTabDelete(scope.row)">移除</el-button>
+        </template>
+        <template #header-modificationPrice="{ row }">
+          单价区间
+          <el-tooltip
+            class="box-item"
+            effect="dark"
+            raw-content
+            :content="`请在【供应商基价】设置【单价浮动值】`"
+          >
+            <el-icon class="tooltip-width-auto" ><QuestionFilled /></el-icon>
+          </el-tooltip>
+        </template>
+        <template #default-modificationPrice="{ row }">
+      {{ (row.modificationPrice||row.modificationPrice==0)?(BigNumber(row.supplierPrice).minus(BigNumber(row.modificationPrice))<(BigNumber(0)))?0:BigNumber(row.supplierPrice).minus(BigNumber(row.modificationPrice)).toNumber():'' }}
+      -{{ (row.modificationPrice||row.modificationPrice==0)?BigNumber(row.supplierPrice).plus(BigNumber(row.modificationPrice)).toNumber():'' }}
+        </template>
+
+          <template #default-monthlyMethod="{ row }">
+            <el-select v-model="row.monthlyMethod" filterable placeholder="请选择月结方式" style="width: 100%;">
+              <el-option v-for="dict in monthly_method" :key="dict.value" :label="dict.label" :value="dict.label"></el-option>
+            </el-select>
+          </template>
+          <template #default-isTax="{ row }">
+              <el-select placeholder=" " suffix-icon="" class="height-light font-14" v-model="row.isTax" >
+                <el-option label="是" value="1"/>
+                <el-option label="否" value="0"/>
+              </el-select>
+          </template>
+
+
         <template #default-applyRemark="{ row }">
           <el-input :rows="1" :max="200" type="textarea" v-model="row.applyRemark" autocomplete="off" />
         </template>
@@ -180,7 +245,9 @@
         </template>
         <template #default-price="{ row }">
           <el-input-number :disabled="dialog.title === '物料申请详情'" @change="calculatePrice(row)" style="width: 99%;"
-            :controls="false" v-model="row.price" :min="0.0001" :precision="4" /> </template> <template
+            :min="(row.modificationPrice||row.modificationPrice==0)?(BigNumber(row.supplierPrice).minus(BigNumber(row.modificationPrice))<(BigNumber(0)))?0.0001:BigNumber(row.supplierPrice).minus(BigNumber(row.modificationPrice)).toNumber():0.0001"
+            :max="(row.modificationPrice||row.modificationPrice==0)?BigNumber(row.supplierPrice).plus(BigNumber(row.modificationPrice)).toNumber():99999999"
+            :controls="false" v-model="row.price"  :precision="4" /> </template> <template
           #default-quantity="{ row }">
           <el-input-number :disabled="dialog.title === '物料申请详情'" style="width: 99%;" @change="calculatePrice(row)"
             :controls="false" v-model="row.quantity" :min="0.01" :precision="2" />
@@ -223,9 +290,43 @@
           <el-button v-if="dialogConfirm.title === '采购合同确认'" type="primary" plain @click="selectMaterial">选择物料</el-button>
         </el-col>
       </el-row>
-
+   <div style="height: calc(100% - 168px);">
+      <div style="flex: none;height: 50% !important;" class="ptable-card">
       <XTable :pageShow="false" ref="confirmTable" :data="confirmSelectInventoryList" border :columnList="confirmSelectInventoryColumnList"
-        :loading="dialogTableLoading">
+        :loading="dialogTableLoading"
+         class="ptable-content"
+         style="height: 100%;"
+         height="100%"
+        >
+
+        <template #header-modificationPrice="{ row }">
+          单价区间
+          <el-tooltip
+            class="box-item"
+            effect="dark"
+            raw-content
+            :content="`请在【供应商基价】设置【单价浮动值】`"
+          >
+            <el-icon class="tooltip-width-auto" ><QuestionFilled /></el-icon>
+          </el-tooltip>
+        </template>
+        <template #default-modificationPrice="{ row }">
+        {{ (row.modificationPrice||row.modificationPrice==0)?(BigNumber(row.supplierPrice).minus(BigNumber(row.modificationPrice))<(BigNumber(0)))?0:BigNumber(row.supplierPrice).minus(BigNumber(row.modificationPrice)).toNumber():'' }}
+        -{{ (row.modificationPrice||row.modificationPrice==0)?BigNumber(row.supplierPrice).plus(BigNumber(row.modificationPrice)).toNumber():'' }}
+        </template>
+
+        <template v-if="dialogConfirm.title === '采购合同确认'" #default-monthlyMethod="{ row }">
+          <el-select v-model="row.monthlyMethod" filterable placeholder="请选择月结方式" style="width: 100%;">
+            <el-option v-for="dict in monthly_method" :key="dict.value" :label="dict.label" :value="dict.label"></el-option>
+          </el-select>
+        </template>
+        <template v-if="dialogConfirm.title === '采购合同确认'" #default-isTax="{ row }">
+            <el-select placeholder=" " suffix-icon="" class="height-light font-14" v-model="row.isTax" >
+              <el-option label="是" value="1"/>
+              <el-option label="否" value="0"/>
+            </el-select>
+        </template>
+
         <template v-if="dialogConfirm.title === '采购合同确认'" #default-deliverTime="scope">
           <el-date-picker
             :disabled="dialog.title === '物料申请详情'"
@@ -238,10 +339,13 @@
             clearable />
         </template>
         <template v-if="dialogConfirm.title === '采购合同确认'" #default-quantity="scope">
-          <el-input-number style="width: 99%;"  :step="0.1" :controls="false" :precision="0" v-model="scope.row.quantity" @change="calculatePrice(scope.row)"/>
+          <el-input-number style="width: 99%;"  :step="0.1" :controls="false" :precision="0" v-model="scope.row.quantity" @change="calculatePrice(scope.row)" v-inputNumber="(value: any) => scope.row.quantity = value"/>
         </template>
-        <template v-if="dialogConfirm.title === '采购合同确认'" #default-price="scope">
-          <el-input-number style="width: 99%;"  :step="0.1" :controls="false" :precision="4" v-model="scope.row.price" @change="calculatePrice(scope.row)"/>
+        <template v-if="dialogConfirm.title === '采购合同确认'" #default-price="{row}">
+          <el-input-number style="width: 99%;"  :step="0.1" :controls="false" :precision="4"
+          :min="(row.modificationPrice||row.modificationPrice==0)?(BigNumber(row.supplierPrice).minus(BigNumber(row.modificationPrice))<(BigNumber(0)))?0.0001:BigNumber(row.supplierPrice).minus(BigNumber(row.modificationPrice)).toNumber():0.0001"
+          :max="(row.modificationPrice||row.modificationPrice==0)?BigNumber(row.supplierPrice).plus(BigNumber(row.modificationPrice)).toNumber():99999999"
+          v-model="row.price" @change="calculatePrice(row)" v-inputNumber="(value: any) => row.price = value"/>
         </template>
         <template v-if="dialogConfirm.title === '采购合同确认'" #default-applyRemark="scope">
           <el-input style="width: 99%;"  v-model="scope.row.applyRemark" />
@@ -250,27 +354,44 @@
           <el-button link type="primary" @click="handleSelectDelete(scope.row)">删除</el-button>
         </template>
       </XTable>
+           </div>
+      <div  style="flex: none;height: 50% !important;" class="ptable-card">
+      <!-- 确认记录 -->
+      <el-divider content-position="left">确认记录</el-divider>
+         <XTable
+        :pageShow="false"
+        :loading="confirmationRecordLoading"
+        height="100%"
+        class="ptable-content"
+        style="height: 100%;"
+        :column-config="{resizable: true}"
+        size="mini"
+        :data="queryRecordList"
+        :border="true"
+
+        :columnList="orderRecordColumnList"
+        border
+      >
+      <template #default-operateContent="scope">
+       <div style="text-align: left">{{scope.row.operateContent}}</div>
+      </template>
+      </XTable>
+          </div>
+      </div>
 
       <template #footer>
-        <div style="display: flex; justify-content: center;">
-          <span class="dialog-footer">
-            <el-button :loading="buttonLoading" @click="dialogConfirm.visible = false">取消</el-button>
-            <el-button v-if="dialogConfirm.title === '采购合同取消确认'" :loading="buttonLoading" type="danger" @click="submitCancelOrder('6')">驳回</el-button>
-            <el-button v-if="dialogConfirm.title === '采购合同取消确认'" :loading="buttonLoading" type="primary" @click="submitCancelOrder('3')">确定取消</el-button>
-            <el-button v-if="dialogConfirm.title === '采购合同确认'" :loading="buttonLoading" type="primary" @click="submitConfirmForm">确 定</el-button>
-          </span>
-        </div>
+        <el-button v-if="dialogConfirm.title === '采购合同取消确认'" :loading="buttonLoading" type="danger" @click="submitCancelOrder('6')">驳回</el-button>
+        <el-button v-if="dialogConfirm.title === '采购合同取消确认'" :loading="buttonLoading" type="primary" @click="submitCancelOrder('3')">确定取消</el-button>
+        <el-button v-if="dialogConfirm.title === '采购合同确认'" :loading="buttonLoading" type="primary" @click="submitConfirmForm">确 定</el-button>
+        <el-button :loading="buttonLoading" @click="dialogConfirm.visible = false">取消</el-button>
       </template>
     </el-drawer>
 
     <el-dialog v-model="dialogMaterials.visible" title="选择物料" width="80%" draggable destroy-on-close>
       <el-row>
         <el-col :span="5">
-          <el-table size="small" :data="selectInventoryList" height="440" :border="true">
-            <el-table-column property="materialCode" fixed />
-            <el-table-column v-show="false" property="materialName" label="已选物资" />
-            <el-table-column align="center">
-              <template #default="scope">
+          <XTable :pageShow="false" :columnList="columnListChooseMaterial" :data="selectInventoryList" height="440" :border="true">
+              <template #default-make="scope">
                 <el-tooltip content="删除" placement="top">
                   <el-button
                     link
@@ -281,8 +402,7 @@
                   ></el-button>
                 </el-tooltip>
               </template>
-            </el-table-column>
-          </el-table>
+          </XTable>
         </el-col>
         <el-col :span="19">
           <XTable
@@ -314,36 +434,35 @@
         </el-col>
       </el-row>
       <template #footer>
-        <div style="display: flex; justify-content: center;">
-          <span class="dialog-footer">
-            <el-button @click="clearInventoryForm">取消</el-button>
-            <el-button :loading="buttonLoading" type="primary" @click="submitInventoryForm">确 定</el-button>
-          </span>
-        </div>
+        <el-button :loading="buttonLoading" type="primary" @click="submitInventoryForm">确 定</el-button>
+        <el-button @click="clearInventoryForm">取消</el-button>
       </template>
     </el-dialog>
 
     <el-dialog title="操作记录" v-model="dialogRecord" width="70%" draggable destroy-on-close>
       <!-- <div class="expand-wrapper"> -->
-        <vxe-table border show-overflow show-header-overflow :column-config="{ resizable: true }" height="500"
-                   :data="queryRecordList" :loading="loading" >
-          <vxe-column width="50" field="index" align="center" title="序号" type="seq"></vxe-column>
-          <vxe-column width="80" field="ownerName" align="center" title="所属单位"></vxe-column>
-          <vxe-column width="140" align="center" field="materialName" title="物料名称">
-          <template #default="scope">
+        <XTable :columnList="columnListRecord" :column-config="{ resizable: true }" height="500"
+                   :data="queryRecordList" :loading="loading" :pageShow="false">
+          <!-- <vxe-column width="50" field="index" align="center" title="序号" type="seq"></vxe-column>
+          <vxe-column field="ownerName" align="center" title="所属单位"></vxe-column>
+          <vxe-column width="140" align="center" field="materialName" title="物料名称"> -->
+          <template #default-materialName="scope">
               <div>{{ scope.row.materialCode }}-{{ scope.row.materialName }}</div>
             </template>
-          </vxe-column>
-          <vxe-column width="100" align="center" field="createByName" title="操作人"></vxe-column>
+          <!-- </vxe-column>
+          <vxe-column width="80" align="center" field="createByName" title="操作人"></vxe-column>
           <vxe-column width="160" align="center" field="createTime" title="操作时间"></vxe-column>
-          <vxe-column width="200" field="operateContent" title="操作内容"></vxe-column>
-          <vxe-column width="160" field="remark" title="确认备注"></vxe-column>
-        </vxe-table>
+          <vxe-column align="center"  field="operateContent" title="操作内容"> -->
+             <template #default-operateContent="{row}">
+              <!-- 里面内容居左 -->
+              <div style="text-align: left">{{row.operateContent}}</div>
+            </template>
+          <!-- </vxe-column>
+          <vxe-column align="center"  width="160" field="remark" title="确认备注"></vxe-column> -->
+        </XTable>
       <!-- </div> -->
       <template #footer>
-      <span class="dialog-footer">
         <el-button @click="cancelRecord">取 消</el-button>
-      </span>
       </template>
     </el-dialog>
 
@@ -366,15 +485,304 @@
         </el-col>
       </el-row>
       <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="statement.visible = false">取消</el-button>
-          <el-button v-if="statement.title === '结单确认'" type="danger" @click="statementAccount('1')">驳回</el-button>
-          <el-button v-if="statement.title === '申请结单'" type="primary" @click="statementAccount('3')">确认</el-button>
-          <el-button v-if="statement.title === '申请取消'" type="primary" @click="cancelAccount">确认</el-button>
-          <el-button v-if="statement.title === '结单确认'" type="primary" @click="statementAccount('2')">确认</el-button>
-        </span>
+        <el-button v-if="statement.title === '结单确认'" type="danger" @click="statementAccount('1')">驳回</el-button>
+        <el-button v-if="statement.title === '申请结单'" type="primary" @click="statementAccount('3')">确认</el-button>
+        <el-button v-if="statement.title === '申请取消'" type="primary" @click="cancelAccount">确认</el-button>
+        <el-button v-if="statement.title === '结单确认'" type="primary" @click="statementAccount('2')">确认</el-button>
+        <el-button @click="statement.visible = false">取消</el-button>
       </template>
     </el-dialog>
+
+    <!-- 采购订单物流明细 -->
+    <el-drawer :title="purchaseOrderLogiticsDrawer.title" v-model="purchaseOrderLogiticsDrawer.visible" class="purchaseOrderLogiticsDrawer" size="60%" >
+      <p style="font-weight: bold;margin-bottom: 2px;">采购信息</p>
+      <el-form label-width="90px" v-loading="addLogisticsDialogLoading" >
+        <el-row>
+          <el-col :span="8">
+            <el-form-item label="单据状态：" >
+              <dict-tag :options="statusList" :value="orderLogistics?.orderVo.status" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="采购单号：" >
+              <span>{{orderLogistics?.orderVo.code}}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="单据类型：" >
+              <dict-tag :options="purTypeList" :value="orderLogistics?.orderVo.orderType" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="16">
+            <el-form-item label="供应商：" >
+              <span>{{orderLogistics?.orderVo.supplierName}}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="下单时间：" >
+              <span>{{orderLogistics?.orderVo.createTime}}</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="收货地址：" >
+              <span>{{orderLogistics?.orderVo.addressName}}</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="备注：" >
+              <span>{{orderLogistics?.orderVo.remark}}</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+
+
+      <p style="font-weight: bold;margin-bottom: 2px;">物料信息</p>
+      <el-form  label-width="90px" v-loading="addLogisticsDialogLoading" >
+        <el-row>
+          <el-col :span="8">
+            <el-form-item label="结单状态：" >
+              <dict-tag :options="material_order_detail_status" :value="orderLogistics?.detailVo.status" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="物料类别：" >
+              <span>{{orderLogistics?.detailVo.categoryName}}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="单位：" >
+              <span>{{orderLogistics?.detailVo.units}}</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="8">
+            <el-form-item label="物品名称：" >
+              <span>{{orderLogistics?.detailVo.materialName}}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="物料编码：" >
+              <span>{{orderLogistics?.detailVo.materialCode}}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="品牌：" >
+              <span>{{orderLogistics?.detailVo.manufacturer}}</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="16">
+            <el-form-item label="规格型号：" >
+              <span>{{orderLogistics?.detailVo.specification}}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="材质牌号：" >
+              <span>{{orderLogistics?.detailVo.materialQuality}}</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="8">
+            <el-form-item label="采购数量：" >
+              <span>{{orderLogistics?.detailVo.quantity}}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="收货数量：" >
+              <span>{{orderLogistics?.detailVo.receiveQuantity}}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="入库数量：" >
+              <span>{{orderLogistics?.detailVo.inventoryQuantity}}</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="8">
+            <el-form-item label="采购单价：" >
+              <span>{{orderLogistics?.detailVo.price}}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="采购金额：" >
+              <span>{{orderLogistics?.detailVo.totalPrice}}</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="物料备注：" >
+              <span>{{orderLogistics?.detailVo.remark}}</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <p style="font-weight: bold;margin-top: 2px;">物流信息</p>
+
+      <div style="width: 100%; text-align: left; margin-bottom: 10px">
+          <el-button  type="primary" @click="handleAddLogisticInfo">添加物流</el-button>
+      </div>
+
+      <el-tabs class="xtable-tab only-one-tab" @tab-click="tabChange" v-model="logiticsRadioTable">
+        <el-tab-pane v-if="!orderLogistics?.deliveryVoList||orderLogistics?.deliveryVoList?.length==0" label="物流进度" name="物流进度"
+          style="justify-content: center;flex-direction: row;">
+          <span style="font-size:13px">暂无物流进度</span>
+        </el-tab-pane>
+        <el-tab-pane v-else v-for="(item, index) in orderLogistics?.deliveryVoList"
+           :label="'物流进度-'+(index+1)" :name="'物流进度-'+(index+1)"  v-loading="addLogisticsDialogLoading" >
+
+           <el-row v-if="!item.logisticsTrackingNumber" style="justify-content: center;flex-direction: row;width: 100%;">
+            <span style="font-size:13px">暂无物流进度</span>
+          </el-row>
+
+          <el-row v-else class="demo-avatar demo-basic" style="width:100%">
+            <el-col :span="2" style="display: flex;justify-content: center;">
+              <div class="demo-basic--circle" style="display: flex; align-items: center;">
+                <div class="block">
+                  <el-icon style="font-size: 55px; background-color: #cce8ff; border-radius: 40px; padding: 10px;"><UserFilled /></el-icon>
+                </div>
+              </div>
+            </el-col>
+            <el-col :span="8">
+              <el-row style="margin-top:10px;">
+                <el-col :span="1"></el-col>
+                <el-col :span="8">
+                 <span style="font-size: 15px;"> {{ item.logisticsCompany }}</span>
+                </el-col>
+                <el-col :span="14" style="align-items: center;display: flex;" v-if="item.logisticInfoList&&item.logisticInfoList[0].phone">
+                  <el-icon style="font-size: 20px;color:var(--el-color-primary);"><PhoneFilled /></el-icon>
+                  <span style="font-size: 20px;white-space: nowrap;">{{ item.logisticInfoList[0].phone }}</span>
+                </el-col>
+              </el-row>
+              <el-row style="margin-top:10px">
+                <el-col :span="1"></el-col>
+                <el-col :span="23">
+                  <span style="font-size: 18px;white-space: nowrap;">{{item.logisticInfoList[0].logisticNum}}</span>
+                </el-col>
+              </el-row>
+            </el-col>
+            <el-col :span="14" style="max-height: 100px;overflow-y: auto;">
+              <ImagePreview v-for="(activity, index) in item.fileList"
+              style="margin-left:10px"
+              :width="75"
+              :height="75"
+              :src="activity.url"
+              :type="activity.type"
+              :preview-src-list="[activity.url]"
+              />
+            </el-col>
+          </el-row>
+
+            <el-timeline style="max-width: 600px;padding-left: 18px;margin-top:8px">
+              <el-timeline-item
+                v-for="(activity, index) in item.logisticInfoList[0].logisticItemList"
+                :key="index"
+                :icon="activity.icon"
+                :type="index==0?'primary':activity.type"
+                :color="activity.color"
+                :size="activity.size"
+                :hollow="activity.hollow"
+                :timestamp="activity.content"
+              >
+                {{ activity.time }}
+              </el-timeline-item>
+            </el-timeline>
+        </el-tab-pane>
+        <el-tab-pane label="占位tab" name="占位tab"></el-tab-pane>
+      </el-tabs>
+
+    </el-drawer>
+
+
+    <el-dialog v-model="addLogisticsDialog.visible" title="添加物流" width="50%" draggable style="min-width: 450px;">
+      <el-form ref="addLogisticsFormRef" :model="tabForm" :rules="tabRules" label-width="120px"
+        label-position="right">
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="物流公司:" prop="logisticsCompany">
+              <el-input v-model="tabForm.logisticsCompany" maxLength="50" :rows="2" type="text" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="收货人手机号:" :required="tabForm.logisticsCompany?.includes('顺丰')" :prop="tabForm.logisticsCompany?.includes('顺丰')?'phoneNumber':''" style="width: 100%">
+              <el-input v-model="tabForm.phoneNumber" maxLength="11" :rows="2" type="text" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="物流单号:" prop="logisticsTrackingNumber">
+              <el-input v-model="tabForm.logisticsTrackingNumber" maxLength="40" :rows="2" type="text" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="23" >
+            <el-form-item label="物流凭证:" prop="fileList">
+              <div class="global-flex flex-start">
+                <XUpload
+                  v-model:model-value="tabForm.fileList"
+                  :fileType="fileType"
+                  @fileChange="handleFileChange"
+                  @delFile="handleFileChange"
+                  model="preview"
+                  :multiple="false"
+                  :fileSize="5"
+                  accept="image/png, image/bmp, image/jpeg, image/jpg, image/gif"
+                ></XUpload>
+              </div>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <template #footer>
+        <el-button type="primary" @click="logisticSubmitForm">
+          保存
+        </el-button>
+        <el-button @click="addLogisticsDialog.visible = false">取消</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 提示同供应商采购单拆分 -->
+    <el-dialog v-model="splitSupplierOrder.visible" :title="splitSupplierOrder.title" width="40%" destroy-on-close draggable>
+      <span>
+        以下物料的月结方式、含税方式在同一个供应商内不一致，是否继续操作。
+      </span>
+      <XTable
+        :pageShow="false"
+        height="100%"
+        class="ptable-content"
+        style="height: 100%;"
+        :column-config="{resizable: true}"
+        size="mini"
+        :data="promptList"
+        :border="true"
+        toolId="splitSupplierOrderDetail"
+        :columnList="promptColumnList"
+      >
+      <template #default-isTax="scope">
+        <span>{{ scope.row.isTax == '1' ? '是' : '否' }}</span>
+      </template>
+      <template #default-supplierId="{ row }">
+        {{ SupplierList.filter(item => item.id==row.supplierId).length>0?SupplierList.filter(item => item.id==row.supplierId)[0].supplierName:'' }}
+      </template>
+      </XTable>
+      <template #footer>
+        <el-button type="primary" @click="confirmSplit" > 确定 </el-button>
+        <el-button @click="splitSupplierOrder.visible = false">取消</el-button>
+      </template>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -388,7 +796,7 @@ import {
   updateDetailStatusClose,
   updateDetailStatusOpen,
   updateMaterialOrder,
-  doRejectOrder, confirmOrder, operateRecordList, compareList, cancelOrder, getMaterialOrderDetil
+  doRejectOrder, confirmOrder, operateRecordList, compareList, cancelOrder, getMaterialOrderDetil,getMaterialOrderLogisticsDetail,addLogisticNo
 } from '@/api/purchase/materialOrder';
 import { MaterialOrderForm, MaterialOrderQuery, MaterialOrderVO } from '@/api/purchase/materialOrder/types';
 import { ref } from 'vue'
@@ -398,11 +806,11 @@ import {
   MaterialOrderDetailQuery,
   MaterialOrderDetailVO
 } from "@/api/purchase/materialOrderDetail/types";
-import {delMaterialOrderDetail, listPurchaseOrderDetail} from "@/api/purchase/materialOrderDetail";
+import {delMaterialOrderDetail, listPurchaseOrderDetail,listPurchaseOrderDetailSum} from "@/api/purchase/materialOrderDetail";
 
 import useUserStore from '@/store/modules/user';
 import { SupplierVO } from "@/api/basedata/supplier/types";
-import { listSupplier} from '@/api/basedata/supplier';
+import { listSupplier,getSupplier} from '@/api/basedata/supplier';
 import {
   copySaveOrderDetailList,
   copySubmitOrderDetailList,
@@ -412,7 +820,9 @@ import {
 import {
   getSupplierMaterialPrice,
   getDefaultSupplierMaterialPriceByRawIds,
-  listMaterialInventory
+  listMaterialInventory,
+  listMaterialInventoryInfo,
+  getSupplierMaterialPriceInfo
 } from '@/api/purchase/materialApply';
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 import clipboard3 from "vue-clipboard3";
@@ -424,6 +834,18 @@ import {deepClone} from "@/utils";
 import {RecordVO} from "@/api/purchase/record/types";
 import {getSignPdf} from "@/api/financial/accountOrder";
 import { getUrlLink } from "@/api/purchase/materialOrder";
+import { listLogisticsCompany } from '@/api/basedata/logisticsCompany';
+import { BigNumber } from 'bignumber.js';
+import {VXETable, VxeTablePropTypes} from "vxe-table";
+import { decryptBase64ByStr } from '@/utils/crypto'
+
+const { monthly_method} = toRefs<any>(proxy?.useDict( 'monthly_method'));
+const splitSupplierOrder = reactive<DialogOption>({
+  visible: false,
+  title: '确认'
+});
+
+const secordConfirm = ref(false);
 /** 对账单按钮操作 */
 let reportUrl = ref("");
 const reportDrawer = reactive<DrawerOption>({
@@ -434,16 +856,16 @@ const reportDrawer = reactive<DrawerOption>({
 const purchaseReportHandle = async (row: any) => {
   reportDrawer.title = "采购订单报表预览";
   reportDrawer.visible = true;
-  if(row.confirmStatus=="3"){
-    getSignPdf({bizCode:row.code}).then(res=>{
-      let vo = res.data;
-      if (vo.url) {
-        let url = '/web/viewer.html?file=' + encodeURIComponent(vo.url + '#' + vo.name);
-        reportUrl.value = url;
-        return;
-      }
-    });
-  }
+  // 获取签名文件
+  getSignPdf({bizCode:row.code}).then(res=>{
+    let vo = res.data;
+    if (vo.url) {
+      let url = '/web/viewer.html?file=' + encodeURIComponent(vo.url + '#' + vo.name);
+      reportUrl.value = url;
+      return;
+    }
+  });
+
   reportUrl.value = getReportUrl() + `&_n=采购单&_u=file:procure.ureport.xml&url=purchase/materialHandle/uReportReview/${row.id}&listUrl=purchase/materialHandle/uReportReviewList/${row.id}`;
   console.log("reportUrl", reportUrl.value);
 }
@@ -502,6 +924,16 @@ const confirmStatusList = ref([
   { type:"success", label: '已确认', value: "3" }
 ]);
 
+const columnListRecord = ref([
+{ width: '50',type: 'seq',title: '序号',field: 'index',align: 'center',  },
+{ title: '所属单位',field: 'ownerName',align: 'center',  },
+{ width: '140',title: '物料名称',field: 'materialName',align: 'center',  },
+{ width: '80',title: '操作人',field: 'createByName',align: 'center',  },
+{ width: '160',title: '操作时间',field: 'createTime',align: 'center',  },
+{ title: '操作内容',field: 'operateContent',align: 'center',  },
+{ width: '160',title: '确认备注',field: 'remark',align: 'center',  },
+]);
+
 const orderTypeList = ref([
   { label: '电脑端', value: "0" },
   { label: '小程序', value: "1" },
@@ -509,6 +941,8 @@ const orderTypeList = ref([
 // const { material_order_status } = toRefs<any>(proxy?.useDict("material_order_status"));
 const buttonLoading = ref(false);
 const loading = ref(true);
+const confirmationRecordLoading = ref(true);
+const pageLoading = ref(true);
 const dialogTableLoading = ref(false);
 const materialsLoading = ref(false);
 
@@ -568,6 +1002,11 @@ const selectInventoryList = ref<MaterialOrderDetailVO[]>([]);
 const confirmSelectInventoryList = ref<MaterialOrderDetailVO[]>([]);
 //确认选中的物料-备份
 const confirmSelectInventoryCopyList = ref<MaterialOrderDetailVO[]>([]);
+const columnListChooseMaterial = ref([
+{ field: 'materialCode',align: 'center',  },
+{ title: '已选物资',field: 'materialName',align: 'center',  },
+{ field: 'make',align: 'center',  },
+]);
 //确认选中的物料
 const confirmSelectInventoryColumnList = ref([
   { title: '序号', align: 'center', width: '50', type: 'seq' },
@@ -584,7 +1023,9 @@ const confirmSelectInventoryColumnList = ref([
   { title: '长(mm)', field: 'length', width: '70', align: 'center', },
   { title: '宽(mm)', field: 'width', width: '70', align: 'center', },
   { title: '品牌', field: 'manufacturer', width: '60', align: 'center', },
-  { title: '要求交期', field: 'deliverTime', fixed:'right', width: '180', align: 'center', },
+  { title: '月结方式', field: 'monthlyMethod', fixed:'right', width: '120', align: 'center', },
+  { title: '含税', field: 'isTax', fixed:'right', width: '40', align: 'center', },
+  { title: '要求交期', field: 'deliverTime', fixed:'right', width: '150', align: 'center', },
   { title: '采购数量', field: 'quantity', fixed:'right', width: '80', align: 'center' },
   { title: '单位', field: 'units', width: '80', align: 'center' },
   { title: '采购单价', field: 'price', fixed:'right', width: '80', align: 'center' },
@@ -592,7 +1033,26 @@ const confirmSelectInventoryColumnList = ref([
   { title: '采购备注', field: 'applyRemark', fixed:'right', width: '80', align: 'center' },
   { title: '操作',field:'make', fixed: 'right', width:'60', align: 'center', showOverflow:false},
 ]);
+const orderRecordColumnList = ref([
+ { width:'60',title:'序号',align:'center',type:'seq'},
+{ title:'所属单位',field:'ownerName',align:'center',  },
+{ width:'140',title:'物料名称',field:'materialName',align:'center',  },
+{ width:'80',title:'操作人',field:'createByName',align:'center',  },
+{ width:'160',title:'操作时间',field:'createTime',align:'center',  },
+{ title:'操作内容',field:'operateContent',align:'center',  },
+{ width:'160',title:'确认备注',field:'remark',align:'center',  },
+]);
 
+//拆分提示
+const promptList = ref([]);
+const promptColumnList = ref([
+  { width:'60',title:'序号',align:'center',type:'seq'},
+  { width:'80',title:'物料编码',field:'materialCode',align:'center',  },
+  { width:'120',title:'物料名称',field:'materialName',align:'center',  },
+  { title: '供应商', field: 'supplierId', align: 'center', },
+  { width:'80',title:'月结方式',field:'monthlyMethod', align:'center', },
+  { width:'60',title:'是否含税',field:'isTax', align:'center', },
+]);
 const SelectData = reactive<PageData<MaterialOrderDetailForm, MaterialOrderDetailQuery>>({
   form: { },
   queryParams: {
@@ -782,7 +1242,7 @@ const columnList = ref([
   { title: '备注', field: 'remark', align: 'center', width: '140', },
   { title: '操作', field: 'make', align: 'center', width: '460', fixed: 'right', },
 ]);
-
+const XTableRef2 = ref();
 const columnList2 = ref([
   { title: "序号", type: 'seq', field: 'index', align: 'center', width: '50', },
   { title: '采购订单号', field: 'orderCode', width: '90', align: 'center', filterType: 'input', filterParam: { placeholder: '' }, },
@@ -812,6 +1272,8 @@ const columnList2 = ref([
       endParams: { placeholder: '请输入结束时间', type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss' },
     }
   },
+{ width:'80',title:'月结方式',field:'monthlyMethod', align:'center', filterType: 'input'},
+  { width:'60',title:'是否含税',field:'isTax', align:'center', },
   {
     title: '收货地址', field: 'addressName', width: '300', align: 'center'
     , filterType: 'input', filterParam: { placeholder: '' },
@@ -883,8 +1345,49 @@ const columnList2 = ref([
   { title: '单价', field: 'price', width: '80', align: 'center' },
   { title: '采购总金额', field: 'totalPrice', width: '80', align: 'center' },
   { title: '备注', field: 'remark', align: 'center', width: '80' },
+  { title: '操作', field: 'make', align: 'center', width: '80',fixed: 'right', },
+
 ]);
 
+// 扩展表格
+const columnListOrderExpend = ref([
+{ width: '105',title: '详情状态',field: 'detailStatus',align: 'center',  },
+{ title: '物料类别',field: 'categoryName',align: 'center',  },
+{ title: '物料编码',field: 'materialCode',align: 'center',  },
+{ title: '物料名称',field: 'materialName',align: 'center',  },
+{ width: '65',title: '实际供应商',field: 'actualSupplierName',align: 'center',  },
+{ title: '材质牌号',field: 'materialQuality',align: 'center',  },
+{ title: '板厚',field: 'boardThickness',align: 'center',  },
+{ title: '铜厚',field: 'copperThickness',align: 'center',  },
+{ title: '颜色',field: 'color',align: 'center',  },
+{ title: '级别',field: 'level',align: 'center',  },
+{ title: '长(mm)',field: 'length',align: 'center',  },
+{ title: '宽(mm)',field: 'width',align: 'center',  },
+{ title: '品牌',field: 'manufacturer',align: 'center',  },
+{ title: '库存单位',field: 'units',align: 'center',  },
+{ title: '申请备注',field: 'applyRemark',align: 'center',  },
+{ title: '要求交期',field: 'deliverTime',align: 'center',  },
+{ title: '月结方式',field: 'monthlyMethod',align: 'center',  },
+{ title: '是否含税',field: 'isTax',align: 'center',  },
+{ title: '采购数量',field: 'quantity',align: 'center',  },
+{ title: '收货数量',field: 'receiveQuantity',align: 'center',  },
+{ title: '入库数量',field: 'receiveQuantity',align: 'center',  },
+{ title: '退货数',field: 'backQuantity',align: 'center',  },
+{ width: '65',title: '退货重收数',field: 'backResendQuantity',align: 'center',  },
+{ title: '单价',field: 'price',align: 'center',  },
+{ width: '65',title: '采购总金额',field: 'totalPrice',align: 'center',  },
+{ width: '120',title: '操作',align: 'center', field: 'make' },
+]);
+
+const route = useRoute();
+/**
+ * 进入页面次数
+ */
+const isFirst = ref(0)
+/**
+ * 待办跳转参数
+ */
+const pendingParams = ref()
 // 获取 搜索条件
 const searchChange = (params: any) => {
   queryParams.value = params
@@ -924,6 +1427,14 @@ const getList = async () => {
   XTableRef.value.xTableRef.clearRowExpand();
 }
 
+const headData = ref({
+  quantity:0,
+  receiveQuantity:0,
+  inventoryQuantity:0,
+  backResendQuantity:0,
+  price:0,
+});
+
 /**
  * 查询按采购订单列表
  * */
@@ -932,6 +1443,8 @@ const getPurchaseOrderDetailList = async () => {
   const res = await listPurchaseOrderDetail(queryParamsDetail.value);
   materialOrderDetailList.value = res.rows;
   total.value = res.total;
+const res1 = await listPurchaseOrderDetailSum(queryParamsDetail.value);
+  headData.value = res1.data;
   loading.value = false;
 }
 
@@ -1231,7 +1744,7 @@ let SupplierList: SupplierVO[] = [];
  */
  const getSupplierList = async () => {
   const SupplierResponse: any = await listSupplier();
-  SupplierList = SupplierResponse.rows;
+  SupplierList = SupplierResponse.rows.filter((v:any) => v.status == '1');
 }
 /** 时间禁选*/
 const disabledDate = (date:any) => {
@@ -1260,7 +1773,10 @@ const handleColumnList = ref([
   { width:'100',title:'供应商基价',field:'supplierPrice',align:'center', },
   { title:'申请数量',field:'applyQuantity',align:'center',  width:'100'},
   { width:'125',title:'要求交期',field:'deliverTime',align:'center', },
+{ width:'80',title:'月结方式',field:'monthlyMethod', align:'center'},
+  { width:'60',title:'是否含税',field:'isTax', align:'center', },
   { title:'采购单价',field:'price',align:'center',  width:'100'},
+{ title:'单价区间',field:'modificationPrice',align:'center',   width:'100'},
   { title:'采购数量',field:'quantity',align:'center', width:'100'},
   { title:'采购金额',field:'totalPrice',align:'center',  width:'100'},
   { title:'收货地址',field:'addressName',align:'center', width:'240' },
@@ -1277,10 +1793,21 @@ const handleCopy = async (row?: MaterialOrderVO) => {
         item.addressId =  row?.addressId;
         item.addressName = row?.address;
         item.status = undefined;
+const itemSupplier = SupplierList.find((vo) => vo.id == item.supplierId)
+    if (!itemSupplier) {
+      item.supplierId = undefined;
+      item.monthlyMethod = undefined;
+      item.isTax = undefined;
+    }else{
+      item.monthlyMethod = itemSupplier.monthlyMethod;
+      item.isTax = itemSupplier.isTax;
+    }
   });
   console.log("waitHandleDetailList......", waitHandleDetailList.value);
   proxy?.$modal.closeLoading();
   copyDialogMaterial.title="采购订单复制";
+//重置供应商含税校验
+  secordConfirm.value = false;
   copyDialogMaterial.visible=true;
 }
 // 获取当前时间的方法
@@ -1302,8 +1829,18 @@ const priceFormat = (val: number|string, float: number = 2) => {
 const getSupplierPrice = async (row: any) => {
   const supplierId = row.supplierId;
   const materialId = row.rawMaterialId;
-  const res =  await getSupplierMaterialPrice(supplierId, materialId);
-  row.supplierPrice = res.data;
+  //const res =  await getSupplierMaterialPrice(supplierId, materialId);
+
+  const res =  await getSupplierMaterialPriceInfo(supplierId, materialId);
+  if(res.data){
+    row.supplierPrice = res.data.price;
+    row.modificationPrice = res.data.modificationPrice;
+  }else{
+    row.supplierPrice = undefined;
+    row.modificationPrice = undefined;
+  }
+
+  //row.supplierPrice = res.data;
   if (row.supplierPrice) {
     row.price = row.supplierPrice;
     row.totalPrice = row.price * row.quantity;
@@ -1311,11 +1848,28 @@ const getSupplierPrice = async (row: any) => {
   }else{
     row.disabled = false;
   }
+
+  const supRes = await getSupplier(supplierId);
+  if(supRes?.code=='200'){
+    row.monthlyMethod=supRes.data?.monthlyMethod;
+    row.isTax=supRes.data?.isTax;
+  }
 };
 const calculateSupplierPrice = async (row: any) => {
+
   row.price = row.supplierPrice;
-  row.totalPrice = row.price * row.quantity;
-  row.totalPrice = row.totalPrice.toFixed(2);
+  // row.totalPrice = row.price * row.quantity;
+  // row.totalPrice = row.totalPrice.toFixed(2);
+//获得单价
+  const price = row.price;
+  //获得数量
+  const quantity = row.quantity;
+  //计算总价
+  if(price&&quantity){
+    row.totalPrice = BigNumber(price).times(BigNumber(quantity));
+  }else{
+    row.totalPrice = 0
+  }
 };
 const calculatePrice = async (row: any) => {
   //获得单价
@@ -1327,12 +1881,15 @@ const calculatePrice = async (row: any) => {
     return;
   }
   //计算总价
-  row.totalPrice = price * quantity;
-  row.totalPrice = row.totalPrice.toFixed(4);
+  if(price&&quantity){
+    row.totalPrice = BigNumber(price).times(BigNumber(quantity));
+  }else{
+  row.totalPrice = 0
+  }
 };
 /** 待受理的 保存按钮操作 */
 const handleSave = async () => {
-  const flag = saveValidate();
+  const flag = saveValidate(handleSave);
   if (!flag) {
     return;
   }else{
@@ -1352,7 +1909,7 @@ const handleSave = async () => {
 
 /** 提交按钮操作 */
 const handleApply = async () => {
-  const flag = saveValidate();
+  const flag = saveValidate(handleApply);
   if (!flag) {
     return;
   } else {
@@ -1367,10 +1924,11 @@ const handleApply = async () => {
     copyDialogMaterial.visible=false;
   }
 }
+const confirmCallback = ref();
 /**
  * 保存前的校验
  */
- const saveValidate = () => {
+ const saveValidate = (callback) => {
   //遍历waitHandleDetailList 判断 supplierPrice 和 quantity 和 price 和 totalprice和deliverTime 是否为空
   let check = false;
   let msg = "";
@@ -1406,11 +1964,30 @@ const handleApply = async () => {
       msg = "采购金额不能为空"
       return;
     }
+if (!item.monthlyMethod) {
+      check = true;
+      msg="月结方式不能为空"
+      return;
+    }
+    if (!item.isTax) {
+      check = true;
+      msg="是否含税不能为空"
+      return;
+    }
+
   });
   if (check) {
     proxy?.$modal.msgError(msg);
     return false;
   }
+if(secordConfirm.value){
+    return true;
+  }
+  if(callback){
+    confirmCallback.value=callback;
+    return saveValidateSplit();
+  }
+
   return true;
 }
 
@@ -1431,6 +2008,9 @@ const getDefaultSupplierPrice = async () => {
     //在priceList 中找到supplierId和rawMaterialId都相同的数据
         let basice =priceList.find(price=>price.rawMaterialId==item.rawMaterialId);
         if (basice) {
+          item.modificationPrice = basice.modificationPrice;
+          item.supplierPrice = basice.price;
+
           item.supplierPrice = basice.price;
           item.supplierId = basice.supplierId;
           item.disabled = true;
@@ -1453,8 +2033,12 @@ const handleExport = () => {
 /** 合同确认按钮操作 */
 const handleConfirm = async (row?: MaterialOrderVO) => {
   reset();
+//重置供应商含税校验
+  secordConfirm.value = false;
+  dialogConfirm.visible = true;
   dialogTableLoading.value = true;
   materialOrderUpdate.value = row;
+  confirmationRecordLoading.value = true;
   confirmForm.value.orderCode = row?.code;
   confirmForm.value.supplierCode = row?.supplierCode;
   confirmForm.value.supplierName = row?.supplierName;
@@ -1471,11 +2055,34 @@ const handleConfirm = async (row?: MaterialOrderVO) => {
     dialogConfirm.title = '采购合同确认';
     confirmData.rules = {}
   }
-  getMaterialOrderDetil({id:row?.id, confirmStatus:row?.confirmStatus}).then(res => {
+
+  await getMaterialOrderDetil({id:row?.id, confirmStatus:row?.confirmStatus}).then(res => {
     confirmSelectInventoryList.value = res.data.orderDetailVoList;
-    dialogConfirm.visible = true;
+    dialogTableLoading.value = false;
   });
-  dialogTableLoading.value = false;
+
+
+  const _ids = confirmSelectInventoryList.value.map(item => item.rawMaterialId);
+  if (_ids.length == 0) {
+    return;
+  }
+  const res2 =  await getDefaultSupplierMaterialPriceByRawIds(_ids);
+  let priceList= res2.data;
+  confirmSelectInventoryList.value.forEach((item) => {
+  //在priceList 中找到supplierId和rawMaterialId都相同的数据
+    let basice = priceList.find(price=>price.rawMaterialId==item.rawMaterialId);
+    if (basice) {
+      item.modificationPrice = basice.modificationPrice;
+      item.supplierPrice = basice.price;
+    }
+  });
+
+  console.log("confirmSelectInventoryList.value",confirmSelectInventoryList.value)
+
+   const res = await operateRecordList({id: row.id});
+  queryRecordList.value = res.rows;
+
+  confirmationRecordLoading.value = false;
 }
 
 /**选择物料按钮 */
@@ -1545,7 +2152,7 @@ const pageChange = async(params: any) => {
 }
 /** 查询物料库存列表 */
 const getMaterialInventory = async () => {
-  const res = await listMaterialInventory(selectQueryParams.value);
+  const res = await listMaterialInventoryInfo(selectQueryParams.value);
   materialInventoryList.value = res.rows;
   materialInventoryList.value.forEach((item) => {
     item.materialCode = item.code;
@@ -1590,7 +2197,9 @@ const submitInventoryForm = () => {
   dialogMaterials.visible = false;
   //将已选中的赋值给confirmSelectInventoryList
   confirmSelectInventoryList.value = selectInventoryList.value;
-
+console.log("=====confirmSelectInventoryList.value",confirmSelectInventoryList.value)
+  console.log("=====confirmSelectInventoryCopyList.value",confirmSelectInventoryCopyList.value);
+  const _supId=confirmSelectInventoryCopyList.value&&confirmSelectInventoryCopyList.value.length>0?confirmSelectInventoryCopyList.value[0].supplierId:undefined;
   confirmSelectInventoryList.value.map((item2) => {
     let material =  confirmSelectInventoryCopyList.value.find(item => item.rawMaterialId == item2.id);
     if (material) {
@@ -1601,11 +2210,16 @@ const submitInventoryForm = () => {
       item2.confirmRemark = material.confirmRemark;
       item2.remark = material.remark;
       item2.id = material.id;
+      item2.monthlyMethod = material.monthlyMethod;
+      item2.isTax = material.isTax;
+      item2.supplierId = material.supplierId;
     }else{
       // 老数据没有的则新增
       item2.id = null;
     }
   });
+
+  console.log("========= confirmSelectInventoryList.value", confirmSelectInventoryList.value)
 }
 
 /** 已选物料取消按钮操作 */
@@ -1657,19 +2271,29 @@ const submitConfirmForm = async () => {
   let msg = "";
   confirmSelectInventoryList.value.forEach((item) => {
     //判断item.applyNum>0
-    if (item.quantity <= 0) {
+    if (!item.quantity||item.quantity <= 0) {
       check = true;
-      msg="申请数量必须大于0"
+      msg="采购数量必须大于0"
       return;
     }
-    if (item.price <= 0) {
+    if (!item.price||item.price <= 0) {
       check = true;
-      msg="采购单间必须大于0"
+      msg="采购单价必须大于0"
       return;
     }
     if (item.deliverTime == undefined) {
       check = true;
       msg="要求交期不能为空"
+      return;
+    }
+if (!item.monthlyMethod) {
+      check = true;
+      msg="月结方式不能为空"
+      return;
+    }
+    if (!item.isTax) {
+      check = true;
+      msg="是否含税不能为空"
       return;
     }
   });
@@ -1763,14 +2387,287 @@ const submitCancelOrder = async (status: string) => {
   });
 }
 
+//通过，确认要切割
+const confirmSplit = ()=>{
+  secordConfirm.value = true;
+  splitSupplierOrder.visible = false;
+  confirmCallback.value();
+}
+
+//验证是否要提示切割
+const saveValidateSplit = () => {
+    //判断是否存在同供应商多个月结方式和含税
+    const repetitionItemList=findInconsistentRecords(waitHandleDetailList.value);
+    console.log("repetitionItemList",repetitionItemList)
+    console.log("waitHandleDetailList",waitHandleDetailList.value)
+    if(repetitionItemList.length>0){
+      let repetList = waitHandleDetailList.value.filter(item => {
+          return repetitionItemList.some(item2 => item2.supplierId==item.supplierId)
+      });
+      promptList.value = deepClone(repetList);
+      splitSupplierOrder.visible = true;
+      return false;
+    }
+  return true;
+}
+
+//校验同供应商多个月结方式和含税
+function findInconsistentRecords(users:any) {
+    const userRecords = {};
+    const inconsistentRecords = <any>[];
+
+    // 遍历用户数组
+    users.forEach(user => {
+        const { supplierId, monthlyMethod, isTax } = user;
+
+        // 如果用户ID不存在，则初始化记录
+        if (!userRecords[supplierId]) {
+            userRecords[supplierId] = { supplierId, monthlyMethod, isTax };
+        } else {
+            // 检查地址和性别是否与已记录的不同
+            if (userRecords[supplierId].monthlyMethod !== monthlyMethod || userRecords[supplierId].isTax !== isTax) {
+                // 记录不一致的信息
+                inconsistentRecords.push({
+                    supplierId,
+                    original: userRecords[supplierId],
+                    current: { monthlyMethod, isTax }
+                });
+                // 更新记录，这里可以选择保留任何一个版本，根据业务需求决定
+                userRecords[supplierId] = { ...userRecords[supplierId], monthlyMethod, isTax };
+            }
+        }
+    });
+
+    return inconsistentRecords;
+}
+
+const initLogisticsFormData: any = {
+  id: undefined,
+  logisticsCompany:undefined,
+  fileList: [],
+}
+
+const logisticsData = reactive<PageData<any, any>>({
+  form: { ...initLogisticsFormData },
+  queryParams: {
+    pageNum: 1,
+    pageSize: 20,
+    createDeptName: undefined,
+    createByName: undefined,
+    updateByName: undefined,
+    type: '0',
+    quantity: undefined,
+    bizid: undefined,
+    code: undefined,
+    isCallback: undefined,
+    params: {
+    }
+  },
+  rules: {
+    phoneNumber: [
+      { required: true, message: "顺丰物流收件人手机号不能为空", trigger: "change" }
+    ],
+    // phoneNumber: [
+    //   {validator: (rule, value, callback) => {
+    //     console.log(value)
+    //     if(tabForm.value.logisticsCompany?.includes('顺丰')){
+    //       if (!value) {
+    //         callback(new Error("顺丰物流收件人手机号不能为空"));
+    //       }
+    //     }else{
+    //       if (!value) {
+    //         // 如果没有输入，则直接通过验证，不显示错误信息
+    //         return callback();
+    //       }
+    //     }
+    //     // 正则表达式验证手机号格式
+    //     const pattern = /^1[3|4|5|6|7|8|9][0-9]\d{8}$/;
+    //     if (pattern.test(value)) {
+    //       // 符合格式，验证通过
+    //       callback();
+    //     } else {
+    //       // 不符合格式，返回错误信息
+    //       callback(new Error("请输入正确的手机号码"));
+    //     }
+    //   }, trigger: "change"
+    //  }
+    // ],
+    logisticsCompany:[
+      { required: true, message: "物流公司不能为空", trigger: "change" }
+    ],
+    logisticsTrackingNumber:[
+      { required: true, message: "物流单号不能为空", trigger: "change" }
+    ],
+  }
+});
+
+// 正则表达式验证手机号格式
+const validPhone = (cellValue: any) => {
+  if (!/^1[3|4|5|6|7|8|9][0-9]\d{8}$/.test(cellValue)) {
+    return new Error('请输入正确的手机号码')
+  }
+}
+VXETable.validators.add('validPhone', {
+  cellValidatorMethod({cellValue}) {
+    return validPhone(cellValue)
+  }
+})
+
+const purchaseOrderLogiticsDrawer = reactive<DrawerOption>({
+  direction: 'left',
+  visible: false,
+  title: ''
+});
+const addLogisticsDialog = reactive<DialogOption>({
+  visible: false,
+  title: ''
+});
+/**运行文件上传的类型 */
+const fileType: string[] = ["png", "bmp", "jpeg", "jpg", "gif"];
+const logisticsCompanyList = ref();
+const orderLogistics = ref();
+const addLogisticsFormRef = ref();
+const currentDeliveryId = ref();
+const currentDetailId = ref();
+const addLogisticsDialogLoading = ref();
+const logiticsRadioTable = ref('物流进度');
+const purTypeList= [{label: '电脑端', value: '0'},{label: '小程序', value: '1'}];
+
+const {form: tabForm, rules:tabRules } = toRefs(logisticsData);
+/**
+ * handleFileChange 清空form.fileList 校验
+ */
+ const handleFileChange = (fileList: any) => {
+  if (fileList.length > 0) {
+    tabForm.value.fileList = fileList;
+  } else {
+    tabForm.value.fileList = [];
+  }
+}
+
+const handleAddLogisticInfo = ()=>{
+  tabForm.value = {...initLogisticsFormData};
+  //当前送货单的id
+  tabForm.value.purchaseDetailId = currentDetailId.value;
+  addLogisticsDialog.visible=true;
+}
+
+const tabChange = (tab: any, event: any) => {
+  let checkedTab = tab.props.label;
+  let checkList = checkedTab.split("-");
+  if(checkList.length>1){
+    let inx = checkList[1];
+    currentDeliveryId.value = orderLogistics.value.deliveryVoList[inx-1].id;
+  }
+  console.log("currentDeliveryId.value",currentDeliveryId.value);
+}
+
+const handleLogistics = async (row : any) =>{
+  currentDetailId.value=row.id;
+  purchaseOrderLogiticsDrawer.visible = true;
+  orderLogistics.value=undefined;
+  getDetailLogisticsInfo();
+
+}
+
+const getDetailLogisticsInfo = async()=>{
+  addLogisticsDialogLoading.value=true;
+  let res = await getMaterialOrderLogisticsDetail(currentDetailId.value);
+  if(res.code==200){
+    orderLogistics.value=res.data;
+  }
+  console.log(res);
+  if(!orderLogistics.value.deliveryVoList || orderLogistics.value.deliveryVoList.length==0){
+    logiticsRadioTable.value = '物流进度';
+  }else{
+    logiticsRadioTable.value = '物流进度-1';
+    currentDeliveryId.value=orderLogistics.value.deliveryVoList[0].id;
+  }
+  addLogisticsDialogLoading.value=false;
+}
+
+
+/** 确认按钮 */
+const logisticSubmitForm = () => {
+  addLogisticsFormRef.value?.validate(async (valid: boolean) => {
+    if (valid) {
+        //修改
+        addLogisticNo(tabForm.value).then(res => {
+            proxy?.$modal.msgSuccess("操作成功");
+            getDetailLogisticsInfo();
+        }).finally(() => { addLogisticsDialog.visible = false; });
+      }
+    });
+};
+
+
+const getLogisticsCompanyList = async ()=>{
+  const res = await listLogisticsCompany({pageNum:1,pageSize:500})
+  logisticsCompanyList.value = res.rows
+}
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      let tab = !isNaN(Number(params.tab)) ? Number(params.tab) : 1;
+      editableTabsValue.value = tab
+      if (tab === 1) {
+        let tempColumnList = [{field: 'code', defaultValue: params.bizNo}]
+        queryParams.value.code = params.bizNo
+        setTimeout(() => {
+          XTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === 2) {
+        let tempColumnList = [{field: 'orderCode', defaultValue: params.bizNo}]
+        queryParamsDetail.value.code = params.bizNo
+        setTimeout(() => {
+          XTableRef2.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      }
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
 onMounted(() => {
-  getList();
-  getSupplierList();
-  updateCurrentTime();
+    getList();
+    getSupplierList();
+    updateCurrentTime();
+    getLogisticsCompanyList();
 });
 </script>
 <style scoped lang="scss">
 .expand-wrapper {
   padding-left: 39px;
 }
+.totalTitle{
+  padding: 0px !important;
+  margin: 0px;
+  line-height: 24px !important;
+  display: flex !important;
+  justify-content: end !important;
+  font-size: 14px !important;
+  color: #0892c7 !important;
+  font-weight: bold;
+  margin-right: 10px;
+}
+:deep(.purchaseOrderLogiticsDrawer){
+  .el-form-item {
+    margin-bottom: 2px !important;
+  }
+
+  .el-drawer__body{
+    padding-top: 0px !important;
+  }
+}
+
 </style>

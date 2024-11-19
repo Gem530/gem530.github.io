@@ -77,14 +77,32 @@
             class="box-item"
             effect="dark"
             raw-content
-            v-if="scope.row.unit == '2'"
+            v-if="scope.row.unit == '2' && scope.row.extendCraftName"
+            :content="`测试架结存有小数的情况会向下取整<br>
+                        如：1pnl=4set=24pcs<br>
+                         本卡1pnl，前面工序报废1set和2pcs<br>
+                        报废pcs：6+2=8pcs<br>
+                        测试架结存数：(24-6-2)/6=2.66≈2set<br>
+                        结存面积：2*set面积<br><br>`"
+          >
+            <el-icon style="margin-left: 10px;color: #f3d8c4;"><QuestionFilled /></el-icon>
+          </el-tooltip>
+          <el-tooltip
+            class="box-item"
+            effect="dark"
+            raw-content
+            v-if="scope.row.unit == '2' && !scope.row.extendCraftName"
             :content="`FQC结存有小数的情况会向下取整，出单向上取整<br>
-                      如：1pnl=3set=24pcs<br>
-                         &nbsp;本卡1pnl，前面工序报废1set和1pcs，则FQC可出15pcs，包装接5pcs<br>
-                         &nbsp;出单set数： 5/8=0.63set≈1set<br>
-                         &nbsp;出单面积：1*set面积<br>
-                         &nbsp;则 FQC结存数：3-0.63=2.37≈2set<br>
-                         &nbsp;结存面积：2*set面积`"
+                        如：1pnl=4set=24pcs<br>
+                         本卡1pnl，前面工序报废1set和2pcs<br>
+                        报废pcs：6+2=8pcs<br>
+                        FQC结存数：(24-6-2)/6=2.66≈2set<br>
+                        结存面积：2*set面积<br>
+                         若包装接5pcs<br>
+                         出单set数： 5/6=0.83set<br>
+                         出单面积：0.83*set面积<br>
+                         则 FQC结存数：(24-6-2-5)/6=1.83≈1set<br>
+                         结存面积：1*set面积<br><br>`"
           >
             <el-icon style="margin-left: 10px;color: #f3d8c4;"><QuestionFilled /></el-icon>
           </el-tooltip>
@@ -139,7 +157,7 @@
                 :scroll-y="{enabled: true,gt: 50}"
         >
           <template #default-finishSetArea="{ row }">
-              {{Number(row.finishSetArea).toFixed(4)}}
+              {{ BigNumber(row.finishSetArea).dp(4)}}
             </template>
           <template #default-pnlQuantity="{row}">
             {{row.pnlQuantity}}{{unitOption.find(v=>v.value == row.countUnit)?.label}}
@@ -158,15 +176,12 @@
 </template>
 
 <script setup name="ProductionAnalysis" lang="ts">
-  import {
-    getInInventoryDetails, saveCommodityInOutRecord, getInRecordList, delInRecords
-  } from '@/api/production/card';
-  import {CardVO, CardQuery, CardForm} from '@/api/production/card/types';
-  import {deepClone} from "@/utils";
-  import {getCraftProductivityAnalysis, listProductionStatistics, updateProduction} from "@/api/production/production";
+  import {CardVO} from '@/api/production/card/types';
+  import {getCraftProductivityAnalysis} from "@/api/production/production";
   import {ProductionForm, ProductionQuery, ProductionVO} from "@/api/production/production/types";
   import dayjs from "dayjs";
   import {VxeTableEvents, VxeTablePropTypes} from "vxe-table";
+  import { BigNumber } from 'bignumber.js';
 
   const {proxy} = getCurrentInstance() as ComponentInternalInstance;
 
@@ -583,10 +598,10 @@
           return columns.length;
         }
         if (column.field == "finishSetArea") {
-          return `${sumNum(data, "finishSetArea").toFixed(4)} `;
+          return `${sumNum(data, "finishSetArea")} `;
         }
         if (column.field == "pnlQuantity") {
-          return `${sumNum(data, "pnlQuantity").toFixed(4)} `;
+          return `${sumNum(data, "pnlQuantity")} `;
         }
         return "";
       })
@@ -598,7 +613,7 @@
     list.forEach(item => {
       count += Number(item[field]);
     });
-    return Number(count.toFixed(4));
+    return BigNumber(count).dp(4);
   };
 
   /** 查询左边边框数据 */

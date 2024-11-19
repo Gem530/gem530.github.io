@@ -1,16 +1,18 @@
 <template>
   <div class="p-2 xtable-page">
 
-    <el-card shadow="never" class="xtable-card">
+    <!-- <el-card shadow="never" class="xtable-card">
       <template #header>
         <el-row :gutter="10" class="mb8">
-          <el-col :span="24" class="global-flex flex-end">
+          <el-col :span="24" class="global-flex flex-end"> -->
+          <div class="head-btn-flex">
             <el-button type="primary" plain icon="Plus" @click="handleAdd" >
               新增
             </el-button>
-          </el-col>
+          </div>
+          <!-- </el-col>
         </el-row>
-      </template>
+      </template> -->
 
       <XTable toolId="basedataDiscardReason" :pageShow="true" v-model:page-size="queryParams.pageSize" height="100%" class="xtable-content"
               v-model:current-page="queryParams.pageNum"
@@ -30,7 +32,7 @@
         </template>
       </XTable>
 
-    </el-card>
+    <!-- </el-card> -->
     <!-- 添加或修改报废原因对话框 -->
     <el-dialog :title="dialog.title" :close-on-click-modal="false" :close-on-press-escape="false"
                v-model="dialog.visible" width="500px">

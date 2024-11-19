@@ -1,8 +1,8 @@
 <template>
   <div class="p-2 xtable-page">
     <el-card shadow="never" class="xtable-card">
-      <el-tabs type="border-card" @tab-click="handleClick" class="xtable-tab">
-        <el-tab-pane label="可入库列表">
+      <el-tabs v-model="type" type="border-card" @tab-click="handleClick" class="xtable-tab">
+        <el-tab-pane label="可入库列表" :name="0">
           <XTable toolId="productionInOut" v-model:page-size="queryParams.pageSize"
                   v-model:current-page="queryParams.pageNum"
                   :page-params="{ perfect: true, total: total }"
@@ -16,6 +16,7 @@
                   :column-config="{ resizable: true }"
                   :checkbox-config="{reserve: true }"
                   :row-config="{ keyField:'id' }"
+                  ref="xTableRef"
           >
             <template #default-make="scope">
               <el-button link type="primary" @click="handleUpdate(scope.row)">确认入库</el-button>
@@ -23,7 +24,7 @@
             </template>
           </XTable>
         </el-tab-pane>
-        <el-tab-pane label="入库记录">
+        <el-tab-pane label="入库记录" :name="1">
           <div class="global-flex flex-end" style="width: 100%;margin-bottom: 10px;">
             <div class="totalTitle">入库数量：{{sumData.quantity}}pcs &nbsp;&nbsp;|&nbsp;&nbsp;入库面积：{{sumData.area}}㎡ &nbsp;&nbsp;|&nbsp;&nbsp;报废数量：{{sumData.scrapNum}}pcs</div>
           </div>
@@ -40,6 +41,7 @@
                   :column-config="{ resizable: true }"
                   :checkbox-config="{reserve: true }"
                   :row-config="{ keyField:'id' }"
+                  ref="xTableRef2"
           >
             <template #default-type="scope">
               <span v-if="scope.row.type==3">生产入库</span>
@@ -54,7 +56,7 @@
     </el-card>
 
     <!--确认入库-->
-    <el-dialog :title="dialog.title" v-model="dialog.visible" width="60%" append-to-body
+    <el-dialog :title="dialog.title" v-model="dialog.visible" width="60%"
                :close-on-click-modal="false"
                v-loading="isLoading">
       <div>
@@ -67,33 +69,17 @@
         </div>
         <div class="orderLi" style="overflow:hidden;">
           <el-divider content-position="left">按订单入库</el-divider>
-          <el-table :data="currentInfo.saleOrderVoList"
+          <XTable :showHead="false" :pageShow="false" :columnList="columnListConfirmEntry" :data="currentInfo.saleOrderVoList"
                     size="small" border v-loading="dialogTableLoading"
                     style="width: 100%; margin-top:20px;">
-            <el-table-column align="center" :show-overflow-tooltip="true" prop="orderCode" label="销售订单" width="120"></el-table-column>
-            <el-table-column align="center" :show-overflow-tooltip="true" prop="orderQuantity" label="订单安排生产" width="100"></el-table-column>
-            <el-table-column align="center" :show-overflow-tooltip="true" prop="alreadySumPcsQuantity" label="已入库总pcs数量"
-                             width="120"></el-table-column>
-            <el-table-column align="center" :show-overflow-tooltip="true" prop="alreadyCardPcsQuantity" label="流转卡已入库pcs数量"
-                             width="145"></el-table-column>
-            <el-table-column align="center" :show-overflow-tooltip="true" prop="placeOrderTime" label="下单时间" width="130">
-            </el-table-column>
-            <el-table-column align="center" :show-overflow-tooltip="true" prop="deliveryTime" label="交期" width="130">
-            </el-table-column>
-            <el-table-column align="center" :show-overflow-tooltip="true" prop="canInInventoryQuantity" label="可入库pcs数量"
-                             min-width="110"></el-table-column>
-            <el-table-column align="center" :show-overflow-tooltip="true" prop="quantity" label="入库数" width="140">
-              <template #default="{row,$index}">
+              <template #default-quantity="{row,$index}">
                 <el-input-number :precision="0" @blur="numberChange(row.quantity,currentInfo.saleOrderVoList[$index])"
                                  v-model.number="row.quantity" :min="0"/>
               </template>
-            </el-table-column>
-            <el-table-column align="center" :show-overflow-tooltip="true" prop="" label="库位" width="90">
-              <template #default="scope">
+              <template #default-storageCuang="scope">
                 成品仓
               </template>
-            </el-table-column>
-          </el-table>
+          </XTable>
         </div>
       </div>
       <div style="float: right;color: red;padding-top: 20px">提示：入库数量如果填错可删除入库记录重新入库</div>
@@ -106,30 +92,20 @@
     </el-dialog>
 
     <!--入库记录-->
-    <el-dialog :title="dialogHistory.title" v-model="dialogHistory.visible" width="80%" append-to-body
+    <el-dialog :title="dialogHistory.title" v-model="dialogHistory.visible" width="80%"
                :close-on-click-modal="false"
                v-loading="isLoading">
-      <el-table :data="inRecordList"
-                size="small" v-loading="dialogTableLoading"
+      <XTable :showHead="false" :pageShow="false" :columnList="columnListStorageRecord" :data="inRecordList"
+                v-loading="dialogTableLoading"
                 style="width: 100%; margin-top:20px;">
-        <el-table-column align="center" :show-overflow-tooltip="true" prop="code" label="流转卡号" width="150"></el-table-column>
-        <el-table-column align="center" :show-overflow-tooltip="true" prop="productionVo.code" label="排产单号" width="150"></el-table-column>
-        <el-table-column align="center" :show-overflow-tooltip="true" prop="customerCode" label="客户编码" width="150"></el-table-column>
-        <el-table-column align="center" :show-overflow-tooltip="true" prop="commodityCode" label="产品编码" width="150"></el-table-column>
-        <el-table-column align="center" :show-overflow-tooltip="true" prop="commodityName" label="产品名称"></el-table-column>
-        <el-table-column align="center" :show-overflow-tooltip="true" prop="bundleSetQuantity" label="SET数量" width="150"></el-table-column>
-        <el-table-column align="center" :show-overflow-tooltip="true" prop="bundlePcsQuantity" label="PCS数量" width="150"></el-table-column>
-        <el-table-column align="center" :show-overflow-tooltip="true" prop="scrapPcsQuantity" label="报废PCS数量" width="150"></el-table-column>
-        <el-table-column align="center" :show-overflow-tooltip="true" prop="completedQuantity" label="入库PCS数量" width="150"></el-table-column>
-        <el-table-column align="center" :show-overflow-tooltip="true" prop="productionUserName" label="生产人员" width="150"></el-table-column>
-        <el-table-column align="center" :show-overflow-tooltip="true" prop="productionTime" label="生产时间" width="150"></el-table-column>
-        <el-table-column label="操作" width="100" align="center" class-name="small-padding fixed-width">
-          <template #default="scope">
+          <template #default-make="scope">
               <el-button link type="primary" @click="handleDelete(scope.row)">删除</el-button>
           </template>
-        </el-table-column>
-      </el-table>
+      </XTable>
     </el-dialog>
+
+    <!-- 库存锁定提示框 -->
+    <InventoryLock title="产品盘点提示" inventoryType="1" v-model:show="inventoryCheck" :data="inventoryRes" @close="inventoryCheck = false"/>
   </div>
 </template>
 
@@ -141,8 +117,9 @@
   } from '@/api/production/card';
   import {CardVO, CardQuery, CardForm} from '@/api/production/card/types';
   import {deepClone} from "@/utils";
-  import {updateProduction} from "@/api/production/production";
   import {ref} from "vue";
+  import {listCommodityInventory} from "@/api/order/commodity";
+  import { decryptBase64ByStr } from '@/utils/crypto'
 
   const {proxy} = getCurrentInstance() as ComponentInternalInstance;
 
@@ -163,7 +140,17 @@
     area:0,
     scrapNum:0
   })
-
+  const xTableRef = ref();
+  const xTableRef2 = ref();
+  const route = useRoute();
+  /**
+   * 进入页面次数
+   */
+  const isFirst = ref(0)
+  /**
+   * 待办跳转参数
+   */
+  const pendingParams = ref()
   const getRemainQuantity = () => {
     const sum = currentInfo.value.saleOrderVoList.reduce((total, current) => total + current.quantity, 0);
     const result = getNeedQuantity() - sum;
@@ -275,7 +262,31 @@
     pnlId: undefined,
     params: {}
   });
-
+  const columnListConfirmEntry = ref([
+  { width: '120',title: '销售订单',field: 'orderCode',align: 'center',  },
+  { width: '100',title: '订单安排生产',field: 'orderQuantity',align: 'center',  },
+  { width: '120',title: '已入库总pcs数量',field: 'alreadySumPcsQuantity',align: 'center',  },
+  { width: '145',title: '流转卡已入库pcs数量',field: 'alreadyCardPcsQuantity',align: 'center',  },
+  { width: '130',title: '下单时间',field: 'placeOrderTime',align: 'center',  },
+  { width: '130',title: '交期',field: 'deliveryTime',align: 'center',  },
+  { width: '110',title: '可入库pcs数量',field: 'canInInventoryQuantity',align: 'center',  },
+  { width: '160',title: '入库数',field: 'quantity',align: 'center',  },
+  { width: '90',title: '库位',field: 'storageCuang',align: 'center',  },
+  ]);
+  const columnListStorageRecord = ref([
+  { width: '150',title: '流转卡号',field: 'code',align: 'center',  },
+  { width: '150',title: '排产单号',field: 'productionVo.code',align: 'center',  },
+  { width: '150',title: '客户编码',field: 'customerCode',align: 'center',  },
+  { width: '150',title: '产品编码',field: 'commodityCode',align: 'center',  },
+  { width: '150',title: '产品名称',field: 'commodityName',align: 'center',  },
+  { width: '150',title: 'SET数量',field: 'bundleSetQuantity',align: 'center',  },
+  { width: '150',title: 'PCS数量',field: 'bundlePcsQuantity',align: 'center',  },
+  { width: '150',title: '报废PCS数量',field: 'scrapPcsQuantity',align: 'center',  },
+  { width: '150',title: '入库PCS数量',field: 'completedQuantity',align: 'center',  },
+  { width: '150',title: '生产人员',field: 'productionUserName',align: 'center',  },
+  { width: '150',title: '生产时间',field: 'productionTime',align: 'center',  },
+  { width: '100',title: '操作',field: 'make',align: 'center',  },
+  ]);
   const columnList = ref([
 
     {title: "序号", type: 'seq', fixed: "left", align: 'center', width: '60'},
@@ -453,7 +464,7 @@
     },
     {
       width: "120",
-      title: '操作pcs数',
+      title: '本次入库pcs数',
       field: 'quantity',
       align: 'center',
     },
@@ -553,8 +564,26 @@
     })
   }
 
+  const inventoryCheck = ref(false);
+  const inventoryRes = ref<any[]>([]);
+
   /** 提交按钮 */
   const submitForm = async () => {
+    // 查询是否存在盘点中产品
+    let ids = currentInfo.value.saleOrderVoList.map(item => item.commodityId);
+    let query = {
+      pageNum: 1,
+      pageSize: 20,
+      IdList: ids,
+      status: '1'
+    }
+    const res = await listCommodityInventory(query);
+    if (res.rows && res.rows.length > 0) {
+      inventoryRes.value = res.rows;
+      inventoryCheck.value = true;
+      return;
+    }
+
     const b:boolean =  currentInfo.value.saleOrderVoList.some(item=>{
       return item.quantity > item.canInInventoryQuantity && item.quantity > 0;
     })
@@ -662,10 +691,41 @@
       ...queryParams.value
     }, `card_${new Date().getTime()}.xlsx`)
   }
-
-  onMounted(() => {
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      let tab = !isNaN(Number(params.tab)) ? Number(params.tab) : 0;
+      type.value = tab
+      let tempColumnList = [{field: 'productionCode', defaultValue: params.bizNo}]
+      if (tab === 0) {
+        queryParams.value.code = params.bizNo
+        setTimeout(() => {
+          xTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === 1) {
+        queryHistoryParams.value.code = params.bizNo;
+        setTimeout(() => {
+          xTableRef2.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      }
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
+onMounted(() => {
     getList();
-  });
+});
 </script>
 
 <style>

@@ -1,0 +1,57 @@
+@import '../../assets/custom.less';
+
+.material-detail {
+    min-height: 100vh;
+    .at-tabs {
+        .at-tabs__body {
+            padding: 0;
+            height: 0;
+            // height: calc(100vh - 70px);
+            // // flex: 1;
+            // // box-sizing: border-box;
+            // // overflow: hidden;
+
+            // .at-tabs-pane {
+            //     padding: 16px 16px 0;
+            // }
+        }
+    }
+
+    .material-tab-body {
+        padding: 16px 16px 0;
+
+        .at-timeline {
+            .at-timeline-item__icon,
+            .at-timeline-item__dot {
+                top: 8px;
+                left: -10px;
+                width: 36px;
+                height: 36px;
+
+                .at-icon {
+                    font-size: 36px;
+                }
+            }
+            .at-timeline-item__dot::after {
+                width: 32px;
+                height: 32px;
+            }
+
+            .at-timeline-item__content {
+                position: relative;
+                .at-timeline-item__content-item {
+                    &:first-child {
+                        font-size: 36px;
+                        font-weight: 600;
+                    }
+                    font-size: 32px;
+                    // &:nth-child(2) {
+                    //     position: absolute;
+                    //     top: 0;
+                    //     right: 0;
+                    // }
+                }
+            }
+        }
+    }
+}

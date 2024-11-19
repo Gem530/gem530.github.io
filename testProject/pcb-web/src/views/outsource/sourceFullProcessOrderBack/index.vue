@@ -22,8 +22,8 @@
           </el-col>
         </el-row>
       </template>
-      <el-tabs type="border-card" class="xtable-tab" @tab-click="radioTableHandle">
-        <el-tab-pane label="待审核列表">
+      <el-tabs v-model="editableTabsValue" type="border-card" class="xtable-tab" @tab-click="radioTableHandle">
+        <el-tab-pane label="待审核列表" :name="0">
           <XTable toolId="outsourceSourceFullProcessOrderBackWait" height="100%" class="xtable-content"
             v-loading="waitLoading"
             v-model:page-size="waitQueryParams.pageSize"
@@ -57,7 +57,7 @@
             </template>
           </XTable>
         </el-tab-pane>
-        <el-tab-pane label="退货列表">
+        <el-tab-pane label="退货列表" :name="1">
 
              <div class="global-flex flex-end" style="width: 100%;margin-bottom: 10px;">
             <el-button plain @click="handleExportRecord">导出 </el-button>
@@ -69,7 +69,7 @@
             :page-params="{ perfect: true, total: total }"
             :data="sourceFullProcessOrderBackList"
             :columnList="columnList"
-            ref="XTableRef"
+            ref="XTableRef2"
             border :showRefresh="true"
             @searchChange="searchChange"
             :column-config="{ resizable: true }"
@@ -77,16 +77,22 @@
             @checkbox-change="selectChangeEvent"
             :checkbox-config="{ reserve: true }"
             :row-config="{ keyField: 'id' }"
-            :intervalCondition="['backTime']"
+            :intervalCondition="['backTime', 'accountQuantity']"
           >
-           <template #default-code="scope">
-              <span>{{ scope.row.code }}</span>
-              <el-button v-if="scope.row.status=='4'" link @click="accountUReportHandle(scope.row)">
-                <el-icon>
-                  <Document />
-                </el-icon>
-              </el-button>
-            </template>
+<!--           <template #default-code="scope">-->
+<!--              <span>{{ scope.row.code }}</span>-->
+<!--              <el-button v-if="scope.row.status=='4'" link @click="accountUReportHandle(scope.row)">-->
+<!--                <el-icon>-->
+<!--                  <Document />-->
+<!--                </el-icon>-->
+<!--              </el-button>-->
+<!--            </template>-->
+          <template #default-hasAccountOrder="scope">
+            {{ accountStatusList.find(item => item.value == scope.row.hasAccountOrder)?.label }}
+          </template>
+          <template #default-inventoryQuantity="{ row }">
+            <div>{{ row.inventoryQuantity?Number(row.inventoryQuantity).toFixed(0):0 }}</div>
+          </template>
           <template #default-quantity="{ row }">
             <div>{{ row.quantity?Number(row.quantity).toFixed(0):0 }}</div>
           </template>
@@ -135,11 +141,11 @@
       </el-tabs>
     </el-card>
     <el-drawer :title="drawer.title" v-model="drawer.visible" size="80%" destroy-on-close>
-          <el-card shadow="never" class="ptable-card">
+      <el-card v-loading="drawerLoading" shadow="never" class="ptable-card">
       <el-form :model="selectForm" ref="backFormRef" :rules="selectRules" :disabled="drawer.title?.includes('详情')||drawer.title?.includes('审核')">
         <el-row>
           <el-col :span="6">
-            <el-form-item label="退货供应商："  prop="supplierId">
+            <el-form-item  label="退货供应商："  prop="supplierId">
               <el-select v-model="selectForm.supplierId" filterable placeholder="请选择供应商" @change="changeBackSupplier">
                 <el-option v-for="item in supplierList" :key="item.id" :label="item.supplierName" :value="item.id" />
               </el-select>
@@ -188,21 +194,37 @@
         </el-col>
       </el-row>
 
-      <XTable  :pageShow="false" ref="confirmTable" :edit-rules="validRules" :data="confirmOrderBackList" border :columnList="confirmColumnList">
-        <template #default-categoryId="scope">
+          <XTable :pageShow="false" ref="confirmTable" :edit-rules="validRules" :data="confirmOrderBackList" size="mini" border
+                  :columnList="confirmColumnList"
+                  :column-config="{ resizable: true }" :edit-config="{trigger: 'click', mode: 'row', showStatus: true}">
+          <template #default-categoryId="scope">
           <div>{{ scope.row.categoryName }}</div>
         </template>
         <template #default-unit="{ row }">
           <span>PCS</span>
         </template>
+        <template #default-inventoryQuantity="{ row }">
+          <div>{{ row.inventoryQuantity?Number(row.inventoryQuantity).toFixed(0):0 }}</div>
+        </template>
         <template #default-quantity="scope">
           <el-input-number style="width: 100%; text-align: left;" :controls="false"
-          :precision="0"
-          :min="1"
-          :max="scope.row.canBackQuantity"
-          :disabled="drawer.title?.includes('详情')||drawer.title?.includes('审核')"
-          v-model="scope.row.quantity"   maxLength="11"
+                           :precision="0"
+                           :min="1"
+                           :max="scope.row.canBackQuantity"
+                           :disabled="drawer.title?.includes('详情')||drawer.title?.includes('审核')"
+                           v-model="scope.row.quantity" maxLength="11"
           />
+        </template>
+        <template #edit-quantity="scope">
+          <el-input-number style="width: 100%; text-align: left;" :controls="false"
+                           :precision="0"
+                           :min="1"
+                           :max="calcMaxQuantity(scope.row,drawer.title)"
+                           :disabled="drawer.title?.includes('详情')||drawer.title?.includes('审核')"
+                           v-model="scope.row.quantity" maxLength="11"/>
+        </template>
+        <template #edit-reason="scope">
+          <el-input v-model="scope.row.reason" maxLength="1000" :disabled="drawer.title?.includes('详情')||drawer.title?.includes('审核')"/>
         </template>
         <template #default-reason="scope">
           <el-input
@@ -467,6 +489,9 @@ import { SourceFullProcessOrderBackVO, SourceFullProcessOrderBackQuery, SourceFu
 import { VxeTableEvents } from 'vxe-table'
 import { VXETable, VxeTableInstance } from "vxe-table";
 import { getBaseStorage } from "@/api/system/config";
+import { deepClone } from '@/utils'
+import { decryptBase64ByStr } from '@/utils/crypto'
+
 const baseStorage = ref<any[]>([]);
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
@@ -481,6 +506,7 @@ const buttonLoading = ref(false);
 const confirmTable = ref();
 const loading = ref(true);
 const waitLoading = ref(true);
+const drawerLoading = ref(true);
 const showSearch = ref(true);
 const ids = ref<Array<string | number>>([]);
 const single = ref(true);
@@ -502,7 +528,6 @@ const backFormRef = ref<ElFormInstance>();
 const queryFormRef = ref<ElFormInstance>();
 const updateFormRef = ref<ElFormInstance>();
 const inventoryLoading = ref(false);
-import { deepClone } from '@/utils'
 const dialog = reactive<DialogOption>({
   visible: false,
   title: ''
@@ -514,6 +539,16 @@ const updateDialog = reactive<DialogOption>({
 const formLabelWidth = '140px';
 //头部按钮组
 const radioTable = ref('待审核列表');
+const editableTabsValue = ref(0);
+const route = useRoute();
+/**
+ * 进入页面次数
+ */
+const isFirst = ref(0)
+/**
+ * 待办跳转参数
+ */
+const pendingParams = ref()
 const radioTableHandle = (tab: any, event: any) => {
   console.log("tab", tab.props.label);
   radioTable.value = tab.props.label;
@@ -527,6 +562,7 @@ const radioTableHandle = (tab: any, event: any) => {
 const handleAdd = () => {
   confirmColumnList.value[10].visible = true;
   reset();
+  queryOutSourceSupplierTypeList();
   drawer.visible = true;
   drawer.title = "退货申请";
 
@@ -577,6 +613,7 @@ const handleToExamine = async (row?: SourceFullProcessOrderBackVO) => {
   para.backQuantity=para.backQuantity-para.quantity;
     para.canBackQuantity=para.canBackQuantity+para.quantity;
 confirmOrderBackList.value.push(para);
+  queryOutSourceSupplierList();
   drawer.visible = true;
   drawer.title = "审核";
 }
@@ -593,6 +630,7 @@ selectForm.value.backTime = row?.backTime;
   para.backQuantity=para.backQuantity-para.quantity;
   para.canBackQuantity=para.canBackQuantity+para.quantity;
 confirmOrderBackList.value.push(para);
+  queryOutSourceSupplierList();
   drawer.visible = true;
   drawer.title = "详情";
 
@@ -725,7 +763,23 @@ const submitUpdateForm = async () => {
   });
 }
 
-
+//退货数量<=库存数量 且 退货数量<=未退货数量
+const calcMaxQuantity = (row, type) => {
+  if (!type.includes('详情') && !type.includes('审核')) {
+    //库存数量
+    let inventoryQuantity = row.inventoryQuantity ? row.inventoryQuantity : 0;
+    //未退货数量
+    let canBackQuantity = row.canBackQuantity ? row.canBackQuantity : 0;
+    if (inventoryQuantity == 0 || canBackQuantity == 0) {
+      return null
+    }
+    if (inventoryQuantity > canBackQuantity) {
+      return canBackQuantity;
+    } else {
+      return inventoryQuantity
+    }
+  }
+}
 
 const validRules = ref<VxeTablePropTypes.EditRules<OrderVO>>({
   quantity: [
@@ -734,6 +788,7 @@ const validRules = ref<VxeTablePropTypes.EditRules<OrderVO>>({
   reason: [
     { required: true, message: "请输入退货原因" }
   ],})
+
 const validEvent = async () => {
   const $table = confirmTable.value.xTableRef
   if ($table) {
@@ -745,7 +800,6 @@ const validEvent = async () => {
     }
   }
 }
-
 
 const supplierId = ref<string | number>('');
 const initSelectFormData: SourceFullProcessOrderBackForm = {
@@ -816,6 +870,7 @@ const data = reactive<PageData<SourceFullProcessOrderBackForm, SourceFullProcess
 
   }
 });
+
 //待审核
 const waitAuditedData = reactive<PageData<SourceFullProcessOrderBackForm, SourceFullProcessOrderBackQuery>>({
   form: {...initFormData},
@@ -860,6 +915,7 @@ const waitAuditedData = reactive<PageData<SourceFullProcessOrderBackForm, Source
 });
 
 const XTableRef = ref()
+const XTableRef2 = ref()
 
 const inventoryTableRef = ref()
 //状态
@@ -908,11 +964,19 @@ const columnList = ref([
         { title: '外协数量(PCS)', width:'140',field: 'outSourceQuantity', align: 'center' },
         { title: '库存数', width:'80',field: 'inventoryQuantity', align: 'center',
         filterType: 'input',filterParam: {placeholder: '请输入数量',type:'number',precision:0,controls:false}   },
+        { title: '对账状态', width: '80', field: 'hasAccountOrder',  align: 'center', filterType: 'radioButton', filterData: () => accountStatusList.value, isPermi: () => checkPermi(['outsource:account:query']) },
+        { title: '对账数量', width: '80', field: 'accountQuantity',align: 'center', filterType:'intervalNumber', isPermi: () => checkPermi(['outsource:account:query']) },
         { title: '存货仓', width:'80',field: 'storageName', align: 'center', filterType: 'radioButton',
           filterData: () => baseStorage.value,
           filterCustom: {label: 'name', value: 'id'}  },
     { title: '操作', field: 'make', align: 'center', width: '180', fixed: 'right', },
 ]);
+
+const accountStatusList = ref([
+  {label: '已对账', value: '1', },
+  {label: '未对账', value: '0', },
+]);
+
 const waitColumnList = ref([
 
     { title:"序号" ,type: 'seq',  align: 'center', width: '60' },
@@ -961,8 +1025,8 @@ const confirmColumnList = ref([
   { title: '已退货数量', width: '140', field: 'backQuantity', align: 'center', },
   { title: '未退货数量', width: '140', field: 'canBackQuantity', align: 'center', },
   { title: '单位', width: '80', field: 'unit', align: 'center', },
-  { title: '退货数量(PCS)', width: '100', field: 'quantity', align: 'center', },
-  { title: '退货原因', width: '100', field: 'reason', align: 'center', },
+  { title: '退货数量(PCS)', width: '120', field: 'quantity',editRender: '{}', align: 'center', },
+  { title: '退货原因', width: '100', field: 'reason',editRender: '{}', align: 'center', },
   { title: '操作', field: 'make', align: 'center', width: '120',visible:false, fixed: 'right', },
 ]);
 
@@ -1120,6 +1184,12 @@ const doSelectMaterial = async () => {
     }
     listSourceInventoryOrderBack(selectQueryParams.value).then((res) => {
       inventoryList.value = res.rows;
+      inventoryList.value.forEach((ii) => {
+        ii.unit = 'PCS';
+        if (ii.inventoryQuantity == null) {
+          ii.inventoryQuantity = 0;
+        }
+      });
       selectTotal.value = res.total;
       inventoryLoading.value = false;
       setStorage( inventoryList.value)
@@ -1289,12 +1359,21 @@ const handleExport = () => {
       ...queryParams.value, tableName: 'outsourceSourceFullProcessOrderBackReturn'
     }, `外协退货记录_${new Date().getTime()}.xlsx`)
   }
-import {  listOutSourceSupplierList } from "@/api/outsource/sourceFullProcessOrder";
+import {listOutSourceSupplierList, listOutSourceSupplierTypeList} from "@/api/outsource/sourceFullProcessOrder";
 const supplierList: any = ref([]);
 /** 查询外协供应商列表 */
 const queryOutSourceSupplierList = async () => {
+  drawerLoading.value = true;
   const res = await listOutSourceSupplierList();
   supplierList.value = res.data
+  drawerLoading.value = false;
+}
+/** 查询外协供应商列表 -- 只查订单外协供应商*/
+const queryOutSourceSupplierTypeList = async () => {
+  drawerLoading.value = true;
+  const res = await listOutSourceSupplierTypeList();
+  supplierList.value = res.data
+  drawerLoading.value = false;
 }
 import useUserStore from '@/store/modules/user';
 import dayjs from "dayjs";
@@ -1335,6 +1414,7 @@ import {getSignPdf} from "@/api/financial/accountOrder";
 import {CustomerAddressVO} from "@/api/basedata/customerAddress/types";
 import {listCustomerSupplierAddress} from "@/api/basedata/customerAddress";
 import {MaterialOrderForm, MaterialOrderQuery} from "@/api/purchase/materialOrder/types";
+import {checkPermi} from "@/utils/permission";
 let reportUrl = ref("");
 const reportDrawer = reactive<DrawerOption>({
   direction: 'left',
@@ -1415,13 +1495,44 @@ const cancelAccount = async () => {
     }
   });
 }
-
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      let tab = !isNaN(Number(params.tab)) ? Number(params.tab) : 0;
+      editableTabsValue.value = tab
+      let tempColumnList = [{field: 'code', defaultValue: params.bizNo}]
+      if (tab === 0) {
+        waitQueryParams.value.code = params.bizNo
+        setTimeout(() => {
+          XTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === 1) {
+        queryParams.value.code = params.bizNo
+        setTimeout(() => {
+          XTableRef2.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      }
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
 onMounted(() => {
-  console.log(wxhSwitch.value)
-  getList();
-  queryOutSourceSupplierList();
-  updateCurrentTime();
-  getWaitList();
-  getListBaseStorage();
+    console.log(wxhSwitch.value)
+    getList();
+    queryOutSourceSupplierList();
+    updateCurrentTime();
+    getWaitList();
+    getListBaseStorage();
 });
 </script>

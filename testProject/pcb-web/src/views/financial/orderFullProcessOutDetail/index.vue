@@ -22,7 +22,7 @@
         <div style="display: flex; justify-content: center;">
           <span class="dialog-footer">
             <el-button :loading="buttonLoading" @click="drawerBorrow.visible = false">取消</el-button>
-            <el-button :loading="buttonLoading" type="danger" v-show="drawerBorrow.title?.includes('修改') || drawerBorrow.title?.includes('添加')"
+            <el-button :loading="buttonLoading" v-show="drawerBorrow.title?.includes('修改') || drawerBorrow.title?.includes('添加')"
               @click="handleSave">
               保存
             </el-button>
@@ -133,15 +133,22 @@ const tabColumnList = ref([
   { type: 'checkbox', align: 'center', fixed: 'left', field: "checkbox", width: '50' },
   { title: "序号", type: 'seq', fixed: 'left', align: 'center', width: '60' },
   { title: '外协单号', width: '120', fixed: 'left', field: 'code', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入外协单号' } },
-  { title: '入库日期', width: '120', field: 'receiveTime', align: 'center' },
-  { title: '供应商编码', width: '120', field: 'supplierCode', align: 'center' },
+  // { title: '入库日期', width: '120', field: 'receiveTime', align: 'center' },
+  {
+    title: '入库日期', width: "120", field: 'receiveTime', align: 'center', filterType: 'intervalDate',
+    filterParam: {
+      startParams: {placeholder: '请输入开始时间', clearable: true, type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
+      endParams: {placeholder: '请输入结束时间', clearable: true, type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
+    }
+  },
+  { title: '供应商编码', width: '120', field: 'supplierCode', align: 'center' , filterType: 'input', filterParam: { placeholder: '请输入供应商编码' }},
   { title: '供应商名称', width: '120', field: 'supplierName', align: 'center' },
-  { title: '币种', width: '120', field: 'cusCurrency', align: 'center' },
-  { title: '客户名称', width: '120', field: 'customerName', align: 'center' },
-  { title: '客户编码', width: '120', field: 'customerCode', align: 'center' },
-  { title: '产品编码', width: '120', field: 'commodityCode', align: 'center' },
-  { title: '产品名称', width: '120', field: 'commodityName', align: 'center' },
-  { title: '版本号', width: '120', field: 'version', align: 'center' },
+  { title: '币种', width: '120', field: 'cusCurrency', align: 'center' , filterType: 'input', filterParam: { placeholder: '请输入币种' }},
+  { title: '客户名称', width: '120', field: 'customerName', align: 'center' , filterType: 'input', filterParam: { placeholder: '请输入客户名称' }},
+  { title: '客户编码', width: '120', field: 'customerCode', align: 'center' , filterType: 'input', filterParam: { placeholder: '请输入客户编码' }},
+  { title: '产品编码', width: '120', field: 'commodityCode', align: 'center' , filterType: 'input', filterParam: { placeholder: '请输入产品编码' }},
+  { title: '产品名称', width: '120', field: 'commodityName', align: 'center' , filterType: 'input', filterParam: { placeholder: '请输入产品名称' }},
+  { title: '版本号', width: '120', field: 'version', align: 'center' , filterType: 'input', filterParam: { placeholder: '请输入版本号' }},
   { title: '模具费用', width: '120', field: 'mouldCost', align: 'center' },
   { title: '测试架费用', width: '120', field: 'testFrameCost', align: 'center' },
   { title: '工程费', width: '120', field: 'engineeringCost', align: 'center' },
@@ -161,15 +168,22 @@ const tabColumnList2 = ref([
   { title: "序号", type: 'seq', fixed: 'left', align: 'center', width: '60' },
   { title: '退货单号', width: '120', field: 'backCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入退货单号' } },
   { title: '外协单号', width: '120', field: 'code', fixed: 'left', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入外协单号' } },
-  { title: '退货日期', width: '60', field: 'backTime', align: 'center' },
-  { title: '供应商编码', width: '120', field: 'supplierCode', align: 'center' },
+  // { title: '退货日期', width: '60', field: 'backTime', align: 'center' },
+  {
+    title: '退货日期', width: "120", field: 'backTime', align: 'center', filterType: 'intervalDate',
+    filterParam: {
+      startParams: {placeholder: '请输入开始时间', clearable: true, type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
+      endParams: {placeholder: '请输入结束时间', clearable: true, type: 'datetime', valueFormat: 'YYYY-MM-DD HH:mm:ss'},
+    }
+  },
+  { title: '供应商编码', width: '120', field: 'supplierCode', align: 'center' , filterType: 'input', filterParam: { placeholder: '请输入供应商编码' }},
   { title: '供应商名称', width: '120', field: 'supplierName', align: 'center' },
-  { title: '币种', width: '50', field: 'cusCurrency', align: 'center' },
-  { title: '客户名称', width: '60', field: 'customerName', align: 'center' },
-  { title: '客户编码', width: '60', field: 'customerCode', align: 'center' },
-  { title: '产品编码', width: '60', field: 'commodityCode', align: 'center' },
-  { title: '产品名称', width: '60', field: 'commodityName', align: 'center' },
-  { title: '版本号', width: '60', field: 'version', align: 'center' },
+  { title: '币种', width: '50', field: 'cusCurrency', align: 'center' , filterType: 'input', filterParam: { placeholder: '请输入币种' }},
+  { title: '客户名称', width: '60', field: 'customerName', align: 'center' , filterType: 'input', filterParam: { placeholder: '请输入客户名称' }},
+  { title: '客户编码', width: '60', field: 'customerCode', align: 'center' , filterType: 'input', filterParam: { placeholder: '请输入客户编码' }},
+  { title: '产品编码', width: '60', field: 'commodityCode', align: 'center' , filterType: 'input', filterParam: { placeholder: '请输入产品编码' }},
+  { title: '产品名称', width: '60', field: 'commodityName', align: 'center' , filterType: 'input', filterParam: { placeholder: '请输入产品名称' }},
+  { title: '版本号', width: '60', field: 'version', align: 'center' , filterType: 'input', filterParam: { placeholder: '请输入版本号' }},
   { title: '退货数量(PCS)', width: '120', field: 'outQuantity', fixed: 'right', align: 'center' },
   { title: '退货单价', width: '60', field: 'outPrice', fixed: 'right', align: 'center' },
   { title: '核对数量(PCS)', width: '120', field: 'quantity', fixed: 'right', align: 'center' , editRender: {}},

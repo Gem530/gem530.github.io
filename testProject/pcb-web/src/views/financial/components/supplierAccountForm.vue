@@ -75,8 +75,17 @@
           />
         </el-form-item>
       </el-col>
+
+      <el-col :span="6" v-if="props.monthlyMethod&&props.monthlyMethod.length>0">
+        <el-form-item size="small" label="月结方式：" prop="monthlyMethod">
+          <el-select  v-model="form.monthlyMethod" clearable style="width: 100%" filterable>
+            <el-option v-for="dict in props.monthlyMethod" :key="dict.value" :label="dict.label" :value="dict.label" />
+          </el-select>
+        </el-form-item>
+      </el-col>
+
       <el-col :span="6">
-        <el-form-item size="small" label="回款截止日期：" prop="endTime">
+        <el-form-item size="small" label="回款截止日期：" label-width="120px" prop="endTime">
           <el-date-picker v-model="form.endTime" style="width: 100%;" type="date" placeholder="选择日期时间" value-format="YYYY-MM-DD 23:59:59" />
         </el-form-item>
       </el-col>
@@ -141,7 +150,8 @@ const props = withDefaults(defineProps<{
   showIsTax?: boolean,
   isOutSource?: boolean,
   showCurrency?:boolean
-  row?: any
+  row?: any,
+  monthlyMethod?:any
 }>(), {
   type: HandleEnum.ADD,
   showSupplierSelect: true,
@@ -153,7 +163,8 @@ const props = withDefaults(defineProps<{
   showIsTax: false,
   isOutSource: false,
   showCurrency:false,
-  row: {}
+  row: {},
+  monthlyMethod:[]
 })
 const initOutFormData: any = {
   id: undefined,
@@ -188,7 +199,10 @@ const insertFormData = reactive<PageData<any, any>>({
     ],
     accountMonth: [
       { required: true, message: "对账月份不能为空", trigger: "blur" }
-    ]
+    ],
+    monthlyMethod:[{ required: true, message: "月结方式不能为空", trigger: "change" }]
+    ,
+    isTax:[{ required: true, message: "含税不能为空", trigger: "change" }]
   }
 });
 const { form: form, rules: rules } = toRefs(insertFormData);
@@ -197,6 +211,7 @@ const handleSearchChange = async () => {
   let selectForm:any = {};
   selectForm.accountTime = form.value.accountTime;
   selectForm.endTime = form.value.endTime;
+  selectForm.monthlyMethod = form.value.monthlyMethod;
   if(props.showCraftSelect){
 selectForm.craftId = form.value.craftId;
   }
@@ -205,7 +220,7 @@ selectForm.categoryId = form.value.categoryId;
   }
   if(props.showSupplierSelect){
 selectForm.supplierId = form.value.supplierId;
-selectForm.companyId = form.value.companyId;
+selectForm.companyId = form.value.ownerId;
   }
   if(props.showIsTaxSelect){
 selectForm.isTax = form.value.isTax;
@@ -252,9 +267,10 @@ const resetQuery = async () => {
     form.value.craftId = undefined;
     form.value.companyId = undefined;
     form.value.supplierId = undefined;
+    form.value.monthlyMethod = undefined;
   }
   emits('reset');
-  emits('handleSearch');
+  emits('handleSearch',{monthlyMethod:form.value.monthlyMethod,isTax:form.value.isTax});
 }
 //选择客户
 const selectCustomerChange = (value: any) => {
@@ -312,7 +328,7 @@ const getCustomerList = async () => {
  */
 const getSupplierList = async () => {
   const res: any = await listSupplier();
-  SupplierList.value = res;
+  SupplierList.value = res.filter((v:any)=> props.type == HandleEnum.ADD ? v.status!='0' : v.status!=null);;
 }
 
 /** 查询工艺列表 */

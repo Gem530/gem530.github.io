@@ -22,6 +22,16 @@ export const listPostOrder = (query?: OrderQuery): AxiosPromise<OrderVO[]> => {
     data: query
   });
 };
+/**
+ * 发外协前校验
+ */
+export const checkBeforeOutSource = (query : any) => {
+  return request({
+    url: '/project/assignTask/checkBeforeOutSource',
+    method: 'post',
+    data: query
+  });
+};
 export const listOrderCust = (query?: OrderQuery): AxiosPromise<OrderVO[]> => {
   return request({
     url: '/order/saleOrder/getListCust',
@@ -365,9 +375,9 @@ export const rejectFinishedOrder = (orderId, finishRemark) => {
   });
 };
 /**
- * 
+ *
  * @param query 历史订单已完成列表
- * @returns 
+ * @returns
  */
 export const listCompletePostOrder = (query?: OrderQuery): AxiosPromise<OrderVO[]> => {
   return request({

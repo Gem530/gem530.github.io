@@ -1,5 +1,5 @@
 <template>
-  <div v-if="deliverInfo" style="display:none; width: 600pt !important;padding-right:5pt;" ref="cardRef">
+  <div v-if="deliverInfo" style="display:none; width: 600pt !important;padding-right:5pt; margin-top: 20pt;" ref="cardRef">
     <div style="width:100%;text-align:center;font-size:10pt;">
 
       <div style="width: 100%;display: flex;justify-content: center;">
@@ -8,8 +8,8 @@
           <div style="font-size:18pt;font-weight:bold;">{{ deliverInfo.enterpriseName }}</div>
           <div style="font-size:14pt;padding-top:5pt">{{ deliverInfo.enterpriseEName }}</div>
         </div>
-        <div style="width: 20%;justify-content: start;"> 
-          <img style="width: 50pt;" :src="deliverInfo.qcCodeImage" /> 
+        <div style="width: 20%;justify-content: start;">
+          <img style="width: 50pt;" :src="deliverInfo.qcCodeImage" />
         </div>
       </div>
 
@@ -19,7 +19,7 @@
       <div style="font-size:16pt;font-weight:600;">送&nbsp;货&nbsp;单</div>
       <div style="display: flex; justify-content: space-between; padding: 2pt 0pt;">
 
-        
+
         <div v-if="deliverInfo.deliverTemplates && deliverInfo.deliverTemplates.length > 0 &&deliverInfo.showType">
           客户名称：{{ deliverInfo.showType=='11'?deliverInfo.customerCode: deliverInfo.customerName }}</div>
         <div v-else style="">客户名称：{{ deliverInfo.customerCode }}</div>
@@ -126,7 +126,7 @@
           核对：
         </div>
         <div style="width: 200pt; text-align: left;">
-          &nbsp;&nbsp;客&nbsp;&nbsp;户&nbsp;&nbsp;签&nbsp;&nbsp;收：
+          &nbsp;&nbsp;客户签收：
         </div>
       </div>
       <div style="display: flex; justify-content: space-between; padding: 2pt 0pt;">
@@ -140,7 +140,7 @@
           第一联存根(白) 第二联客户(红) 第三联回单(黄) 第四销售(绿)
         </div>
         <div style="width: 200pt; text-align: left;">
-          &nbsp;&nbsp;日&nbsp;&nbsp;&nbsp;&nbsp;期：
+          &nbsp;&nbsp;日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;期：
         </div>
       </div>
     </div>
@@ -153,6 +153,7 @@ import { getPrintDeliveryRecord } from '@/api/order/deliveryRecord';
 import { getOrderBackPrintDeliveryRecord } from "@/api/order/deliveryRecord/index";
 import { listDeliveryConfig } from '@/api/basedata/deliveryConfig';
 import * as QRCode from "qrcode";
+import {generateUrlLink} from "@/api/system/user";
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 const cardRef = ref();
@@ -305,16 +306,19 @@ const doPrintCommon = async () => {
     printHtmlV2(null);
   }, 800)
 }
-const setQrCode = async ()=>{
+const setQrCode = async () => {
   //二维码
-  let _productionCardId: string = deliverInfo.value.code;
-      QRCode.toDataURL(_productionCardId, {errorCorrectionLevel: 'H'}, (err: any, url: string) => {
-        if (err) {
-          console.log('Error: ' + err);
-        } else {
-          deliverInfo.value.qcCodeImage = url;
-        }
-      });
+  if(!deliverInfo.value.qcCodeImage){
+    //为空的时候预览二维码设置
+    deliverInfo.value.qcCodeImage='00000000';
+  }
+  QRCode.toDataURL(deliverInfo.value.qcCodeImage, {errorCorrectionLevel: 'H'}, (err: any, url: string) => {
+    if (err) {
+      console.log('Error: ' + err);
+    } else {
+      deliverInfo.value.qcCodeImage = url;
+    }
+  });
 }
 const demoData = ref({
   "id": "0",

@@ -1,12 +1,12 @@
 <template>
     <div class="filter-box">
         <el-popover
-            :width="200"
-            placement="bottom"
             trigger="click"
             :visible="flag"
             @show="showPop"
-            @hide="hidePop">
+            @hide="hidePop"
+            placement="bottom"
+            :width="props.width">
             <template #reference>
                 <div @click.stop="openPop">
                     <slot name="reference"></slot>
@@ -15,9 +15,11 @@
             <div class="pop-box" v-click-outside="clickOutside">
                 <slot></slot>
                 <div class="popver-footer">
-                    <el-button link type="primary" @click="confirm">确定</el-button>
-                    <el-button link type="primary" @click="reset">重置</el-button>
-                    <el-button link type="primary" @click="cancel">取消</el-button>
+                    <div class="global-flex flex-start">
+                        <el-button link @click="confirm">确定</el-button>
+                        <el-button link @click="reset">重置</el-button>
+                    </div>
+                    <el-button link @click="cancel">取消</el-button>
                 </div>
             </div>
         </el-popover>
@@ -28,12 +30,14 @@
 import { ClickOutside as vClickOutside } from 'element-plus'
 
 interface filterElement {
+    width?: number
     showReset?: boolean
 }
 
 const emits = defineEmits(['confirm', 'cancel', 'show', 'hide', 'reset'])
 const props = withDefaults(defineProps<filterElement>(), {
-    showReset: false
+    width: 184,
+    showReset: false,
 })
 
 // const data = computed({
@@ -117,8 +121,10 @@ const cancel = () => {
 }
 .popver-footer {
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
-    margin-top: 10px;
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid #F0F0F0;
 }
 </style>

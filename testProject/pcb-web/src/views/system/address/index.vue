@@ -1,18 +1,11 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
-
-
-      <el-tabs type="border-card" @tab-click="radioTableHandle" v-model="radioTable" class="xtable-tab">
+    <!-- <el-card shadow="never" class="xtable-card"> -->
+      <el-tabs @tab-click="radioTableHandle" v-model="radioTable" class="xtable-tab">
         <el-tab-pane label="本厂地址" name="本厂地址">
-        <el-row :gutter="10" class="mb8" style="width: 100%; margin-left: 0px;">
-        <el-col :span="22">
-        </el-col>
-        <el-col :span="2" style="padding: 0;" class="global-flex flex-end">
-          <el-button type="primary" plain icon="Plus" @click="handleAdd"
-            >新增</el-button>
-        </el-col>
-      </el-row>
+          <div class="head-btn-flex">
+            <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
+          </div>
           <XTable toolId="basedataAddressCompany"  :loading="loading" v-model:page-size="queryParams.pageSize" v-model:current-page="queryParams.pageNum" height="100%" class="xtable-content"
             :page-params="{ perfect: true, total: total }" :data="addressList" :columnList="columnList" ref="XTableRef" :showRefresh="true"
             border @searchChange="searchChange" :column-config="{ resizable: true }" :row-config="{ keyField: 'id' }">
@@ -33,14 +26,9 @@
           </XTable>
         </el-tab-pane>
         <el-tab-pane label="客户地址" name="客户地址">
-           <el-row :gutter="10" class="mb8" style="width: 100%; margin-left: 0px;">
-        <el-col :span="22">
-        </el-col>
-        <el-col :span="2" style="padding: 0;" class="global-flex flex-end">
-          <el-button type="primary" plain icon="Plus" @click="handleAdd"
-            >新增</el-button>
-        </el-col>
-      </el-row>
+          <div class="head-btn-flex">
+            <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
+          </div>
           <XTable toolId="basedataAddressCustomer" :loading="custLoading" v-model:page-size="custQueryParams.pageSize" v-model:current-page="custQueryParams.pageNum" height="100%" class="xtable-content"
             :page-params="{ perfect: true, total: cusTotal }" :data="customerAddressList" :columnList="customerColumnList" :showRefresh="true"
             ref="custTableRef" border @searchChange="searchCustChange" :column-config="{ resizable: true }"
@@ -66,14 +54,9 @@
           </XTable>
         </el-tab-pane>
         <el-tab-pane label="供应商地址" name="供应商地址">
-           <el-row :gutter="10" class="mb8" style="width: 100%; margin-left: 0px;">
-        <el-col :span="22">
-        </el-col>
-        <el-col :span="2" style="padding: 0;" class="global-flex flex-end">
-          <el-button type="primary" plain icon="Plus" @click="handleAdd"
-            >新增</el-button>
-        </el-col>
-      </el-row>
+          <div class="head-btn-flex">
+            <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
+          </div>
           <XTable toolId="basedataAddressSupplier" :loading="supplierLoading" v-model:page-size="custQueryParams.pageSize" v-model:current-page="custQueryParams.pageNum" height="100%" class="xtable-content"
             :page-params="{ perfect: true, total: supplierTotal }" :data="supplierAddressList" :showRefresh="true"
             :columnList="supplierColumnList" ref="supplierTableRef" border @searchChange="searchSupplierChange"
@@ -99,7 +82,7 @@
           </XTable>
         </el-tab-pane>
       </el-tabs>
-    </el-card>
+    <!-- </el-card> -->
     <!-- 添加或修改本厂地址对话框 -->
     <el-dialog :title="dialog.title" v-model="dialog.visible" width="55%">
       <el-form ref="addressFormRef" :model="form" :rules="rules" label-width="120px" v-loading="dialogTableLoading">

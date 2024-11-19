@@ -1,0 +1,430 @@
+.sale-contract-page {
+    min-height: 100vh;
+    padding: 20px 32px;
+    background: #f9f9f9;
+    box-sizing: border-box;
+
+    .sale-head {
+        position: relative;
+        height: 120px;
+        padding: 0 120px 0 0;
+        margin-bottom: 20px;
+        z-index: 0;
+        box-sizing: border-box;
+        .sale-company {
+            height: 100%;
+            font-size: 32px;
+            font-weight: 900;
+            color: rgba(51, 51, 51, 1);
+            // text-align: center;
+
+            Image {
+                flex: none;
+                width: 120px;
+                height: 120px;
+                margin-right: 10px;
+            }
+        }
+        .sale-qrcode {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 120px;
+            height: 120px;
+            z-index: 0;
+            // background-color: #999;
+        }
+    }
+
+    .sale-card {
+        position: relative;
+        height: auto;
+        margin-bottom: 20px;
+        padding: 20px 32px;
+        background: #fff;
+        box-shadow: 0px 0px 8px  rgba(0, 0, 0, 0.08);
+        border-radius: 20px;
+        box-sizing: border-box;
+        &:first-child,
+        &:nth-child(2) {
+            padding-bottom: 20px;
+        }
+        &.height-overflow {
+            height: 500px;
+            overflow: hidden;
+        }
+        &.p-bottom {
+            padding-bottom: 100px;
+        }
+        .related-card-item {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 28px;
+
+            .related-card-label {
+                width: 150px;
+                margin-right: 20px;
+            }
+            .related-card-value {
+                flex: 1;
+            }
+            .related-card-tag {
+                background: rgba(45, 144, 237, 1);
+                color: #fff;
+                padding: 10px 20px;
+                border-radius: 4px;
+            }
+        }
+
+        .sale-progress-text {
+            margin: 20px 0;
+            font-size: 28px;
+            color: #333333;
+
+            .sale-progress-text-value {
+                margin-left: 20px;
+                color: #2d90ed;
+            }
+        }
+
+        .sale-card-expend {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: #fff;
+            padding-bottom: 20px;
+            border-radius: 0 0 20px 20px;
+            box-sizing: border-box;
+            z-index: 1;
+        }
+
+        .sale-card-title {
+            position: relative;
+            // padding-left: 30px;
+            margin-bottom: 20px;
+            font-size: 32px;
+            font-weight: 700;
+            box-sizing: border-box;
+
+            &.margin-top {
+                margin-top: 20px;
+            }
+
+            // &::before {
+            //     content: "";
+            //     position: absolute;
+            //     top: 50%;
+            //     left: 0;
+            //     transform: translate(0, -50%);
+            //     width: 15px;
+            //     height: 15px;
+            //     background: #2d90ed;
+            //     border-radius: 50%;
+            // }
+        }
+
+        .at-progress {
+            margin-bottom: 20px;
+            .at-progress__outer-inner-background {
+                background: linear-gradient(195.36deg, rgba(45, 144, 237, 1) 0%, rgba(45, 144, 237, 0.5) 100%);
+            }
+        }
+
+        
+        .at-timeline {
+            margin-left: 20px;
+            .at-timeline-item--yellow {
+                // width: 100px;
+                .at-timeline-item__icon {
+                    // color: #999999;
+                    top: 16px;
+                    left: 2px;
+                    width: 16px;
+                    height: 16px;
+                    opacity: 1;
+                    background: rgba(211, 211, 211, 1);
+                    .at-icon {
+                        display: none;
+                    }
+                }
+            }
+            .at-timeline-item__icon,
+            .at-timeline-item__dot {
+                top: 8px;
+                left: -10px;
+                width: 36px;
+                height: 36px;
+
+                .at-icon {
+                    font-size: 36px;
+                }
+            }
+            .at-timeline-item__dot::after {
+                width: 32px;
+                height: 32px;
+            }
+
+            .at-timeline-item__content {
+                position: relative;
+                .at-timeline-item__content-item {
+                    &:first-child {
+                        font-size: 36px;
+                        // font-weight: 600;
+                    }
+                    font-size: 32px;
+                }
+            }
+
+            &.order-progress {
+                .at-timeline-item__content {
+                    .at-timeline-item__content-item {
+                        &:first-child {
+                            width: calc(100% - 320px);
+                        }
+                        &:nth-child(2) {
+                            position: absolute;
+                            top: 0;
+                            right: 0;
+                            color: #2d90ed;
+                        }
+                    }
+                }
+            }
+        }
+
+        .express-tab {
+            height: auto;
+            margin-bottom: 20px;
+
+            .at-tabs__item {
+                box-shadow: none;
+                
+                .at-tabs__item-underline {
+                    width: 64px;
+                    height: 6px;
+                }
+
+                &.at-tabs__item--active {
+                    .at-tabs__item-underline {
+                        left: 50%;
+                        transform: translate(-50%, 0);
+                        width: 64px;
+                        height: 6px;
+                        border: none;
+                        background: rgba(45, 144, 237, 1);
+                        border-radius: 6px;
+                    }
+                }
+            }
+        }
+
+        .sale-user-info {
+            position: relative;
+            padding: 23px 0;
+            // margin-bottom: 23px;
+            // border-bottom: 2px solid rgba(243, 243, 243, 1);
+
+            .sale-user-info-back {
+                position: absolute;
+                top: 0;
+                right: 0;
+                z-index: 0;
+            }
+
+            .sale-user-icon {
+                flex: none;
+                width: 64px;
+                height: 64px;
+                margin-right: 20px;
+                background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/land-user.png') no-repeat;
+                background-size: 100% 100%;
+            }
+
+            .sale-user-content {
+                flex: 1;
+
+                .sale-user-content-top {
+                    margin-bottom: 8px;
+                    .sale-user-company {
+                        margin-right: 20px;
+                        font-size: 28px;
+                        font-weight: 400;
+                        color: #333333;
+                    }
+                    .sale-user-no {
+                        font-size: 28px;
+                        font-weight: 700;
+                        color: #333333;
+                    }
+                }
+                .sale-user-content-bottom {
+                    .sale-user-phone {
+                        font-size: 28px;
+                        font-weight: 700;
+                        color: #333333;
+                    }
+                    .sale-user-time {
+                        flex: none;
+                        width: 230px;
+                        font-size: 28px;
+                        font-weight: 400;
+                        color: #999999;
+                        
+                    }
+                }
+            }
+        }
+
+        .sale-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 15px;
+            margin-bottom: 23px;
+            box-sizing: border-box;
+
+            &.border-bottom {
+                border-bottom: 2px solid rgba(243, 243, 243, 1);
+            }
+        }
+
+        .sale-card-item {
+            margin-bottom: 10px;
+
+            .sale-card-tag {
+                background: rgba(243, 243, 243, 1);
+                padding: 4px 10px;
+                margin-left: 10px;
+                font-size: 28px;
+                font-weight: 400;
+                color: rgba(51, 51, 51, 1);
+                border-radius: 4px;
+            }
+        }
+    }
+
+    .detail-back-content {
+        margin-bottom: 20px;
+        .detail-upload-between {
+            margin-top: 0;
+        }
+    }
+
+    .sale-time-line {
+        max-height: 500px;
+        margin-left: 0 !important;
+        padding-left: 20px;
+        overflow-y: auto;
+        .at-timeline-item {
+            &:first-child {
+                .at-timeline-item__icon {
+                    top: 12px;
+                    left: -2px;
+                    width: 24px;
+                    height: 24px;
+                    background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/flow-pass.png') no-repeat;
+                    background-size: 100% 100%;
+                }
+                // .at-timeline-item__content {
+                //     .at-timeline-item__content-item {
+                //         &:nth-child(2) {
+                //             color: #2d90ed;
+                //         }
+                //     }
+                // }
+            }
+
+            .at-timeline-item__tail {
+                top: 18px;
+                bottom: -18px;
+            }
+            .at-timeline-item__icon {
+                top: 16px;
+                left: 2px;
+                width: 16px;
+                height: 16px;
+                opacity: 1;
+                background: rgba(211, 211, 211, 1);
+                .at-icon {
+                    display: none;
+                }
+            }
+            .at-timeline-item__content {
+                position: relative;
+                .at-timeline-item__content-item {
+                    font-size: 32px;
+                    font-weight: 700;
+                    color: rgba(51, 51, 51, 1);
+                    box-sizing: border-box;
+                    &:first-child {
+                        padding-right: 100px;
+                    }
+                    // &:nth-child(2) {
+                    //     position: absolute;
+                    //     top: 4px;
+                    //     right: 0;
+                    //     font-size: 28px;
+                    //     font-weight: 400;
+                    //     color: rgba(0, 0, 0, 1);
+                    // }
+                    &:nth-child(2) {
+                        font-size: 28px;
+                        font-weight: 400;
+                        color: rgba(153, 153, 153, 1);
+                    }
+                }
+            }
+        }
+    }
+
+    .common-round-btn {
+        position: fixed;
+        bottom: 64px;
+        left: 32px;
+        width: 686px;
+        height: 72px;
+        background: rgba(255, 255, 255, 1);
+        z-index: 2;
+        border-radius: 40px;
+        box-shadow: 0px 0px 8px  rgba(0, 0, 0, 0.08);
+
+        .common-round-item {
+            position: relative;
+            flex: 1;
+            height: 100%;
+            font-size: 28px;
+            font-weight: 500;
+            color: rgba(51, 51, 51, 1);
+            &:not(:last-child) {
+                &::after {
+                    content: "";
+                    position: absolute;
+                    top: 50%;
+                    right: 0;
+                    transform: translate(0, -50%);
+                    height: 24px;
+                    border-right: 1px solid rgba(0, 0, 0, 0.08);
+                }
+            }
+        }
+    }
+
+    .refresh-btn {
+        // float: right;
+        min-width: 150px;
+        height: 50px;
+        margin: 0 !important;
+        line-height: 50px;
+        background: #2D90ED;
+        font-size: 24px;
+        font-weight: 700;
+        &.mini {
+            min-width: 144px;
+            padding: 0 5px;
+        }
+    }
+}

@@ -1,5 +1,5 @@
 <template>
-  <div class="p-2">
+  <div class="p-2 xtable-page">
     <transition :enter-active-class="proxy?.animate.searchAnimate.enter" :leave-active-class="proxy?.animate.searchAnimate.leave">
       <div class="search" v-show="showSearch">
         <el-form :model="queryParams" ref="queryFormRef" :inline="true" label-width="68px">
@@ -17,7 +17,7 @@
       </div>
     </transition>
 
-    <el-card shadow="never">
+    <el-card shadow="never" class="xtable-card">
       <template #header>
         <el-row :gutter="10" class="mb8">
           <el-col :span="1.5">
@@ -46,16 +46,14 @@
         </el-row>
       </template>
 
-      <el-table v-loading="loading" :data="accountOrderOtherList" @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="${comment}" align="center" prop="id" v-if="true" />
-        <el-table-column label="类型" align="center" prop="type" />
-        <el-table-column label="金额" align="center" prop="price" />
-        <el-table-column label="备注" align="center" prop="remark" />
-        <el-table-column label="对账单ID" align="center" prop="accountOrderId" />
-        <el-table-column label="入账/出账时间" align="center" prop="recordTime" />
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-          <template #default="scope">
+      <XTable v-loading="loading" :columnList="columnList" :data="accountOrderOtherList" class="xtable-content" height="100%"
+      v-model:page-size="queryParams.pageSize"
+      v-model:current-page="queryParams.pageNum"
+      :page-params="{ perfect: true, total: total }"
+      @search-change="getList"
+      @checkbox-change="handleSelectionChange" ref="xtableRef"
+        @checkbox-all="handleSelectionChange">
+        <template #default-make="scope">
             <el-tooltip content="修改" placement="top">
               <el-button
                 link
@@ -75,10 +73,7 @@
               ></el-button>
             </el-tooltip>
           </template>
-        </el-table-column>
-      </el-table>
-
-      <pagination v-show="total>0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" @pagination="getList" />
+      </XTable>
     </el-card>
     <!-- 添加或修改对账单其他增减记录对话框 -->
     <el-dialog :title="dialog.title" v-model="dialog.visible" width="500px">
@@ -106,6 +101,7 @@ import { AccountOrderOtherVO, AccountOrderOtherQuery, AccountOrderOtherForm } fr
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
+const xtableRef = ref()
 const accountOrderOtherList = ref<AccountOrderOtherVO[]>([]);
 const buttonLoading = ref(false);
 const loading = ref(true);
@@ -176,6 +172,17 @@ const getList = async () => {
   loading.value = false;
 }
 
+const columnList = ref([
+{ width: '55',type: 'checkbox',align: 'center',  },
+{ title: '${comment}',field: 'id',align: 'center',  },
+{ title: '类型',field: 'type',align: 'center',  },
+{ title: '金额',field: 'price',align: 'center',  },
+{ title: '备注',field: 'remark',align: 'center',  },
+{ title: '对账单ID',field: 'accountOrderId',align: 'center',  },
+{ title: '入账/出账时间',field: 'recordTime',align: 'center',  },
+{ title: '操作',field: 'make',align: 'center',  },
+]);
+
 /** 取消按钮 */
 const cancel = () => {
   reset();
@@ -201,10 +208,17 @@ const resetQuery = () => {
 }
 
 /** 多选框选中数据 */
-const handleSelectionChange = (selection: AccountOrderOtherVO[]) => {
-  ids.value = selection.map(item => item.id);
-  single.value = selection.length != 1;
-  multiple.value = !selection.length;
+const handleSelectionChange = () => {
+  // ids.value = selection.map(item => item.id);
+  // single.value = selection.length != 1;
+  // multiple.value = !selection.length;
+  const $table = xtableRef.value.xTableRef
+  if ($table) {
+    const selection = $table.getCheckboxReserveRecords().concat($table.getCheckboxRecords()) // 获取选择的行数据列表
+    ids.value = selection.map((item: any) => item.id);
+    single.value = selection.length != 1;
+    multiple.value = !selection.length;
+  }
 }
 
 /** 新增按钮操作 */

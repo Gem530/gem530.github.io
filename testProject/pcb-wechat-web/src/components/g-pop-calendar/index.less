@@ -1,0 +1,143 @@
+.pop-calendar {
+    .at-modal__content {
+        padding: 20px 32px 40px !important;
+    }
+    .calender-header  {
+        &>View {
+            flex: 1;
+        }
+
+        .calendar-title {
+            flex: 2;
+        }
+        .calendar-cancel {
+            font-size: 28px;
+            font-weight: 400;
+            color: rgba(136,130,130,1);
+        }
+    }
+
+    .pop-calendar {
+        position: relative;
+        .calendar-tag-list {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            
+            .calendar-tag {
+                height: 55px;
+                padding: 0 18px;
+                background: rgba(255,255,255,1);
+                border: 1px solid rgba(239,239,239,1);
+                font-size: 28px;
+                color: rgba(108,108,108,1);
+                line-height: 55px;
+                border-radius: 55px;
+                box-sizing: border-box;
+
+                &:not(:last-child) {
+                    margin-right: 10px;
+                }
+
+                &.active {
+                    background: rgba(19,115,255,0.1);
+                    border: 1px solid rgba(19,115,255,0.59);
+                    color: rgba(19,115,255,1);
+                }
+            }
+        }
+
+        .custome-calender {
+            &.at-calendar {
+                .at-calendar__controller {
+                    justify-content: flex-start;
+                    .controller__info {
+                        position: relative;
+                        display: inline-block;
+                        padding-top: 10px;
+                        margin-left: 35px;
+                        margin-right: 35px;
+
+                        &::after {
+                            content: "";
+                            position: absolute;
+                            top: 50%;
+                            right: 0;
+                            transform: translate(100%, -45%);
+                            flex: none;
+                            width: 36px;
+                            height: 36px;
+                            background: url('https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/wechat/bottom.png') no-repeat;
+                            background-size: 100% 100%;
+                            background-position: center center;
+                        }
+                    }
+                }
+                .at-calendar-slider__main {
+                    .at-calendar__header {
+                        .header__flex-item {
+                            font-size: 28px;
+                            color: rgba(16,16,16,0.6);
+                        }
+                    }
+
+                    .main__body {
+                        .at-calendar__list {
+                            .flex__item {
+                                font-size: 28px;
+                                &.flex__item--now {
+                                    color: rgba(16,16,16,0.6);
+                                }
+                                &:nth-child(7n) {
+                                    &.flex__item--selected {
+                                        border-top-right-radius: 72px;
+                                        border-bottom-right-radius: 72px;
+                                    }
+                                }
+                                &:nth-child(7n + 1) {
+                                    &.flex__item--selected {
+                                        border-top-left-radius: 72px;
+                                        border-bottom-left-radius: 72px;
+                                    }
+                                }
+                                // &:nth-child(1n) {
+                                //     border-radius: 0 72px 72px 9;
+                                // }
+                                &.flex__item--selected {
+                                    background-color: rgba(19,115,255,0.2);
+                                    .flex__item-container {
+                                        width: 100%;
+                                        margin: 0 !important;
+                                    }
+                                }
+                                &.flex__item--selected-tail,
+                                &.flex__item--selected-head {
+                                    // background-color: rgba(19,115,255,1);
+                                    color: #ffffff;
+                                    .flex__item-container {
+                                        background-color: rgba(19,115,255,1);
+                                        border-radius: 72px;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .calendar-btn {
+            padding: 20px 20px 0;
+            box-sizing: border-box;
+            .at-button {
+                height: 70px;
+                font-size: 28px;
+                line-height: 70px;
+                border-radius: 70px;
+            }
+        }
+    }
+}

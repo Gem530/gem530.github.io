@@ -23,7 +23,7 @@
         :row-class-name="rowClassName"
         :column-config="{ resizable: true }"
       >
-       
+
         <template #default-checkQuantity="{ row }">
           <el-input-number
             :disabled="props.type==HandleEnum.INFO || props.type==HandleEnum.EXAMINE"
@@ -137,73 +137,30 @@
           <span>{{ scope.row.type == 1 ? '入金' : '出金' }}</span>
         </template>
         <template #default-price="scope">
-          <span>{{ scope.row.price ? Number(scope.row.price).toFixed(2) : 0.00 }}</span>
+          <span>{{ scope.row.price ? Number(parseFloat(scope.row.price).toString()) : 0 }}</span>
         </template>
         <template #default-operate="scope">
           <el-button link type="primary" @click="handleUpdateOther(scope.row)">修改</el-button>
           <el-button link type="primary" @click="handleDeleteOther(scope.row)">删除</el-button>
         </template>
       </XTable>
-      <vxe-table
-        align="center"
-        border
-        ref="otherTableRef"
-        height="400"
-        size="small"
-        :row-config="{ isHover: true }"
-        :data="accountOrderOtherList"
-        @checkbox-all="selectOtherAllChangeEvent"
-        @checkbox-change="selectOtherChangeEvent"
-        v-if="false"
-      >
-        <vxe-column width="40" type="checkbox" v-if="drawerBorrow.title?.includes('修改') || drawerBorrow.title?.includes('添加')"> </vxe-column>
-        <vxe-column type="seq" width="50" title="序号" field="code"> </vxe-column>
-        <vxe-column width="180" title="创建时间" field="createTime">
-          <template #default="scope">
-            <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
-          </template>
-        </vxe-column>
-        <vxe-column field="createByName" title="创建人" width="120"></vxe-column>
-        <vxe-column field="recordTime" width="140" title="对账日期">
-          <template #default="scope">
-            <span>{{ parseTime(scope.row.recordTime, '{y}-{m}-{d}') }}</span>
-          </template>
-        </vxe-column>
-        <vxe-column field="type" width="80" title="金额类型">
-          <template #default="scope">
-            <span>{{ scope.row.type == 1 ? '入金' : '出金' }}</span>
-          </template>
-        </vxe-column>
-        <vxe-column field="price" width="80" title="金额">
-          <template #default="scope">
-            <span>{{ scope.row.price ? scope.row.price.toFixed(2) : 0.00 }}</span>
-          </template>
-        </vxe-column>
-        <vxe-column field="remark" fixed="right" title="备注"> </vxe-column>
-        <vxe-column fixed="right" width="120" title="操作" v-if="drawerBorrow.title?.includes('修改') || drawerBorrow.title?.includes('添加')">
-          <template #default="scope">
-            <el-button link type="primary" @click="handleUpdateOther(scope.row)">修改</el-button>
-            <el-button link type="primary" @click="handleDeleteOther(scope.row)">删除</el-button>
-          </template>
-        </vxe-column>
-      </vxe-table>
     </el-tab-pane>
   </el-tabs>
 
   <el-form border label-width="120px" :model="outForm" class="drawer-order-form">
     <el-row>
       <el-col :span="4">
-        <el-form-item size="small" label="对账总金额：" prop="borrowTotalPrice">{{ borrowTotalPrice }}</el-form-item>
+        <el-form-item size="small" label="对账总金额：" prop="borrowTotalPrice">{{ Number(parseFloat(borrowTotalPrice).toString()) }}</el-form-item>
       </el-col>
       <el-col :span="4">
-        <el-form-item size="small" label="退货总金额：" prop="backTotalPrice">{{ -backTotalPrice }}</el-form-item>
+        <el-form-item size="small" label="退货总金额：" prop="backTotalPrice">{{ -Number(parseFloat(backTotalPrice).toString()) }}</el-form-item>
       </el-col>
       <el-col :span="4">
-        <el-form-item size="small" label="入金总金额：" prop="backDiscountTotalPrice">{{ otherRecoverTotalPrice
+        <el-form-item size="small" label="入金总金额：" prop="backDiscountTotalPrice">{{ Number(parseFloat(otherRecoverTotalPrice).toString())
         }}</el-form-item>
       </el-col>
       <el-col :span="4">
-        <el-form-item size="small" label="出金总金额：" prop="backDiscountTotalPrice">{{ -otherOutTotalPrice
+        <el-form-item size="small" label="出金总金额：" prop="backDiscountTotalPrice">{{ -Number(parseFloat(otherOutTotalPrice).toString())
         }}</el-form-item>
       </el-col>
       <el-col :span="6">
@@ -684,9 +641,9 @@ const rowClassName = ({ row, rowIndex, $rowIndex }: any) => {
 }
 // 搜索 **************start
 const deliverSearchChange = async(params: any) => {
-  
+
   emits('tabSearchChange1',  params);
-  
+
   await getAddListRecord();
 }
 const backSearchChange = async(params: any) => {
@@ -774,7 +731,7 @@ const addTabStore = (sourceList: any, storeList: any, key: any) => {
     let itemAlready = storeList.find((itemAlready: any) => {
       return itemAlready[key] == item[key]
     });
-  
+
     if (itemAlready) {
       // 更新已存在的元素
       itemAlready = item;

@@ -21,8 +21,8 @@
         <el-form-item size="small" label="供应商：" prop="supplierId">
           <el-select :disabled="props.type == HandleEnum.EDIT"  placeholder="请选择供应商" style="width: 100%;"
             v-model="form.supplierId" @change="selectSupplierChange" filterable>
-            <el-option v-for="item in SupplierList" 
-            :key="item.id" 
+            <el-option v-for="item in SupplierList"
+            :key="item.id"
             :label="item.supplierCode+'-'+item.supplierName"
             :value="item.id"
             ></el-option>
@@ -205,7 +205,7 @@ const resetQuery = async () => {
     form.value.craftId = undefined;
   }
   emits('reset');
-  emits('handleSearch');
+  emits('handleSearch',{monthlyMethod:form.value.monthlyMethod,isTax:form.value.isTax});
 }
 //选择供应商
 const selectSupplierChange = (value: string) => {
@@ -219,7 +219,7 @@ const selectSupplierChange = (value: string) => {
     return;
   }
   console.log("supplier", supplier);
-  
+
   form.value.currency = supplier.currency;
   form.value.isTax = supplier.isTax;
 };
@@ -238,7 +238,7 @@ const getListRawMaterialCategory = async () => {
 const SupplierList = ref<any[]>([]);
 const getSupplierList = async () => {
   const SupplierResponse: any = await listSupplier();
-  SupplierList.value = SupplierResponse;
+  SupplierList.value = SupplierResponse.filter((v:any)=> props.type == HandleEnum.ADD ? v.status!='0' : v.status!=null);
 }
 
 /** 查询工艺列表 */

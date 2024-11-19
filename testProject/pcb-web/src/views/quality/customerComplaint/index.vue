@@ -2,9 +2,9 @@
       <div class="p-2 xtable-page customer-complaint">
         <el-card shadow="never" class="xtable-card">
 
-          <el-tabs type="border-card"  class="xtable-tab" @tab-click="handleClick" >
+          <el-tabs type="border-card"  class="xtable-tab" @tab-click="handleClick" v-model="editableTabsValue">
 
-            <el-tab-pane label="待提交" name="0">
+            <el-tab-pane label="待提交" :name="0">
               <div style="width: 100%; text-align: right; padding-bottom: 10px">
                 <el-button type="primary" @click="complaintModifyVisible = true" v-if="checkPermi(['quality:customerComplaint:commit'])">新增</el-button>
               </div>
@@ -41,7 +41,7 @@
 
             </el-tab-pane>
 
-            <el-tab-pane label="待回复" name="1" >
+            <el-tab-pane label="待回复" :name="1" >
 
               <XTable toolId="qualityCustomerComplaint" height="100%" class="xtable-content"
                       v-model:page-size="toBeReplyQueryParams.pageSize"
@@ -51,7 +51,7 @@
                       :data="toBeReplyTableData"
                       :columnList="toBeReplyColumnList"
                       show-footer="true"
-                      ref="XTableRef"
+                      ref="XTableRef2"
                       border
                       :showRefresh="true"
                       @searchChange="toBeReplySearchChange"
@@ -75,7 +75,7 @@
 
             </el-tab-pane>
 
-            <el-tab-pane label="客诉列表" name="2">
+            <el-tab-pane label="客诉列表" :name="2">
 
               <div class="global-flex flex-end" style="width: 100%;margin-bottom: 10px;">
                 <el-button  plain icon="Download" @click="handleExport">导出</el-button>
@@ -89,7 +89,7 @@
                       :data="repliedTableData"
                       :columnList="repliedColumnList"
                       show-footer="true"
-                      ref="XTableRef"
+                      ref="XTableRef3"
                       border
                       :showRefresh="true"
                       @searchChange="repliedSearchChange"
@@ -118,8 +118,7 @@
 
         <el-drawer
           v-model="complaintModifyVisible"
-          :title= "title"
-          direction="rtl"
+          :title="title"
           size="40%"
           destroy-on-close
           @close="closeComplaint"
@@ -142,12 +141,22 @@ import {
   listCustomerComplaint
 } from "@/api/quality/customerComplaint";
 import {checkPermi} from "@/utils/permission";
-
-
-
+import { decryptBase64ByStr } from '@/utils/crypto'
 
 const complaintModifyVisible =ref(false);
-
+const editableTabsValue = ref(0);
+const XTableRef = ref();
+const XTableRef2 = ref();
+const XTableRef3 = ref();
+const route = useRoute();
+/**
+ * 进入页面次数
+ */
+const isFirst = ref(0)
+/**
+ * 待办跳转参数
+ */
+const pendingParams = ref()
 /**
  * 删除单行客诉单
  */
@@ -557,15 +566,49 @@ const exportComplaintList = () => {
     ...repliedQueryParams.value
   }, `客诉列表_${new Date().getTime()}.xlsx`);
 }
-
-
-
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      let tab = !isNaN(Number(params.tab)) ? Number(params.tab) : 0;
+      editableTabsValue.value = tab
+      let tempColumnList = [{field: 'saleOrderCode', defaultValue: params.bizNo}]
+      if (tab === 0) {
+        toBeSubmittedQueryParams.value.code = params.bizNo
+        setTimeout(() => {
+          XTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === 1) {
+        toBeReplyQueryParams.value.orderCode = params.bizNo
+        setTimeout(() => {
+          XTableRef2.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === 2) {
+        repliedQueryParams.value.orderCode = params.bizNo
+        setTimeout(() => {
+          XTableRef3.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      }
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
 /**
  * 渲染完页面后刷新页面数据
  */
 onMounted(() => {
-  toBeSubmittedQueryParams.value.orderStatus='0';
-  refreshTableData();
+    toBeSubmittedQueryParams.value.orderStatus='0';
+    refreshTableData();
 });
 
 </script>

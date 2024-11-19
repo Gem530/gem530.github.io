@@ -41,7 +41,7 @@
           <span>PCS</span>
         </template>
         <template #default-totalPrice="{ row }">
-          <span>{{ row.totalPrice ? Number(row.totalPrice).toFixed(2) : 0.00 }}</span>
+          <span>{{ row.totalPrice ? new Decimal(row.totalPrice).toDecimalPlaces(2).toNumber() : 0.00 }}</span>
         </template>
         <template #default-createTime="scope">
           <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
@@ -166,7 +166,7 @@
           {{scrapUnitOption.find(v => v.value == row.scrapUnit)?.label}}
         </template>
         <template #default-totalPrice="{ row }">
-          <span>{{ row.totalPrice ? Number(row.totalPrice).toFixed(2) : 0.00 }}</span>
+          <span>{{ row.totalPrice ? new Decimal(row.totalPrice).toDecimalPlaces(2).toNumber() : 0.00 }}</span>
         </template>
         <template #default-createTime="scope">
           <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
@@ -312,7 +312,7 @@
           size="small"
           :label="props.footLabel && props.footLabel?.label1 ? props.footLabel?.label1 + ':' : '对账总金额：'"
           prop="borrowTotalPrice"
-          >{{ borrowTotalPrice }}</el-form-item
+          >{{ Number(parseFloat(borrowTotalPrice).toString()) }}</el-form-item
         >
       </el-col>
       <el-col :span="4" v-if="!props.footAdd">
@@ -320,7 +320,7 @@
           size="small"
           :label="props.footLabel && props.footLabel?.label2 ? props.footLabel?.label2 + ':' : '退货总金额：'"
           prop="backTotalPrice"
-          >{{ -backTotalPrice }}</el-form-item
+          >{{ -Number(parseFloat(backTotalPrice).toString()) }}</el-form-item
         >
       </el-col>
       <el-col :span="4">
@@ -328,7 +328,7 @@
           size="small"
           :label="props.footLabel && props.footLabel?.label3 ? props.footLabel?.label3 + ':' : '入金总金额：'"
           prop="backDiscountTotalPrice"
-          >{{ otherRecoverTotalPrice
+          >{{ Number(parseFloat(otherRecoverTotalPrice).toString())
           }}</el-form-item
         >
       </el-col>
@@ -337,7 +337,7 @@
           size="small"
           :label="props.footLabel && props.footLabel?.label4 ? props.footLabel?.label4 + ':' : '出金总金额：'"
           prop="backDiscountTotalPrice"
-          >{{ -otherOutTotalPrice
+          >{{ -Number(parseFloat(otherOutTotalPrice).toString())
           }}</el-form-item
         >
       </el-col>
@@ -604,7 +604,7 @@ const otherColumnList = ref([
 const deductionColumnList = ref([
   { type: 'checkbox', fixed: 'left', align: 'center', field: "checkbox", width: '50' },
   { title: '序号',field: "index", width: '40', type: 'seq', visible: true, align: 'center' },
-  { title: '扣款单号', width: '100', field: 'no', align: 'center', },
+  { title: '扣款单号', width: '100', field: 'code', align: 'center', },
   { title: '扣款类型', width: '80', field: 'type', align: 'center', },
   { title: '创建人', width: '60', field: 'createByName', align: 'center', },
   { title: '创建时间', width: '120', field: 'createTime', align: 'center', },
@@ -1065,6 +1065,8 @@ const addTabStore = (sourceList: any, storeList: any, key: any) => {
     } else {
       // 添加新元素
       storeList.push(item);
+      //将选中的数据从delPageChangeCheckList中删除
+      delPageChangeCheckList.value = delPageChangeCheckList.value.filter((item2: any) => item2[key] != item[key]);
     }
   })
 }
@@ -1074,7 +1076,11 @@ const removeTabStore = (sourceList: any, storeList: any, key: any) => {
 
     item.selected = false;
     if (itemAlready) {
+        //判断delPageChangeCheckList 中itemAlready是否已经存在 如果不存在则添加
+      const _inxExist = delPageChangeCheckList.value.findIndex((item2: any) => item2[key] == item[key]);
+      if (_inxExist == -1) {
       delPageChangeCheckList.value.push(itemAlready)
+      }
       // 删除元素
       const _inx = storeList.indexOf(itemAlready);
       storeList.splice(_inx, 1);
@@ -1297,7 +1303,7 @@ const setSelectRow = (queryType?: string) => {
 }
 
 const setPriceInfo = () => {
-  if (props.allData?.tabList2) {
+  if (props.allData?.tabList2&&props.allData?.tabList2.length>0) {
     props.allData?.tabList2.forEach((item) => {
       item.price = item.price ? item.price : 0;
       item.quantity = item.quantity ? item.quantity : 0;
@@ -1317,7 +1323,7 @@ const setPriceInfo = () => {
       item.totalPrice = Number(sum1) / 10000;
     });
   }
-  if (props.allData?.tabList1) {
+  if (props.allData?.tabList1&&props.allData?.tabList1.length>0) {
     props.allData?.tabList1.forEach((item, inx) => {
       item.price = item.price ? item.price : 0;
       item.quantity = item.quantity ? item.quantity : 0;
@@ -1353,16 +1359,18 @@ const setCheckedListInfo = () => {
       }
     });
 
-    props.allData?.tabList1.forEach((item, inx) => {
-      const crtM = changeOrderList.value.find((f: any) => f.id == item.id)
-      if (crtM) {
-        item.quantity = crtM?.quantity ? crtM.quantity : 0;
-        item.discountPrice = crtM?.discountPrice ? crtM.discountPrice : 0;
-        item.totalPrice = crtM?.totalPrice ? crtM.totalPrice : 0;
-        item.remark = crtM?.remark;
-        item.price = crtM?.price ? crtM.price : 0;
-      }
-    });
+    if(props.allData?.tabList1){
+      props.allData?.tabList1.forEach((item, inx) => {
+        const crtM = changeOrderList.value.find((f: any) => f.id == item.id)
+        if (crtM) {
+          item.quantity = crtM?.quantity ? crtM.quantity : 0;
+          item.discountPrice = crtM?.discountPrice ? crtM.discountPrice : 0;
+          item.totalPrice = crtM?.totalPrice ? crtM.totalPrice : 0;
+          item.remark = crtM?.remark;
+          item.price = crtM?.price ? crtM.price : 0;
+        }
+      });
+    }
 
   }
   if (checkedTabList2.value && checkedTabList2.value.length > 0) {
@@ -1377,17 +1385,19 @@ const setCheckedListInfo = () => {
       }
     });
 
-    props.allData?.tabList2.forEach((item, inx) => {
-      const crtM = changeOrderList.value.find((f: any) => f.id == item.id)
-      if (crtM) {
-        item.quantity = crtM?.quantity ? crtM.quantity : 0;
-        item.discountPrice = crtM?.discountPrice ? crtM.discountPrice : 0;
-        item.totalPrice = crtM?.totalPrice ? crtM.totalPrice : 0;
-        item.remark = crtM?.remark;
-        item.unInitEditPrice = crtM?.unInitEditPrice;
-        item.price = crtM?.price ? crtM.price : 0;
-      }
-    });
+    if(props.allData?.tabList2){
+      props.allData?.tabList2.forEach((item, inx) => {
+        const crtM = changeOrderList.value.find((f: any) => f.id == item.id)
+        if (crtM) {
+          item.quantity = crtM?.quantity ? crtM.quantity : 0;
+          item.discountPrice = crtM?.discountPrice ? crtM.discountPrice : 0;
+          item.totalPrice = crtM?.totalPrice ? crtM.totalPrice : 0;
+          item.remark = crtM?.remark;
+          item.unInitEditPrice = crtM?.unInitEditPrice;
+          item.price = crtM?.price ? crtM.price : 0;
+        }
+      });
+    }
   }
 
 }
@@ -1519,12 +1529,15 @@ const validateList = async (_form: any) => {
   let wbnoList = "";
   let feiLinSupplier: any;
   let wangbanSupplier: any;
+  let monthlyMethodValid = true;
+  const monthlyMethod = _form.monthlyMethod;
 
   let formSupplierId = _form.companyId;
 
   if(!props.supplierQuery){
     formSupplierId=_form.supplierId;
   }
+  let isTaxValid = true;
   const formIsTax = _form.isTax;
   if (checkedTabList2.value.length > 0) {
     if(!props.supplierQuery){
@@ -1551,6 +1564,7 @@ const validateList = async (_form: any) => {
         noList += code + "、";
       }
     });
+
   }
   if (checkedTabList1.value.length > 0) {
     if(!props.supplierQuery){
@@ -1579,6 +1593,40 @@ const validateList = async (_form: any) => {
         wbnoList += code + "、";
       }
     });
+
+    //含税
+      if(formIsTax){
+
+        isTaxValid = checkedTabList1.value.some((item: any) => {
+         let itemMM = item.isTax;
+         return itemMM !== formIsTax;
+         });
+
+         if (isTaxValid) {
+           proxy?.$modal.msgError("含税不一致的单据不能一起对账");
+           return false;
+         }
+      }
+       //月结方式
+      if(monthlyMethod){
+         monthlyMethodValid = checkedTabList1.value.some((item: any) => {
+         let itemMM = item.monthlyMethod;
+         return itemMM !== monthlyMethod;
+         });
+
+         if (monthlyMethodValid) {
+           proxy?.$modal.msgError("非"+monthlyMethod+"的单据不能一起对账");
+           return false;
+         }
+      }
+
+      // taxValid = checkedTabList1.value.some((item: any) => {
+      // return item.isTax !== formIsTax;
+      // });
+      // if (taxValid) {
+      //   proxy?.$modal.msgError("主单含税类型与所选单据含税类型不一致");
+      //   return false;
+      // }
   }
 
 if(!props.supplierQuery){
@@ -1647,7 +1695,19 @@ const doConfirm =  () => {
 watch(() => props.allData.tabList1, (val: any) => {
   console.log("tabList1 数据变化了");
   if(props.allData.checkedTabList1){
+        if(checkedTabList1.value&&checkedTabList1.value.length>0){
+      //遍历checkedTabList1.value，如果存在则不添加
+      props.allData.checkedTabList1.forEach((item)=>{
+        let _index=checkedTabList1.value.findIndex((item2)=>item2.id==item.id);
+        //还需判断_inxExist是否在delPageChangeCheckList中存在，如果存在则不添加
+        let _inxExist=delPageChangeCheckList.value.findIndex((item2: any) => item2.id == item.id);
+        if(_index==-1 && _inxExist==-1){
+          checkedTabList1.value.push(item);
+        }
+      })
+    }else{
     checkedTabList1.value=props.allData.checkedTabList1;
+    }
   }
 
   setSelectRow();
@@ -1655,7 +1715,19 @@ watch(() => props.allData.tabList1, (val: any) => {
 watch(() => props.allData.tabList2, (val: any) => {
   console.log("tabList2 数据变化了");
   if(props.allData.checkedTabList2){
+     if(checkedTabList2.value&&checkedTabList2.value.length>0){
+      //遍历checkedTabList1.value，如果存在则不添加
+      props.allData.checkedTabList2.forEach((item)=>{
+        let _index=checkedTabList2.value.findIndex((item2)=>item2.id==item.id);
+        //还需判断_inxExist是否在delPageChangeCheckList中存在，如果存在则不添加
+        let _inxExist=delPageChangeCheckList.value.findIndex((item2: any) => item2.id == item.id);
+        if(_index==-1 && _inxExist==-1){
+          checkedTabList2.value.push(item);
+        }
+      })
+    }else{
     checkedTabList2.value=props.allData.checkedTabList2;
+    }
   }
   setSelectRow();
 }, { deep: true, immediate: true })
@@ -1694,12 +1766,12 @@ const resetInfo = () => {
   let _deTabCache = tabRef2.value;
   if (_backTabCache) {
     _backTabCache.xTableRef.clearCheckboxReserve();
-    _backTabCache.deleteAll();
+    //_backTabCache.deleteAll();
     _backTabCache.xTableRef.clearCheckboxRow();
   }
   if (_deTabCache) {
     _deTabCache.xTableRef.clearCheckboxReserve();
-    _deTabCache.deleteAll();
+    //_deTabCache.deleteAll();
     _deTabCache.xTableRef.clearCheckboxRow();
   }
   tabQueryParams2.value = {

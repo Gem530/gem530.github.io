@@ -13,7 +13,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item size="small" label="领用数量">
+          <el-form-item size="small" label="领用总数">
             <el-input v-model="form.quantity" :disabled="true" clearable style="width: 80%;"></el-input>{{ form.units }}
           </el-form-item>
         </el-col>
@@ -25,12 +25,12 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item size="small" label="可归还数量">
+          <el-form-item size="small" label="剩余可还料">
             <el-input v-model="form.returnableQuantity" clearable style="width: 80%;" :disabled="true"></el-input>{{ form.units }}
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item size="small" label="归还数量" prop="returnQuantity">
+          <el-form-item size="small" label="本次还料" prop="returnQuantity">
             <el-input-number v-model="form.returnQuantity" clearable style="width: 80%;" :max="form.returnableQuantity"  :controls="false" :min="1" :precision="0"></el-input-number>{{ form.units }}
           </el-form-item>
         </el-col>
@@ -49,25 +49,24 @@
       </el-row>
     </el-form>
     <!-- 横线 -->
-    <el-divider content-position="left" v-if="props.formShow">归还记录</el-divider>
+    <el-divider content-position="left" v-if="props.formShow">还料记录</el-divider>
     <XTable :page-show="false" :data="dataList" :columnList="columnList" height="200px" :isAutoHeight="true" :loading="loading">
       <template #default-quantity="scope">
              <div>{{ scope.row.quantity?Number(scope.row.quantity).toFixed(0):0 }}</div>
-      </template> 
+      </template>
      <template #default-storageId="scope">
              {{ storageOptions.find(item => item.id === scope.row.storageId)?.name }}
-      </template> 
+      </template>
 
     </XTable>
     <template #footer>
-      <div style="display: flex; justify-content: center;">
-        <span class="dialog-footer">
-          <el-button v-if="formShow" :loading="buttonLoading" @click="cancel">取消</el-button>
           <el-button v-if="formShow" :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
-        </span>
-      </div>
+          <el-button v-if="formShow" :loading="buttonLoading" @click="cancel">取消</el-button>
     </template>
   </el-dialog>
+
+  <!-- 库存锁定提示框 -->
+  <InventoryLock title="物料盘点提示" inventoryType="2" v-model:show="inventoryCheck" :data="inventoryRes" @close="inventoryCheck = false"/>
 </template>
 
 <script setup name="RequisitionReturn" lang="ts">
@@ -77,7 +76,9 @@ import {listMaterialStorage} from "@/api/purchase/materialStorage";
     getReturnRecordListById,submitReturn
   } from '@/api/purchase/materialRequisition'
 import { emit } from "process";
-  
+import {ref} from "vue";
+import {listMaterialInventoryInfo} from "@/api/purchase/materialApply";
+
 const {proxy} = getCurrentInstance() as ComponentInternalInstance;
 const buttonLoading = ref(false);
 const loading = ref(true);
@@ -181,10 +182,28 @@ const columnList = ref([
   {title: '备注', field: 'remark', align: 'center',},
 ]);
 
+
+const inventoryCheck = ref(false);
+const inventoryRes = ref<any[]>([]);
+
 /**
  * 提交表单
  */
-const submitForm = () => {
+const submitForm = async () => {
+  // 查询是否存在盘点中物料
+  let query = {
+    pageNum: 1,
+    pageSize: 20,
+    idList: form.value.rawMaterialId,
+    isCheck: '1'
+  }
+  const res = await listMaterialInventoryInfo(query);
+  if (res.rows && res.rows.length > 0) {
+    inventoryRes.value = res.rows;
+    inventoryCheck.value = true;
+    return;
+  }
+
   formRef.value.validate(async (valid: any) => {
     if (valid) {
       buttonLoading.value = true;
@@ -207,13 +226,13 @@ const submitForm = () => {
       })
       emits('refresh');
       showFlag.value = false;
-       
+
       }).catch(() => {
         buttonLoading.value = false;
       }).finally(() => {
         proxy?.$modal.closeLoading()
       });
-         
+
     }).catch(() => {
       buttonLoading.value = false;
     });
@@ -221,7 +240,7 @@ const submitForm = () => {
   })
 }
 const getReturnRecordList = async () => {
-  loading.value = true;  
+  loading.value = true;
   getReturnRecordListById(form.value.id).then((res: any) => {
     dataList.value = res.data;
   }).finally(() => {
@@ -241,10 +260,10 @@ watch(() => form.value.id, (val) => {
  * 物料盘点弹窗
  */
 const getMaterialStorage= async () => {
-  
+
   const storageResponse: any = await listMaterialStorage();
   storageOptions.value = storageResponse.rows;
-  
+
 }
 
 onMounted(() => {

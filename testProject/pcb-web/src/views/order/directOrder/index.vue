@@ -1,5 +1,5 @@
 <template>
-  <div class="p-2">
+  <div class="p-2 xtable-page-height" :style="`${props?.isComp && 'padding: 0px;'}`">
     <div>
       <el-form :model="formInline" ref="addCustomerFormRef" :disabled="isDisabled"
                :rules="rules" label-width="80px" class="demo-form-inline">
@@ -29,12 +29,6 @@
                   >
                 </el-option>
               </el-select>
-<!--              <el-button @click="handleAdd" style="width: 60px;margin-left: 3px" text="plain">-->
-<!--                <el-icon>-->
-<!--                  <Plus/>-->
-<!--                </el-icon>-->
-<!--                添加客户-->
-<!--              </el-button>-->
             </el-form-item>
           </el-col>
           <el-col :span="6">
@@ -170,7 +164,7 @@
                   :disabled="item.status==0"
                 />
               </el-select>
-              <el-button style="width: 60px;margin-left: 3px" text="plain" @click="handleAddAddress">
+              <el-button style="width: 60px;margin-left: 3px" link @click="handleAddAddress">
                 <el-icon>
                   <Plus/>
                 </el-icon>
@@ -207,34 +201,32 @@
         </el-row>
       </el-form>
     </div>
-    <div>
-      <el-button text="plain" @click="chooseOrder">
-        <el-icon>
+    <div style="margin-bottom: 8px;">
+      <el-button style="font-size: 14px !important;" link type="primary" @click="chooseOrder">
+        <!-- <el-icon>
           <FolderDelete/>
-        </el-icon>
-        订单返单
+        </el-icon> -->
+        <span>订单返单</span>
       </el-button>
-      <el-button text="plain" @click="addCommodity">
-        <el-icon>
+      <el-button style="font-size: 14px !important;" link type="primary" @click="addCommodity">
+        <!-- <el-icon>
           <FolderAdd/>
-        </el-icon>
-        新增产品
+        </el-icon> -->
+        <span>新增产品</span>
       </el-button>
-      <el-button text="plain" @click="chooseCommodity">
-        <el-icon>
+      <el-button style="font-size: 14px !important;" link type="primary" @click="chooseCommodity">
+        <!-- <el-icon>
           <Checked/>
-        </el-icon>
-        选择产品
+        </el-icon> -->
+        <span>选择产品</span>
       </el-button>
     </div>
-    <vxe-table
+    <XTable
       border
       keep-source
-      size="small"
       align="center"
-      :height="props.isComp ? '455px' : '545px'"
-      :row-config="{height: 50}"
-      max-height="100%"
+      height="100%"
+      :showHead="false"
       :show-footer="true"
       :footer-method="footerMethod"
       :edit-rules="validRules"
@@ -242,498 +234,377 @@
       :valid-config="{
           showMessage: false,
       }"
-      ref="xTable" class="direct-table"
+      :pageShow="false"
+      :columnList="columnList"
+      ref="xTable" class="direct-table xtable-content"
       :column-config="{resizable: true}"
       @cell-click="handleCellClick"
       :data="tableData"
-      :edit-config="{trigger: 'click', mode: 'cell',autoClear:true, showStatus: true,beforeEditMethod:beforeEditMethod}">
-      <vxe-column type="seq" fixed="left" title="序号" width="50"></vxe-column>
-      <vxe-column width="70" title="订单类型" :edit-render="{placeholder: '请点击输入'}" field="orderType">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.orderType">
+      :edit-config="{trigger: 'click', mode: 'cell',showIcon:true,autoClear:true, showStatus: true,beforeEditMethod:beforeEditMethod}">
+      <!-- :scroll-x="{enabled:true, gt: 10}" -->
+        <template #edit-orderType="{row}">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.orderType">
             <vxe-option v-for="item in resDictData.order_type" :key="item.dictValue" :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-        <template #default="{row}">
+        <template #default-orderType="{row}">
           <div v-for="item in resDictData.order_type">
             <span v-if="item.dictValue==row.orderType">{{item.dictLabel}}</span>
           </div>
         </template>
-      </vxe-column>
-      <vxe-column width="60" title="批/样" :edit-render="{placeholder: '请点击输入'}" field="model">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.model">
-            <vxe-option v-for="item in resDictData.order_model" :key="item.dictValue" :label="item.dictLabel"
-                        :value="item.dictValue"/>
-          </vxe-select>
-        </template>
-        <template #default="{ row }">
+
+        <template #default-model="{ row }">
           <div v-for="item in resDictData.order_model">
             <span v-if="item.dictValue==row.model">{{item.dictLabel}}</span>
           </div>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="客户PO" :edit-render="{placeholder: '请点击输入'}" field="customerPo">
-        <template #edit="{ row }">
+        <template #edit-model="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.model">
+            <vxe-option v-for="item in resDictData.order_model" :key="item.dictValue" :label="item.dictLabel"
+                        :value="item.dictValue"/>
+          </vxe-select>
+        </template>
+
+        <template #edit-customerPo="{ row }">
           <el-input v-model="row.customerPo"></el-input>
         </template>
-      </vxe-column>
-      <vxe-column width="150" title="产品编码" field="commodityCode">
-        <template #default="{ row }">
+
+        <template #default-commodityCode="{ row }">
           {{showCommodityCode(row)}}
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="流水号" :edit-render="{placeholder: '请点击输入'}" field="serialNumber">
-        <template #edit="{ row }">
-          <el-input v-model="row.serialNumber" maxlength="5" @change="serialChange(row)" @focus="serialNumberOld = row.serialNumber"></el-input>
-          <el-button type="primary" link @click="getNextNumber(row)">设置流水</el-button>
+        <template #edit-serialNumber="{ row }">
+          <div class="global-flex flex-start">
+            <el-input v-model="row.serialNumber" maxlength="5" @change="serialChange(row)" @focus="serialNumberOld = row.serialNumber"></el-input>
+            <el-button class="col-edit-button" type="primary" @click="getNextNumber(row)">设置流水</el-button>
+          </div>
         </template>
-      </vxe-column>
-      <vxe-column width="120" title="产品名称" :edit-render="{placeholder: '请点击输入'}" field="commodityName">
-        <template #edit="{ row }">
+        <template #default-serialNumber="{ row }">
+          <div class="global-flex flex-between width-100 height-100">
+            <span>{{row.serialNumber}}</span>
+            <el-button :disabled="(isSale ? !(['1','3'].includes(row.status) || !row.status) : false)" class="col-edit-button" type="primary" @click="getNextNumber(row)">设置流水</el-button>
+          </div>
+        </template>
+        <template #edit-commodityName="{ row }">
           <el-input v-model="row.commodityName" :disabled="['2'].includes(row.orderType)"></el-input>
         </template>
-      </vxe-column>
-      <vxe-column width="50" title="版本号" :edit-render="{placeholder: '请点击输入'}" field="version">
-        <template #edit="{ row }">
+        <template #edit-version="{ row }">
           <el-input v-model="row.version" :disabled="['2'].includes(row.orderType)" @focus="versionOld = row.version" @change="(value) => versionChange(value, row)"></el-input>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="产品类型" :edit-render="{placeholder: '请点击输入'}" field="commodityType">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.commodityType" :disabled="['2'].includes(row.orderType)">
+        <template #edit-commodityType="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.commodityType" :disabled="['2'].includes(row.orderType)">
             <vxe-option v-for="item in resDictData.sys_commodity_type" :key="item.dictValue" :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="加急" :edit-render="{placeholder: '请点击输入'}" field="urgent">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.urgent">
+
+        <template #edit-urgent="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.urgent">
             <vxe-option v-for="item in resDictData.order_urgent" :key="item.dictValue" :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-        <template #default="{ row }">
-          <div v-for="item in resDictData.order_urgent">
-            <span v-if="item.dictValue==row.urgent">{{item.dictLabel}}</span>
-          </div>
-        </template>
-      </vxe-column>
-      <vxe-column width="80" title="订购数量(pcs)" :edit-render="{placeholder: '请点击输入'}" field="quantity">
-        <template #edit="{ row, column }">
+
+        <template #edit-quantity="{ row, column }">
           <el-input style="width: 100%" v-model="row.quantity" type="number"
                     @change="countQuantity(row, column)"></el-input>
 
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="单价(元/pcs)" :edit-render="{placeholder: '请点击输入'}" field="price">
-        <template #edit="{ row }">
+        <template #edit-price="{ row }">
           <el-input style="width: 100%" v-model="row.price" type="number"
-                    @change="countTotalPrice(row)"></el-input>
+                    @change="countPriceOther(row)"></el-input>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="面积(㎡)" field="area" :edit-render="{placeholder: ''}">
-        <template #edit="{ row }">
+
+        <template #edit-area="{ row }">
           <el-input style="width: 100%" disabled v-model="row.area" type="number" @change="countPriceByArea(row)"
                     :model-value="countArea(row)"></el-input>
         </template>
-        <template #default="{ row }">
+        <!-- <template #default-area="{ row }">
           <el-input style="width: 100%" disabled v-model="row.area" type="number" @change="countPriceByArea(row)"
                     :model-value="countArea(row)"></el-input>
-        </template>
-      </vxe-column>
-      <vxe-column width="80" title="平米价(元/㎡)" :edit-render="{placeholder: '请点击输入'}" field="areaPrice">
-        <template #edit="{ row }">
+        </template> -->
+
+        <template #edit-areaPrice="{ row }">
           <el-input style="width: 100%" v-model="row.areaPrice" type="number"
                     @change="countPrice(row)"></el-input>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="总金额" field="totalPrice">
-        <template #default="{ row }">
+        <!-- <template #default-totalPrice="{ row }">
           <el-input style="width: 100%" v-model="row.totalPrice" type="number" disabled></el-input>
-        </template>
-      </vxe-column>
-      <vxe-column width="80" title="总价" field="totalOrderPrice">
-        <template #default="{ row }">
+        </template> -->
+        <!-- <template #default-totalOrderPrice="{ row }">
           <el-input v-model="row.totalOrderPrice" disabled></el-input>
+        </template> -->
+        <template #default-tax="{ row }">
+          {{countTax(row)}}
+          <!-- <el-input v-model="row.tax" :model-value="countTax(row)"
+                    disabled></el-input> -->
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="税金" field="tax">
-        <template #default="{ row }">
-          <el-input v-model="row.tax" :model-value="countTax(row)"
-                    disabled></el-input>
-        </template>
-      </vxe-column>
-      <vxe-column width="110" title="客户交期" :edit-render="{placeholder: '请点击输入'}" field="deliveryTime">
-        <template #edit="{ row }">
+        <template #edit-deliveryTime="{ row }">
           <el-date-picker style="width: 100%"
-                          size="small" v-model="row.deliveryTime" type="date"
-                          placeholder="选择日期时间"
+                           v-model="row.deliveryTime" type="date"
+                          placeholder=" "
                           :disabled-date="disabledDateEndOrder"
                           value-format="YYYY-MM-DD" format="YYYY-MM-DD"
                           clearable @change="dispatchTimeChange(row)"/>
         </template>
-      </vxe-column>
-      <vxe-column width="60" title="提前发货(h)" :edit-render="{placeholder: '请点击输入'}" field="preDeliveryHour">
-        <template #edit="{ row }">
+        <template #edit-preDeliveryHour="{ row }">
           <el-input v-model="row.preDeliveryHour" type="number" @change="dispatchTimeChange(row)"></el-input>
         </template>
-      </vxe-column>
-      <vxe-column width="110" title="最迟发货" :edit-render="{placeholder: '请点击输入'}" field="dispatchTime">
-        <template #edit="{ row }">
-          <el-date-picker style="width: 100%" size="small" v-model="row.dispatchTime" type="datetime"
-                          placeholder="选择日期时间" value-format="YYYY-MM-DD HH:mm:ss" format="YYYY-MM-DD HH:mm:ss"
+        <template #edit-dispatchTime="{ row }">
+          <el-date-picker style="width: 100%"  v-model="row.dispatchTime" type="datetime"
+                          placeholder=" " value-format="YYYY-MM-DD HH:mm:ss" format="YYYY-MM-DD HH:mm:ss"
                           disabled clearable/>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="表面处理" :edit-render="{placeholder: '请点击输入'}" field="surfaceTreatment">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.surfaceTreatment" :disabled="['2'].includes(row.orderType)">
+        <template #edit-surfaceTreatment="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.surfaceTreatment" :disabled="['2'].includes(row.orderType)">
             <vxe-option v-for="item in resDictData.order_surface_treatment" :key="item.dictValue"
                         :label="item.dictLabel"
                         :value="item.dictLabel"/>
           </vxe-select>
         </template>
-        <template #default="{ row }">
-          <!-- <div v-for="item in resDictData.order_surface_treatment">
-            <span v-if="item.dictValue==row.surfaceTreatment">{{item.dictLabel}}</span>
-          </div> -->
+        <template #default-surfaceTreatment="{ row }">
           <span>{{row.surfaceTreatment}}</span>
         </template>
-      </vxe-column>
-      <vxe-column width="50" title="层数" :edit-render="{placeholder: '请点击输入'}" field="materialLayer">
-        <template #edit="{ row }">
+
+        <template #edit-materialLayer="{ row }">
           <el-input style="width: 100%" v-model="row.materialLayer" :disabled="['2'].includes(row.orderType)"></el-input>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="板材" :edit-render="{placeholder: '请点击输入'}" field="materialQuality">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.materialQuality" :disabled="['2'].includes(row.orderType)">
+        <template #edit-materialQuality="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.materialQuality" :disabled="['2'].includes(row.orderType)">
             <vxe-option v-for="item in resDictData.order_material_quality" :key="item.dictValue" :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="板材品牌" :edit-render="{placeholder: '请点击输入'}" field="materialBrand">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.materialBrand" :disabled="['2'].includes(row.orderType)">
+        <template #edit-materialBrand="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.materialBrand" :disabled="['2'].includes(row.orderType)">
             <vxe-option v-for="item in resDictData.order_plate_brand" :key="item.dictValue" :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="板材级别" :edit-render="{placeholder: '请点击输入'}" field="materialLevel">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.materialLevel" :disabled="['2'].includes(row.orderType)">
+        <template #edit-materialLevel="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.materialLevel" :disabled="['2'].includes(row.orderType)">
             <vxe-option v-for="item in resDictData.order_material_level" :key="item.dictValue" :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="阻焊颜色" :edit-render="{placeholder: '请点击输入'}" field="commoditySolder">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.commoditySolder" :disabled="['2'].includes(row.orderType)">
-            <vxe-option v-for="item in resDictData.order_commodity_solder" :key="item.dictValue" :label="item.dictLabel"
+        <template #edit-commoditySolder="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.commoditySolder" :disabled="['2'].includes(row.orderType)">
+            <vxe-option v-for="item in resDictData.order_commodity_solder" :key="item.dictValue" :label="item.dictLabel" 
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="阻焊面数" :edit-render="{placeholder: '请点击输入'}" field="commoditySolderCount">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.commoditySolderCount" :disabled="['2'].includes(row.orderType)">
+        <template #edit-commoditySolderCount="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" v-model="row.commoditySolderCount" :disabled="['2'].includes(row.orderType)">
             <vxe-option v-for="item in resDictData.order_commodity_solder_count" :key="item.dictValue"
                         :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="金厚(u'')" :edit-render="{placeholder: '请点击输入'}" field="goldenThickness">
-        <template #edit="{ row }">
+        <template #edit-goldenThickness="{ row }">
           <el-input style="width: 100%" v-model="row.goldenThickness" :disabled="['2'].includes(row.orderType)"></el-input>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="字符" :edit-render="{placeholder: '请点击输入'}" field="characterColor">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.characterColor" :disabled="['2'].includes(row.orderType)">
+        <template #edit-characterColor="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.characterColor" :disabled="['2'].includes(row.orderType)">
             <vxe-option v-for="item in resDictData.order_character" :key="item.dictValue" :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="字符面数" :edit-render="{placeholder: '请点击输入'}" field="characterCount">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.characterCount" :disabled="['2'].includes(row.orderType)">
+        <template #edit-characterCount="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.characterCount" :disabled="['2'].includes(row.orderType)">
             <vxe-option v-for="item in resDictData.order_character_count" :key="item.dictValue" :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="成形方式" :edit-render="{placeholder: '请点击输入'}" field="commodityForm">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.commodityForm" :disabled="['2'].includes(row.orderType)">
+        <template #edit-commodityForm="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.commodityForm" :disabled="['2'].includes(row.orderType)">
             <vxe-option v-for="item in resDictData.order_commodity_form" :key="item.dictValue" :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="测试方式" :edit-render="{placeholder: '请点击输入'}" field="commodityTestWay">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.commodityTestWay">
+        <template #edit-commodityTestWay="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.commodityTestWay">
             <vxe-option v-for="item in resDictData.order_commodity_testway" :key="item.dictValue"
                         :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="测试架" :edit-render="{}">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.testFrame">
+        <template #edit-testFrame="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.testFrame">
             <vxe-option v-for="item in resDictData.order_test_stand" :key="item.dictValue"
                         :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="测试点(个)" :edit-render="{placeholder: '请点击输入'}" field="testPoint">
-        <template #edit="{ row }">
+        <template #edit-testPoint="{ row }">
           <el-input-number :controls="false" style="width: 100%" v-model="row.testPoint" :disabled="['2'].includes(row.orderType)"/>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="过孔要求" :edit-render="{placeholder: '请点击输入'}" field="holeRequirement">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.holeRequirement" :disabled="['2'].includes(row.orderType)">
+        <template #edit-holeRequirement="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.holeRequirement" :disabled="['2'].includes(row.orderType)">
             <vxe-option v-for="item in resDictData.order_hole_requirement" :key="item.dictValue" :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="检验标准" :edit-render="{placeholder: '请选择'}" field="inspectionStandard">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.inspectionStandard" :disabled="['2'].includes(row.orderType)">
+        <template #edit-inspectionStandard="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.inspectionStandard" :disabled="['2'].includes(row.orderType)">
             <vxe-option v-for="item in resDictData.order_inspection_standard" :key="item.dictValue"
                         :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="金面积" :edit-render="{placeholder: '请点击输入'}" field="goldArea">
-        <template #edit="{ row }">
+        <template #edit-goldArea="{ row }">
           <el-input :controls="false" style="width: 100%" v-model="row.goldArea" :maxlength="100" :disabled="['2'].includes(row.orderType)"/>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="客户物料编码" :edit-render="{placeholder: '请点击输入'}" field="materialNumber">
-        <template #edit="{ row }">
+        <template #edit-materialNumber="{ row }">
           <el-input v-model="row.materialNumber"></el-input>
         </template>
-      </vxe-column>
-      <vxe-column width="120" title="客户物料名称" :edit-render="{placeholder: '请点击输入'}" field="materialName">
-        <template #edit="{ row }">
+        <template #edit-materialName="{ row }">
           <el-input v-model="row.materialName"></el-input>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="最小线宽(mm)" :edit-render="{placeholder: '请点击输入'}" field="minLineWidth">
-        <template #edit="{ row }">
+        <template #edit-minLineWidth="{ row }">
           <el-input-number :controls="false" style="width: 100%" v-model="row.minLineWidth"/>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="最小线距(mm)" :edit-render="{placeholder: '请点击输入'}" field="minLineSpace">
-        <template #edit="{ row }">
+        <template #edit-minLineSpace="{ row }">
           <el-input-number :controls="false" style="width: 100%" v-model="row.minLineSpace"/>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="最小孔径(mm)" :edit-render="{placeholder: '请点击输入'}" field="minAperture">
-        <template #edit="{ row }">
+        <template #edit-minAperture="{ row }">
           <el-input-number :controls="false" style="width: 100%" v-model="row.minAperture"/>
         </template>
-      </vxe-column>
-      <vxe-column width="90" title="总孔数(/连板(SLOT))" :edit-render="{placeholder: '请点击输入'}" field="holeCount">
-        <template #edit="{ row }">
+        <template #edit-holeCount="{ row }">
           <el-input-number :controls="false" style="width: 100%" v-model="row.holeCount" :min="0" @change="holeTableCountnumber(row)"/>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="孔密度(万/m²)" :edit-render="{placeholder: '请点击输入'}" field="holeDensity">
-        <template #edit="{ row }">
+        <template #edit-holeDensity="{ row }">
           <el-input-number :controls="false" style="width: 100%" v-model="row.holeDensity"/>
         </template>
-      </vxe-column>
-      <vxe-column width="60" title="模具费" :edit-render="{placeholder: '请点击输入'}" field="mouldCost">
-        <template #edit="{ row }">
+        <template #edit-mouldCost="{ row }">
           <el-input class="number-left" style="width: 100%;" v-model="row.mouldCost" @change="countPriceOther(row)"/>
         </template>
-      </vxe-column>
-      <vxe-column width="60" title="测试架费" :edit-render="{placeholder: '请点击输入'}" field="testFrameCost">
-        <template #edit="{ row }">
+        <template #edit-testFrameCost="{ row }">
           <el-input class="number-left" style="width: 100%;" v-model="row.testFrameCost" @change="countPriceOther(row)"/>
         </template>
-      </vxe-column>
-      <vxe-column width="60" title="飞针费" :edit-render="{placeholder: '请点击输入'}" field="flyProbeCost">
-        <template #edit="{ row }">
+        <template #edit-flyProbeCost="{ row }">
           <el-input class="number-left" style="width: 100%;" v-model="row.flyProbeCost" @change="countPriceOther(row)"/>
         </template>
-      </vxe-column>
-      <vxe-column width="60" title="工程费" :edit-render="{placeholder: '请点击输入'}" field="engineeringCost">
-        <template #edit="{ row }">
+        <template #edit-engineeringCost="{ row }">
           <el-input class="number-left" style="width: 100%;" v-model="row.engineeringCost" @change="countPriceOther(row)"/>
         </template>
-      </vxe-column>
-      <vxe-column width="60" title="样板费" :edit-render="{placeholder: '请点击输入'}" field="sampleCost">
-        <template #edit="{ row }">
+        <template #edit-sampleCost="{ row }">
           <el-input class="number-left" style="width: 100%;" v-model="row.sampleCost" @change="countPriceOther(row)"/>
         </template>
-      </vxe-column>
-      <vxe-column width="60" title="加急费" :edit-render="{placeholder: '请点击输入'}" field="expeditedCost">
-        <template #edit="{ row }">
+        <template #edit-expeditedCost="{ row }">
           <el-input class="number-left" style="width: 100%;" v-model="row.expeditedCost" @change="countPriceOther(row)"/>
         </template>
-      </vxe-column>
-      <vxe-column width="60" title="其他费" field="otherCost">
-        <template #default="{ row }">
+        <template #default-otherCost="{ row }">
           <el-button link type='primary' v-model="row.otherCost" @click="openOtherCostDialog(row)">{{row.otherCost}}
           </el-button>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="包装要求" :edit-render="{placeholder: '请点击输入'}" field="packRequirement">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.packRequirement">
+
+        <template #edit-packRequirement="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.packRequirement">
             <vxe-option v-for="item in resDictData.order_packaging_requirements" :key="item.dictValue"
                         :label="item.dictLabel"
                         :value="item.dictLabel"/>
           </vxe-select>
         </template>
-        <template #default="{ row }">
+        <template #default-packRequirement="{ row }">
           <div v-for="item in resDictData.order_packaging_requirements">
             <span v-if="item.dictLabel==row.packRequirement">{{item.dictLabel}}</span>
           </div>
         </template>
-      </vxe-column>
-      <vxe-column width="120" title="订单特殊要求" :edit-render="{placeholder: '请点击输入'}" field="specialRequirement">
-        <template #edit="{ row }">
-          <el-input type="textarea" v-model="row.specialRequirement"></el-input>
+
+        <template #edit-specialRequirement="{ row }">
+          <el-input type="textarea" rows="1" v-model="row.specialRequirement"></el-input>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="成品板厚" :edit-render="{placeholder: '请点击输入'}" field="commodityThickness">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.commodityThickness" :disabled="['2'].includes(row.orderType)">
+        <template #edit-commodityThickness="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.commodityThickness" :disabled="['2'].includes(row.orderType)">
             <vxe-option v-for="item in resDictData.finish_plate_thickness" :key="item.dictValue" :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="外层铜厚" :edit-render="{placeholder: '请点击输入'}" field="materialCopperOutside">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.materialCopperOutside" :disabled="['2'].includes(row.orderType)">
+        <template #edit-materialCopperOutside="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.materialCopperOutside" :disabled="['2'].includes(row.orderType)">
             <vxe-option v-for="item in resDictData.order_material_copperoutside" :key="item.dictValue"
                         :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="内层铜厚" :edit-render="{placeholder: '请点击输入'}" field="materialCopperInside">
-        <template #edit="{ row }">
-          <vxe-select v-model="row.materialCopperInside" :disabled="['2'].includes(row.orderType)">
+        <template #edit-materialCopperInside="{ row }">
+          <vxe-select transfer popup-class-name="vxe-pop-select" placeholder=" " v-model="row.materialCopperInside" :disabled="['2'].includes(row.orderType)">
             <vxe-option v-for="item in resDictData.order_material_copperinside" :key="item.dictValue"
                         :label="item.dictLabel"
                         :value="item.dictValue"/>
           </vxe-select>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="单片长(mm)" :edit-render="{placeholder: '请点击输入'}" field="singleLength">
-        <template #edit="{ row }">
+        <template #edit-singleLength="{ row }">
           <el-input-number :controls="false" style="width: 100%" v-model="row.singleLength" :disabled="['2'].includes(row.orderType)"/>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="单片宽(mm)" :edit-render="{placeholder: '请点击输入'}" field="singleWidth">
-        <template #edit="{ row }">
+        <template #edit-singleWidth="{ row }">
           <el-input-number :controls="false" style="width: 100%" v-model="row.singleWidth" :disabled="['2'].includes(row.orderType)"/>
         </template>
-      </vxe-column>
-
-      <vxe-column width="80" title="联片长(mm)" :edit-render="{placeholder: '请点击输入'}" field="unitedLength">
-        <template #edit="{ row }">
+        
+        <template #edit-unitedLength="{ row }">
           <el-input-number :controls="false" style="width: 100%" v-model="row.unitedLength" :disabled="['2'].includes(row.orderType)"
                            @input="countPriceAndArea(row)"/>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="联片宽(mm)" :edit-render="{placeholder: '请点击输入'}" field="unitedWidth">
-        <template #edit="{ row }">
+        <template #edit-unitedWidth="{ row }">
           <el-input-number :controls="false" style="width: 100%" v-model="row.unitedWidth" :disabled="['2'].includes(row.orderType)"
                            @input="countPriceAndArea(row)"/>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="联片数量(pcs)" field="unitedNumber">
-        <template #default="{ row }">
+        <template #edit-unitedNumber="{ row }">
           <el-input-number :controls="false" style="width: 100%" disabled v-model="row.unitedNumber" :disabled="['2'].includes(row.orderType)"/>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="连片方式长(个)" :edit-render="{placeholder: '请点击输入'}" field="unitedWayLength">
-        <template #edit="{ row }">
+        <template #edit-unitedWayLength="{ row }">
           <el-input-number :controls="false" style="width: 100%" v-model="row.unitedWayLength" :min="0" :precision="0" :disabled="['2'].includes(row.orderType)"
                            @change="countPriceAndArea(row)"/>
         </template>
-      </vxe-column>
-      <vxe-column width="80" title="连片方式宽(个)" :edit-render="{placeholder: '请点击输入'}" field="unitedWayWidth">
-        <template #edit="{ row }">
+        <template #edit-unitedWayWidth="{ row }">
           <el-input-number :controls="false" style="width: 100%" v-model="row.unitedWayWidth" :min="0" :precision="0" :disabled="['2'].includes(row.orderType)"
                            @change="countPriceAndArea(row)"/>
         </template>
-      </vxe-column>
-      <vxe-column width="120" title="产品备注" :edit-render="{placeholder: '请点击输入'}" field="commodityRemark">
-        <template #edit="{ row }">
-          <el-input type="textarea" v-model="row.commodityRemark"></el-input>
+        <template #edit-commodityRemark="{ row }">
+          <el-input type="textarea" rows="1" v-model="row.commodityRemark"></el-input>
         </template>
-      </vxe-column>
-      <vxe-column width="120" title="订单备注" :edit-render="{placeholder: '请点击输入'}" field="remark">
-        <template #edit="{ row }">
-          <el-input type="textarea" v-model="row.remark"></el-input>
+        <template #edit-remark="{ row }">
+          <el-input type="textarea" rows="1" v-model="row.remark"></el-input>
         </template>
-      </vxe-column>
-
-      <vxe-column width="60" title="承认书/出货报告"  field="hasAcknowledgment">
-        <template #default="{ row }"><el-icon v-if="row.hasAcknowledgment=='1'"><Check /></el-icon></template>
-      </vxe-column>
-      <vxe-column width="60" title="阻抗报告"  field="hasImpedanceReport">
-        <template #default="{ row }"><el-icon v-if="row.hasImpedanceReport=='1'"><Check /></el-icon></template>
-      </vxe-column>
-      <vxe-column width="60" title="切片"   field="hasSection">
-        <template #default="{ row }"><el-icon v-if="row.hasSection=='1'"><Check /></el-icon></template>
-      </vxe-column>
-      <vxe-column width="60" title="阻抗条" field="hasImpedanceBar">
-        <template #default="{ row }"><el-icon v-if="row.hasImpedanceBar=='1'"><Check /></el-icon></template>
-      </vxe-column>
-      <vxe-column width="60" title="菲林"  field="hasFilm">
-        <template #default="{ row }"><el-icon v-if="row.hasFilm=='1'"><Check /></el-icon></template>
-      </vxe-column>
-      <vxe-column width="60" title="封样"  field="hasSealedSample">
-        <template #default="{ row }"><el-icon v-if="row.hasSealedSample=='1'"><Check /></el-icon></template>
-      </vxe-column>
-
-      <vxe-column fixed="right" title="操作" width="220">
-        <template #default="{ row,rowIndex}">
+        
+        <template #default-hasAcknowledgment="{ row }"><el-icon v-if="row.hasAcknowledgment=='1'"><Check /></el-icon></template>
+        <template #default-hasImpedanceReport="{ row }"><el-icon v-if="row.hasImpedanceReport=='1'"><Check /></el-icon></template>
+        <template #default-hasSection="{ row }"><el-icon v-if="row.hasSection=='1'"><Check /></el-icon></template>
+        <template #default-hasImpedanceBar="{ row }"><el-icon v-if="row.hasImpedanceBar=='1'"><Check /></el-icon></template>
+        <template #default-hasFilm="{ row }"><el-icon v-if="row.hasFilm=='1'"><Check /></el-icon></template>
+        <template #default-hasSealedSample="{ row }"><el-icon v-if="row.hasSealedSample=='1'"><Check /></el-icon></template>
+        
+        <template #default-make="{ row,rowIndex}">
+            <AutoBtn :list="[
+              { title: '复制', fun: () => copyRowEvent(row) },
+              { title: '编辑', isShow: () => !(isSale && (row.status ? !['1','3'].includes(row.status) : false)), fun: () => openDrawer(2, row, rowIndex) },
+              { title: '删除', isShow: () => !(isSale && (row.status ? !['1','3'].includes(row.status) : false)), fun: () => deleteRowEvent(row,rowIndex) },
+              { title: '提交审核', isShow: () => !(isSale && (row.status ? !['1','3'].includes(row.status) : false)) && props.isComp && props.code, fun: () => submitRowEvent(row,rowIndex), attrs: { loading: buttonLoading } },
+              { title: '撤回', color: 'var(--el-color-danger)', isShow: () => (isSale && (row.status ? !['1','3'].includes(row.status) : false)) && !(['6','7'].includes(row.flowStatus) || ['3'].includes(row.status)), fun: () => backOrderEvent(row,rowIndex) },
+            ]"></AutoBtn>
           <!--          <template v-if="isActiveStatus(row)">
                       <vxe-button @click="saveRowEvent(row)">保存</vxe-button>
                       <vxe-button @click="cancelRowEvent(row)">取消</vxe-button>
                     </template>
                     <template v-else>
-                      <el-button size="small" text="plain" @click="copyRowEvent(row)">复制</el-button>
-                      <el-button size="small" text="plain" @click="editRowEvent(row)">编辑</el-button>
-                      <el-button size="small" text="plain" @click="deleteRowEvent(row,rowIndex)">删除</el-button>
+                      <el-button  link @click="copyRowEvent(row)">复制</el-button>
+                      <el-button  link @click="editRowEvent(row)">编辑</el-button>
+                      <el-button  link @click="deleteRowEvent(row,rowIndex)">删除</el-button>
                     </template>-->
-          <el-button size="small" type="primary" link @click="copyRowEvent(row)">复制</el-button>
+          <!-- <el-button  type="primary" link @click="copyRowEvent(row)">复制</el-button>
           <template v-if="!(isSale && (row.status ? !['1','3'].includes(row.status) : false))">
-            <el-button size="small" type="primary" link @click="openDrawer(2, row, rowIndex)">编辑</el-button>
-            <el-button size="small" type="primary" link @click="deleteRowEvent(row,rowIndex)">删除</el-button>
-            <el-button v-if="props.isComp && props.code" size="small" type="primary" link @click="submitRowEvent(row,rowIndex)" :loading="buttonLoading">提交审核</el-button>
+            <el-button  type="primary" link @click="openDrawer(2, row, rowIndex)">编辑</el-button>
+            <el-button  type="primary" link @click="deleteRowEvent(row,rowIndex)">删除</el-button>
+            <el-button v-if="props.isComp && props.code"  type="primary" link @click="submitRowEvent(row,rowIndex)" :loading="buttonLoading">提交审核</el-button>
           </template>
           <template v-else-if="!(['6','7'].includes(row.flowStatus) || ['3'].includes(row.status))">
-            <el-button size="small" type="danger" link @click="backOrderEvent(row,rowIndex)">撤回</el-button>
-          </template>
+            <el-button  type="danger" link @click="backOrderEvent(row,rowIndex)">撤回</el-button>
+          </template> -->
         </template>
-      </vxe-column>
-    </vxe-table>
+      <!-- </vxe-column> -->
+    </XTable>
 
-    <div class="text-center mt-1">
+    <div class="text-center mt-1" :style="`${!props?.isComp && 'padding-bottom: 8px;'}`">
       <el-button type="danger" @click="deleteContract()" :loading="buttonLoading">删除合同</el-button>
       <el-button v-if="props.isComp" :loading="buttonLoading" @click="closePage(false)">取消</el-button>
       <el-button @click="preViewOrder('1')" :loading="buttonLoading">预览</el-button>
@@ -742,37 +613,31 @@
     </div>
 
     <el-dialog v-model="otherCostDialog.visible" :title="otherCostDialog.title" :destroy-on-close="true" width="550px">
-      <vxe-table border show-overflow keep-source ref="_tableRef" :data="currentRow.otherCostList" size="small"
+      <XTable border ref="_tableRef" :data="currentRow.otherCostList"  :columnList="columnListOtherPrice" :pageShow="false"
                  :edit-rules="costRules" :edit-config="{ trigger: 'click', mode: 'row', showStatus: true }">
-        <vxe-column field="make" title="操作" width="60" align="center">
-          <template #header>
+        <!-- <vxe-column field="make" title="操作" width="60" align="center"> -->
+          <template #header-make>
             <el-icon @click="addChangeRow" style="color: rgb(64, 158, 255);font-size:19px">
               <CirclePlusFilled/>
             </el-icon>
           </template>
-<!--          <template #edit="scope">-->
-<!--            <el-icon @click="removeChange(scope.row)" color="red" size="19px">-->
-<!--              <RemoveFilled/>-->
-<!--            </el-icon>-->
-<!--          </template>-->
-          <template #default="scope">
+          <template #default-make="scope">
             <el-icon @click="removeChange(scope.row)" color="red" size="19px">
               <RemoveFilled/>
             </el-icon>
           </template>
-        </vxe-column>
-        <vxe-column field="title" title="费用名称" align="center" :edit-render="{}">
-          <template #edit="scope">
+        <!-- </vxe-column>
+        <vxe-column field="title" title="费用名称" align="center" :edit-render="{}"> -->
+          <template #edit-title="scope">
             <el-input v-model="scope.row.title" type="text" @change="changeCellEvent(scope)"></el-input>
           </template>
-        </vxe-column>
-        <vxe-column field="price" title="金额" align="center" :edit-render="{}">
-          <template #edit="scope">
+        <!-- </vxe-column>
+        <vxe-column field="price" title="金额" align="center" :edit-render="{}"> -->
+          <template #edit-price="scope">
             <el-input-number :controls="false" :precision="2" class="number-left" style="width: 100%;" v-model="scope.row.price" type="number" @change="changeCellEvent(scope)"></el-input-number>
-            <!-- <el-input-number :controls="false" :precision="2" class="number-left" style="width: 100%;" v-model="other.price" @change="countPriceOther(editInfo.form)"></el-input-number> -->
           </template>
-        </vxe-column>
-      </vxe-table>
+        <!-- </vxe-column> -->
+      </XTable>
 <!--      <div class="text-center pt-5">
         <el-button @click="cancelOtherCost">取 消</el-button>
         <el-button :loading="buttonLoading" type="primary" @click="submitOtherCost">确 定</el-button>
@@ -797,9 +662,9 @@
           <el-input v-model="formAddress.logisticsCycle" autocomplete="off" type="number" placeholder="请输入物流周期"></el-input>
         </el-form-item>
       </el-form>
-      <div class="text-center">
-        <el-button @click="cancelAddress">取 消</el-button>
+      <div class="text-right">
         <el-button :loading="buttonLoading" type="primary" @click="submitAddress">确 定</el-button>
+        <el-button @click="cancelAddress">取 消</el-button>
       </div>
     </el-dialog>
     <!--    <vxe-pager
@@ -897,7 +762,7 @@
           </el-form-item>
         </div>
         <div style="display: flex;">
-          <el-form-item size="small" style="flex: 1;" label="月结方式">
+          <el-form-item size="small" style="flex: 1;" label="月结方式" prop="monthlyMethod">
             <el-select v-model="form.monthlyMethod" clearable filterable placeholder="请选择月结方式">
               <el-option
                 v-for="item in resDictData.monthly_method"
@@ -1037,10 +902,10 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <div class="text-center">
+        <!-- <div class="text-center"> -->
           <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
           <el-button @click="cancel">取 消</el-button>
-        </div>
+        <!-- </div> -->
       </template>
     </el-drawer>
 
@@ -1050,23 +915,15 @@
       <el-container>
         <el-aside width="220px" style="background-color: rgb(238, 241, 246)">
           <div style=" font-size:medium; font-weight:600">已选产品</div>
-          <el-table :data="alreadySelectCommodity"
-                    tooltip-effect="dark"
-                    style="width: 100%;height: calc(100% - 40px);"
-                    :show-header="false">
-            <el-table-column prop="code"
-                             label="产品编码"
-                             align="left">
-            </el-table-column>
-            <el-table-column label="操作"
-                             width="50">
-              <template #default="scope">
+          <div style="background: #fff;">
+          <XTable :showHead="false" :pageShow="false" :show-header="false" :columnList="columnListChooseProduct" :data="alreadySelectCommodity" height="588">
+              <template #default-make="scope">
                 <div style="text-align:center">
                   <el-button @click="removeData(scope.row)" type="text" size="small">X</el-button>
                 </div>
               </template>
-            </el-table-column>
-          </el-table>
+          </XTable>
+          </div>
         </el-aside>
         <el-main style="padding:0px;overflow-x:hidden;">
           <XTable :pageShow="true" v-model:page-size="queryParamsCommodity.pageSize"
@@ -1092,10 +949,10 @@
       </el-container>
 
       <template #footer>
-        <div class="text-center">
-          <el-button @click="cancelCommodity">取 消</el-button>
+        <!-- <div class="text-center"> -->
           <el-button :loading="buttonLoading" type="primary" @click="submitCommodity">确 定</el-button>
-        </div>
+          <el-button @click="cancelCommodity">取 消</el-button>
+        <!-- </div> -->
       </template>
     </el-dialog>
 
@@ -1105,25 +962,18 @@
       <el-container>
         <el-aside width="310px" style="background-color: rgb(238, 241, 246)">
           <div style=" font-size:medium; font-weight:600">已选产品</div>
-          <el-table :data="alreadySelectOrder"
-                    tooltip-effect="dark"
-                    style="width: 100%;height: calc(100% - 40px);"
-                    :show-header="false">
-            <el-table-column prop="commodityCode"
-                             label="产品编码">
-              <template #default="scope">
+          <div style="background: #fff;">
+          <XTable :showHead="false" :pageShow="false" :show-header="false" :columnList="columnListOrderReturn" :data="alreadySelectOrder" height="588">
+              <template #default-commodityCode="scope">
                 {{scope.row.commodityCode}} - {{scope.row.code}}
               </template>
-            </el-table-column>
-            <el-table-column label="操作"
-                             width="50">
-              <template #default="scope">
+              <template #default-make="scope">
                 <div style="text-align:center">
                   <el-button @click="removeDataOrder(scope.row)" type="text" size="small">X</el-button>
                 </div>
               </template>
-            </el-table-column>
-          </el-table>
+          </XTable>
+          </div>
         </el-aside>
         <el-main style="padding:0px;overflow-x:hidden;">
           <XTable :pageShow="true" v-model:page-size="queryParams.pageSize"
@@ -1154,10 +1004,10 @@
       </el-container>
 
       <template #footer>
-        <div class="text-center">
-          <el-button :loading="buttonLoading" @click="cancelOrder">取 消</el-button>
+        <!-- <div class="text-center"> -->
           <el-button :loading="buttonLoading" type="primary" @click="submitOrder">确 定</el-button>
-        </div>
+          <el-button :loading="buttonLoading" @click="cancelOrder">取 消</el-button>
+        <!-- </div> -->
       </template>
     </el-dialog>
 
@@ -1185,19 +1035,28 @@
     </el-drawer>
 
     <!-- 直接下单新增、编辑产品弹框 -->
+    <!-- 去除这个属性 destroy-on-close 同时表单加上key唯一标识，即可解决内存泄漏 -->
     <el-drawer
+      key="prod-order-edit"
       v-model="editInfo.show"
       :title="editInfo.type == 1 ? '新增产品' : '编辑产品'"
       size="45%"
-      modal-class="add-prod-drawder"
+      :modal-class="`add-prod-drawder ${ownerId == '101' && 'normal-prod-drawder'}`"
       :close-on-click-modal="false"
-      destroy-on-close
     >
-      <el-form ref="addProdRef" :model="editInfo.form" :rules="editInfo.rules" label-width="60px" size="small">
+      <template #header>
+        <span class="el-drawer__title no-wrap">{{editInfo.type == 1 ? '新增产品' : '编辑产品'}}</span>
+        <TotalTitle :start="true" :firstBorder="true" :list="[
+          { title: `总价：${ totalOrderPriceShow }元` },
+          { title: `税金：${ countTax(editInfo.form) }元` },
+          { title: `总金额：${ totalPriceShow }元` },
+        ]"></TotalTitle>
+      </template>
+      <el-form ref="addProdRef" :model="editInfo.form" :rules="editInfo.rules" label-width="65px" size="small" key="prod-order-edit-form">
         <el-row>
           <el-col :span="6">
             <el-form-item label="客户" prop="cusId">
-              <el-select v-model="formInline.customerId"
+              <el-select v-model="formInline.customerId" key="selectCustom"
                          style="width: 100%;"
                          placeholder=" "
                          disabled
@@ -1215,7 +1074,7 @@
           </el-col>
           <el-col :span="6">
             <el-form-item label="表面处理" prop="surfaceTreatment">
-              <el-select suffix-icon="" class="height-light"  v-model="editInfo.form.surfaceTreatment"
+              <el-select suffix-icon="" class="height-light"  v-model="editInfo.form.surfaceTreatment" key="select2"
                          placeholder=" " @change="changeCommodityCode" :disabled="['2'].includes(editInfo.form.orderType)">
                 <el-option v-for="item in resDictData.order_surface_treatment" :key="item.dictValue"
                            :label="item.dictLabel"
@@ -1226,7 +1085,7 @@
           </el-col>
           <el-col :span="4">
             <el-form-item label="批量/样品" prop="model">
-              <el-select suffix-icon=""  v-model="editInfo.form.model" @change="changeCommodityCode" placeholder=" ">
+              <el-select suffix-icon=""  v-model="editInfo.form.model" @change="changeCommodityCode" placeholder=" " key="select3">
                 <el-option v-for="item in resDictData.order_model" :key="item.dictValue"
                            :label="item.dictLabel"
                            :value="item.dictValue"
@@ -1282,7 +1141,7 @@
 
           <el-col :span="4">
             <el-form-item label="订单类型" prop="orderType">
-              <el-select suffix-icon="" v-model="editInfo.form.orderType" placeholder=" ">
+              <el-select suffix-icon="" v-model="editInfo.form.orderType" placeholder=" " key="select4">
                 <el-option v-for="item in resDictData.order_type" :key="item.dictValue"
                            :label="item.dictLabel"
                            :value="item.dictValue"
@@ -1292,7 +1151,7 @@
           </el-col>
           <el-col :span="4">
             <el-form-item label="包装要求" prop="packRequirement">
-              <el-select suffix-icon="" v-model="editInfo.form.packRequirement" placeholder=" ">
+              <el-select suffix-icon="" v-model="editInfo.form.packRequirement" placeholder=" " key="select5">
                 <el-option v-for="item in resDictData.order_packaging_requirements" :key="item.dictValue"
                            :label="item.dictLabel"
                            :value="item.dictLabel"
@@ -1320,7 +1179,7 @@
 
           <el-col :span="4">
             <el-form-item label="板材" prop="materialQuality">
-              <el-select
+              <el-select key="select6"
                 suffix-icon="" class="height-light"
                 v-model="editInfo.form.materialQuality"
                 placeholder=" "
@@ -1341,7 +1200,7 @@
           </el-col>
           <el-col :span="4">
             <el-form-item label="板材品牌" prop="materialBrand">
-              <el-select
+              <el-select key="select7"
                 suffix-icon="" class="height-light"
                 v-model="editInfo.form.materialBrand"
                 placeholder=" "
@@ -1362,7 +1221,7 @@
           </el-col>
           <el-col :span="4">
             <el-form-item label="板材级别" prop="materialLevel">
-              <el-select
+              <el-select key="select8"
                 suffix-icon="" class="height-light"
                 v-model="editInfo.form.materialLevel"
                 placeholder=" "
@@ -1383,7 +1242,7 @@
           </el-col>
           <el-col :span="4">
             <el-form-item label="成品板厚" prop="commodityThickness">
-              <el-select
+              <el-select key="select9"
                 suffix-icon="" class="height-light font-14"
                 v-model="editInfo.form.commodityThickness"
                 placeholder=" "
@@ -1404,7 +1263,7 @@
           </el-col>
           <el-col :span="4">
             <el-form-item label="外层铜厚" prop="materialCopperOutside">
-              <el-select
+              <el-select key="select10"
                 suffix-icon="" class="height-light font-14"
                 v-model="editInfo.form.materialCopperOutside"
                 placeholder=" "
@@ -1425,7 +1284,7 @@
           </el-col>
           <el-col :span="4">
             <el-form-item label="内层铜厚" prop="materialCopperInside">
-              <el-select
+              <el-select key="select11"
                 suffix-icon="" class="height-light"
                 v-model="editInfo.form.materialCopperInside"
                 placeholder=" "
@@ -1525,7 +1384,7 @@
 
           <el-col :span="4">
             <el-form-item label="阻焊颜色" prop="commoditySolder">
-              <el-select
+              <el-select key="select12"
                 suffix-icon="" class="height-light"
                 v-model="editInfo.form.commoditySolder"
                 placeholder=" "
@@ -1546,7 +1405,7 @@
           </el-col>
           <el-col :span="4">
             <el-form-item label="阻焊面数" prop="commoditySolderCount">
-              <el-select
+              <el-select key="select13"
                 suffix-icon="" class="height-light"
                 v-model="editInfo.form.commoditySolderCount"
                 placeholder=" "
@@ -1574,7 +1433,7 @@
           </el-col>
           <el-col :span="4">
             <el-form-item label="字符" prop="characterColor">
-              <el-select
+              <el-select key="select14"
                 suffix-icon="" class="height-light"
                 v-model="editInfo.form.characterColor"
                 placeholder=" "
@@ -1595,7 +1454,7 @@
           </el-col>
           <el-col :span="4">
             <el-form-item label="字符面数" prop="characterCount">
-              <el-select
+              <el-select key="select15"
                 suffix-icon=""
                 v-model="editInfo.form.characterCount"
                 placeholder=" "
@@ -1616,7 +1475,7 @@
           </el-col>
           <el-col :span="4">
             <el-form-item label="成形方式" prop="commodityForm" class="error-left">
-              <el-select
+              <el-select key="select16"
                 suffix-icon=""
                 v-model="editInfo.form.commodityForm"
                 placeholder=" "
@@ -1637,13 +1496,11 @@
           </el-col>
           <el-col :span="4">
             <el-form-item label="测试方式" prop="commodityTestWay">
-              <el-select
+              <el-select key="select17"
                 suffix-icon="" class="height-light"
                 v-model="editInfo.form.commodityTestWay"
                 placeholder=" "
-                @change="saveDict(editInfo.form.commodityTestWay,'order_commodity_testway')"
                 filterable
-                allow-create
                 default-first-option
                 :reserve-keyword="false"
 
@@ -1658,12 +1515,10 @@
           </el-col>
           <el-col :span="4">
             <el-form-item size="small" label="测试架" prop="testFrame">
-              <el-select suffix-icon=""
+              <el-select suffix-icon="" key="select18"
                          v-model="editInfo.form.testFrame"
                          placeholder=" "
-                         @change="saveDict(editInfo.form.testFrame,'order_test_stand')"
                          filterable
-                         allow-create
                          default-first-option
                          :reserve-keyword="false"
 
@@ -1681,7 +1536,7 @@
           </el-col>
           <el-col :span="4">
             <el-form-item label="过孔要求" prop="holeRequirement">
-              <el-select
+              <el-select key="select19"
                 suffix-icon=""
                 v-model="editInfo.form.holeRequirement"
                 placeholder=" "
@@ -1702,7 +1557,7 @@
           </el-col>
           <el-col :span="4">
             <el-form-item label="检验标准" prop="inspectionStandard">
-              <el-select
+              <el-select key="select20"
                 suffix-icon=""
                 v-model="editInfo.form.inspectionStandard"
                 placeholder=" "
@@ -1769,7 +1624,7 @@
           </el-col>
           <el-col :span="6">
             <el-form-item label="加急" prop="urgent">
-              <el-select suffix-icon="" class="height-light" v-model="editInfo.form.urgent" placeholder=" ">
+              <el-select suffix-icon="" class="height-light" v-model="editInfo.form.urgent" placeholder=" " key="select21">
                 <el-option v-for="item in resDictData.order_urgent" :key="item.dictValue"
                            :label="item.dictLabel"
                            :value="item.dictLabel"
@@ -1779,7 +1634,7 @@
           </el-col>
           <el-col :span="6">
             <el-form-item label="是否含税" prop="isTax">
-              <el-select suffix-icon="" class="height-light font-14" v-model="editInfo.form.isTax" disabled placeholder=" ">
+              <el-select suffix-icon="" class="height-light font-14" v-model="editInfo.form.isTax" disabled placeholder=" " key="select22">
                 <el-option label="含税" value="1"/>
                 <el-option label="不含税" value="0"/>
               </el-select>
@@ -1825,7 +1680,7 @@
           </el-col>
           <el-col :span="6">
             <el-form-item label="产品类型" prop="commodityType">
-              <el-select
+              <el-select key="select23"
                 suffix-icon="" :disabled="['2'].includes(editInfo.form.orderType)"
                 v-model="editInfo.form.commodityType"
                 placeholder=" "
@@ -1996,7 +1851,7 @@
         </el-row>
       </el-form>
       <template #footer>
-        <el-row>
+        <!-- <el-row>
           <el-col :span="8" style="text-align: left;">
             总价：{{ totalOrderPriceShow }}元
           </el-col>
@@ -2006,11 +1861,11 @@
           <el-col :span="8" style="text-align: right;">
             总金额：{{ totalPriceShow }}元
           </el-col>
-        </el-row>
-        <div style="display: flex;justify-content:center;width: 100%;margin-top: 5px;">
-          <el-button @click="cancelProdDrawer">取消</el-button>
+        </el-row> -->
+        <!-- <div style="display: flex;justify-content:center;width: 100%;margin-top: 5px;"> -->
           <el-button type="primary" @click="saveProdDrawer">保存</el-button>
-        </div>
+          <el-button @click="cancelProdDrawer">取消</el-button>
+        <!-- </div> -->
       </template>
     </el-drawer>
   </div>
@@ -2060,6 +1915,7 @@
   import {getReportUrl} from "@/utils/report";
   import useTagsViewStore from '@/store/modules/tagsView';
   import { Decimal } from 'decimal.js'
+  import useUserStore from '@/store/modules/user';
   //copy是复制的函数  copied 是boolean值 是否已复制完成  isSupported 检查浏览器是否支持
   // const {copy, copied} = useClipboard()
   // watch(() => copied.value, (val) => {
@@ -2067,6 +1923,7 @@
   //     ElMessage.success('复制成功')
   //   }
   // })
+  const { ownerId } = useUserStore();
   const productLoading = ref(false)
   const isSale = ref(false)
   const isQuot = ref(false)
@@ -2087,10 +1944,10 @@
   })
 
   const totalPriceShow = computed(() => {
-    return (editInfo.form.totalPrice == 'NaN' ? 0 : editInfo.form.totalPrice) || 0
+    return (isNaN(editInfo.form.totalPrice) ? 0 : editInfo.form.totalPrice) || 0
   })
   const totalOrderPriceShow = computed(() => {
-    return (editInfo.form.totalOrderPrice == 'NaN' ? 0 : editInfo.form.totalOrderPrice) || 0
+    return (isNaN(editInfo.form.totalOrderPrice) ? 0 : editInfo.form.totalOrderPrice) || 0
   })
   /**
    * 查看弹框，文件列表
@@ -2270,21 +2127,21 @@
             let preDeliveryHour = Math.abs(dayjs1 - dayjs2) / (60 * 60 * 1000); // 将毫秒转换为小时并取绝对值*/
             item.preDeliveryHour=preDeliveryHour;
            // item.code=undefined;
-            item.singleLength = Number(item.singleLength || 0).toFixed(2)
-            item.singleWidth = Number(item.singleWidth || 0).toFixed(2)
-            item.unitedLength = Number(item.unitedLength || 0).toFixed(2)
-            item.unitedWidth = Number(item.unitedWidth || 0).toFixed(2)
+            item.singleLength = Number(Number(item.singleLength || 0).toFixed(2))
+            item.singleWidth = Number(Number(item.singleWidth || 0).toFixed(2))
+            item.unitedLength = Number(Number(item.unitedLength || 0).toFixed(2))
+            item.unitedWidth = Number(Number(item.unitedWidth || 0).toFixed(2))
 
-            item.engineeringCost = Number(item.engineeringCost || 0).toFixed(2)
-            item.testFrameCost = Number(item.testFrameCost || 0).toFixed(2)
-            item.flyProbeCost = Number(item.flyProbeCost || 0).toFixed(2)
-            item.mouldCost = Number(item.mouldCost || 0).toFixed(2)
-            item.expeditedCost = Number(item.expeditedCost || 0).toFixed(2)
-            item.sampleCost = Number(item.sampleCost || 0).toFixed(2)
-            item.otherCost = Number(item.otherCost || 0).toFixed(2)
+            item.engineeringCost = Number(Number(item.engineeringCost || 0).toFixed(2))
+            item.testFrameCost = Number(Number(item.testFrameCost || 0).toFixed(2))
+            item.flyProbeCost = Number(Number(item.flyProbeCost || 0).toFixed(2))
+            item.mouldCost = Number(Number(item.mouldCost || 0).toFixed(2))
+            item.expeditedCost = Number(Number(item.expeditedCost || 0).toFixed(2))
+            item.sampleCost = Number(Number(item.sampleCost || 0).toFixed(2))
+            item.otherCost = Number(Number(item.otherCost || 0).toFixed(2))
             if (item.otherCostList?.length) {
               item.otherCostList.map((v: any) => {
-                v.price = Number(v.price || 0).toFixed(2)
+                v.price = Number(Number(v.price || 0).toFixed(2))
               })
             }
           })
@@ -2325,28 +2182,29 @@
       /*  const sum = currentRow.value.otherCostList.reduce((accumulator, currentValue) => accumulator + Number(currentValue.price), 0);
         currentRow.value.otherCost = sum;*/
         if (info.otherCostQuotationList?.length > 0){
-          info.otherCost  =info.otherCostQuotationList.reduce((accumulator, currentValue) => accumulator + Number(currentValue.price), 0).toFixed(2);
+          info.otherCost  =info.otherCostQuotationList.reduce((accumulator, currentValue) => accumulator + Number(Number(currentValue.price), 0).toFixed(2));
           info.otherCostQuotationList.forEach(item => {
             item.id="";
-            item.price = Number(item.price || 0).toFixed(2)
+            item.price = Number(Number(item.price || 0).toFixed(2))
           })
         }
-        info.engineeringCost = Number(info.engineeringCost || 0).toFixed(2)
-        info.testFrameCost = Number(info.testFrameCost || 0).toFixed(2)
-        info.flyProbeCost = Number(info.flyProbeCost || 0).toFixed(2)
-        info.mouldCost = Number(info.mouldCost || 0).toFixed(2)
-        info.expeditedCost = Number(info.expeditedCost || 0).toFixed(2)
-        info.sampleCost = Number(info.sampleCost || 0).toFixed(2)
+        info.engineeringCost = Number(Number(info.engineeringCost || 0).toFixed(2))
+        info.testFrameCost = Number(Number(info.testFrameCost || 0).toFixed(2))
+        info.flyProbeCost = Number(Number(info.flyProbeCost || 0).toFixed(2))
+        info.mouldCost = Number(Number(info.mouldCost || 0).toFixed(2))
+        info.expeditedCost = Number(Number(info.expeditedCost || 0).toFixed(2))
+        info.sampleCost = Number(Number(info.sampleCost || 0).toFixed(2))
+        info.otherCost = Number(Number(info.otherCost || 0).toFixed(2))
 
         info.otherCostList=info.otherCostQuotationList;
         info.quotationFileList?.length && info.quotationFileList.forEach(info=>{
           info.id="";
         })
         info.popoverFileList=info.quotationFileList;
-        info.singleLength = Number(info.singleLength || 0).toFixed(2)
-        info.singleWidth = Number(info.singleWidth || 0).toFixed(2)
-        info.unitedLength = Number(info.unitedLength || 0).toFixed(2)
-        info.unitedWidth = Number(info.unitedWidth || 0).toFixed(2)
+        info.singleLength = Number(Number(info.singleLength || 0).toFixed(2))
+        info.singleWidth = Number(Number(info.singleWidth || 0).toFixed(2))
+        info.unitedLength = Number(Number(info.unitedLength || 0).toFixed(2))
+        info.unitedWidth = Number(Number(info.unitedWidth || 0).toFixed(2))
       })
       // console.log('666---',tableData.value);
       //获取客户表主键
@@ -2456,12 +2314,12 @@
         // console.log(taxRate.value)
         row.totalOrderPrice = Number(((row.totalPrice || 0) / (1 + taxRate.value)).toFixed(2))
       } else {
-        row.totalOrderPrice = Number(row.totalPrice || 0).toFixed(2) || 0;
+        row.totalOrderPrice = Number(Number(row.totalPrice || 0).toFixed(2)) || 0;
       }
     })
     nextTick(() => {
-      if (xTable.value) {
-        xTable.value.reloadData(tableData.value)
+      if (xTable.value.xTableRef) {
+        xTable.value.xTableRef.reloadData(tableData.value)
       }
     })
   }
@@ -2488,11 +2346,13 @@
   const countTax = (row: OrderVO) => {
     const tax = (row.totalPrice - row.totalOrderPrice) || 0;
     row.tax = formInline.isTax == 1 ? Number(tax.toFixed(2)) : 0;
-    return row.tax;
+    row.tax = isNaN(row.tax) ? 0 : row.tax
+    return row.tax || 0;
   }
 
   const countPrice = (row: OrderVO) => {
-    row.price = (returnNumber(row.areaPrice) * (returnNumber(row.unitedLength) * returnNumber(row.unitedWidth)) / returnNumber(row.unitedNumber) / 1000000).toFixed(4)
+    row.price = Number((returnNumber(row.areaPrice) * (returnNumber(row.unitedLength) * returnNumber(row.unitedWidth)) / returnNumber(row.unitedNumber) / 1000000).toFixed(4))
+    row.price = isNaN(row.price) ? 0 : row.price
     countAreaPrice(row)
     countTotalPrice(row)
   }
@@ -2501,42 +2361,46 @@
     return Number(val || 0)
   }
   const countAreaPrice = (row: OrderVO) => {
-    const areaPrice = (returnNumber(row.price) * returnNumber(row.unitedNumber) / (returnNumber(row.unitedLength) * returnNumber(row.unitedWidth)) * 1000000).toFixed(4)
+    const areaPrice = Number((returnNumber(row.price) * returnNumber(row.unitedNumber) / (returnNumber(row.unitedLength) * returnNumber(row.unitedWidth)) * 1000000).toFixed(4))
     // console.log(row.price, row.unitedNumber, row.unitedLength, row.unitedWidth, (returnNumber(row.price) * returnNumber(row.unitedNumber) / (returnNumber(row.unitedLength) * returnNumber(row.unitedWidth)) * 1000000))
     if (isNaN(areaPrice)) {
       row.areaPrice = 0;
     } else {
-      row.areaPrice = Number(areaPrice).toFixed(4);
+      row.areaPrice = Number(Number(areaPrice).toFixed(4));
       //总金额
-      row.totalPrice = Number(parseFloat(row.price) * parseFloat(row.quantity)).toFixed(2);
+      row.totalPrice = Number(Number(parseFloat(row.price) * parseFloat(row.quantity)).toFixed(2));
       if (formInline.isTax == 1) {
         //不含税总价
-        row.totalOrderPrice = Number(parseFloat(row.totalPrice) / (1 + taxRate.value)).toFixed(2);
+        row.totalOrderPrice = Number(Number(parseFloat(row.totalPrice) / (1 + taxRate.value)).toFixed(2));
         //税金
-        row.tax = Number(parseFloat(row.totalPrice) - parseFloat(row.totalOrderPrice)).toFixed(2);
+        row.tax = Number(Number(parseFloat(row.totalPrice) - parseFloat(row.totalOrderPrice)).toFixed(2));
       } else {
-        row.totalOrderPrice = Number(parseFloat(row.totalPrice)).toFixed(2);
+        row.totalOrderPrice = Number(Number(parseFloat(row.totalPrice)).toFixed(2));
       }
     }
   }
 
   const countQuantity = (row: OrderVO, column?: any) => {
     //计算面积
-    row.area = Number(parseFloat(row.quantity) / parseFloat(row.unitedNumber) * parseFloat(row.unitedLength) * parseFloat(row.unitedWidth) / 1000000).toFixed(4);
+    row.area = Number(Number(parseFloat(row.quantity) / parseFloat(row.unitedNumber) * parseFloat(row.unitedLength) * parseFloat(row.unitedWidth) / 1000000).toFixed(4));
+    row.area = isNaN(row.area) ? 0 : row.area
     //总金额
-    row.totalPrice = Number(parseFloat(row.price) * parseFloat(row.quantity)).toFixed(2);
+    row.totalPrice = Number(Number(parseFloat(row.price) * parseFloat(row.quantity)).toFixed(2));
     countTotalPrice(row)
+    row.totalPrice = isNaN(row.totalPrice) ? 0 : row.totalPrice
 
     if (row && column) {
-      xTable.value?.updateStatus({row,column});
+      xTable.value.xTableRef?.updateStatus({row,column});
     }
   }
 
   const countPriceAndArea = (row: OrderVO) => {
     //计算联片数量
     row.unitedNumber = parseFloat(row.unitedWayLength) * parseFloat(row.unitedWayWidth);
+    row.unitedNumber = isNaN(row.unitedNumber) ? 0 : row.unitedNumber
     //计算订单面积 (订单面积（㎡）=订购数量/连片方式（长+宽）*连片尺寸（长*宽）/1000000）
-    row.area = Number(parseFloat(row.quantity) / parseFloat(row.unitedNumber) * parseFloat(row.unitedLength) * parseFloat(row.unitedWidth) / 1000000).toFixed(4);
+    row.area = Number(Number(parseFloat(row.quantity) / parseFloat(row.unitedNumber) * parseFloat(row.unitedLength) * parseFloat(row.unitedWidth) / 1000000).toFixed(4));
+    row.area = isNaN(row.area) ? 0 : row.area
     countPriceOther(row)
     // holeCountnumber()
     holeTableCountnumber(row)
@@ -2551,15 +2415,18 @@
         row.totalPrice += returnNumber(item.price)
       })
     }
-    row.totalPrice = returnNumber(row.totalPrice).toFixed(2)
+    row.totalPrice = Number(returnNumber(row.totalPrice).toFixed(2))
     if (formInline.isTax == 1) {
       //不含税总价
-      row.totalOrderPrice = Number(parseFloat(row.totalPrice) / (1 + taxRate.value)).toFixed(2);
+      row.totalOrderPrice = Number(Number(parseFloat(row.totalPrice) / (1 + taxRate.value)).toFixed(2));
+      row.totalOrderPrice = isNaN(row.totalOrderPrice) ? 0 : row.totalOrderPrice
       //税金
-      row.tax = Number(parseFloat(row.totalPrice) - parseFloat(row.totalOrderPrice)).toFixed(2);
+      row.tax = Number(Number(parseFloat(row.totalPrice) - parseFloat(row.totalOrderPrice)).toFixed(2));
+      row.tax = isNaN(row.tax) ? 0 : row.tax
     } else {
       //不含税总价
-      row.totalOrderPrice = Number(parseFloat(row.totalPrice)).toFixed(2);
+      row.totalOrderPrice = Number(Number(parseFloat(row.totalPrice)).toFixed(2));
+      row.totalOrderPrice = isNaN(row.totalOrderPrice) ? 0 : row.totalOrderPrice
     }
   }
 
@@ -2578,12 +2445,13 @@
     }
     const totalOrderPrice = Number(row.area * row.areaPrice);
     row.totalOrderPrice = Number(totalOrderPrice.toFixed(2));
+    row.totalOrderPrice = isNaN(row.totalOrderPrice) ? 0 : row.totalOrderPrice
     if (formInline.isTax == 1) {
       row.totalPrice = Number((row.totalOrderPrice / (1 + taxRate.value)).toFixed(2))
     } else {
-      row.totalPrice = row.totalOrderPrice;
+      row.totalPrice = Number(row.totalOrderPrice);
     }
-
+    row.totalPrice = isNaN(row.totalPrice) ? 0 : row.totalPrice
   }
 
   const total = ref(0);
@@ -3193,7 +3061,7 @@
   const loading = ref(false);
   const comLoading = ref(false);
   const tableData = ref<OrderVO[]>([]);
-  const editInfo = reactive<Record<string, any>>({
+  const editInfo = reactive({
     type: 1, // 1新增产品 2编辑产品
     show: false,
     index: 1,
@@ -3353,6 +3221,15 @@
       ]
     }
   })
+  
+  const columnListChooseProduct = ref([
+  { title: '产品编码',field: 'code',align: 'center',  },
+  { width: '50',title: '操作',field: 'make',align: 'center',  },
+  ]);
+  const columnListOrderReturn = ref([
+  { title: '产品编码',field: 'commodityCode',align: 'center',  },
+  { width: '50',title: '操作',field: 'make',align: 'center',  },
+  ]);
 
   const showCommodityCode = (row: any) => {
     /*客户编码+批量/样品+版层+表面处理+流水号+版本号*/
@@ -3411,7 +3288,7 @@
   /** 提交审核 */
   const onSubmitCheckBtnClick = async (type: string, fn?: any,isRow?:boolean,index?:number) => {
     let msg = "修改成功";
-    if (type == '1') {
+    if (type == '1' && null == index) {
       msg = "暂存成功";
     } else if (type == '2') {
       msg = "提交审核成功";
@@ -3460,6 +3337,19 @@
     directOrder.orderList.map(order => {
       order.cusAddressId = formInline.addressId;
       order.cusAddress = addressInfo?.address;
+
+      // 最迟发货为空时，再计算一次
+      if (!order.dispatchTime) {
+        // console.log('order.dispatchTime', order.dispatchTime)
+        if (order.preDeliveryHour != 0 && order.preDeliveryHour!=undefined) {
+          const dayjs1 = dayjs(order.deliveryTime);
+          const dayjs2 = dayjs1.subtract(order.preDeliveryHour, 'hour');
+          order.dispatchTime = dayjs2.format("YYYY-MM-DD HH:mm:ss");
+        }else{
+          order.dispatchTime= dayjs(order.deliveryTime).format("YYYY-MM-DD HH:mm:ss");
+        }
+      }
+
       Object.keys(order).forEach((fieldName) => {
         order[fieldName] = order[fieldName] ? order[fieldName] : commonCommodityOrderVo[fieldName];
       })
@@ -3543,11 +3433,12 @@
     if ((isSale.value || isQuot.value) && type == '2' && !isRow) {
       closePage(true)
     }
+    isDisabled.value = tableData.value.some((item: any) => !['1','3'].includes(item.status))
   };
 
   /*数据校验*/
   const validAllEvent = async () => {
-    const $table = xTable.value;
+    const $table = xTable.value.xTableRef;
     let formValidate = await addCustomerFormRef.value?.validate((valid: boolean) => {
       if (valid) {
         return true;
@@ -3670,7 +3561,85 @@
     // proxy?.$modal.closeLoading()
     alreadySelectCommodity.value = [];
   }
-
+  const columnListOtherPrice = ref([
+  { width: '60',title: '操作',field: 'make',align: 'center',  },
+  { title: '费用名称',field: 'title',align: 'center',editRender:{}  },
+  { title: '金额',field: 'price',align: 'center',editRender:{}  },
+  ]);
+  const columnList = ref([
+  { width:'50',title:'序号',type:'seq',align:'center',fixed:"left"  },
+  { width:'100',title:'订单类型',field:'orderType',align:'center',editRender:{} },
+  { width:'80',title:'批/样',field:'model',align:'center',editRender:{}  },
+  { width:'80',title:'客户PO',field:'customerPo',align:'center',editRender:{}  },
+  { width:'150',title:'产品编码',field:'commodityCode',align:'center',  },
+  { width:'120',title:'流水号',field:'serialNumber',align:'center',editRender:{}  },
+  { width:'120',title:'产品名称',field:'commodityName',align:'center',editRender:{}  },
+  { width:'90',title:'版本号',field:'version',align:'center',editRender:{}  },
+  { width:'80',title:'产品类型',field:'commodityType',align:'center',editRender:{}  },
+  { width:'80',title:'加急',field:'urgent',align:'center',editRender:{}  },
+  { width:'120',title:'订购数量(pcs)',field:'quantity',align:'center',editRender:{}  },
+  { width:'120',title:'单价(元/pcs)',field:'price',align:'center',editRender:{}  },
+  { width:'90',title:'面积(㎡)',field:'area',align:'center',editRender:{}  },
+  { width:'120',title:'平米价(元/㎡)',field:'areaPrice',align:'center',editRender:{}  },
+  { width:'80',title:'总金额',field:'totalPrice',align:'center',  },
+  { width:'80',title:'总价',field:'totalOrderPrice',align:'center',  },
+  { width:'80',title:'税金',field:'tax',align:'center',  },
+  { width:'110',title:'客户交期',field:'deliveryTime',align:'center',editRender:{}  },
+  { width:'100',title:'提前发货(h)',field:'preDeliveryHour',align:'center',editRender:{}  },
+  { width:'110',title:'最迟发货',field:'dispatchTime',align:'center',editRender:{}  },
+  { width:'100',title:'表面处理',field:'surfaceTreatment',align:'center',editRender:{}  },
+  { width:'80',title:'层数',field:'materialLayer',align:'center',editRender:{}  },
+  { width:'80',title:'板材',field:'materialQuality',align:'center',editRender:{}  },
+  { width:'80',title:'板材品牌',field:'materialBrand',align:'center',editRender:{}  },
+  { width:'80',title:'板材级别',field:'materialLevel',align:'center',editRender:{}  },
+  { width:'100',title:'阻焊颜色',field:'commoditySolder',align:'center',editRender:{}  },
+  { width:'80',title:'阻焊面数',field:'commoditySolderCount',align:'center',editRender:{}  },
+  { width:'80',title:"金厚(u'')",field:'goldenThickness',align:'center',editRender:{}  },
+  { width:'80',title:'字符',field:'characterColor',align:'center',editRender:{}  },
+  { width:'80',title:'字符面数',field:'characterCount',align:'center',editRender:{}  },
+  { width:'100',title:'成形方式',field:'commodityForm',align:'center',editRender:{}  },
+  { width:'100',title:'测试方式',field:'commodityTestWay',align:'center',editRender:{}  },
+  { width:'80',title:'测试架',field: 'testFrame',align:'center',editRender:{}  },
+  { width:'100',title:'测试点(个)',field:'testPoint',align:'center',editRender:{}  },
+  { width:'80',title:'过孔要求',field:'holeRequirement',align:'center',editRender:{}  },
+  { width:'80',title:'检验标准',field:'inspectionStandard',align:'center',editRender:{}  },
+  { width:'80',title:'金面积',field:'goldArea',align:'center',editRender:{}  },
+  { width:'110',title:'客户物料编码',field:'materialNumber',align:'center',editRender:{}  },
+  { width:'120',title:'客户物料名称',field:'materialName',align:'center',editRender:{}  },
+  { width:'120',title:'最小线宽(mm)',field:'minLineWidth',align:'center',editRender:{}  },
+  { width:'120',title:'最小线距(mm)',field:'minLineSpace',align:'center',editRender:{}  },
+  { width:'120',title:'最小孔径(mm)',field:'minAperture',align:'center',editRender:{}  },
+  { width:'150',title:'总孔数(/连板(SLOT))',field:'holeCount',align:'center',editRender:{}  },
+  { width:'120',title:'孔密度(万/m²)',field:'holeDensity',align:'center',editRender:{}  },
+  { width:'100',title:'模具费',field:'mouldCost',align:'center',editRender:{}  },
+  { width:'100',title:'测试架费',field:'testFrameCost',align:'center',editRender:{}  },
+  { width:'100',title:'飞针费',field:'flyProbeCost',align:'center',editRender:{}  },
+  { width:'100',title:'工程费',field:'engineeringCost',align:'center',editRender:{}  },
+  { width:'100',title:'样板费',field:'sampleCost',align:'center',editRender:{}  },
+  { width:'100',title:'加急费',field:'expeditedCost',align:'center',editRender:{}  },
+  { width:'100',title:'其他费',field:'otherCost',align:'center',  },
+  { width:'100',title:'包装要求',field:'packRequirement',align:'center',editRender:{}  },
+  { width:'120',title:'订单特殊要求',field:'specialRequirement',align:'center',editRender:{}  },
+  { width:'80',title:'成品板厚',field:'commodityThickness',align:'center',editRender:{}  },
+  { width:'80',title:'外层铜厚',field:'materialCopperOutside',align:'center',editRender:{}  },
+  { width:'80',title:'内层铜厚',field:'materialCopperInside',align:'center', editRender:{} },
+  { width:'120',title:'单片长(mm)',field:'singleLength',align:'center',editRender:{}  },
+  { width:'120',title:'单片宽(mm)',field:'singleWidth',align:'center',editRender:{}  },
+  { width:'120',title:'联片长(mm)',field:'unitedLength',align:'center',editRender:{}  },
+  { width:'120',title:'联片宽(mm)',field:'unitedWidth',align:'center',editRender:{}  },
+  { width:'100',title:'联片数量(pcs)',field:'unitedNumber',align:'center',  },
+  { width:'120',title:'连片方式长(个)',field:'unitedWayLength',align:'center',editRender:{}  },
+  { width:'120',title:'连片方式宽(个)',field:'unitedWayWidth',align:'center',editRender:{}  },
+  { width:'120',title:'产品备注',field:'commodityRemark',align:'center',editRender:{}  },
+  { width:'120',title:'订单备注',field:'remark',align:'center',editRender:{}  },
+  { width:'130',title:'承认书/出货报告',field:'hasAcknowledgment',align:'center',  },
+  { width:'60',title:'阻抗报告',field:'hasImpedanceReport',align:'center',  },
+  { width:'60',title:'切片',field:'hasSection',align:'center',  },
+  { width:'60',title:'阻抗条',field:'hasImpedanceBar',align:'center',  },
+  { width:'60',title:'菲林',field:'hasFilm',align:'center',  },
+  { width:'60',title:'封样',field:'hasSealedSample',align:'center',  },
+  { width:'220',title:'操作',field:'make',align:'center',fixed:"right"  },
+  ]);
   const columnCommodityList = ref([
     {type: 'checkbox', width: '60', align: "center"},
     {
@@ -4115,7 +4084,7 @@
 
   /*其他费用数据校验*/
   const validOtherCostEvent = async () => {
-    const $table = _tableRef.value
+    const $table = _tableRef.value.xTableRef
     if ($table) {
       const errMap = await $table.validate(true)
       if (errMap) {
@@ -4274,10 +4243,10 @@
       orderVo.cusTransStyle = String(formInline.shippingType);
       orderVo.commodityCode = item.code;
       orderVo.commodityName = item.name;
-      orderVo.otherCost = Number(item.otherCost || 0).toFixed(2)
+      orderVo.otherCost = Number(Number(item.otherCost || 0).toFixed(2))
       if (orderVo.otherCostList?.length) {
         orderVo.otherCostList.map((v: any) => {
-          v.price = Number(v.price || 0).toFixed(2)
+          v.price = Number(Number(v.price || 0).toFixed(2))
         })
       }
       const userInfo = salerOptions.value.find(item => item.userId = String(formInline.cusSaleUserId))
@@ -4429,11 +4398,11 @@
       orderVo.updateBy = undefined;
       orderVo.createTime = undefined;
       orderVo.updatetime = undefined;
-      orderVo.otherCost = Number(item.otherCost || 0).toFixed(2)
+      orderVo.otherCost = Number(Number(item.otherCost || 0).toFixed(2))
       // orderVo.otherCostList = []
       if (orderVo.otherCostList?.length) {
         orderVo.otherCostList.map((v: any) => {
-          v.price = Number(v.price || 0).toFixed(2)
+          v.price = Number(Number(v.price || 0).toFixed(2))
         })
       }
       // orderVo.preDeliveryHour = ((new Date(orderVo.deliveryTime).getTime() - new Date(orderVo.dispatchTime).getTime()) / 1000 / 60 / 60).toFixed(0)
@@ -4575,10 +4544,10 @@
     currentRow.value = row;
   }
 
-  const _tableRef = ref<VxeTableInstance<changeItemVO>>();
+  const _tableRef = ref();
 
   const addChangeRow = async () => {
-    const $table = _tableRef.value
+    const $table = _tableRef.value.xTableRef
     if ($table) {
       currentRow.value.otherCostList = currentRow.value.otherCostList ? currentRow.value.otherCostList : [];
       const index = currentRow.value.otherCostList.length + 1;
@@ -4592,7 +4561,7 @@
   //删除变更行
   const removeChange = async (_row: any) => {
     // console.log(_row);
-    const $table = _tableRef.value
+    const $table = _tableRef.value.xTableRef
     if ($table) {
       const {row: newRow} = await $table.remove(_row)
       if (_row.id) {
@@ -4658,9 +4627,9 @@
     // paymentMethod: [
     //   {required: true, message: "付款方式不能为空", trigger: "change"}
     // ],
-    // monthlyMethod: [
-    //   {required: true, message: "月结方式不能为空", trigger: "change"}
-    // ],
+    monthlyMethod: [
+      {required: true, message: "月结方式不能为空", trigger: "change"}
+    ],
     currency: [
       {required: true, message: "币种不能为空", trigger: "change"}
     ],
@@ -4681,7 +4650,7 @@
 
 
   const isActiveStatus = (row: OrderVO) => {
-    const $table = xTable.value;
+    const $table = xTable.value.xTableRef;
     if ($table) {
       return $table.isEditByRow(row);
     }
@@ -4689,7 +4658,7 @@
 
   //编辑
   const editRowEvent = (row: OrderVO) => {
-    const $table = xTable.value;
+    const $table = xTable.value.xTableRef;
     if ($table) {
       $table.setEditRow(row);
     }
@@ -4706,13 +4675,13 @@
         $table.status = undefined
       }
       tableData.value.push($table);
-      // console.log(xTable.value)
+      // console.log(xTable.value.xTableRef)
     }
     // console.log(tableData.value)
     // const record = {}
-    // const {row: newRow} =  xTable.value.insertNextAt(record,row);
+    // const {row: newRow} =  xTable.value.xTableRef.insertNextAt(record,row);
     // console.log(tableData.value)
-    // console.log(xTable.value)
+    // console.log(xTable.value.xTableRef)
   };
 
   //删除
@@ -4774,10 +4743,11 @@
         if(res.code == 200){
           row.status = '3';
           // getRouterData()
-          ElMessage({
-            type: 'success',
-            message: '操作成功',
-          })
+          onSubmitCheckBtnClick('1',() => {},true,index);
+          // ElMessage({
+          //   type: 'success',
+          //   message: '操作成功',
+          // })
         }
       })
     }).catch(() => {})
@@ -4803,7 +4773,7 @@
   const saveRowEvent = (row: OrderVO) => {
     // row.unitedNumber = row.unitedWayLength * row.unitedWayWidth;
     // console.log(row)
-    const $table = xTable.value;
+    const $table = xTable.value.xTableRef;
     if ($table) {
       $table.clearEdit().then(() => {
         loading.value = true;
@@ -4816,7 +4786,7 @@
   };
 
   const cancelRowEvent = (row: OrderVO) => {
-    const $table = xTable.value;
+    const $table = xTable.value.xTableRef;
     if ($table) {
       $table.clearEdit().then(() => {
         // 还原行数据
@@ -4954,7 +4924,7 @@
     // console.log('---------',customerList.value, editInfo.form);
     queryInventoryByCommodityHandle(editInfo.form.commodityCode, editInfo.form)
     setTimeout(() => {
-      addProdRef.value.clearValidate()
+      addProdRef.value?.clearValidate()
     }, 0)
   }
 
@@ -5002,18 +4972,20 @@
    * 计算孔密度
    */
   const holeCountnumber = async () => {
-    return editInfo.form.holeDensity = Number(parseFloat(editInfo.form.holeCount) / parseFloat(editInfo.form.unitedLength) / parseFloat(editInfo.form.unitedWidth) * 100).toFixed(6);
+    return editInfo.form.holeDensity = Number(Number(parseFloat(editInfo.form.holeCount) / parseFloat(editInfo.form.unitedLength) / parseFloat(editInfo.form.unitedWidth) * 100).toFixed(6));
   }
 
   /**
    * 表格孔密度
    */
   const holeTableCountnumber = (row: any) => {
-    return row.holeDensity = Number(parseFloat(row.holeCount) / parseFloat(row.unitedLength) / parseFloat(row.unitedWidth) * 100).toFixed(6);
+    return row.holeDensity = Number(Number(parseFloat(row.holeCount) / parseFloat(row.unitedLength) / parseFloat(row.unitedWidth) * 100).toFixed(6));
   }
 
   // 关闭产品弹框
   const cancelProdDrawer = () => {
+    addProdRef.value.resetFields()
+    addProdRef.value.clearValidate()
     editInfo.show = false
     for (let key in editInfo.form) {
       editInfo.form[key] = undefined
@@ -5042,7 +5014,7 @@
 
         // 文件
         // console.log('3333----',tableData.value)
-        const $table = xTable.value;
+        const $table = xTable.value.xTableRef;
         if ($table) {
           getDictOptions()
           $table.reloadData(tableData.value)
@@ -5160,6 +5132,10 @@
 
 <style lang="scss" scoped>
   :deep(.direct-table) {
+    // 底部 内边距10
+    &.is--footer .vxe-table--body-wrapper {
+      padding-bottom: 10px;
+    }
     .vxe-select {
       .vxe-input--inner {
         padding-right: 2px;
@@ -5181,9 +5157,10 @@
     width: 100%;
   }
 
-  :deep(.vxe-icon-edit) {
-    display: none;
-  }
+  // 需要展示编辑图标，以方便用户知道可以编辑
+  // :deep(.vxe-icon-edit) {
+  //   display: none;
+  // }
 
   :deep(input::-webkit-inner-spin-button) {
     -webkit-appearance: none !important;
@@ -5195,114 +5172,6 @@
     margin-top: -20px !important;
   }
 
-
-  :deep(.add-prod-drawder) {
-    .el-drawer__header {
-      padding: 5px !important;
-      margin-bottom: 5px !important;
-    }
-
-    .el-drawer__body {
-      padding: 5px 5px !important;
-
-      .el-divider {
-        margin: 0 0 6px 0 !important;
-      }
-
-      .error-left {
-        .el-form-item__error {
-          left: -20px;
-        }
-      }
-
-      .error-left-one {
-        .el-form-item__error {
-          left: -30px;
-        }
-      }
-
-      .el-form-item {
-        margin-bottom: 6px !important;
-
-        .el-form-item__label {
-          padding-right: 3px !important;
-        }
-
-        .el-form-item__content {
-          .el-form-item {
-            margin-bottom: 0 !important;
-          }
-
-          .el-textarea,
-          .el-input__wrapper,
-          .el-textarea__inner {
-            background-color: #FDFFE1 !important;
-            color: #000000 !important;
-          }
-
-          .el-input__inner {
-            -webkit-text-fill-color: #000000;
-            color: #000000 !important;
-          }
-
-          .height-light .el-input__wrapper {
-            background-color: #FED547 !important;
-          }
-          .font-14 .el-input__inner {
-            font-size: 14px;
-          }
-
-          .el-input-group__prepend,
-          .el-input-group__append {
-            padding: 0 2px !important;
-          }
-
-          .append-btn {
-            .el-input-group__append {
-              padding: 0 20px !important;
-            }
-          }
-        }
-
-        &.is-error .el-input__wrapper {
-          box-shadow: 0 0 0 2px var(--el-color-danger) inset;
-        }
-
-        .el-form-item__error {
-          display: none;
-          // margin-top: -2px;
-          // white-space: nowrap !important;
-          // font-size: 12px !important;
-          // transform: scale(0.9) !important;
-          // z-index: 10 !important;
-        }
-
-        .error-right {
-          .el-form-item__error {
-            /* text-align: right; */
-            left: 105px !important;
-          }
-
-          z-index: 10 !important;
-        }
-      }
-    }
-
-    /* .el-drawer__footer {
-      padding: 5px;
-    } */
-    .flex-start {
-      .el-form-item__content {
-        justify-content: flex-start !important;
-        align-items: center;
-
-        .el-input-number {
-          flex: 1 !important;
-          width: auto;
-        }
-      }
-    }
-  }
   :deep(.number-left) {
     .el-input__wrapper {
       padding-left: 7px;

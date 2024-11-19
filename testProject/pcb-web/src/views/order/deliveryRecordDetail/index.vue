@@ -1,11 +1,11 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
-      <el-tabs class="xtable-tab" type="border-card" @tab-click="tabChange" v-model="tabValue">
+    <!-- <el-card shadow="never" class="xtable-card"> -->
+      <el-tabs class="xtable-tab" @tab-click="tabChange" v-model="tabValue">
         <el-tab-pane label="销售订单" name="销售订单">
-          <transition :enter-active-class="proxy?.animate.searchAnimate.enter"
+          <!-- <transition :enter-active-class="proxy?.animate.searchAnimate.enter"
                       :leave-active-class="proxy?.animate.searchAnimate.leave">
-            <div class="search" >
+            <div class="search" > -->
               <el-form :model="queryParams" ref="queryFormRef" size="small" label-width="80px"
                        class="demo-form-inline">
                 <el-row>
@@ -22,31 +22,31 @@
                                       placeholder="选择结束时间" value-format="YYYY-MM-DD HH:mm:ss" format="YYYY-MM-DD HH:mm:ss"/>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="送货单号">
                       <el-input v-model="queryParams.code" clearable @keyup.enter="handleQuery"/>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="物流单号">
                       <el-input v-model="queryParams.logisticsNo" clearable @keyup.enter="handleQuery"/>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="产品名称" prop="commodityName">
                       <el-input v-model="queryParams.commodityName" clearable @keyup.enter="handleQuery"/>
                     </el-form-item>
                   </el-col>
-                  <div class="pl-10">
+                  <el-col :span="3" class="text-right">
                     <el-button type="primary" @click="handleQuery">搜索</el-button>
                     <el-button @click="resetQuery">重置</el-button>
-                  </div>
+                  </el-col>
                   <el-col :span="6">
                     <el-form-item label="产品编码" prop="commodityCode">
                       <el-input v-model="queryParams.commodityCode" clearable @keyup.enter="handleQuery"/>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="客户编码" prop="customerCode">
                       <!-- <el-input v-model="queryParams.customerCode" clearable @keyup.enter="handleQuery"/> -->
 
@@ -57,28 +57,34 @@
 
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="销售单号" prop="saleOrderNo">
                       <el-input v-model="queryParams.saleOrderNo" clearable @keyup.enter="handleQuery"/>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="客户PO" prop="customerPo">
                       <el-input v-model="queryParams.customerPo" clearable @keyup.enter="handleQuery"/>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="6" style="text-align: right">
+                  <el-col :span="3" class="text-right">
                     <el-button @click="exportExcelBefore">导出</el-button>
                   </el-col>
                 </el-row>
               </el-form>
-            </div>
-          </transition>
-          <el-row :gutter="10" class="mb8" style="width:100%;margin:0;display:flex;justify-content: end;">
+            <!-- </div>
+          </transition> -->
+          <TotalTitle
+            :list="[
+              { title: `面积汇总：${totalArea} m²` },
+              { title: `数量汇总：${totalQuantity}` },
+            ]"
+          ></TotalTitle>
+          <!-- <el-row :gutter="10" class="mb8" style="width:100%;margin:0;display:flex;justify-content: end;">
             <el-col :span="20">
               <p class="totalTitle">面积汇总：{{totalArea}} （m²）&nbsp;&nbsp;|&nbsp;&nbsp; 数量汇总：{{totalQuantity}}</p>
             </el-col>
-          </el-row>
+          </el-row> -->
           <XTable :toolId="mainTableToolId" v-model:page-size="queryParams.pageSize" :loading="loading"
             v-model:current-page="queryParams.pageNum" height="100%" class="xtable-content" :showRefresh="true"
             :intervalCondition="intervalCondition" :page-params="{ perfect: true, total: total }" :show-footer="true" :footer-method="footerMethod"
@@ -91,7 +97,7 @@
               <span>{{ parseTime(scope.row.deliveryTime, '{y}-{m}-{d}') }}</span>
             </template> -->
             <template #default-code="scope">
-              <el-link type="primary" @click="doDeliverPrint(scope.row.id)">{{ scope.row.code }} </el-link>
+              <el-link type="primary" @click="doDeliverPrint(scope.row)">{{ scope.row.code }} </el-link>
             </template>
             <template #default-isCallback="scope">
               <el-tag :type="scope.row.isCallback == '1' ? 'success' : 'info'">{{ '0' === scope.row.isCallback ? '未回签' : "已回签" }}</el-tag>
@@ -99,9 +105,9 @@
           </XTable>
         </el-tab-pane>
         <el-tab-pane label="退货订单" name="退货订单">
-          <transition :enter-active-class="proxy?.animate.searchAnimate.enter"
+          <!-- <transition :enter-active-class="proxy?.animate.searchAnimate.enter"
                       :leave-active-class="proxy?.animate.searchAnimate.leave">
-            <div class="search" >
+            <div class="search" > -->
               <el-form :model="orderBackQueryParams" ref="orderBackQueryFormRef" size="small" label-width="80px"
                        class="demo-form-inline">
                 <el-row>
@@ -118,31 +124,31 @@
                                       placeholder="选择结束时间" value-format="YYYY-MM-DD HH:mm:ss" format="YYYY-MM-DD HH:mm:ss"/>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="送货单号">
                       <el-input v-model="orderBackQueryParams.code" clearable @keyup.enter="handleQuery"/>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="物流单号">
                       <el-input v-model="orderBackQueryParams.logisticsNo" clearable @keyup.enter="handleQuery"/>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="产品名称" prop="commodityName">
                       <el-input v-model="orderBackQueryParams.commodityName" clearable @keyup.enter="handleQuery"/>
                     </el-form-item>
                   </el-col>
-                  <div class="pl-10">
+                  <el-col :span="3" class="text-right">
                     <el-button type="primary" @click="orderBackHandleQuery">搜索</el-button>
                     <el-button @click="orderBackResetQuery">重置</el-button>
-                  </div>
+                  </el-col>
                   <el-col :span="6">
                     <el-form-item label="产品编码" prop="commodityCode">
                       <el-input v-model="orderBackQueryParams.commodityCode" clearable @keyup.enter="handleQuery"/>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="客户编码" prop="customerCode">
                       <!-- <el-input v-model="orderBackQueryParams.customerCode" clearable @keyup.enter="handleQuery"/> -->
 
@@ -153,28 +159,33 @@
 
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="销售单号" prop="saleOrderNo">
                       <el-input v-model="orderBackQueryParams.saleOrderNo" clearable @keyup.enter="handleQuery"/>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="4">
+                  <el-col :span="5">
                     <el-form-item label="客户PO" prop="customerPo">
                       <el-input v-model="orderBackQueryParams.customerPo" clearable @keyup.enter="handleQuery"/>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="6" style="text-align: right">
+                  <el-col :span="3" class="text-right">
                     <el-button @click="orderBackExportExcel">导出</el-button>
                   </el-col>
                 </el-row>
               </el-form>
-            </div>
-          </transition>
-          <el-row :gutter="10" class="mb8" style="width:100%;margin:0;display:flex;justify-content: end;">
+            <!-- </div>
+          </transition> -->
+          <TotalTitle
+            :list="[
+              { title: `面积汇总：${totalBackArea} m²` },
+            ]"
+          ></TotalTitle>
+          <!-- <el-row :gutter="10" class="mb8" style="width:100%;margin:0;display:flex;justify-content: end;">
             <el-col :span="20">
               <p class="totalTitle">面积汇总：{{totalBackArea}} （m²）</p>
             </el-col>
-          </el-row>
+          </el-row> -->
           <XTable :toolId="mainTableOrderBackToolId" v-model:page-size="orderBackQueryParams.pageSize" :loading="orderBackLoading"
                   v-model:current-page="orderBackQueryParams.pageNum" height="100%" class="xtable-content" :show-footer="true" :footer-method="footerMethodRetrun"
                   :intervalCondition="intervalCondition" :page-params="{ perfect: true, total: orderBacktotal }"
@@ -184,7 +195,7 @@
               <span>{{ parseTime(scope.row.accountDate, '{y}-{m}-{d}') }}</span>
             </template>
             <template #default-code="scope">
-              <el-link type="primary" @click="doDeliverPrint(scope.row.id)">{{ scope.row.code }} </el-link>
+              <el-link type="primary" @click="doDeliverPrint(scope.row)">{{ scope.row.code }} </el-link>
             </template>
             <template #default-isCallback="scope">
               <el-tag :type="scope.row.isCallback == '1' ? 'success' : 'info'">{{ '0' === scope.row.isCallback ? '未回签' : "已回签" }}</el-tag>
@@ -192,7 +203,7 @@
           </XTable>
         </el-tab-pane>
       </el-tabs>
-    </el-card>
+    <!-- </el-card> -->
 
     <el-dialog
       v-model="exportVisible"
@@ -217,8 +228,14 @@
       </template>
     </el-dialog>
 
-    
+
     <DeliveryPrint ref="deliverCardRef" />
+    <!-- 打印对话框 -->
+    <el-drawer destroy-on-close v-model="reportDrawer.visible" :title="reportDrawer.title" size="70%" visible.sync="false"
+               draggable>
+      <iframe :src="reportUrl" style="width: 100%; height: 100%; border: none;"></iframe>
+      <PrintPurchase />
+    </el-drawer>
   </div>
 </template>
 
@@ -229,6 +246,7 @@ import { VxeTableEvents } from "vxe-table";
 import { ref } from "vue";
 import { parseTime } from "@/utils/ruoyi";
 import { getListCustomer} from "@/api/basedata/customer";
+import {getSignPdf} from "@/api/financial/accountOrder";
 
 const deliverCardRef = ref();
 const totalArea = ref(0);
@@ -473,7 +491,7 @@ const searchChange = (params: any) => {
   console.log("searchChange params",params,queryParams.value)
   //删除原本不属于queryParams的属性
   for (const key in queryParams.value) {
-    if (queryParamsCopy && queryParamsCopy.value && typeof queryParamsCopy.value === 'object' 
+    if (queryParamsCopy && queryParamsCopy.value && typeof queryParamsCopy.value === 'object'
       && !queryParamsCopy.value.hasOwnProperty(key)) {
       delete queryParams.value[key];
     }
@@ -489,7 +507,7 @@ const orderBackSearchChange = (params: any) => {
 
   //删除原本不属于orderBackQueryParams的属性
   for (const key in orderBackQueryParams.value) {
-    if (orderBackQueryParamsCopy && orderBackQueryParamsCopy.value && typeof orderBackQueryParamsCopy.value === 'object' 
+    if (orderBackQueryParamsCopy && orderBackQueryParamsCopy.value && typeof orderBackQueryParamsCopy.value === 'object'
       && !orderBackQueryParamsCopy.value.hasOwnProperty(key)) {
       delete orderBackQueryParams.value[key];
     }
@@ -615,9 +633,29 @@ const orderBackResetQuery = () => {
 }
 
 
-const doDeliverPrint = (ids:any) => {
-  deliverCardRef.value?.doPrint(ids);
+const doDeliverPrint = async (row?: any) => {
+  // 有签名文件使用ureport
+  const res = await getSignPdf({bizCode: row.code});
+  if (res.data?.url) {
+    reportDrawer.title = "送货单报表预览";
+    reportDrawer.visible = true;
+    let url = '/web/viewer.html?file=' + encodeURIComponent(res.data.url + '#' + res.data.name);
+    reportUrl.value = url;
+    reportUrl.value = reportUrl.value.replace("1,4,6", "2,4,6");
+    return;
+  }
+
+  // 没有使用原来的打印格式
+  deliverCardRef.value?.doPrint(row.id);
 }
+
+let reportUrl = ref("");
+const reportDrawer = reactive<DrawerOption>({
+  direction: 'left',
+  visible: false,
+  title: '送货单'
+});
+
 /** 导出按钮操作 */
 const handleExport = () => {
   proxy?.download('order/deliveryRecord/export', {
@@ -671,7 +709,7 @@ const getListCust = async() => {
     if(resCust){
       customerCodeList.value = resCust.map(item=>{ return { value:item.id, label:item.customerCode } });
     }
-    
+
 }
 
 onMounted(() => {

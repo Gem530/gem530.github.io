@@ -3,7 +3,7 @@
       <el-tabs type="border-card" @tab-click="handleClick" class="xtable-tab" v-model="editableTabsValue">
         <el-tab-pane label="统计图表" name="0">
           <el-card shadow="never" style="margin:0;width: 100%;height: 50%">
-            <el-row style="width: 100%; height: 26px">
+            <el-row style="width: 100%; height: 38px;margin-top: -10px;">
               <el-col :span="7">
                 <el-form-item label="查询日期：">
                   <interval-date ref="timeRef" class="init-date" v-model="queryTime" :start-params="dateParams.startTime"
@@ -21,7 +21,7 @@
           </el-card>
 
           <el-card shadow="never" style="margin:0;width: 100%;height: 50%">
-            <el-row style="width: 100%; height: 26px">
+            <el-row style="width: 100%; height: 38px; margin-top: -10px;">
               <el-col :span="7">
                 <el-form-item label="查询日期：">
                   <interval-date ref="timeRef" class="init-date" v-model="queryTime2" :start-params="dateParams2.startTime"
@@ -466,7 +466,7 @@
 
     loading.value = true;
     params.type='0'
-    params.status = '1'
+    //params.status = '1'
     params.isAsc='desc'
     params.orderByColumn = 'create_time'
     const res = await listCapacity(params);
@@ -485,7 +485,7 @@
     params.time = undefined
 
     params.type='0'
-    params.status = '1'
+    //params.status = '1'
     const res = await getCount(params);
     let obj= res.data;
     cardAreaTotal.value = obj.cardAreaTotal;
@@ -601,7 +601,7 @@
     // params.time = undefined
 
     params.type='0'
-    params.status = '1'
+    //params.status = '1'
     if(params.createDeptName==undefined
       && params.createByName==undefined
       && params.craftName==undefined

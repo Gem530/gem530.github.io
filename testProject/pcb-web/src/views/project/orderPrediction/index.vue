@@ -1,6 +1,6 @@
 <template>
   <div class="p-2 xtable-page">
-    <div class="search" v-show="showSearch">
+    <!-- <div class="search" v-show="showSearch"> -->
       <el-form :model="queryParams" ref="queryFormRef" size="small" label-width="100px"
                class="demo-form-inline">
         <el-row>
@@ -39,6 +39,12 @@
            </el-select>
             </el-form-item>
           </el-col>
+
+          <el-col :span="4" class="global-flex flex-end align-start">
+            <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+            <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+          </el-col>
+
           <el-col :span="4">
             <el-form-item label="销售单号" prop="orderCode">
               <el-input v-model="queryParams.orderCode" clearable/>
@@ -70,21 +76,21 @@
               </el-radio-group>
             </el-form-item>
           </el-col>
-          <el-col :span="6" class="global-flex flex-end">
-          <div style="float: right">
+          <el-col :span="8" class="global-flex flex-end align-start">
+          <!-- <div style="float: right">
             <div style="display:flex;;line-height: 24px;font-size: 14px">
               <div style="width: 110px;background-color: #ECB0B1;text-align: center;">订单已撤回</div>
               <div style="width: 110px;background-color: #FAECD8;text-align: center">存在外协单</div>
               <div style="width: 110px;background-color: #E1E5FD;text-align: center">库存发货</div>
             </div>
-          </div>
-          </el-col>
-          <el-col :span="6" class="global-flex flex-end">
-            <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-            <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+          </div> -->
+          <!-- </el-col>
+          <el-col :span="4" class="global-flex flex-end align-start"> -->
+          <div>
             <el-button icon="Download" @click="exportData">导出</el-button>
             <el-button type="danger" :loading="buttonLoading" @click="updateStatus(0)">审核驳回</el-button>
             <el-button type="success" :loading="buttonLoading" @click="updateStatus(1)">审核通过</el-button>
+          </div>
           </el-col>
         </el-row>
         <!--        <div style="padding-left: 30px">-->
@@ -98,11 +104,11 @@
         <!--          </vxe-radio-group>-->
         <!--        </div>-->
       </el-form>
-    </div>
+    <!-- </div> -->
     <!--    <div class="p-2 text-right">-->
     <!--      <el-button type="primary" @click="updateStatus">审核通过</el-button>-->
     <!--    </div>-->
-    <el-tabs class="xtable-tab" type="border-card" @tab-click="radioTableHandle" v-model="radioTable">
+    <el-tabs class="xtable-tab" @tab-click="radioTableHandle" v-model="radioTable">
       <el-tab-pane label="本厂订单" name="本厂订单">
         <XTable toolId="projectOrderPrediction" height="100%" class="xtable-content"
                 :page-show="false" :data="orderPredictionList" :columnList="columnList"
@@ -116,6 +122,13 @@
                 :scroll-y="{enabled: true,gt: 50}"
                 @finishSort="finishSort1Flag = !finishSort1Flag"
         >
+          <template #header-tool>
+            <ColorRule :list="[
+              { title: '订单已撤回', color: '#ECB0B1' },
+              { title: '存在外协单', color: '#FAECD8' },
+              { title: '库存发货', color: '#E1E5FD' },
+            ]"></ColorRule>
+          </template>
           <template #default-status="scope">
             <span>{{scope.row.status=='3'?"未投料":"已投料"}}</span>
           </template>
@@ -132,10 +145,10 @@
             <span>{{scope.row.saleOrderVo&&scope.row.saleOrderVo.commodityCode}}</span>
           </template>
           <template #default-saleOrderVo.unitedLength="scope">
-            {{Number(scope.row.saleOrderVo&&scope.row.saleOrderVo.unitedLength).toFixed(2)}}
+            {{Number(Number(scope.row.saleOrderVo&&scope.row.saleOrderVo.unitedLength).toFixed(2))}}
           </template>
           <template #default-saleOrderVo.unitedWidth="scope">
-            {{Number(scope.row.saleOrderVo&&scope.row.saleOrderVo.unitedWidth).toFixed(2)}}
+            {{Number(Number(scope.row.saleOrderVo&&scope.row.saleOrderVo.unitedWidth).toFixed(2))}}
           </template>
         <!--      <template #default-preFeedRate="{row}">-->
         <!--        {{(getCommodityPcsQuantity(row.id) / row.quantity * 100).toFixed(2)}}-->
@@ -159,7 +172,7 @@
             </div>
           </template>
           <template #default-saleOrderVo.totalPrice="scope">
-            {{Number(scope.row.saleOrderVo&&scope.row.saleOrderVo.totalPrice).toFixed(2)}}
+            {{Number(Number(scope.row.saleOrderVo&&scope.row.saleOrderVo.totalPrice).toFixed(2))}}
           </template>
           <template #default-saleOrderVo.surfaceTreatment="scope">
         <!--        <div v-for="item in resDictData.order_surface_treatment">-->
@@ -202,6 +215,13 @@
                 :scroll-y="{enabled: true,gt: 50}"
                 @finishSort="finishSort2Flag = !finishSort2Flag"
         >
+          <template #header-tool>
+            <ColorRule :list="[
+              { title: '订单已撤回', color: '#ECB0B1' },
+              { title: '存在外协单', color: '#FAECD8' },
+              { title: '库存发货', color: '#E1E5FD' },
+            ]"></ColorRule>
+          </template>
           <template #default-status="scope">
             <span>{{scope.row.status=='3'?"未投料":"已投料"}}</span>
           </template>
@@ -218,10 +238,10 @@
             <span>{{scope.row.saleOrderVo.commodityCode}}</span>
           </template>
           <template #default-saleOrderVo.unitedLength="scope">
-            {{Number(scope.row.saleOrderVo.unitedLength).toFixed(2)}}
+            {{Number(Number(scope.row.saleOrderVo.unitedLength).toFixed(2))}}
           </template>
           <template #default-saleOrderVo.unitedWidth="scope">
-            {{Number(scope.row.saleOrderVo.unitedWidth).toFixed(2)}}
+            {{Number(Number(scope.row.saleOrderVo.unitedWidth).toFixed(2))}}
           </template>
         <!--      <template #default-preFeedRate="{row}">-->
         <!--        {{(getCommodityPcsQuantity(row.id) / row.quantity * 100).toFixed(2)}}-->
@@ -245,7 +265,7 @@
             </div>
           </template>
           <template #default-saleOrderVo.totalPrice="scope">
-            {{Number(scope.row.saleOrderVo.totalPrice).toFixed(2)}}
+            {{Number(Number(scope.row.saleOrderVo.totalPrice).toFixed(2))}}
           </template>
           <template #default-saleOrderVo.surfaceTreatment="scope">
         <!--        <div v-for="item in resDictData.order_surface_treatment">-->
@@ -290,36 +310,39 @@
         <div style="float:right;margin-right:10px;">预投面积：<span style="color:red;">{{chargeArea}}</span>m²</div>
       </template>
       <div v-loading="dialogTableLoading">
-        <vxe-table
+        <XTable
           border
           keep-source
           align="center"
-          :row-config="{height: 40,isCurrent:true}"
+          :showHead="false"
+          :pageShow="false"
+          :columnList="columnListOtherPnl"
+          :row-config="{isCurrent:true}"
           show-overflow
           :column-config="{resizable: true}"
           :data="form.saleOrderVoList">
-          <vxe-column fixed="left" type="seq" title="序号" width="60"></vxe-column>
-          <vxe-column title="新/返" field="orderType">
-            <template #default="{row}">
+          <!-- <vxe-column fixed="left" type="seq" title="序号" width="60"></vxe-column>
+          <vxe-column title="新/返" field="orderType"> -->
+            <template #default-orderType="{row}">
               <div v-for="item in resDictData.order_type">
                 <span v-if="item.dictValue==row.orderType">{{item.dictLabel}}</span>
               </div>
             </template>
-          </vxe-column>
-          <vxe-column title="批/样" field="model">
-            <template #default="{ row }">
+          <!-- </vxe-column>
+          <vxe-column title="批/样" field="model"> -->
+            <template #default-model="{ row }">
               <div v-for="item in resDictData.order_model">
                 <span v-if="item.dictValue==row.model">{{item.dictLabel}}</span>
               </div>
             </template>
-          </vxe-column>
-          <vxe-column title="加急" field="urgent">
-            <template #default="{ row }">
+          <!-- </vxe-column>
+          <vxe-column title="加急" field="urgent"> -->
+            <template #default-urgent="{ row }">
               <div v-for="item in resDictData.order_urgent">
                 <span v-if="item.dictValue==row.urgent">{{item.dictLabel}}</span>
               </div>
             </template>
-          </vxe-column>
+          <!-- </vxe-column>
           <vxe-column title="产品编码" field="commodityCode">
           </vxe-column>
           <vxe-column width="430" title="产品名称" field="commodityName">
@@ -332,38 +355,39 @@
           </vxe-column>
           <vxe-column title="订货数量(pcs)" field="quantity">
           </vxe-column>
-          <vxe-column title="预投数量(pcs)">
-            <template #default="{row}">
+          <vxe-column title="预投数量(pcs)"> -->
+            <template #default-preNum="{row}">
               <span style="color: red">
                 {{getCommodityPcsQuantity(row.id)}}
               </span>
             </template>
-          </vxe-column>
-          <vxe-column title="投料率(%)">
-            <template #default="{row}">
-              {{(getCommodityPcsQuantity(row.id) / row.quantity * 100).toFixed(2)}}
+          <!-- </vxe-column>
+          <vxe-column title="投料率(%)"> -->
+            <template #default-predictionRate="{row}">
+              {{Number((getCommodityPcsQuantity(row.id) / row.quantity * 100).toFixed(2))}}
             </template>
-          </vxe-column>
-        </vxe-table>
+          <!-- </vxe-column>
+          <vxe-column  width="120" title="成品库存(pcs)" field="availableInventoryQuantity"></vxe-column> -->
+        </XTable>
         <el-form ref="orderPredictionFormRef" :model="form" :rules="rules" label-width="110px" label-position="right">
           <!--按开料方案循环-->
-          <el-card v-for="(scheme,index) in schemeList"
+          <div v-for="(scheme,index) in schemeList"
                   :key="index"
                   class="box-card"
-                  style="width:100%;margin:10px auto;">
+                  style="width:100%;margin:10px auto;overflow: hidden;">
 
             <!--开料方案信息-->
             <div slot="header">
               <el-form label-width="90px"
                       label-position="right">
                 <el-row>
-                  <el-col :span="3" class="cardhead">
+                  <el-col :span="4" class="cardhead">
                     {{scheme.name}}
                   </el-col>
                   <el-col :span="4" class="cardhead">
                     <el-form-item label="利用率">{{scheme.cuttingRate}}%</el-form-item>
                   </el-col>
-                  <el-col :span="4" class="cardhead">
+                  <el-col :span="3" class="cardhead">
                     <!--                  <el-form-item label="计划投料数">{{scheme.materialNumber}}张</el-form-item>-->
                   </el-col>
                   <el-col :span="4" class="cardhead">
@@ -387,9 +411,6 @@
                       </div>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="3" class="cardhead">
-                    <span>&nbsp;</span>
-                  </el-col>
                   <el-col :span="4" class="cardhead">
                     <el-form-item label="物料编码">{{scheme.rawMaterial?.code}}</el-form-item>
                   </el-col>
@@ -410,11 +431,11 @@
                   <el-col :span="3" class="cardhead">
                     <el-form-item label="宽" label-width="50px">{{scheme.rawMaterial?.width}}mm</el-form-item>
                   </el-col>
-                  <el-col :span="2" class="cardhead">
+                  <el-col :span="3" class="cardhead">
                     <el-form-item label="MI开料板厚" label-width="100px">{{scheme.boardThickness}}mm
                     </el-form-item>
                   </el-col>
-                  <el-col :span="2" class="cardhead">
+                  <el-col :span="3" class="cardhead">
                     <el-form-item label="MI开料铜厚" label-width="100px">{{scheme.copperThickness}}OZ
                     </el-form-item>
                   </el-col>
@@ -422,74 +443,32 @@
               </el-form>
             </div>
             <!--Pnl信息-->
-            <el-table :data="scheme.pnlList"
+            <XTable :showHead="false" :pageShow="false" :columnList="columnListPnlInfo" :data="scheme.pnlList"
                       style="width: 100%;">
-              <el-table-column prop="pnl.name"
-                              align="center"
-                              label="PNL名称"
-                              width="150px">
-              </el-table-column>
-              <el-table-column prop="pnl.pnlLength"
-                              align="center"
-                              label="长(mm)"
-                              width="100px">
-              </el-table-column>
-              <el-table-column prop="pnl.pnlWidth"
-                              align="center"
-                              label="宽(mm)"
-                              width="100px">
-              </el-table-column>
-              <el-table-column prop="count"
-                              align="center"
-                              label="pnl/大料"
-                              width="100px">
-              </el-table-column>
-              <el-table-column align="center"
-                              label="产品编码"
-                              width="160px">
-                <template #default="scope">
+                <template #default-commodityCode="scope">
                   <div v-for="item in scope.row.pnl.pnlSetBoList">{{item.saleOrderBo.commodityCode}}</div>
                 </template>
-              </el-table-column>
-              <el-table-column align="center"
-                              label="set/pnl"
-                              width="100px">
-                <template #default="scope">
+                <template #default-setPnl="scope">
                   <div v-for="item in scope.row.pnl.pnlSetBoList">
                     {{item.quantity}}
                   </div>
                 </template>
-              </el-table-column>
-              <el-table-column align="center"
-                              label="pcs/大料"
-                              width="100px">
-                <template #default="scope">
+                <template #default-pcsBig="scope">
                   <div v-for="item in scope.row.pnl.pnlSetBoList">
                     {{scope.row.count * item.quantity * item.saleOrderBo.unitedNumber}}
                   </div>
                 </template>
-              </el-table-column>
-              <el-table-column align="center"
-                              label="pcs/pnl"
-                              width="100px">
-                <template #default="scope">
+                <template #default-pcsPnl="scope">
                   <div v-for="item in scope.row.pnl.pnlSetBoList">
                     {{item.quantity * item.saleOrderBo.unitedNumber}}
                   </div>
                 </template>
-              </el-table-column>
-              <el-table-column align="center"
-                              label="预投pcs数"
-                              width="100px">
-                <template #default="scope">
+                <template #default-rePcsNum="scope">
                   <div v-for="item in scope.row.pnl.pnlSetBoList" style="color:red">
                     {{(scope.row.preFeedQuantity * item.quantity * item.saleOrderBo.unitedNumber).toFixed(0)}}
                   </div>
                 </template>
-              </el-table-column>
-              <el-table-column align="center"
-                              label="预投pnl数">
-                <template #default="scope">
+                <template #default-pnlNum="scope">
                   <el-input-number v-model="scope.row.preFeedQuantity"
                                   :min="0"
                                   :precision="0"
@@ -497,8 +476,7 @@
                                   @change="onPnlPreFeedQuantityChange(scheme,scope.row)"
                   ></el-input-number>
                 </template>
-              </el-table-column>
-            </el-table>
+            </XTable>
 
             <!--开料图-->
             <el-collapse style="width:100%;" value="schemeImg">
@@ -507,16 +485,16 @@
               </el-collapse-item>
             </el-collapse>
 
-          </el-card>
+          </div>
         </el-form>
       </div>
       <template #footer>
-        <div class="text-center">
-          <el-button :loading="buttonLoading" @click="cancel">取消</el-button>
+        <!-- <div class="text-center"> -->
           <el-button :loading="buttonLoading" type="success" @click="submitForm(false,false)">保存</el-button>
           <el-button style="float:right;" :loading="buttonLoading" type="primary" @click="submitButton(true)">审核通过</el-button>
           <el-button style="float:right;" :loading="buttonLoading" type="danger" @click="submitReject()">审核驳回</el-button>
-        </div>
+          <el-button :loading="buttonLoading" @click="cancel">取消</el-button>
+          <!-- </div> -->
       </template>
     </el-drawer>
 
@@ -643,7 +621,33 @@
   }
 
   const customerCodeList = ref();
-
+  const columnListPnlInfo = ref([
+  { width: '150px',title: 'PNL名称',field: 'pnl.name',align: 'center',  },
+  { width: '100px',title: '长(mm)',field: 'pnl.pnlLength',align: 'center',  },
+  { width: '100px',title: '宽(mm)',field: 'pnl.pnlWidth',align: 'center',  },
+  { width: '100px',title: 'pnl/大料',field: 'count',align: 'center',  },
+  { width: '160px',title: '产品编码',field: 'commodityCode',align: 'center', showOverflow: false },
+  { width: '100px',title: 'set/pnl',field: 'setPnl',align: 'center', showOverflow: false },
+  { width: '100px',title: 'pcs/大料',field: 'pcsBig',align: 'center', showOverflow: false },
+  { width: '100px',title: 'pcs/pnl',field: 'pcsPnl',align: 'center', showOverflow: false },
+  { width: '100px',title: '预投pcs数',field: 'rePcsNum',align: 'center', showOverflow: false },
+  { minWidth: '100px',title: '预投pnl数',field: 'pnlNum',align: 'center',  },
+  ]);
+  const columnListOtherPnl = ref([
+  { width: '60',type: 'seq',title: '序号',fixed: 'left',field: 'index',align: 'center',  },
+  { title: '新/返',field: 'orderType',align: 'center',  },
+  { title: '批/样',field: 'model',align: 'center',  },
+  { title: '加急',field: 'urgent',align: 'center',  },
+  { title: '产品编码',field: 'commodityCode',align: 'center',  },
+  { width: '430',title: '产品名称',field: 'commodityName',align: 'center',  },
+  { title: '产品类型',field: 'commodityType',align: 'center',  },
+  { title: 'pcs/set',field: 'unitedNumber',align: 'center',  },
+  { title: '订单面积(m²)',field: 'area',align: 'center',  },
+  { title: '订货数量(pcs)',field: 'quantity',align: 'center',  },
+  { title: '预投数量(pcs)',align: 'center', field: 'preNum'  },
+  { title: '投料率(%)',align: 'center', field: 'predictionRate' },
+  { width: '120',title: '成品库存(pcs)',field: 'availableInventoryQuantity',align: 'center',  },
+  ]);
   const columnList = ref([
     {type: 'checkbox', width: '60',  align: 'center', showOverflow: false},
     {title: "序号", width: '60',  field: 'index', type: 'seq', align: 'center', showOverflow: false},
@@ -703,6 +707,7 @@
     {title: '大料长(mm)', width: '100', field: 'schemeLength', align: 'center'},
     {title: '大料宽(mm)', width: '100', field: 'schemeWidth', align: 'center'},
     {title: '大料使用面积(m²)', width: '120', field: 'productionSchemeArea', align: 'center'},
+    {title: '特殊要求', width: '120', field: 'specialRequirement', align: 'center', filterType: 'input', filterParam: {placeholder: '请输入特殊要求'}},
     {
       title: 'MI单号',
       width: '100',
@@ -734,7 +739,7 @@
     {title: '制单时间', width: '120', field: 'createTime', align: 'center'},
     {title: '审核时间', width: '120', field: 'auditTime', align: 'center'},
     {title: '投料人', width: '80', field: 'preFeedUserName', align: 'center'},
-    {title: '制单人', width: '80', field: 'createByName', align: 'center'},
+    {title: '制单人', width: '80', field: 'miUserName', align: 'center'},
     {title: '审核人', width: '80', field: 'preFeedAuditUserName', align: 'center'},
     {title: '操作', field: 'make', align: 'center', width: '140', fixed: 'right', showOverflow: false},
   ]);
@@ -844,13 +849,13 @@
           return "合计";
         }
         if (column.field == "saleOrderVo.area") {
-          return `${sumNum(data, "saleOrderVo.area").toFixed(4)} `;
+          return `${Number(sumNum(data, "saleOrderVo.area").toFixed(4))} `;
         }
         if (column.field == "productionArea") {
-          return `${sumNum(data, "productionArea").toFixed(4)} `;
+          return `${Number(sumNum(data, "productionArea").toFixed(4))} `;
         }
         if (column.field == "differArea") {
-          return `${sumNum(data, "differArea").toFixed(4)} `;
+          return `${Number(sumNum(data, "differArea").toFixed(4))} `;
         }
         return "";
       })
@@ -962,6 +967,7 @@
       urgent: undefined,
       status: '3',
       isNeedPreFeed: '1',
+      specialRequirement: undefined,
     },
     rules: {
       miUserId: [
@@ -1092,7 +1098,7 @@
       pnl.preFeedQuantity = pnlCount;
       //根据pnl数，计算需要的大料数
       if (pnl.count) {
-        const needScheme = (pnl.preFeedQuantity / pnl.count).toFixed(2);
+        const needScheme = Number((pnl.preFeedQuantity / pnl.count).toFixed(2));
         if (needScheme > maxSchemeChage) {
           maxSchemeChage = needScheme;
         }
@@ -1167,12 +1173,12 @@
   //预投pnl数量改变时发生
   const onPnlPreFeedQuantityChange = (scheme: any, pnl: any) => {
     if (pnl.count) {
-      const needSchemeCount = (pnl.preFeedQuantity / pnl.count).toFixed(2);
+      const needSchemeCount = Number((pnl.preFeedQuantity / pnl.count).toFixed(2));
       let maxSchemeChage = needSchemeCount;
       console.log(pnl)
       console.log(scheme.pnlList)
       scheme.pnlList.filter(vo => vo.id != pnl.id).forEach(pnl => {
-          const needScheme = (pnl.preFeedQuantity / pnl.count).toFixed(2);
+          const needScheme = Number((pnl.preFeedQuantity / pnl.count).toFixed(2));
           if (needScheme > maxSchemeChage) {
             maxSchemeChage = needScheme;
           }
@@ -1265,7 +1271,7 @@
               item.differPNL.forEach(differ => {
                 schemeList.value.forEach(scheme => {
                   if (differ.pnlName = scheme.name) {
-                    scheme.boardThickness = differ.parameterValue ? differ.parameterValue : differ.defaultValue
+                    scheme.boardThickness = differ.defaultValue
                   }
                 })
               })
@@ -1281,7 +1287,7 @@
               item.differPNL.forEach(differ => {
                 schemeList.value.forEach(scheme => {
                   if (differ.pnlName = scheme.name) {
-                    scheme.copperThickness = differ.parameterValue ? differ.parameterValue : differ.defaultValue
+                    scheme.copperThickness = differ.defaultValue
                   }
                 })
               })
@@ -1427,8 +1433,8 @@
       //item.pcsPerScheme
       //大料利用率(%)
       item.schemeUtilization = item.schemeBoList.length != 1 ? item.schemeBoList.map(x => {
-        return x.name + ":" + x.cuttingRate && Number(x.cuttingRate).toFixed(2) + "%"
-      }).join("/") : (item.schemeBoList[0].cuttingRate && (Number(item.schemeBoList[0].cuttingRate).toFixed(2) + "%"));
+        return x.name + ":" + x.cuttingRate && Number(Number(x.cuttingRate).toFixed(2)) + "%"
+      }).join("/") : (item.schemeBoList[0].cuttingRate && (Number(Number(item.schemeBoList[0].cuttingRate).toFixed(2)) + "%"));
 
       //大料面积
       item.schemeArea = item.schemeBoList.length != 1 ? item.schemeBoList.map(x => {
@@ -1437,7 +1443,7 @@
 
       item.differArea = formatAreaData((item.productionArea - _saleVo.area > 0) ? (item.productionArea - _saleVo.area) : 0)
 
-      item.preFeedRate = Number(total / _saleVo.quantity).toFixed(2);
+      item.preFeedRate = Number(Number(total / _saleVo.quantity).toFixed(2));
       var index = item.thickness.indexOf(":",1);
       item.thickness = item.schemeBoList.length > 1 ? item.thickness : (item.thickness.substring(index+1,item.thickness.length));
     })
@@ -1453,7 +1459,7 @@
     var length = 4;
     var tmp = Math.pow(10, length);
     var result = Math.round(value * tmp) / tmp;
-    return result.toFixed(length);
+    return Number(result.toFixed(length));
   }
 
   /**审核驳回按钮  */
@@ -1671,6 +1677,10 @@
           queryParams.value[key] = params[key];
         }
     });
+
+    if (!params.specialRequirement) {
+      queryParams.value.specialRequirement = undefined;
+    }
 
     if(queryParams.value.status==""){
         queryParams.value.status=undefined;

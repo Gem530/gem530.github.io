@@ -182,6 +182,14 @@ export interface CraftQuery extends PageQuery {
    * 是否可以外协1否 2是
    */
   canOutsource?: number;
+  /**
+   * 禁用状态 0禁用 1启用
+   */
+  isOpen?: string;
+  /**
+   * 是否过滤部门 0否 1是
+   */
+  isFilterDept?: string;
 
   /**
    * 是否自动过数1 否 2是
@@ -204,7 +212,7 @@ export interface CraftQuery extends PageQuery {
   params?: any;
 
   equipmentIds?: any;
-  craftId: number | string;
+  craftId?: number | string;
 }
 
 

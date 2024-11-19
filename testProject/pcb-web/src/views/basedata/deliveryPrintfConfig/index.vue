@@ -1,19 +1,21 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
+    <!-- <el-card shadow="never" class="xtable-card">
       <template #header>
         <el-row :gutter="10" class="mb8" style=" margin-right: 0px;justify-content: end;">
-          <el-col :span="1.5">
+          <el-col :span="1.5"> -->
             <!-- v-if="checkPermi(['basedata:deliveryConfig:add'])" -->
+          <div class="head-btn-flex">
             <el-button type="primary"  @click="handleAdd">新增</el-button>
-          </el-col>
+          </div>
+          <!-- </el-col>
         </el-row>
-      </template>
+      </template> -->
 
       <XTable toolId="deliverPrintConfigList" v-model:page-size="queryParams.pageSize" v-model:current-page="queryParams.pageNum" :showRefresh="true"
         :page-params="{ perfect: true, total: total }" :data="deliveryConfigList" :columnList="columnList" ref="XTableRef"
         border @searchChange="searchChange" :column-config="{ resizable: true }" :checkbox-config="{ reserve: true }"
-        class="xtable-content" :row-config="{ keyField: 'id' }">
+        height="100%" class="xtable-content" :row-config="{ keyField: 'id' }">
         <template #default-type="scope">
           <span>
             {{ configTypeStrings[scope.row.type as keyof typeof ConfigTypeEnum] }}
@@ -25,9 +27,9 @@
           <el-button link type="primary" @click="preDetail(scope.row)">详情</el-button>
         </template>
       </XTable>
-    </el-card>
+    <!-- </el-card> -->
 
-    <el-drawer  v-model="dialog.visible" :title="dialog.title" size="55%" 
+    <el-drawer  v-model="dialog.visible" :title="dialog.title" size="55%"
       modal-class="mi-drawer-scoped"
         draggable>
       <el-form border label-width="120px" :disabled="dialog.title?.includes('详情') || dialog.title?.includes('审核')"
@@ -150,6 +152,15 @@
         </el-row>
         <el-row>
           <el-col :span="20">
+            <el-form-item size="small" label="报表名称:">
+              <el-input maxlength="1000" v-model="form.reportName"
+                        :disabled="dialog.title?.includes('详情') || dialog.title?.includes('审核')" :rows="2" type="textarea"
+                        placeholder="请输入备注" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="20">
             <el-form-item size="small" label="备注:">
               <el-input maxlength="1000" v-model="form.remark"
                 :disabled="dialog.title?.includes('详情') || dialog.title?.includes('审核')" :rows="2" type="textarea"
@@ -265,10 +276,11 @@ const columnList = ref([
   //{ title: '客户名称', field: 'customerName', width: '100', align: 'center', filterType: 'input' },
   { title: '客户编码', field: 'customerCode', align: 'center',width: '120', filterType: 'checkboxSearch' , filterData:()=>customerCodeList.value },
   { title: '客户名称', field: 'customerName', align: 'center',width: '120', filterType: 'checkboxSearch' , filterData:()=>customerNameList.value },
- 
+
   { title: '出货单配置列', field: 'deliveryConfigListStr', width: '400', align: 'center' },
   { title: '修改时间', field: 'updateTime', width: '100', align: 'center' },
   { title: '修改人', field: 'updateByName', width: '100', align: 'center' },
+  { title: '报表名称', field: 'reportName', align: 'center' },
   { title: '备注', field: 'remark', align: 'center' },
   { title: '操作', field: 'make', align: 'center', width: '160', fixed: 'right', },
 ]);
@@ -374,7 +386,7 @@ const searchChange = (params: any) => {
 /** 查询deliveryConfig列表 */
 const getList = async () => {
   loading.value = true;
-  
+
   queryParams.value.customerIdList=queryParams.value.customerCode;
   queryParams.value.customerNameIdList=queryParams.value.customerName;
   queryParams.value.customerCode=undefined;

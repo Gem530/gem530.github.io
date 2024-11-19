@@ -116,15 +116,16 @@
         border :showRefresh="true"
         @searchChange="searchChange"
         :column-config="{ resizable: true }"
+        ref="XTableRef"
       >
         <template #default-payCode="scope">
           <span>{{ scope.row.payCode?scope.row.payCode:'--' }}</span>
         </template>
         <template #default-transferredAmount="scope">
-          <span>{{ scope.row.transferredAmount==='0.0000'?'':Number(scope.row.transferredAmount).toFixed(2) }}</span>
+          <span>{{ scope.row.transferredAmount==='0.0000'?'':Number(parseFloat(scope.row.transferredAmount).toString()) }}</span>
         </template>
         <template #default-totalPrice="scope">
-          <span>{{ scope.row.totalPrice?Number(scope.row.totalPrice).toFixed(2):'0.00' }}</span>
+          <span>{{ scope.row.totalPrice?Number(parseFloat(scope.row.totalPrice).toString()):'0' }}</span>
         </template>
         <template #default-status="scope">
           <div v-for="(item,index) in statusFilterData">
@@ -243,35 +244,25 @@
     getRepaymentRecord,
     delRepaymentRecord,
     addPaymentRecord,
-    getWriteOffAllListByPayId,
     queryPayRecordListByCustSup,
     updateRepaymentRecord,
-    updatePaymentStatus,
-    uploadReceipt,
     submitPaymentAccount,
     getPaymentAccountList,
-    approvePaymentAccount,
     rejectPaymentAccount,
     reUpdatePaymentAccount,
-    addSubmitPaymentWriteOff,
     deletePaymentAccount,
     addSubmitPrePaymentWriteOff, approvePrePaymentAccount, validatePaymentAccountDetail
   } from '@/api/financial/repaymentRecord';
-import { RepaymentRecordVO, RepaymentRecordQuery, RepaymentRecordForm , InvoiceQuery, InvoiceForm } from '@/api/financial/repaymentRecord/types';
+import { RepaymentRecordVO, RepaymentRecordForm , InvoiceForm } from '@/api/financial/repaymentRecord/types';
 import { InvoiceVO} from "@/api/financial/invoice/types";
 import { listOwnerSupplier } from '@/api/basedata/supplier';
-import { listInvoice } from "@/api/financial/invoice";
-import { VxeTableInstance, VxeTableEvents } from 'vxe-table'
-import { OssForm, OssQuery, OssVO } from "@/api/system/oss/types";
 import { SupplierVO } from "@/api/basedata/supplier/types";
 import { OrderWriteOffRecordVO } from '@/api/financial/orderWriteOffRecord/types';
-import { listDept } from "@/api/system/dept";
 import { listCompany } from '@/api/basedata/customer';
 import { deepClone } from '@/utils';
 import {ref} from "vue";
 import {AccountOrderForm, AccountOrderQuery, AccountOrderVO} from "@/api/financial/accountOrder/types";
 import {getAccountOrder} from "@/api/financial/accountOrder";
-import { BigNumber } from 'bignumber.js';
 import {parseTime} from "@/utils/ruoyi";
 import { listOrderBack } from '@/api/order/orderBack/index';
 import {
@@ -290,6 +281,7 @@ import {listOrderSaleDetail} from "@/api/financial/orderSaleDetail";
 import {listAccountOrderOther} from "@/api/financial/accountOrderOther";
 import {accountList} from "@/api/order/deliveryRecord";
 import {OrderFilinOutDetailForm, OrderFilinOutDetailQuery} from "@/api/financial/orderFilinOutDetail/types";
+import { decryptBase64ByStr } from '@/utils/crypto'
 
 let customerList = ref([]);
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
@@ -413,7 +405,16 @@ const columnList = ref([
 
   { title: '操作', field: 'make',  align: 'center', fixed: 'right', width: '220' },
 ])
-
+const XTableRef = ref();
+const route = useRoute();
+/**
+ * 进入页面次数
+ */
+const isFirst = ref(0)
+/**
+ * 待办跳转参数
+ */
+const pendingParams = ref()
 
 const recordList = ref<OrderWriteOffRecordVO[]>([]);
 // 获取 搜索条件
@@ -619,7 +620,7 @@ const checkPass = async (row: RepaymentRecordVO) => {
       getList();
     })
   } else {
-    submitPaymentAccount({id: row.id}).then(res => {
+    submitPaymentAccount({id: row.id, isSup: true}).then(res => {
       proxy?.$modal.msgSuccess("操作成功");
       getList();
       paymentTable.visible = false;
@@ -642,9 +643,9 @@ const submit = (row: any) => {
 }
 
   /*审核通过*/
-  const submitPass = (id: any) => {
+  const submitPass = (id: any, isSup: boolean) => {
     buttonLoading.value = true;
-    approvePrePaymentAccount({id: id}).then(res => {
+    approvePrePaymentAccount({id: id, isSup: isSup}).then(res => {
       proxy?.$modal.msgSuccess("操作成功");
       paymentTable.visible = false;
       getList();
@@ -1498,6 +1499,25 @@ const getCustomerList = async () => {
 
 
 }
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      queryParams.value.code = params.bizNo
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
 onMounted(() => {
   getList();
   getSupplierList();

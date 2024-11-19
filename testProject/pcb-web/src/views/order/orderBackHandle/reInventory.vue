@@ -28,17 +28,20 @@
       </el-col>
     </el-row>
   </el-form>
-  <div class="text-center" style="margin-top: 10px">
+  <div class="text-right" style="margin-top: 10px">
     <el-button type="primary" @click="submitForm(formRef)" :loading="submitLoading">确 定</el-button>
     <el-button @click="cancel" :loading="submitLoading">关 闭</el-button>
   </div>
+
+
 </template>
 
 <script setup name="backOrderReInventory">
 
-import { defineProps } from "vue";
+import {defineProps, ref} from "vue";
 import { commodityStorages } from "@/api/system/config/index";
 import { saveReInventory } from "@/api/order/orderBackHandle/index";
+import {listCommodityInventory} from "@/api/order/commodity";
 
 const zeroValid = (rule, value, callback) => {
   if (value === 0) {
@@ -66,7 +69,7 @@ const { formData, formRule } = toRefs(reactive({
 }))
 
 const formRef = ref();
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'check']);
 const submitLoading = ref(false);
 const storageLoading = ref(false);
 const storageList = ref([]);
@@ -75,20 +78,24 @@ const cancel = () => {
   emit('close');
 }
 
-const submitForm = (formEl) => {
-  formEl.validate((valid) => {
-    if (valid) {
-      submitLoading.value = true;
-      saveReInventory({
-        saleOrderBackId: props.backOrder.value.id,
-        saleOrderId: props.backOrder.value.saleOrderId,
-        quantity: formData.value.quantity,
-        storageId: formData.value.storageId,
-        remark: formData.value.remark,
-      }).then(() => {
-        emit('confirm');
-      }).finally(() => {
-        submitLoading.value = false;
+const submitForm = async (formEl) => {
+  emit('check', (bol) => {
+    if(!bol) {
+      formEl.validate((valid) => {
+        if (valid) {
+          submitLoading.value = true;
+          saveReInventory({
+            saleOrderBackId: props.backOrder.value.id,
+            saleOrderId: props.backOrder.value.saleOrderId,
+            quantity: formData.value.quantity,
+            storageId: formData.value.storageId,
+            remark: formData.value.remark,
+          }).then(() => {
+            emit('confirm');
+          }).finally(() => {
+            submitLoading.value = false;
+          })
+        }
       })
     }
   })

@@ -17,6 +17,7 @@
                 <el-radio-group v-if="item.type == '1'" v-model="item.values">
                   <el-radio v-for="(itemOption, index) in item.options" :key="index" :label="itemOption.value"
                     :value="itemOption.value">
+                    {{itemOption.label}}
                   </el-radio>
                 </el-radio-group>
                 <el-checkbox-group v-if="item.type == '2'" v-model="item.values">
@@ -38,8 +39,11 @@
                 <el-row v-if="item.type == '7'">
                   <el-col :span="24">
                     <el-button link type="primary" v-if="item.options[0]?.type == '1' || item.name.includes('工序')" @click="addOption(item,'1')">配置选项</el-button>
-                    <el-button link type="primary" v-if="item.options[0]?.type == '2'" @click="addOption(item,'2')">配置选项</el-button>
+                    <el-button link type="primary" v-if="item.options[0]?.type == '2' || item.name.includes('物料类型')" @click="addOption(item,'2')">配置选项</el-button>
                     <el-button link type="primary" v-if="item.options[0]?.type == '3'" @click="addOption(item,'3')">配置选项</el-button>
+                    <el-button link type="primary" v-if="item.options[0]?.type == '4'" @click="addOption(item,'4')">配置选项</el-button>
+                    <el-button link type="primary" v-if="item.options[0]?.type == '5' || item.name.includes('春节')" @click="addOption(item,'5')">配置选项</el-button>
+                    <el-button link type="primary" v-if="item.options[0]?.type == '6' || item.name.includes('客户')" @click="addOption(item,'6')">配置选项</el-button>
                     <el-check-tag class="configCheckTag" size="small" :checked="item.values.includes(item.options[index]?.value)"
                       @click="onChange(index, item)" v-for="(itemName, index) in item?.options" :key="index"
                        v-model="item.values">{{ itemName.label }}</el-check-tag>
@@ -55,7 +59,10 @@
                     </el-card>
                   </el-col>
                 </el-row>
-                <el-input-number v-if="item.type == '8'" size="small" v-model="item.values" :min="1" />
+                <el-input-number v-if="item.type == '8'" size="small" v-model="item.values" />
+                <div v-if="item.type == '9'">
+                  出账日+<x-input-number :controls="false" :min="0" :precision="0" size="small" v-model="item.values"/>天
+                </div>
                 <span class="labelTip">{{ item.remark }}</span>
               </el-form-item>
 
@@ -67,7 +74,7 @@
     <el-dialog
       v-model="dialogVisible"
       title="选项配置"
-      width="600px"
+      width="37%"
       destroy-on-close
     >
       <el-transfer
@@ -95,12 +102,14 @@
 
 <script setup name="TenantConfig" lang="ts">
 import { getCurrentInstance, ref } from "vue";
-import { listTenantConfig } from "@/api/system/tenantConfig";
+import { listTenantConfig,listWxMenu } from "@/api/system/tenantConfig";
 import { TenantConfigQuery, TenantConfigForm } from "@/api/system/tenantConfig/types";
 import { updateTenantConfig } from "@/api/system/tenantConfig";
 import {getCraftList} from "@/api/basedata/craft";
 import {listMaterialStorageNoPage} from "@/api/purchase/materialStorage";
 import {listRawMaterialCategoryNoPage} from "@/api/basedata/rawMaterialCategory";
+import dayjs from "dayjs";
+import { getListCustomer } from "@/api/basedata/customer";
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
@@ -173,10 +182,13 @@ const getList = async () => {
         info.defaultValue = info.defaultValue ? info.defaultValue[0] : false;
       }
       if (info.type == '8') {
-        info.values = Number(info.values ? info.values[0] : 0);
         info.defaultValue = Number(info.defaultValue ? info.defaultValue[0] : 0);
+        info.values = info.values == undefined || info.values == 'null' || info.values == null?info.defaultValue:info.values;
+        //数字类型判断需要单独处理
+      }else{
+        info.values = info.values ? info.values : info.defaultValue;
       }
-      info.values = info.values ? info.values : info.defaultValue;
+
     });
     form.value.tenantConfigBoList = tmp;
     console.log("tenantConfigBoList", form.value.tenantConfigBoList);
@@ -233,7 +245,16 @@ const addOption = (item: any, type?: any) => {
   } else if (type == '3'){
     optionData.value = storageOptions.value
     transferTitle.value = ['仓库', '已选仓库']
-  }
+  }else if (type == '4'){
+    optionData.value = wxMenuOptions.value
+    transferTitle.value = ['菜单', '已选菜单']
+  }else if (type == '5'){
+    optionData.value = monthOptions.value
+    transferTitle.value = ['年月', '已选年月']
+  } else if (type == '6'){
+    optionData.value = customerList.value
+    transferTitle.value = ['客户', '已选客户']
+}
   currenInfo.value = item;
   transValue.value = item.options.map((v: any) =>  v.value);
   dialogVisible.value = true;
@@ -310,17 +331,83 @@ const getListStorage= async () => {
 
 }
 
+let wxMenuOptions:any = ref([]);
+
+/**
+ * 查询小程序菜单列表
+ */
+const getWxMenuListStorage= async () => {
+  const res = await listWxMenu();
+  wxMenuOptions.value = res.data.map(item => {
+    return {
+      value: String(item.menuId),
+      label: item.menuName,
+      type: "4"
+    }
+  });
+}
+
+let monthOptions:any = ref([]);
+
+/** 获取从2020年开始10年中的所有月份 */
+const getAllMonths = () => {
+  let currentYear = new Date("2020-01-01").getFullYear();
+  let years = Array.from({ length: 10 }, (_, i) => currentYear + i);
+  let months = Array.from({ length: 12 }, (_, i) => new Date(0, i));
+  monthOptions.value = years.flatMap(year => months.map(month => {
+    let dateStr = dayjs(new Date(year, month.getMonth())).format("YYYY-MM");
+    return {
+      value: dateStr,
+      label: dateStr,
+      type: "5"
+    }
+  }));
+}
+
+
+/*获取启用的客户*/
+
+let customerList:any = ref([]);
+
+//客户下拉数据
+const getCustomerList = async () => {
+  const res = await getListCustomer();
+  customerList.value = res.data.map(item => {
+    return {
+      value: String(item.id),
+      label: item.customerName,
+      type: "6"
+    }
+  });
+};
+
 onMounted(() => {
   getList();
   getListCraft();
   getListCategory();
   getListStorage();
+  getWxMenuListStorage();
+  getAllMonths();
+  getCustomerList()
 });
 </script>
 <style scoped lang="scss">
-.configContent {
+:deep(.configContent) {
   position: relative;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  &>form,&header,&section,&footer,
+  &>div {
+    width: 100%;
+  }
+  // margin-top: 40px;
+  //height: 100%;
+  .el-card__body {
+    flex: 1;
+    overflow-y: auto;
+  }
 }
 
 .configCheckTag {
@@ -347,9 +434,6 @@ onMounted(() => {
 // }
 
 .configBody {
-  // margin-top: 40px;
-  max-height: 700px;
-  overflow-y: auto;
 }
 
 .el-transfer {

@@ -139,6 +139,18 @@ export const updateProduction = (data: ProductionForm) => {
 };
 
 /**
+ * 排产进度管理-修改(权限校验)
+ * @param data
+ */
+export const updateProductionCheckPer = (data: ProductionForm) => {
+  return request({
+    url: '/production/production/updateCheckPer',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
  * 完成过数-排产单
  * @param data
  */
@@ -270,7 +282,26 @@ export const getProductionWIP = (data?: any) => {
     data: data
   });
 };
-
+/**
+ * 生产WIP_V2
+ */
+export const getProductionWIPV2 = (data?: any) => {
+  return request({
+    url: '/production/production/getProductionWIPV2',
+    method: 'post',
+    data: data
+  });
+};
+/**
+ * 生产WIP_V2
+ */
+export const getProductionWIPV3 = (data?: any) => {
+  return request({
+    url: '/production/production/getProductionWIPV3',
+    method: 'post',
+    data: data
+  });
+};
 /**
  * 销售WIP
  */

@@ -1,25 +1,20 @@
 <template>
   <div class="p-2 xtable-page">
-    <el-card shadow="never" class="xtable-card">
-      <template #header>
-        <el-row :gutter="16" class="mb8">
-          <el-col :span="20">
-            <el-radio-group v-model="radioTable" size="small">
-              <el-radio-button label="基价列表" @change="handlePagination" />
-              <el-radio-button label="待处理列表" @change="handlePagination" />
-              <el-radio-button label="待审核列表" @change="handlePagination" />
-            </el-radio-group>
-          </el-col>
-          <el-col :span="4" class="global-flex flex-end">
-            <el-button type="primary" plain  @click="handleAdd" >新增</el-button>
-            <el-button v-if="radioTable=='待处理列表'" type="primary" plain  @click="handleBatchDelete" >批量删除</el-button>
-            <el-button v-if="radioTable=='待处理列表'" type="primary" plain  @click="handleBatchSubmit" >批量提交</el-button>
-            <el-button v-if="radioTable=='待审核列表'" type="primary" plain  @click="handleAduit" >批量审核</el-button>
-            <el-button v-if="radioTable=='基价列表'" @click="exportExcel">导出</el-button>
-            <el-button @click="handleImport">导入基价</el-button>
-          </el-col>
-        </el-row>
-      </template>
+      <div class="head-btn-flex between">
+        <el-radio-group v-model="radioTable" size="small">
+          <el-radio-button label="基价列表" @change="handlePagination" />
+          <el-radio-button label="待处理列表" @change="handlePagination" />
+          <el-radio-button label="待审核列表" @change="handlePagination" />
+        </el-radio-group>
+        <div class="global-flex flex-end">
+          <el-button type="primary" plain  @click="handleAdd" >新增</el-button>
+          <el-button v-if="radioTable=='待处理列表'" type="primary" plain  @click="handleBatchDelete" >批量删除</el-button>
+          <el-button v-if="radioTable=='待处理列表'" type="primary" plain  @click="handleBatchSubmit" >批量提交</el-button>
+          <el-button v-if="radioTable=='待审核列表'" type="primary" plain  @click="handleAduit" >批量审核</el-button>
+          <el-button v-if="radioTable=='基价列表'" @click="exportExcel">导出</el-button>
+          <el-button @click="handleImport">导入基价</el-button>
+        </div>
+      </div>
 
       <XTable height="100%" class="xtable-content" toolId="purchaseSupplierBasePrice"
         v-loading="loading"
@@ -102,16 +97,15 @@
           >
         </template>
       </XTable>
-    </el-card>
 
     <!-- 添加或修改供应商对话框 -->
-    <el-drawer :title="dialog.title" v-model="dialog.visible" size="50%" >
+    <el-drawer :title="dialog.title" v-model="dialog.visible" size="65%" >
       <el-form
         ref="supplierBasicPriceFormRef"
         :disabled="dialog.title === '供应商基价详情' || dialog.title === '供应商基价审核'|| dialog.title === '供应商基价管理'"
         :model="form"
         :rules="rules"
-        label-width="90px"
+        label-width="130px"
         label-position="right"
         v-loading="dialogTableLoading"
       >
@@ -213,10 +207,66 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item size="small" label="单价:" prop="price">
-              <el-input type="number" v-model="form.price"  placeholder="请输入单价" />
+            <el-form-item size="small" label="基价:" prop="price">
+              <!-- <el-input type="number" v-model="form.price"  placeholder="请输入单价" /> -->
+              <XInputNumber class="number-left" :controls="false" style="width: 100%"  :min="0" v-model="form.price" precision="4"  />
             </el-form-item>
           </el-col>
+          <el-col :span="12">
+
+            <el-form-item label="" prop="modificationPrice">
+              <template #label>
+                <div class="global-flex flex-end">
+                  &nbsp;采购单价浮动值
+                  <el-tooltip v-if="form.price&&form.modificationPrice&&Number(form.modificationPrice)>0"
+                    effect="dark"
+                    placement="bottom-start"
+                    :content="'此商品在【采购受理】时的采购单价只能设置  '
+                    +(form.modificationPrice?BigNumber(form.price).minus(BigNumber(form.modificationPrice))<BigNumber(0)?0:BigNumber(form.price).minus(BigNumber(form.modificationPrice)):BigNumber(form.price))
+                    +'-'
+                    +(form.modificationPrice?BigNumber(form.price).plus(BigNumber(form.modificationPrice)):BigNumber(form.price))+'  之间的数字（包含  '+
+                    +(form.modificationPrice?BigNumber(form.price).minus(BigNumber(form.modificationPrice))<BigNumber(0)?0:BigNumber(form.price).minus(BigNumber(form.modificationPrice)):BigNumber(form.price))
+                    +'  、'
+                    +(form.modificationPrice?BigNumber(form.price).plus(BigNumber(form.modificationPrice)):BigNumber(form.price))
+                    +'  ）'"
+                  >
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                  <el-tooltip v-if="form.price&&(!form.modificationPrice&&form.modificationPrice!=='0'&&form.modificationPrice!=='0.0000')"
+                    effect="dark"
+                    placement="bottom-start"
+                    :content="'此商品在【采购受理】时的采购单价可随意设置'"
+                  >
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                  <el-tooltip v-if="form.price&&(!form.modificationPrice&&(form.modificationPrice==='0'||form.modificationPrice==='0.0000'))"
+                    effect="dark"
+                    placement="bottom-start"
+                    :content="'此商品在【采购受理】时的采购单价只能设置为：'+form.price"
+                  >
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                  <el-tooltip v-if="form.price&&(form.modificationPrice&&(Number(form.modificationPrice)=='0'))"
+                    effect="dark"
+                    placement="bottom-start"
+                    :content="'此商品在【采购受理】时的采购单价只能设置为：'+form.price"
+                  >
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                  <el-tooltip v-if="!form.price"
+                    effect="dark"
+                    placement="bottom-start"
+                    :content="'请先设置此商品基价'"
+                  >
+                    <el-icon><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </div>
+              </template>
+              <!-- <el-input type="number" v-model="form.modificationPrice"  placeholder="请输入采购单价浮动值" /> -->
+              <XInputNumber class="number-left" :controls="false" style="width: 100%" :min="0"  v-model="form.modificationPrice" precision="4"  />
+            </el-form-item>
+          </el-col>
+
 
           <el-col :span="24">
             <el-form-item size="small" label="备注:" prop="remark">
@@ -232,8 +282,6 @@
       <XTable height="150" :pageShow="false" :data="form.otherSupplierPriceList" :columnList="otherSupplierPriceColumnList" border> </XTable>
 
       <template #footer>
-        <div class="dialog-footer" style="text-align: center">
-          <el-button :loading="buttonLoading" @click="cancel">取 消</el-button>
           <el-button
             v-if="dialog.title == '供应商基价审核'"
             :loading="buttonLoading"
@@ -273,7 +321,7 @@
 
             >提交</el-button
           >
-        </div>
+          <el-button :loading="buttonLoading" @click="cancel">取 消</el-button>
       </template>
     </el-drawer>
 
@@ -302,10 +350,8 @@
         </template>
       </el-upload>
       <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="submitFileForm">确 定</el-button>
-          <el-button @click="upload.open = false">取 消</el-button>
-        </div>
+        <el-button type="primary" @click="submitFileForm">确 定</el-button>
+        <el-button @click="upload.open = false">取 消</el-button>
       </template>
     </el-dialog>
 
@@ -335,6 +381,7 @@ import { listRawMaterialCategoryNoPage } from '@/api/basedata/rawMaterialCategor
 import { roleMenuTreeselect } from '@/api/system/menu';
 import { parseTime } from "@/utils/ruoyi";
 import { globalHeaders } from "@/utils/request";
+import { BigNumber } from 'bignumber.js';
 
 /*** 导入参数 */
 const upload = reactive<ImportOption>({
@@ -408,7 +455,9 @@ const columnList = ref([
   { title: '物料类别', width: '80', field: 'categoryName', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入物料类别' } ,  },
   { title: '单位名称', width: '80', field: 'units', align: 'center',filterType: 'input', filterParam: { placeholder: '请输入单位名称' } ,  },
   { title: '材质牌号', field: 'materialQuality', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入材质牌号' } },
-  { title: '单价 ', width: '80', field: 'price', align: 'center',  },
+  { title: '基价 ', width: '80', field: 'price', align: 'center',  },
+  { title: '采购单价浮动值 ', width: '100', field: 'modificationPrice', align: 'center',  },
+  
   { title: '品牌', width: '80', field: 'manufacturer', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入品牌' } },
   { title: '厚度', field: 'thickness', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入厚度' } },
   { title: '规格型号', field: 'specification', width: '80', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入规格型号' } },
@@ -428,7 +477,8 @@ const columnList = ref([
 const historyPriceColumnList = ref([
   {title: '序号', field: 'sort',type:'seq', align: 'center', width: 55, sortable: true},
   { title: '变更时间 ', field: 'auditTime', width: '200', align: 'center'},
-  { title: '单价 ', field: 'price', align: 'center' },
+  { title: '基价 ', field: 'price', align: 'center' },
+  { title: '采购单价浮动值 ', field: 'modificationPrice', align: 'center' },
   { title: '供应商编码 ', field: 'supplierCode', align: 'center' },
   { title: '变更人 ', field: 'updateByName', align: 'center' },
   { title: '生效日期', field: 'auditTime', width: '200', align: 'center' },
@@ -440,7 +490,8 @@ const otherSupplierPriceColumnList = ref([
   { title: '供应商编码', field: 'supplierCode', align: 'center', },
   { title: '供应商名称', field: 'supplierName', align: 'center', },
   { title: '生效日期', field: 'auditTime', width: '260', align: 'center',},
-  { title: '单价 ', field: 'price', align: 'center', },
+  { title: '基价 ', field: 'price', align: 'center', },
+  { title: '采购单价浮动值 ', field: 'modificationPrice', align: 'center', },
   { title: '变更人 ', field: 'updateByName', width: '100', align: 'center',  },
   { title: '备注', field: 'remark', align: 'center',},
 ]);
@@ -1074,3 +1125,17 @@ onMounted(() => {
   getListRawMaterialCategorys();
 });
 </script>
+
+<style scoped lang="scss">
+
+:deep(.number-left) {
+  .el-input__wrapper {
+    padding-left: 11px;
+    padding-right: 7px;
+  }
+  .el-input__inner {
+    text-align: left;
+  }
+}
+
+</style>

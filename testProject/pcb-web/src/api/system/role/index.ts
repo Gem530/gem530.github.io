@@ -154,3 +154,11 @@ export const deptTreeSelect = (roleId: string | number): AxiosPromise<RoleDeptTr
     method: 'get'
   });
 };
+
+// 获取单位列表
+export function getOwnerAllList(): AxiosPromise<any> {
+  return request({
+    url: '/system/user/getOwnerAllList',
+    method: 'get'
+  });
+}

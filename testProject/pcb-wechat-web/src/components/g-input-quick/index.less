@@ -1,0 +1,23 @@
+.g-input-quick {
+    padding: 12px 8px;
+    background: #FAFAFA;
+    border-radius: 4px;
+
+    .delete-all-btn {
+        position: relative;
+        font-size: 24px;
+        margin-right: 15px;
+        padding-right: 15px;
+        // border-right: 1px solid #999;
+
+        &::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translate(0, -50%);
+            height: 24px;
+            border-right: 2px solid #E3E3E3;
+        }
+    }
+}

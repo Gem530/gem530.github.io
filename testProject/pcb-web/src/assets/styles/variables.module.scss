@@ -1,32 +1,75 @@
 // 全局SCSS变量
 :root {
-  --menuBg: #304156;
+  --menuBg: #273C5B;
   --menuColor: #bfcbd9;
   --menuActiveText: #f4f4f5;
   --menuHover: #263445;
 
-  --subMenuBg: #1f2d3d;
+  --subMenuBg: #1E2A46;
   --subMenuActiveText: #f4f4f5;
   --subMenuHover: #001528;
   --subMenuTitleHover: #293444;
+
+  --box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.12);
 
   --fixedHeaderBg: #ffffff;
   --tableHeaderBg: #f8f8f9;
   --tableHeaderTextColor: #515a6e;
   --el-vxe-table-weight: 400;
+
+  --el-menu-text-color: rgba(255, 255, 255, 0.8);
+  --el-border-color-light: #E9E9E9;
+
+  --el-menu-base-level-padding: 8px;
+
+  --el-color-primary: #5D7DB3;
+  --el-color-primary-light-3: #8EA4CA;
+  --el-color-primary-light-5: #AEBED9;
+  --el-color-primary-light-7: #CED8E8;
+  --el-color-primary-light-8: #DFE5F0;
+  --el-color-primary-light-9: #EFF2F7;
+  --el-color-primary-dark-2: #273C5B;
+
+  // --el-color-success: #00BAAD;
+  // --el-color-success-light-3: #4DCFC6;
+  // --el-color-success-light-5: #80DCD6;
+  // --el-color-success-light-7: #B3EAE6;
+  // --el-color-success-light-8: #CCF1EF;
+  // --el-color-success-light-9: #E6F8F7;
+  // --el-color-success-dark-2: #00847B;
+
+  --el-color-warning: #E6A23C;
+  --el-color-warning-light-3: #EEBE77;
+  --el-color-warning-light-5: #F2D09D;
+  --el-color-warning-light-7: #F8E3C5;
+  --el-color-warning-light-8: #FAECD8;
+  --el-color-warning-light-9: #FCF6EC;
+  --el-color-warning-dark-2: #B88230;
+
+  --el-color-danger: #F56C6C;
+  --el-color-danger-light-3: #F89898;
+  --el-color-danger-light-5: #FAB5B5;
+  --el-color-danger-light-7: #FCD3D3;
+  --el-color-danger-light-8: #FDE2E2;
+  --el-color-danger-light-9: #FEF0F0;
+  --el-color-danger-dark-2: #C45656;
+
+  --el-text-color-primary: #3D3D3D;
+  --el-text-color-regular: #6C6C6C;
+  --el-text-color-secondary: #919191;
 }
 html.dark {
-  --menuBg: #1d1e1f;
+  --menuBg: #273C5B;
   --menuColor: #bfcbd9;
   --menuActiveText: #f4f4f5;
-  --menuHover: #171819;
+  --menuHover: #01122C;
 
-  --subMenuBg: #1d1e1f;
-  --subMenuActiveText: #1d1e1f;
-  --subMenuHover: #171819;
-  --subMenuTitleHover: #171819;
+  --subMenuBg: #1E2A46;
+  --subMenuActiveText: #01122C;
+  --subMenuHover: #01122C;
+  --subMenuTitleHover: #01122C;
 
-  --fixedHeaderBg: #171819;
+  --fixedHeaderBg: #01122C;
   --tableHeaderBg: var(--el-bg-color);
   --tableHeaderTextColor: var(--el-text-color);
 
@@ -99,7 +142,7 @@ $--color-warning: #e6a23c;
 $--color-danger: #f56c6c;
 $--color-info: #909399;
 
-$base-sidebar-width: 200px;
+$base-sidebar-width: 180px;
 
 // the :export directive is the magic sauce for webpack
 // https://www.bluematador.com/blog/how-to-share-variables-between-js-and-sass

@@ -101,3 +101,28 @@ export const updateEq = (data: AssignTaskForm) => {
     data: data
   });
 };
+
+/**
+ * 订单分配-文件列表
+ * @param data
+ */
+export const getAssignTaskProjectFile = (data: AssignTaskForm) => {
+  return request({
+    url: '/project/assignTask/getProjectFile',
+    method: 'post',
+    data: data
+  });
+};
+
+/**
+ * 订单分配-EQ记录列表
+ * @param query
+ * @returns {*}
+ */
+export const listEQList = (query?: AssignTaskQuery): AxiosPromise<AssignTaskVO[]> => {
+  return request({
+    url: '/project/assignTask/eqlist',
+    method: 'get',
+    params: query
+  });
+};

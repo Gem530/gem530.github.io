@@ -61,7 +61,7 @@ export interface AccountOrderDeductionVO {
 
   supplierCode: string;
   customerCode: string;
-  no:string;
+  code:string;
   hasAccountOrder: boolean;
 }
 
@@ -75,6 +75,16 @@ export interface AccountOrderDeductionForm extends BaseEntity {
    * 金额
    */
   price?: number;
+
+  /**
+   * 结案金额
+   */
+  closedPrice?: number;
+
+  /**
+   * 是否驳回过
+   */
+  haveReturn?: string;
 
   /**
    * 备注
@@ -127,7 +137,7 @@ export interface AccountOrderDeductionForm extends BaseEntity {
   type?: string;
   supplierCode?: string;
   customerCode?: string;
-  no?:string;
+  code?:string;
   hasAccountOrder?: boolean;
 }
 
@@ -189,7 +199,7 @@ export interface AccountOrderDeductionQuery extends PageQuery {
   params?: any;
   supplierCode?: string;
   customerCode?: string;
-  no?:string;
+  code?:string;
   hasAccountOrder?: boolean;
 }
 

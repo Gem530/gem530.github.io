@@ -9,11 +9,11 @@
     </div>
 
     <el-card shadow="never" class="xtable-card">
-      <el-tabs type="border-card" @tab-click="handleClick" class="xtable-tab">
+      <el-tabs v-model="currentType" type="border-card" @tab-click="handleClick" class="xtable-tab">
         <div class="global-flex flex-end" style="width: 100%;margin-bottom: 10px;" v-if="type == 0">
           <el-button plain @click="handleExport">导出 </el-button>
         </div>
-        <el-tab-pane label="投料列表">
+        <el-tab-pane label="投料列表" :name="0">
           <XTable toolId="productionProductionFeedSend" v-model:page-size="queryParams.pageSize" height="100%"
                   class="xtable-content"
                   :loading="feedLoading"
@@ -49,13 +49,13 @@
                 <template #reference>
                   <el-button link type='primary'>{{scope.row.scrapRate}}</el-button>
                 </template>
-                <el-table :data="scope.row.scrapRateList">
-                  <el-table-column width="120" :show-overflow-tooltip="true" property="commodityCode" label="产品编码"/>
+                <XTable :data="scope.row.scrapRateList" :pageShow="false" :columnList="columnListScrapToolTip">
+                  <!-- <el-table-column width="120" :show-overflow-tooltip="true" property="commodityCode" label="产品编码"/>
                   <el-table-column width="120" :show-overflow-tooltip="true" property="commodityName" label="产品名称"/>
                   <el-table-column width="120" :show-overflow-tooltip="true" property="productionNum" label="排产数量"/>
                   <el-table-column width="120" :show-overflow-tooltip="true" property="scrapNum" label="报废数量"/>
-                  <el-table-column width="120" :show-overflow-tooltip="true" property="rate" label="报废率(%)"/>
-                </el-table>
+                  <el-table-column width="120" :show-overflow-tooltip="true" property="rate" label="报废率(%)"/> -->
+                </XTable>
               </el-popover>
             </template>
             <template #default-preRate="scope">
@@ -95,18 +95,18 @@
                 <template #reference>
                   <el-button link type='primary'>{{scope.row.commodityName}}</el-button>
                 </template>
-                <el-table :data="scope.row.saleOrderVoList">
-                  <el-table-column width="120" :show-overflow-tooltip="true" property="commodityCode" label="产品编码"/>
+                <XTable :data="scope.row.saleOrderVoList" :pageShow="false" :columnList="columnListSaleOrderVo">
+                  <!-- <el-table-column width="120" :show-overflow-tooltip="true" property="commodityCode" label="产品编码"/>
                   <el-table-column width="120" :show-overflow-tooltip="true" property="commodityName" label="产品名称"/>
                   <el-table-column width="120" :show-overflow-tooltip="true" property="customerCode" label="客户编码"/>
                   <el-table-column width="100" :show-overflow-tooltip="true" property="version" label="版本号"/>
                   <el-table-column width="100" :show-overflow-tooltip="true" property="materialQuality" label="板材"/>
-                  <el-table-column width="100" :show-overflow-tooltip="true" property="unit" label="单位">
-                    <template #default="scope">
+                  <el-table-column width="100" :show-overflow-tooltip="true" property="unit" label="单位"> -->
+                    <template #default-unit="scope">
                       pcs
                     </template>
-                  </el-table-column>
-                </el-table>
+                  <!-- </el-table-column> -->
+                </XTable>
               </el-popover>
             </template>
             <template #default-saleOrderId="scope">
@@ -114,12 +114,12 @@
                 <template #reference>
                   <el-button link type='primary'>查看</el-button>
                 </template>
-                <el-table :data="scope.row.saleOrderVoList">
-                  <el-table-column width="120" property="code" label="订单编号"/>
+                <XTable :data="scope.row.saleOrderVoList" :pageShow="false" :columnList="columnListSaleOrderCheck">
+                  <!-- <el-table-column width="120" property="code" label="订单编号"/>
                   <el-table-column width="100" property="customerCode" label="客户编码"/>
                   <el-table-column width="130" property="deliveryTime" label="客户交期"/>
-                  <el-table-column width="130" property="dispatchTime" label="最迟发货"/>
-                </el-table>
+                  <el-table-column width="130" property="dispatchTime" label="最迟发货"/> -->
+                </XTable>
               </el-popover>
             </template>
             <template #default-pnlFeedId="scope">
@@ -127,13 +127,13 @@
                 <template #reference>
                   <el-button link type='primary'>查看</el-button>
                 </template>
-                <el-table :data="scope.row.pnlBoList">
-                  <el-table-column width="100" property="name" label="Pnl"/>
+                <XTable :data="scope.row.pnlBoList" :pageShow="false" :columnList="columnListPnlFeed">
+                  <!-- <el-table-column width="100" property="name" label="Pnl"/>
                   <el-table-column width="100" property="preFeedQuantity" label="计划投料"/>
                   <el-table-column width="100" property="feedQuantity" label="已投数量"/>
                   <el-table-column width="100" property="feedArea" label="已投面积">
-                  </el-table-column>
-                </el-table>
+                  </el-table-column> -->
+                </XTable>
               </el-popover>
             </template>
             <template #default-status="scope">
@@ -144,9 +144,10 @@
                 <el-button link type="primary" @click="rejectToMi(scope.row)"
                            v-if="checkPermi(['production:productionFeed:reject']) && scope.row.status == '4'">驳回至mi
                 </el-button>
+                
                 <el-button link type="primary" @click="rejectToPre(scope.row)"
                   v-if="hasProFeedRejectBtn && checkPermi(['production:productionFeed:reject']) && scope.row.status == '4'">驳回至预投</el-button>
-                <el-button v-if="showFeedButton(scope.row) && (['production:productionFeed:Feeding'])" link type="primary" @click="openEdit(scope.row)">投料
+                <el-button v-if="showFeedButton(scope.row) && checkPermi(['production:productionFeed:Feeding'])" link type="primary" @click="openEdit(scope.row)">投料
                 </el-button>
                 <el-button link type="primary" @click="doMIPrint(scope.row,'noOutsideImages')">MI详情</el-button>
                 <el-button v-if="scope.row.productionIdList.length>0" link type="primary"
@@ -157,7 +158,7 @@
 
           </XTable>
         </el-tab-pane>
-        <el-tab-pane label="审核列表" v-if="checkPermi(['production:productionFeed:examine'])">
+        <el-tab-pane label="审核列表"  :name="1" v-if="checkPermi(['production:productionFeed:examine'])">
           <XTable toolId="productionProductionFeedProcess" v-model:page-size="auditQueryParams.pageSize"
                   v-model:current-page="auditQueryParams.pageNum"
                   v-loading="loading"
@@ -192,19 +193,19 @@
               <div v-if="scope.row.miProductionPlanVo.planType==2">拼版</div>
             </template>
             <template #default-area="scope">
-              {{(scope.row.area*1).toFixed(4)}}
+              {{BigNumber(scope.row.area*1).dp(4)}}
             </template>
             <template #default-pnlList="scope">
               <el-popover :persistent="false" placement="right" :width="500" trigger="click">
                 <template #reference>
                   <el-button link type='primary' @click="getPnlDetails(scope.row)">查看</el-button>
                 </template>
-                <el-table :data="scope.row.pnlVoList">
-                  <el-table-column width="100" property="name" label="PNL名称"/>
+                <XTable :data="scope.row.pnlVoList" :pageShow="false" :columnList="columnListPnlDetail">
+                  <!-- <el-table-column width="100" property="name" label="PNL名称"/>
                   <el-table-column width="100" property="feedQuantity" label="PNL数量"/>
                   <el-table-column width="100" property="pnlLength" label="PNL长"/>
-                  <el-table-column width="130" property="pnlWidth" label="PNL宽"/>
-                </el-table>
+                  <el-table-column width="130" property="pnlWidth" label="PNL宽"/> -->
+                </XTable>
               </el-popover>
             </template>
             <template #default-commodityName="scope">
@@ -212,18 +213,18 @@
                 <template #reference>
                   <el-button link type='primary'>{{scope.row.commodityName}}</el-button>
                 </template>
-                <el-table :data="scope.row.saleOrderVoList">
-                  <el-table-column width="120" :show-overflow-tooltip="true" property="commodityCode" label="产品编码"/>
+                <XTable :data="scope.row.saleOrderVoList" :pageShow="false" :columnList="columnListProdName">
+                  <!-- <el-table-column width="120" :show-overflow-tooltip="true" property="commodityCode" label="产品编码"/>
                   <el-table-column width="120" :show-overflow-tooltip="true" property="commodityName" label="产品名称"/>
                   <el-table-column width="120" :show-overflow-tooltip="true" property="customerCode" label="客户编码"/>
                   <el-table-column width="100" :show-overflow-tooltip="true" property="version" label="版本号"/>
                   <el-table-column width="100" :show-overflow-tooltip="true" property="materialQuality" label="板材"/>
-                  <el-table-column width="100" :show-overflow-tooltip="true" property="unit" label="单位">
-                    <template #default="scope">
+                  <el-table-column width="100" :show-overflow-tooltip="true" property="unit" label="单位"> -->
+                    <template #default-unit="scope">
                       pcs
                     </template>
-                  </el-table-column>
-                </el-table>
+                  <!-- </el-table-column> -->
+                </XTable>
               </el-popover>
             </template>
             <template #default-make="scope">
@@ -240,7 +241,7 @@
     <el-drawer
       v-model="drawer.visible"
       :title="drawer.title"
-      size="100%"
+      size="95%"
       :close-on-click-modal="false"
       :direction="drawer.direction"
       :destroy-on-close="true"
@@ -275,37 +276,41 @@
         </div>
 
       </template>
-      <vxe-table
+      <XTable
         border
+        size="mini"
         keep-source
         align="center"
-        size="mini"
+        :pageShow="false"
+        min-height="143px"
+        :columnList="columnListFeedDrawer"
+        toolId="columnListFeedDrawerToolId"
         :row-config="{height: 40,isCurrent:true}"
         show-overflow :loading="dialogTableLoading"
         :column-config="{resizable: true}"
         :data="form.saleOrderVoList">
-        <vxe-column fixed="left" type="seq" title="序号" width="60"></vxe-column>
-        <vxe-column title="新/返" field="orderType">
-          <template #default="{row}">
+        <!-- <vxe-column fixed="left" type="seq" title="序号" width="60"></vxe-column>
+        <vxe-column title="新/返" field="orderType"> -->
+          <template #default-orderType="{row}">
             <div v-for="item in resDictData.order_type">
               <span v-if="item.dictValue==row.orderType">{{item.dictLabel}}</span>
             </div>
           </template>
-        </vxe-column>
-        <vxe-column title="批/样" field="model">
-          <template #default="{ row }">
+        <!-- </vxe-column>
+        <vxe-column title="批/样" field="model"> -->
+          <template #default-model="{ row }">
             <div v-for="item in resDictData.order_model">
               <span v-if="item.dictValue==row.model">{{item.dictLabel}}</span>
             </div>
           </template>
-        </vxe-column>
-        <vxe-column title="加急" field="urgent">
-          <template #default="{ row }">
+        <!-- </vxe-column>
+        <vxe-column title="加急" field="urgent"> -->
+          <template #default-urgent="{ row }">
             <div v-for="item in resDictData.order_urgent">
               <span v-if="item.dictValue==row.urgent">{{item.dictLabel}}</span>
             </div>
           </template>
-        </vxe-column>
+        <!-- </vxe-column>
         <vxe-column title="产品编码" field="commodityCode">
         </vxe-column>
         <vxe-column title="产品类型" field="commodityType">
@@ -316,50 +321,50 @@
         </vxe-column>
         <vxe-column title="订货数量(pcs)" field="quantity">
         </vxe-column>
-        <vxe-column title="预投pcs数量">
-          <template #default="{row}">
+        <vxe-column title="预投pcs数量"> -->
+          <template #default-field1="{row}">
             <span style="color: red">
               {{getCommodityPcsQuantity(row.id)}}
             </span>
           </template>
-        </vxe-column>
-        <vxe-column title="已投pcs数量">
-          <template #default="{row}">
+        <!-- </vxe-column>
+        <vxe-column title="已投pcs数量"> -->
+          <template #default-field2="{row}">
             <span style="color: red">
               {{getCommodityAlreadPcsQuantity(row.id)}}
             </span>
           </template>
-        </vxe-column>
-        <vxe-column title="报废pcs数量">
-          <template #default="{row}">
+        <!-- </vxe-column>
+        <vxe-column title="报废pcs数量"> -->
+          <template #default-scrapNum="{row}">
             <span style="color: red">
               {{row.scrapNum}}
             </span>
           </template>
-        </vxe-column>
-        <vxe-column title="实投pcs数量">
-          <template #default="{row}">
+        <!-- </vxe-column>
+        <vxe-column title="实投pcs数量"> -->
+          <template #default-field4="{row}">
             <span style="color: red">
               {{getCommodityRealPcsQuantity(row.id)}}
             </span>
           </template>
-        </vxe-column>
-        <vxe-column title="投料率(%)">
-          <template #default="{row}">
-            {{(getCommodityRealPcsQuantity(row.id) / row.quantity * 100).toFixed(2)}}
+        <!-- </vxe-column>
+        <vxe-column title="投料率(%)"> -->
+          <template #default-field5="{row}">
+            {{BigNumber(getCommodityRealPcsQuantity(row.id) / row.quantity * 100).dp(2)}}
           </template>
-        </vxe-column>
+        <!-- </vxe-column>
         <vxe-column title="可用库存数(pcs)" field="existingQuantity">
         </vxe-column>
         <vxe-column title="历史使用库存数(pcs)" field="alreadyUsedQuantity">
         </vxe-column>
-        <vxe-column title="本次使用库存数(pcs)" field="useQuantity">
-          <template #default="{row}">
-            <el-input :disabled="form.isCalculate == '1' ? true:false" v-model.number="row.useQuantity"
-                      type="number"></el-input>
+        <vxe-column title="本次使用库存数(pcs)" field="useQuantity"> -->
+          <template #default-useQuantity="{row}">
+            <XInputNumber style="width: 100%;" :disabled="form.isCalculate == '1' ? true:false" v-model="row.useQuantity" :min="0"
+                          :precision="0"  ></XInputNumber>
           </template>
-        </vxe-column>
-      </vxe-table>
+        <!-- </vxe-column> -->
+      </XTable>
       <el-form ref="orderPredictionFormRef" :model="form" :rules="rules" label-width="110px" label-position="right"
                v-loading="dialogTableLoading">
         <!--按开料方案循环-->
@@ -434,9 +439,10 @@
             </el-form>
           </div>
           <!--Pnl信息-->
-          <el-table :data="scheme.pnlList"
-                    style="width: 100%;">
-            <el-table-column prop="pnl.name"
+          <XTable :data="scheme.pnlList"
+                    style="width: 100%;" :pageShow="false"
+                    :columnList="columnListSchemeDrawer">
+            <!-- <el-table-column prop="pnl.name"
                              align="center"
                              label="PNL名称"
                              width="150px">
@@ -458,70 +464,63 @@
             </el-table-column>
             <el-table-column align="center"
                              label="产品编码"
-                             width="160px">
-              <template #default="scope">
+                             width="160px"> -->
+              <template #default-field1="scope">
                 <div v-for="item in scope.row.pnl.pnlSetBoList">{{item.saleOrderBo.commodityCode}}</div>
               </template>
-            </el-table-column>
+            <!-- </el-table-column>
             <el-table-column align="center"
                              label="set/pnl"
-                             width="100px">
-              <template #default="scope">
+                             width="100px"> -->
+              <template #default-field2="scope">
                 <div v-for="item in scope.row.pnl.pnlSetBoList">
                   {{item.quantity}}
                 </div>
               </template>
-            </el-table-column>
+            <!-- </el-table-column>
             <el-table-column align="center"
                              label="pcs/大料"
-                             width="100px">
-              <template #default="scope">
+                             width="100px"> -->
+              <template #default-field3="scope">
                 <div v-for="item in scope.row.pnl.pnlSetBoList">
                   {{scope.row.count * item.quantity * item.saleOrderBo.unitedNumber}}
                 </div>
               </template>
-            </el-table-column>
+            <!-- </el-table-column>
             <el-table-column align="center"
                              label="pcs/pnl"
-                             width="100px">
-              <template #default="scope">
+                             width="100px"> -->
+              <template #default-field4="scope">
                 <div v-for="item in scope.row.pnl.pnlSetBoList">
                   {{item.quantity * item.saleOrderBo.unitedNumber}}
                 </div>
               </template>
-            </el-table-column>
+            <!-- </el-table-column>
             <el-table-column align="center"
                              label="预投pcs数"
-                             width="100px">
-              <template #default="scope">
+                             width="100px"> -->
+              <template #default-field5="scope">
                 <div v-for="item in scope.row.pnl.pnlSetBoList">
                   {{Math.ceil(scope.row.preFeedQuantity * item.quantity * item.saleOrderBo.unitedNumber)}}
                 </div>
               </template>
-            </el-table-column>
+            <!-- </el-table-column>
             <el-table-column align="center"
-                             label="预投pnl数">
-              <template #default="scope">
+                             label="预投pnl数"> -->
+              <template #default-field6="scope">
                 <span style="color: red">{{Math.ceil(scope.row.preFeedQuantity)}}</span>
 
               </template>
-            </el-table-column>
-            <!--            <el-table-column align="center"
-                                         label="待审核pnl数">
-                          <template #default="scope">
-                            <span style="color: red">{{scope.row.waitAuditQuantity}}</span>
-
-                          </template>
-                        </el-table-column>-->
+            <!-- </el-table-column>
             <el-table-column align="center"
-                             label="总pnl数">
-              <template #default="scope">
+                             label="总pnl数"> -->
+              <template #default-field7="scope">
                 <span style="color: red">{{form.isCalculate == 1 ? scope.row.alreadyFeedQuantity: (scope.row.alreadyFeedQuantity + scope.row.feedQuantity)}}</span>
               </template>
-            </el-table-column>
+            <!-- </el-table-column>
             <el-table-column align="center"
-                             label="实投pnl数">
-              <template #default="scope">
+                             label="实投pnl数"> -->
+              <template #default-field8="scope">
                 <el-input-number v-model="scope.row.feedQuantity"
                                  :min="0"
                                  style="width:100%"
@@ -530,8 +529,8 @@
                                  @change="onPnlRealChargeCount(scheme,scope.row)"
                 ></el-input-number>
               </template>
-            </el-table-column>
-          </el-table>
+            <!-- </el-table-column> -->
+          </XTable>
 
           <!--开料图-->
           <el-collapse style="width:100%;" value="schemeImg">
@@ -581,19 +580,19 @@
                            false-label="0">尾扎合并
               </el-checkbox>
             </el-form-item>
-          </el-col>
+          </el-col>领料人
         </el-row>
       </el-form>
       <template #footer>
         <div class="text-center">
           <el-button :loading="buttonLoading" @click="cancel">取消</el-button>
-          <el-button v-if="form.isCalculate == '1' ? false:true" :loading="buttonLoading" type="primary"
+          <el-button v-if="form.isCalculate == '1' ? false:true" :loading="buttonLoading || dialogTableLoading" type="primary"
                      @click="submitForm( form.isCalculate == '1' ? '-1':'0')">确定
           </el-button>
-          <el-button v-if="type==1 && !isReload" :loading="buttonLoading" type="danger"
+          <el-button v-if="type==1 && !isReload" :loading="buttonLoading || dialogTableLoading" type="danger"
                      @click="submitForm(form.isCalculate == '0' ? '2':'3')">审核驳回
           </el-button>
-          <el-button v-if="type==1 && !isReload && form.isCalculate=='0'" :loading="buttonLoading" type="success"
+          <el-button v-if="type==1 && !isReload && form.isCalculate=='0'" :loading="buttonLoading || dialogTableLoading" type="success"
                      @click="submitForm('1')">审核通过
           </el-button>
         </div>
@@ -601,7 +600,7 @@
     </el-drawer>
 
     <!-- 投料详情 -->
-    <el-dialog @close="closedDialog" :title="dialog.title" v-model="dialog.visible" width="50%" append-to-body>
+    <el-dialog @close="closedDialog" :title="dialog.title" v-model="dialog.visible" width="50%">
       <XTable :pageShow="false"
               :data="historyFeedList"
               :columnList="columnHistoryList"
@@ -613,7 +612,7 @@
       >
 
         <template #default-feedRate="scope">
-          {{(scope.row.feedArea / currentInfo.area * 100).toFixed(4)}}
+          {{BigNumber(scope.row.feedArea / currentInfo.area * 100).dp(4)}}
         </template>
         <template #default-alreadyFeedArea="scope">
           {{currentInfo.feedArea}}
@@ -628,7 +627,7 @@
     </el-dialog>
 
     <!-- 排产记录 -->
-    <el-dialog :title="dialogProduction.title" v-model="dialogProduction.visible" width="1000px" append-to-body>
+    <el-dialog :title="dialogProduction.title" v-model="dialogProduction.visible" width="1000px" >
       <XTable :pageShow="false"
               :data="allProductionList"
               :columnList="columnProductionList"
@@ -641,7 +640,7 @@
     </el-dialog>
 
     <!-- 入库记录 -->
-    <el-dialog :title="dialogAlready.title" v-model="dialogAlready.visible" width="950px" append-to-body>
+    <el-dialog :title="dialogAlready.title" v-model="dialogAlready.visible" width="950px" >
       <XTable :pageShow="false"
               :data="alreadyProductionList"
               :columnList="columnInInventoryList"
@@ -769,6 +768,9 @@
         </span>
       </template>
     </el-dialog>
+
+    <!-- 库存锁定提示框 -->
+    <InventoryLock title="产品盘点提示" inventoryType="1" v-model:show="inventoryCheck" :data="inventoryRes" @close="inventoryCheck = false"/>
   </div>
 </template>
 
@@ -792,7 +794,13 @@
   } from '@/api/production/production';
   import {ProductionVO, ProductionQuery, ProductionForm} from '@/api/production/production/types';
   import {VxeTableEvents} from 'vxe-table'
-  import {getMiInfo, savePrediction, checkSaleOrderByBo,revocationProductionPlan} from "@/api/project/productionPlan";
+  import {
+    getMiInfo,
+    savePrediction,
+    checkSaleOrderByBo,
+    revocationProductionPlan,
+    refusalCheckPer
+  } from "@/api/project/productionPlan";
   import {computed, ref} from "vue";
   import {getDicts} from "@/api/system/dict/data";
   import {sortBy} from "@/utils/dict";
@@ -804,6 +812,9 @@
   import * as QRCode from "qrcode";
   import {loadFile} from '@/utils/pdfToImg';
   import { listTenantConfig } from "@/api/system/tenantConfig";
+  import {listCommodityInventory} from "@/api/order/commodity";
+  import { BigNumber } from 'bignumber.js';
+  import { decryptBase64ByStr } from '@/utils/crypto'
 
   const hasProFeedRejectBtn = ref(false);
   const startPrint = ref(false)
@@ -837,7 +848,17 @@
     data: undefined,
     list: []
   })
-
+  const xTableRef = ref();
+  const currentType = ref(0);
+  const route = useRoute();
+  /**
+   * 进入页面次数
+   */
+  const isFirst = ref(0)
+  /**
+   * 待办跳转参数
+   */
+  const pendingParams = ref()
 
   const disabledDateStart = (time) => {
     if (form.value.planCompleteTime) {
@@ -906,7 +927,7 @@
         currentPnlList.value = currentList;
         console.log(currentPnlList.value)
       }
-      return area.toFixed(6);
+      return BigNumber(area).dp(6);
     },
     set(val: any) {
       return val
@@ -1269,6 +1290,96 @@
     {width: "315", title: '操作', showOverflow: 'false', field: 'make', align: 'center', fixed: 'right',},
   ]);
 
+  // 投料详情顶部表格
+  const columnListFeedDrawer = ref([
+  { width: '50',type: 'seq',title: '序号',fixed: 'left',align: 'center',  },
+  { width: '70',title: '新/返',field: 'orderType',align: 'center',  },
+  { width: '70',title: '批/样',field: 'model',align: 'center',  },
+  { width: '70',title: '加急',field: 'urgent',align: 'center',  },
+  { title: '产品编码',field: 'commodityCode',align: 'center',  },
+  { title: '产品类型',field: 'commodityType',align: 'center',  },
+  { title: 'pcs/set',field: 'unitedNumber',align: 'center',  },
+  { title: '订单面积(m²)',field: 'area',align: 'center',  },
+  { title: '订货数量(pcs)',field: 'quantity',align: 'center',  },
+  { title: '预投pcs数量',align: 'center', field: 'field1' },
+  { title: '已投pcs数量',align: 'center', field: 'field2' },
+  { title: '报废pcs数量',align: 'center', field: 'scrapNum' },
+  { title: '实投pcs数量',align: 'center', field: 'field4' },
+  { title: '投料率(%)',align: 'center', field: 'field5' },
+  { width: '110',title: '可用库存数(pcs)',field: 'existingQuantity',align: 'center',  },
+  { width: '130',title: '历史使用库存数(pcs)',field: 'alreadyUsedQuantity',align: 'center',  },
+  { width: '130',type: 'number',title: '本次使用库存数(pcs)',fixed: 'right',field: 'useQuantity',align: 'center',  },
+  ]);
+
+  // 投料详情开料方案
+  const columnListSchemeDrawer = ref([
+  { width: '150px',title: 'PNL名称',field: 'pnl.name',align: 'center',  },
+  { width: '100px',title: '长(mm)',field: 'pnl.pnlLength',align: 'center',  },
+  { width: '100px',title: '宽(mm)',field: 'pnl.pnlWidth',align: 'center',  },
+  { width: '100px',title: 'pnl/大料',field: 'count',align: 'center',  },
+  { width: '160px',title: '产品编码',align: 'center', field: 'field1', showOverflow: false },
+  { width: '100px',title: 'set/pnl',align: 'center', field: 'field2', showOverflow: false },
+  { width: '100px',title: 'pcs/大料',align: 'center', field: 'field3', showOverflow: false },
+  { width: '100px',title: 'pcs/pnl',align: 'center', field: 'field4', showOverflow: false },
+  { width: '100px',title: '预投pcs数',align: 'center', field: 'field5', showOverflow: false },
+  { title: '预投pnl数',align: 'center', field: 'field6' },
+  { title: '总pnl数',align: 'center', field: 'field7' },
+  { title: '实投pnl数',align: 'center', field: 'field8' },
+  ]);
+
+  // 列表报废率tooltip
+  const columnListScrapToolTip = ref([
+  { width: '120',title: '产品编码',field: 'commodityCode',align: 'center',  },
+  { width: '120',title: '产品名称',field: 'commodityName',align: 'center',  },
+  { width: '120',title: '排产数量',field: 'productionNum',align: 'center',  },
+  { width: '120',title: '报废数量',field: 'scrapNum',align: 'center',  },
+  { width: '120',title: '报废率(%)',field: 'rate',align: 'center',  },
+  ]);
+
+  // 列表产品名称tooltip
+  const columnListSaleOrderVo = ref([
+  { width: '120',title: '产品编码',field: 'commodityCode',align: 'center',  },
+  { width: '120',title: '产品名称',field: 'commodityName',align: 'center',  },
+  { width: '120',title: '客户编码',field: 'customerCode',align: 'center',  },
+  { width: '100',title: '版本号',field: 'version',align: 'center',  },
+  { width: '100',title: '板材',field: 'materialQuality',align: 'center',  },
+  { title: '单位',field: 'unit',align: 'center',  },
+  ]);
+
+  // 列表销售订单tooltip
+  const columnListSaleOrderCheck = ref([
+  { width: '120',title: '订单编号',field: 'code',align: 'center',  },
+  { width: '100',title: '客户编码',field: 'customerCode',align: 'center',  },
+  { width: '130',title: '客户交期',field: 'deliveryTime',align: 'center',  },
+  { width: '130',title: '最迟发货',field: 'dispatchTime',align: 'center',  },
+  ]);
+
+  // 列表投料详情tooltip
+  const columnListPnlFeed = ref([
+  { width: '100',title: 'Pnl',field: 'name',align: 'center',  },
+  { width: '100',title: '计划投料',field: 'preFeedQuantity',align: 'center',  },
+  { width: '100',title: '已投数量',field: 'feedQuantity',align: 'center',  },
+  { title: '已投面积',field: 'feedArea',align: 'center',  },
+  ]);
+
+  // 审核列表 pnl详情
+  const columnListPnlDetail = ref([
+  { width: '100',title: 'PNL名称',field: 'name',align: 'center',  },
+  { width: '100',title: 'PNL数量',field: 'feedQuantity',align: 'center',  },
+  { width: '100',title: 'PNL长',field: 'pnlLength',align: 'center',  },
+  { title: 'PNL宽',field: 'pnlWidth',align: 'center',  },
+  ]);
+
+  // 审核列表 产品名称
+  const columnListProdName = ref([
+  { width: '120',title: '产品编码',field: 'commodityCode',align: 'center',  },
+  { width: '120',title: '产品名称',field: 'commodityName',align: 'center',  },
+  { width: '120',title: '客户编码',field: 'customerCode',align: 'center',  },
+  { width: '100',title: '版本号',field: 'version',align: 'center',  },
+  { width: '100',title: '板材',field: 'materialQuality',align: 'center',  },
+  { title: '单位',field: 'unit',align: 'center',  },
+  ]);
+
   const XTableAuditRef = ref()
   const recordCondition = ['planStartTime', 'planCompleteTime', 'createTime'];
   const remediationStatusOption = ref([
@@ -1497,7 +1608,7 @@
           backgroundColor: 'rgb(250, 236, 216)',
         }
       }
-      
+
     }
   }
 
@@ -1711,9 +1822,9 @@
             pnlFeedArea += Number(area);
             feedArea += Number(area);
           })
-          pnl.feedArea = pnlFeedArea.toFixed(4);
+          pnl.feedArea = BigNumber(pnlFeedArea).dp(4);
         })
-        item.feedArea = feedArea.toFixed(4);
+        item.feedArea = BigNumber(feedArea).dp(4);
       } else {
         item.feedArea = 0;
       }
@@ -1758,6 +1869,7 @@
 
   /*重投*/
   const reloadFeed = async (row?: any) => {
+    reset();
     type.value = 1;
     isReload.value = true;
     openEdit(row);
@@ -1815,7 +1927,7 @@
         }
         loading.value = true;
         proxy?.$modal.loading('加载中...')
-        savePrediction(data).then(res => {
+        refusalCheckPer(data).then(res => {
           const data2 = {
             planId : row.id
           }
@@ -1912,6 +2024,7 @@
   }
   /*投料*/
   const openEdit = async (row?: any) => {
+    reset();
     alreadyFeedPnlList.value = [];
     if (type.value == 0 && !isReload.value) {
       const checkRes = await checkFeed(row.id);
@@ -2022,9 +2135,9 @@
           alreadyFeedSum += Number(productionScheme.feedQuantity);
         }
       })
-      scheme.alreadyFeedQuantity = (alreadyFeedSum).toFixed(2); // 解决精度问题
+      scheme.alreadyFeedQuantity = BigNumber(alreadyFeedSum).dp(2); // 解决精度问题
       //设置实投数量
-      const realChargeCount = (scheme.preFeedQuantity - Number(scheme.alreadyFeedQuantity)).toFixed(2);
+      const realChargeCount = BigNumber(scheme.preFeedQuantity - Number(scheme.alreadyFeedQuantity)).dp(2);
       //本次待审核scheme数据
       const resultSchemeItem = waitAuditSchemeList.find(item => item.schemeId == scheme.id);
       console.log(showType.value)
@@ -2098,7 +2211,7 @@
               item.differPNL.forEach(differ => {
                 schemeList.value.forEach(scheme => {
                   if (differ.pnlName = scheme.name) {
-                    scheme.boardThickness = differ.parameterValue ? differ.parameterValue : differ.defaultValue
+                    scheme.boardThickness = differ.defaultValue
                   }
                 })
               })
@@ -2114,7 +2227,7 @@
               item.differPNL.forEach(differ => {
                 schemeList.value.forEach(scheme => {
                   if (differ.pnlName = scheme.name) {
-                    scheme.copperThickness = differ.parameterValue ? differ.parameterValue : differ.defaultValue
+                    scheme.copperThickness = differ.defaultValue
                   }
                 })
               })
@@ -2173,9 +2286,9 @@
               pnlFeedArea += Number(area);
               feedArea += Number(area);
             })
-            pnl.feedArea = pnlFeedArea.toFixed(4);
+            pnl.feedArea = BigNumber(pnlFeedArea).dp(4);
           })
-          item.feedArea = feedArea.toFixed(4);
+          item.feedArea = BigNumber(feedArea).dp(4);
         } else {
           item.feedArea = 0;
         }
@@ -2323,7 +2436,7 @@
   }
   const setSchemeRealChargeCount = (scheme: any, realChargeCount: any) => {
     //设置SchemeList
-    scheme.feedQuantity = realChargeCount.toFixed(2);
+    scheme.feedQuantity = BigNumber(realChargeCount).dp(2);
     //设置SchemeData
     var item = schemeList.value.find(o => {
       return o.id == scheme.id;
@@ -2446,15 +2559,44 @@
 
   const saveHandle = async (data: any) => {
     // console.log(data)
-    await saveProduction(data).finally(() => buttonLoading.value = false);
-    proxy?.$modal.msgSuccess("保存成功");
-    drawer.visible = false;
-    dialog.visible = false;
-    getList();
-    getAuditList();
+    saveProduction(data).then(e => {
+      if (e.code == 200)  {
+        proxy?.$modal.msgSuccess(e.msg);
+        drawer.visible = false;
+        dialog.visible = false;
+        setTimeout(()=>{
+          buttonLoading.value = false
+        },200)
+      }
+    }).finally(() => {
+      buttonLoading.value = false
+    })
+    await getList();
+    await getAuditList();
   }
+
+  const inventoryCheck = ref(false);
+  const inventoryRes = ref([]);
+
   /** 提交按钮 */
   const submitForm = async (auditStatus: string) => {
+    // 查询是否存在盘点中产品
+    let ids = form.value.saleOrderVoList.map(item => {
+      if (Number(item.useQuantity) > 0) {
+        return item.commodityId
+      }
+    });
+    console.log(ids)
+    if (ids.length > 0 && ids[0]) {
+      let query = {pageNum: 1, pageSize: 20, IdList: ids, status: '1'}
+      const res = await listCommodityInventory(query);
+      if (res.rows && res.rows.length > 0) {
+        inventoryRes.value = res.rows;
+        inventoryCheck.value = true;
+        return;
+      }
+    }
+
     buttonLoading.value = true;
     try {
     const boolean: boolean = checkData(schemeList.value);
@@ -2683,7 +2825,7 @@
         if (req.differPNL && req.differPNL.length > 0) {
 
           req.differPNL.forEach((diff: any) => {
-            let val = diff.parameterValue ? diff.parameterValue : diff.defaultValue;
+            let val = diff.defaultValue;
             detail.params.push({
               name: _name,
               para: val + unit,
@@ -2882,7 +3024,7 @@
       allData.value.schemeInfos.forEach((element: any) => {
         let s_cuttingRate = element.cuttingRate;
         if (s_cuttingRate) {
-          element.cuttingRate = Number(s_cuttingRate).toFixed(2) + "%";
+          element.cuttingRate = BigNumber(s_cuttingRate).dp(2) + "%";
         }
       });
     }
@@ -2953,12 +3095,45 @@
     }
   }
 }
-  onMounted(() => {
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      let tab = !isNaN(Number(params.tab)) ? Number(params.tab) : 0;
+      currentType.value = tab
+      if (tab === 0) {
+        let tempColumnList = [{field: 'code', defaultValue: params.bizNo}]
+        queryParams.value.code = params.bizNo
+        setTimeout(() => {
+          XTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === 1) {
+        let tempColumnList = [{field: 'miProductionPlanVo.code', defaultValue: params.bizNo}]
+        auditQueryParams.value.micode = params.bizNo;
+        setTimeout(() => {
+          XTableAuditRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      }
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
+onMounted(() => {
+    getProFeedReject();
     getList();
     // getAuditList();
     getDictOptions();
-    getProFeedReject();
-  });
+});
 </script>
 
 <style>

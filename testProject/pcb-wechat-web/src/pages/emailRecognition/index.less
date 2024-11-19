@@ -1,0 +1,91 @@
+@import '../../assets/custom.less';
+.email-recognition {
+    height: 100vh;
+    padding: 20px 20px 50px;
+    overflow: hidden;
+    box-sizing: border-box;
+    &>view {
+        width: 100%;
+    }
+    .g-form-item {
+        box-sizing: border-box;
+        .g-form-label {
+            flex: none;
+            width: 156px;
+            margin-right: 16px;
+            font-size: 32px;
+            line-height: 1.5;
+            vertical-align: middle;
+            text-align: left;
+            box-sizing: border-box;
+        }
+    }
+    .email-title {
+        font-size: 50px;
+        font-weight: 600;
+    }
+    .input-email-bold {
+        margin: 20px 0;
+        border: none;
+        padding: 0;
+        .at-textarea__textarea {
+            font-size: 50px;
+            font-weight: 600;
+        }
+    }
+    .input-remark-bold {
+        border: none;
+        padding: 0;
+    }
+
+    // .at-input {
+    //     margin-left: 0;
+    //     &.input-email-bold {
+    //         // display: flex;
+    //         // justify-content: flex-start;
+    //         // flex-wrap: wrap;
+    //         // align-items: center;
+    //         height: 30%;
+
+    //         .at-input__input,
+    //         .at-input__title {
+    //             // flex: none;
+    //             width: 100%;
+    //             height: 100%;
+    //             font-size: 50px;
+    //             font-weight: 600;
+    //         }
+    //     }
+    // }
+
+    .email-upload {
+        flex: 1;
+        overflow: hidden;
+        // height: 300px;
+        .at-image-picker__flex-box,
+        .at-image-picker__flex-item,
+        .at-image-picker {
+            height: 100%;
+        }
+    }
+
+    .email-button {
+        // position: fixed;
+        // bottom: 0;
+        // left: 0;
+        width: 100%;
+        // padding: 20px;
+        margin-top: 20px;
+        box-sizing: border-box;
+
+        .at-button {
+            flex: 1;
+
+            &:not(:last-child) {
+                // flex: none;
+                // width: 220px;
+                margin-right: 20px;
+            }
+        }
+    }
+}

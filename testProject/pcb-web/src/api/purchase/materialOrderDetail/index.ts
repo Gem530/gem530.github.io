@@ -61,6 +61,32 @@ export const listPurchaseOrderDetail = (query?: MaterialOrderDetailQuery): Axios
     params: query
   });
 };
+/**
+ * 查询采购订单按物料列表-退货审核
+ * @param query
+ * @returns {*}
+ */
+export const listPurchaseOrderDetailByBack = (query?: MaterialOrderDetailQuery): AxiosPromise<MaterialOrderDetailVO[]> => {
+  return request({
+    url: '/purchase/materialHandleDetail/listBackOrderDetail',
+    method: 'get',
+    params: query
+  });
+};
+
+
+/**
+ * 查询采购订单按物料列表
+ * @param query
+ * @returns {*}
+ */
+export const listPurchaseOrderDetailSum = (query?: any) => {
+  return request({
+    url: '/purchase/materialHandleDetail/listPurchaseOrderDetailSum',
+    method: 'get',
+    params: query
+  });
+};
 
 /**
  * 供应商查询采购订单按物料列表

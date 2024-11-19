@@ -1,5 +1,5 @@
 <template>
-  <div class="p-2">
+  <div class="p-2 xtable-page">
     <transition :enter-active-class="proxy?.animate.searchAnimate.enter"
                 :leave-active-class="proxy?.animate.searchAnimate.leave">
       <div class="search" v-show="showSearch">
@@ -26,7 +26,7 @@
       </div>
     </transition>
 
-    <el-card shadow="never">
+    <el-card shadow="never" class="xtable-card">
       <template #header>
         <el-row :gutter="10" class="mb8 global-flex flex-end">
           <el-col :span="1.5">
@@ -54,38 +54,14 @@
         <el-tab-pane label="应收发票" :name="1"></el-tab-pane>
       </el-tabs>
 
-      <el-table v-loading="loading" :data="invoiceList" @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="发票代码" align="center" prop="code" />
-        <el-table-column label="发票号码" align="center" prop="number" />
-        <el-table-column label="数电票号码" align="center" prop="digitalNumber" />
-        <el-table-column label="销方识别号" align="center" prop="sellerIdentifier" />
-        <el-table-column label="销方名称" align="center" prop="sellerName" />
-        <el-table-column label="购方识别号" align="center" prop="buyerIdentifier" />
-        <el-table-column label="购买方名称" align="center" prop="buyerName" />
-        <el-table-column label="开票日期" align="center" prop="invoiceTime" />
-        <el-table-column label="金额" align="center" prop="amount" />
-        <el-table-column label="税额" align="center" prop="tax" />
-        <el-table-column label="价税合计" align="center" prop="amountTax" />
-        <el-table-column label="发票来源" align="center" prop="source" />
-        <el-table-column label="发票票种" align="center" prop="type" />
-        <el-table-column label="发票状态" align="center" prop="status" />
-        <el-table-column label="发票风险等级" align="center" prop="riskLevel" />
-        <el-table-column label="开票人" align="center" prop="issuerName" />
-        <el-table-column label="备注" align="center" prop="remark" />
-
-
-        <!--        <el-table-column label="是否为红冲票据" align="center" prop="isRed" />-->
-        <!--        <el-table-column label="红冲对应发票代码" align="center" prop="redCode" />-->
-        <!--        <el-table-column label="红冲对应发票号码" align="center" prop="redNumber" />-->
-        <!--        <el-table-column label="红冲对应数电票号码" align="center" prop="redDigitalNumber" />-->
-        <!--        <el-table-column label="导入时间" align="center" prop="importTime" width="180">-->
-        <!--          <template #default="scope">-->
-        <!--            <span>{{ parseTime(scope.row.importTime, '{y}-{m}-{d}') }}</span>-->
-        <!--          </template>-->
-        <!--        </el-table-column>-->
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-          <template #default="scope">
+      <XTable v-loading="loading" :columnList="columnList" :data="invoiceList" class="xtable-content" height="100%"
+      v-model:page-size="queryParams.pageSize"
+      v-model:current-page="queryParams.pageNum"
+      :page-params="{ perfect: true, total: total }"
+      @search-change="getList"
+      @checkbox-change="handleSelectionChange" ref="xtableRef"
+        @checkbox-all="handleSelectionChange">
+        <template #default-make="scope">
             <el-tooltip content="修改" placement="top">
               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)"
                          ></el-button>
@@ -94,18 +70,8 @@
               <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)"
                          ></el-button>
             </el-tooltip>
-
           </template>
-        </el-table-column>
-      </el-table>
-
-      <pagination
-        v-show="total>0"
-        :total="total"
-        v-model:page="queryParams.pageNum"
-        v-model:limit="queryParams.pageSize"
-        @pagination="getList"
-      />
+      </XTable>
     </el-card>
 
     <!-- 添加或修改发票记录对话框 -->
@@ -268,6 +234,7 @@ import { ref } from "vue";
 
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
 
+const xtableRef = ref()
 const invoiceList = ref<InvoiceVO[]>([]);
 const buttonLoading = ref(false);
 const loading = ref(true);
@@ -426,6 +393,27 @@ const data = reactive<PageData<InvoiceForm, InvoiceQuery>>({
 
 const { queryParams, form, rules } = toRefs(data);
 
+const columnList = ref([
+{ width: '55',type: 'checkbox',align: 'center',  },
+{ title: '发票代码',field: 'code',align: 'center',  },
+{ title: '发票号码',field: 'number',align: 'center',  },
+{ title: '数电票号码',field: 'digitalNumber',align: 'center',  },
+{ title: '销方识别号',field: 'sellerIdentifier',align: 'center',  },
+{ title: '销方名称',field: 'sellerName',align: 'center',  },
+{ title: '购方识别号',field: 'buyerIdentifier',align: 'center',  },
+{ title: '购买方名称',field: 'buyerName',align: 'center',  },
+{ title: '开票日期',field: 'invoiceTime',align: 'center',  },
+{ title: '金额',field: 'amount',align: 'center',  },
+{ title: '税额',field: 'tax',align: 'center',  },
+{ title: '价税合计',field: 'amountTax',align: 'center',  },
+{ title: '发票来源',field: 'source',align: 'center',  },
+{ title: '发票票种',field: 'type',align: 'center',  },
+{ title: '发票状态',field: 'status',align: 'center',  },
+{ title: '发票风险等级',field: 'riskLevel',align: 'center',  },
+{ title: '开票人',field: 'issuerName',align: 'center',  },
+{ title: '备注',field: 'remark',align: 'center',  },
+{ title: '操作',field: 'make',align: 'center',  },
+]);
 
 
 /** 查询应付发票按钮传值处理 */
@@ -473,9 +461,16 @@ const resetQuery = () => {
 
 /** 多选框选中数据 */
 const handleSelectionChange = (selection: InvoiceVO[]) => {
-  ids.value = selection.map(item => item.id);
-  single.value = selection.length != 1;
-  multiple.value = !selection.length;
+  // ids.value = selection.map(item => item.id);
+  // single.value = selection.length != 1;
+  // multiple.value = !selection.length;
+  const $table = xtableRef.value.xTableRef
+  if ($table) {
+    const selection = $table.getCheckboxReserveRecords().concat($table.getCheckboxRecords()) // 获取选择的行数据列表
+    ids.value = selection.map((item: any) => item.id);
+    single.value = selection.length != 1;
+    multiple.value = !selection.length;
+  }
 };
 
 /** 新增按钮操作 */

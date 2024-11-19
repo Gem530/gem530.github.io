@@ -15,3 +15,16 @@ export const getDashboardInfo = (query?: SaleDashboardQuery): AxiosPromise<SaleD
     params: query
   });
 };
+/**
+ * 查询报价单列表-详情
+ * @param query
+ * @returns {*}
+ */
+
+export const getDashboardInfoDetail = (query?: SaleDashboardQuery): AxiosPromise<SaleDashboardVO> => {
+  return request({
+    url: '/order/saleDashboard/dashboardDetail',
+    method: 'get',
+    params: query
+  });
+};

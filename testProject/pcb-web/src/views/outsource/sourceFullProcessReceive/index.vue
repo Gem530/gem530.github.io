@@ -16,8 +16,8 @@
           </el-col> -->
       <!-- </el-row>
       </template> -->
-      <el-tabs type="border-card" class="xtable-tab"  @tab-click="radioTableHandle">
-        <el-tab-pane label="待收货列表">
+      <el-tabs v-model="editableTabsValue" type="border-card" class="xtable-tab"  @tab-click="radioTableHandle">
+        <el-tab-pane :name="0" label="待收货列表">
           <XTable toolId="outsourceSourceFullProcessReceiveWait" height="100%" class="xtable-content"
                   v-model:page-size="queryParams.pageSize" :loading="loading"
                   v-model:current-page="queryParams.pageNum"
@@ -76,7 +76,7 @@
             </template>
           </XTable>
         </el-tab-pane>
-        <el-tab-pane label="收货记录">
+        <el-tab-pane :name="1" label="收货记录">
           <div class="global-flex flex-end" style="width: 100%;margin-bottom: 10px;">
             <el-button plain @click="handleExportRecord">导出 </el-button>
           </div>
@@ -85,12 +85,13 @@
                   v-model:page-size="receiveQueryParams.pageSize"
                   v-model:current-page="receiveQueryParams.pageNum"
                   :page-params="{ perfect: true, total: receiveTotal }"
-                  :intervalCondition="['placeOrderTime','dispatchTime','deliveryTime','deliverTime','createTime','receiveTime']"
+                  :intervalCondition="['placeOrderTime','dispatchTime','deliveryTime','deliverTime','createTime','receiveTime','accountQuantity']"
                   :data="receiveList"
                   :columnList="receiveColumnList"
                   border :showRefresh="true"
                   @searchChange="receiveQuerySchChange"
                   :column-config="{ resizable: true }"
+                  ref="XTableRef2"
           >
             <template #default-dispatchTime="{ row }">
               <div>{{dateFormat(row.dispatchTime)}}</div>
@@ -127,6 +128,9 @@
             </template>
             <template #default-storageName="{ row }">
               <div>{{ materialStorageList?.find(v => v.id == row.storageId)?.name }}</div>
+            </template>
+            <template #default-hasAccountOrder="scope">
+              {{ accountStatusList.find(item => item.value == scope.row.hasAccountOrder)?.label }}
             </template>
           </XTable>
         </el-tab-pane>
@@ -192,8 +196,16 @@
     </el-dialog>
 
     <!-- 添加或修改订单外协订单对话框 -->
-    <el-drawer :title="drawer.title" v-model="drawer.visible" size="70%">
-      <div v-loading="dialogTableLoading">
+    <el-drawer :title="drawer.title" v-model="drawer.visible"
+      size="45%">
+      <template #header>
+        <span class="el-drawer__title no-wrap">{{drawer.title}}</span>
+        <TotalTitle :start="true" :firstBorder="true" :list="[
+          { title: `总价：${ currentInfo?.totalOrderPrice||0 }元` },
+          { title: `税金：${ currentInfo?.tax||0 }元` },
+          { title: `总金额：${ currentInfo?.totalPrice||0 }元` },
+        ]"></TotalTitle>
+      </template>
         <SendOutSource
           ref="SendOutSourceRef"
           v-if="!dialogTableLoading"
@@ -203,9 +215,8 @@
           :isShow="false"
           :outSourceOrder="outSourceOrder"
         ></SendOutSource>
-        <SaleDescriptions style="padding-top: 50px;" v-if="currentInfo" :isShow="false" :currentInfo="currentInfo"
-                          :customerList="detailCustomerList" :resDictData="resDictData"></SaleDescriptions>
-      </div>
+        <SaleDescriptions style="padding-top: 8px;" v-if="currentInfo" :isShow="false" :currentInfo="currentInfo"
+                          :resDictData="resDictData"></SaleDescriptions>
       <template #footer>
         <div style="display: flex; justify-content: center;">
           <!-- <el-button type="primary" v-show="dialog.title?.includes('收货')" @click="submitForm" >
@@ -215,6 +226,9 @@
         </div>
       </template>
     </el-drawer>
+
+    <!-- 库存锁定提示框 -->
+    <InventoryLock title="产品盘点提示" inventoryType="1" v-model:show="inventoryCheck" :data="inventoryRes" @close="inventoryCheck = false"/>
   </div>
 </template>
 
@@ -235,6 +249,11 @@
   import { el } from 'element-plus/es/locale';
   import dayjs from "dayjs";
   import {ref} from "vue";
+  import {listCommodityInventory} from "@/api/order/commodity";
+  import {checkPermi} from "@/utils/permission";
+  import { decryptBase64ByStr } from '@/utils/crypto'
+
+  const { ownerId } = useUserStore();
 
   const wxhSwitch = ref(import.meta.env.VITE_WXH_SWITCH === 'true');
 
@@ -258,7 +277,16 @@
   const queryFormRef = ref<ElFormInstance>();
   const outSourceOrder = ref<SourceFullProcessOrderVO>();
   const sourceFullProcessReceiveFormRef = ref<ElFormInstance>();
-
+  const editableTabsValue = ref(0);
+  const route = useRoute();
+  /**
+   * 进入页面次数
+   */
+  const isFirst = ref(0)
+  /**
+   * 待办跳转参数
+   */
+  const pendingParams = ref()
   const waitReceiveQuantity = computed(() => {
     return form.value.outSourceQuantity-form.value.receiveQuantity;
   })
@@ -446,6 +474,7 @@
   })
 
   const XTableRef = ref()
+  const XTableRef2 = ref()
 
   const columnList = ref([
 
@@ -453,7 +482,7 @@
     { title: '外协单号', width: '120', field: 'code', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入外协单号' } },
     { title: '外协供应商', width: '160', field: 'supplierName', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入供应商' } },
     // { title: '外协单价', width: '80', field: 'price', align: 'center', },
-    { title: '客户名称', width: '160', field: 'cusName', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入客户名称' } },
+    // { title: '客户名称', width: '160', field: 'cusName', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入客户名称' } },
     { title: '客户编码', width: '80', field: 'customerCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入客户编码' } },
     // { title: '加急', width: '80', field: 'urgent', align: 'center', filterType: 'input', filterParam: { placeholder: '客户编码' } },
     {
@@ -555,7 +584,7 @@
     { title: '外协单号', width: '120', field: 'code', align: 'center' },
     { title: '外协供应商', width: '140', field: 'supplierName', align: 'center'},
     // { title: '外协单价', width: '80', field: 'price', align: 'center', },
-    { title: '客户名称', width: '160', field: 'cusName', align: 'center', },
+    // { title: '客户名称', width: '160', field: 'cusName', align: 'center', },
     { title: '客户编码', width: '80', field: 'customerCode', align: 'center',},
     { title: '加急', width: '80', field: 'urgent', align: 'center',},
     { title: '交货日期', width: '80', field: 'dispatchTime', align: 'center', },
@@ -583,7 +612,7 @@
     { title: '外协单号', width: '120', field: 'code', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入外协单号' } },
     { title: '外协供应商', width: '180', field: 'supplierName', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入供应商' } },
     // { title: '外协单价', width: '80', field: 'price', align: 'center', },
-    { title: '客户名称', width: '180', field: 'cusName', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入客户名称' } },
+    // { title: '客户名称', width: '180', field: 'cusName', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入客户名称' } },
     { title: '客户编码', width: '80', field: 'customerCode', align: 'center', filterType: 'input', filterParam: { placeholder: '请输入客户编码' } },
     // { title: '加急', width: '80', field: 'urgent', align: 'center', filterType: 'input', filterParam: { placeholder: '客户编码' } },
     {
@@ -688,8 +717,17 @@
     { title: '收货数量', width: '80', field: 'quantity',align: 'center', },
     { title: '备品数量', width: '80', field: 'reserveQuantity', align: 'center',  },
     { title: '入库仓', width: '100', field: 'storageName', align: 'center' },
+    { title: '对账状态', width: '80', field: 'hasAccountOrder',  align: 'center', filterType: 'radioButton', filterData: () => accountStatusList.value, isPermi: () => checkPermi(['outsource:account:query']) },
+    { title: '对账数量', width: '80', field: 'accountQuantity',align: 'center', filterType:'intervalNumber', isPermi: () => checkPermi(['outsource:account:query']) },
+    // { title: '对账面积(㎡)', width: '80', field: 'accountArea', align: 'center',  },
     { title: '备注', field: 'remark', align: 'center', width: '120',  },
   ]);
+
+  const accountStatusList = ref([
+    {label: '已对账', value: '1', },
+    {label: '未对账', value: '0', },
+  ]);
+
   const dialogTableLoading = ref(false)
 
   const checkedSourceFullProcessReceiveList = ref<SourceFullProcessReceiveVO[]>([]);
@@ -852,9 +890,24 @@
     }
   }
 
-
+  const inventoryCheck = ref(false);
+  const inventoryRes = ref<any[]>([]);
   /** 提交按钮 */
   const submitForm = async() => {
+    // 查询是否存在盘点中产品
+    let ids = formReceiveList.value.map(item => item.commodityId);
+    let query = {
+      pageNum: 1,
+      pageSize: 20,
+      IdList: ids,
+      status: '1'
+    }
+    const res = await listCommodityInventory(query);
+    if (res.rows && res.rows.length > 0) {
+      inventoryRes.value = res.rows;
+      inventoryCheck.value = true;
+      return;
+    }
     // const errMap = await validAllEvent();
     // if (errMap) {
     //   return;
@@ -909,13 +962,44 @@
       ...receiveQueryParams.value, tableName: 'outsourceSourceFullProcessReceiveRecord'
     }, `外协收货记录_${new Date().getTime()}.xlsx`)
   }
-
-  onMounted(() => {
+/**
+ * 监听路由变化
+ */
+watch(() => route.query?.pendingParams, (newVal) => {
+  if (newVal) {
+    let decryptStr = decryptBase64ByStr(newVal)
+    if (decryptStr && decryptStr != '{}' && (decryptStr == pendingParams.value)) return;
+    pendingParams.value = decryptStr
+    if (decryptStr && decryptStr != '{}') {
+      const params = JSON.parse(decryptStr);
+      let tab = !isNaN(Number(params.tab)) ? Number(params.tab) : 0;
+      editableTabsValue.value = tab
+      let tempColumnList = [{field: 'code', defaultValue: params.bizNo}]
+      if (tab === 0) {
+        queryParams.value.code = params.bizNo
+        setTimeout(() => {
+          XTableRef.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      } else if (tab === 1) {
+        recordQueryParams.value.orderCode = params.bizNo
+        setTimeout(() => {
+          XTableRef2.value.filterFieldEvent(tempColumnList)
+        }, 100)
+      }
+    }
+  }
+}, {deep: true, immediate: true})
+/**
+ * 重新进入页面时
+ */
+onActivated(() => {
+})
+onMounted(() => {
     getList();
 
     updateCurrentTime();
     getStorageList();
     getReceiveList();
     getDictOptions();
-  });
+});
 </script>
