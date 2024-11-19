@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "alien-signals": "^0.3.0",
     "element-plus": "^2.7.8",
     "vue": "^3.4.29"
   },

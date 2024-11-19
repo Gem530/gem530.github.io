@@ -1,12 +1,15 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { ElInputNumber } from 'element-plus'
+import { signal, computed, effect } from 'alien-signals'
 import HelloWorld from './components/HelloWorld.vue'
 import TheWelcome from './components/TheWelcome.vue'
 
 const test = ref()
+const count = signal(0)
 watch(() => test.value, (val, old) => {
-  console.log('new', val, test.value, 'old', old)
+  // count.set(val)
+  console.log('new', val, test.value, 'old', old, 'count', count.get())
 })
 const getTest = () => {
   console.log(test.value)
@@ -15,7 +18,7 @@ const getTest = () => {
 
 <template>
   {{ test }}
-  <ElInputNumber v-model="test"></ElInputNumber>
+  <ElInputNumber v-model="count"></ElInputNumber>
   <button @click="getTest">test</button>
   <!-- <header>
     <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
