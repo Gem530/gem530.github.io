@@ -615,6 +615,7 @@
         let orderId = '';
         let isXcx = false;
         let requestUrl = '';
+        let originHref = '';
         let currentCardIsChild = false;
         let productionDetails = [];
         let allData = '';
@@ -2258,17 +2259,6 @@
 
             // 调用打印时，发送消息给父页面
             if (window?.parent) {
-                let originHref = ''
-                if (window.parent?.length && window.parent[0].location.origin) {
-                    // 如果带端口的，需要去除端口，取域名
-                    let firstIndex = window.parent[0].location.origin.indexOf(':')
-                    let lasIndex = window.parent[0].location.origin.lastIndexOf(':')
-                    if (firstIndex != lasIndex) {
-                        originHref = window.parent[0].location.origin.slice(0, lasIndex)
-                    } else {
-                        originHref = window.parent[0].location.origin
-                    }
-                }
                 console.log('originHref', originHref)
                 window.parent.postMessage({isPrint: true}, originHref)
             }
@@ -2335,6 +2325,7 @@
                 isMi = params?.isMi || false;
                 type = params.type || 'all'
                 orderId = params?.orderId;
+                originHref = params?.originHref;
                 console.log('params', params, obj)
 
                 // 小程序
@@ -2372,6 +2363,7 @@
                     isMi = params?.isMi || false;
                     orderId = params?.orderId;
                     requestUrl = params.requestUrl;
+                    originHref = params?.originHref;
                     type = params.ty || 'all'
                 }
                 // commonSetStyle('xcxMiprintBtn', [{label: 'display', value: 'none'}])
