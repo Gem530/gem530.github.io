@@ -1,0 +1,2390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预览</title>
+
+    <!-- PDF.js CDN -->
+    <script src="https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/H5/js/pdf.min.js"></script>
+    <!-- qrcodejs2  https://www.npmjs.com/package/qrcodejs2?activeTab=readme -->
+    <script src="https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/H5/js/qrcode.min.js"></script>
+    <style>
+        html,
+        body {
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        .app-overflow {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+        }
+        #app {
+            width: 600pt;
+            margin: 0 auto;
+        }
+
+        @page {
+            margin: 0.5cm;
+        }
+
+        @media print {
+            @font-face {
+                font-family: 'TNR';
+                src: local(times new roman);
+                unicode-range: U+0020-007E, U+00A0-00FF;
+                /* 含了标点符号等常见英文字符,https://wenku.baidu.com/view/7a646208463610661ed9ad51f01dc281e53a563d.html?_wkts_=1735032135151&bdQuery=unicode+%E8%8B%B1%E6%96%87%E5%AD%97%E7%AC%A6 */
+                font-display: swap;
+            }
+
+            .print-content {
+                font-family: 'TNR', '仿宋';
+            }
+
+            table.page-td-bold td {
+                border: 1px solid black !important;
+            }
+        }
+
+        /* 保持打印与预览文字字体相同 */
+        @font-face {
+            font-family: 'TNR';
+            src: local(times new roman);
+            unicode-range: U+0020-007E, U+00A0-00FF;
+            /* 含了标点符号等常见英文字符,https://wenku.baidu.com/view/7a646208463610661ed9ad51f01dc281e53a563d.html?_wkts_=1735032135151&bdQuery=unicode+%E8%8B%B1%E6%96%87%E5%AD%97%E7%AC%A6 */
+            font-display: swap;
+        }
+        .print-content {
+            font-family: 'TNR', '仿宋';
+        }
+
+        /* 打印时，边框看起来更粗，为保持一致，在页面预览时设置为2px */
+        table.page-td-bold td {
+            border: 2px solid black !important;
+        }
+
+        .btn-fixed {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 999;
+        }
+        .btn-fixed button {
+            min-width: 85px;
+            height: 32px;
+            background: #409eff;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        
+        #loader-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999999;
+        }
+
+        #loader {
+            display: block;
+            position: relative;
+            left: 50%;
+            top: 50%;
+            width: 150px;
+            height: 150px;
+            margin: -75px 0 0 -75px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: #FFF;
+            -webkit-animation: spin 2s linear infinite;
+            -ms-animation: spin 2s linear infinite;
+            -moz-animation: spin 2s linear infinite;
+            -o-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+            z-index: 1001;
+        }
+
+        #loader:before {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: #FFF;
+            -webkit-animation: spin 3s linear infinite;
+            -moz-animation: spin 3s linear infinite;
+            -o-animation: spin 3s linear infinite;
+            -ms-animation: spin 3s linear infinite;
+            animation: spin 3s linear infinite;
+        }
+
+        #loader:after {
+            content: "";
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: #FFF;
+            -moz-animation: spin 1.5s linear infinite;
+            -o-animation: spin 1.5s linear infinite;
+            -ms-animation: spin 1.5s linear infinite;
+            -webkit-animation: spin 1.5s linear infinite;
+            animation: spin 1.5s linear infinite;
+        }
+
+
+        @-webkit-keyframes spin {
+            0% {
+            -webkit-transform: rotate(0deg);
+            -ms-transform: rotate(0deg);
+            transform: rotate(0deg);
+            }
+
+            100% {
+            -webkit-transform: rotate(360deg);
+            -ms-transform: rotate(360deg);
+            transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+            -webkit-transform: rotate(0deg);
+            -ms-transform: rotate(0deg);
+            transform: rotate(0deg);
+            }
+
+            100% {
+            -webkit-transform: rotate(360deg);
+            -ms-transform: rotate(360deg);
+            transform: rotate(360deg);
+            }
+        }
+
+
+        #loader-wrapper .loader-section {
+            position: fixed;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            -webkit-transform: translateX(0);
+            -ms-transform: translateX(0);
+            transform: translateX(0);
+        }
+
+        #loader-wrapper .loader-section.section-left {
+            left: 0;
+        }
+
+        #loader-wrapper .loader-section.section-right {
+            right: 0;
+        }
+
+
+        .loaded #loader-wrapper .loader-section.section-left {
+            -webkit-transform: translateX(-100%);
+            -ms-transform: translateX(-100%);
+            transform: translateX(-100%);
+            -webkit-transition: all 0.7s 0.3s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+            transition: all 0.7s 0.3s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+        }
+
+        .loaded #loader-wrapper .loader-section.section-right {
+            -webkit-transform: translateX(100%);
+            -ms-transform: translateX(100%);
+            transform: translateX(100%);
+            -webkit-transition: all 0.7s 0.3s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+            transition: all 0.7s 0.3s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+        }
+
+        .loaded #loader {
+            opacity: 0;
+            -webkit-transition: all 0.3s ease-out;
+            transition: all 0.3s ease-out;
+        }
+
+        .loaded #loader-wrapper {
+            visibility: hidden;
+            -webkit-transform: translateY(-100%);
+            -ms-transform: translateY(-100%);
+            transform: translateY(-100%);
+            -webkit-transition: all 0.3s 1s ease-out;
+            transition: all 0.3s 1s ease-out;
+        }
+
+        .no-js #loader-wrapper {
+            display: none;
+        }
+
+        .no-js h1 {
+            color: #222222;
+        }
+
+        #loader-wrapper .load_title {
+            font-family: 'Open Sans';
+            color: #FFF;
+            font-size: 19px;
+            width: 100%;
+            text-align: center;
+            z-index: 9999999999999;
+            position: absolute;
+            top: 60%;
+            opacity: 1;
+            line-height: 30px;
+        }
+
+        #loader-wrapper .load_title span {
+            font-weight: normal;
+            font-style: italic;
+            font-size: 13px;
+            color: #FFF;
+            opacity: 0.5;
+        }
+
+        .loading-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            text-transform: uppercase;
+            z-index: 999;
+        }
+        .loading-font {
+            width: 100%;
+            font-size: 3em;
+            color: #fff;
+            text-transform: uppercase;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            -webkit-box-reflect: below -12px linear-gradient(transparent, rgba(255, 255, 255, 0.5));
+        }
+        .loading-font span {
+            position: relative;
+            display: inline-block;
+            animation: bolan 1s infinite;
+            animation-delay: calc(0.1s * var(--i));
+        }
+        @keyframes bolan {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            20% {
+                transform: translate(0, -20px);
+            }
+
+            40%,
+            100% {
+                transform: translate(0, 0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-overflow">
+        <div id="app">
+            <div id="canvasToImgDom" style="display: none;"></div>
+            <div class="print-content" style="width: 600pt !important;" ref="cardRef">
+                <!--工艺单信息、钻孔信息、开料信息、压合信息-->
+                <div style="width: 100%; position: relative; page-break-before: always; box-sizing: border-box" id="miOrderInfoDom">
+    
+                    <!-- position: sticky; top: 0; -->
+                    <div style=" text-align: center; width: 100%; box-sizing: border-box">
+                        <table style="border-collapse: collapse; border: none;width:100%;">
+                            <tbody style=" font-weight: bold;">
+                                <tr>
+                                    <td style="width: 80pt; text-align: left">
+                                        <div style="font-size: 18px;" id="isRemediationDom"></div>
+                                        <div style="font-size: 18px;" id="orderTypeDescDom"></div>
+                                        <div style="font-size: 18px;" id="modelDom"></div>
+                                    </td>
+                                    <td style="width: 80pt">
+                                        <img :src="_logn" alt="logo" style="width: 60px; height: 60px" id="logoDom"/>
+    
+                                    </td>
+                                    <td style="text-align: center">
+                                        <span style="font-size: 25px;" id="enterpriseNameDom"></span>
+                                    </td>
+                                    <td style="width: 80pt; text-align: left" id="miHide">
+                                        <div>
+                                            <span style="font-size: 18px;">本卡：</span><span style="font-size: 18px;" id="bundlePnlQuantityDom"></span>
+                                        </div>
+                                        <div>
+                                            <span style="font-size: 18px;">扎号：</span><span style="font-size: 18px;" id="noDom"></span>
+                                        </div>
+                                    </td>
+                                    <td style="width: 80pt; text-align: right">
+                                        <span style="font-size: 30px; font-weight: 1000" id="timeSpanDaysDom"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table style="border-collapse: collapse; border: none;width:100%;">
+                            <tbody style=" font-weight: bold;">
+                                <tr>
+                                    <td style="width: 200pt; text-align: left" id="miHide">
+                                        <div>
+                                            <span style="font-size: 18px;">总数：</span><span style="font-size: 18px;" id="totalNumDom"></span>
+                                            <span>&nbsp;&nbsp;</span>
+                                            <span style="font-size: 18px;" id="cardPnlNameDom"></span>
+                                        </div>
+                                        <div>
+                                            <span style="font-size: 18px;">投料日期：</span><span style="font-size: 18px;" id="productionStartTimeDom"></span>
+                                        </div>
+                                    </td>
+                                    <td style="width: 250pt; text-align: center">
+                                        <span style="font-size: 25px;" id="miNameDom"></span>
+                                    </td>
+                                    <td style="width: 100pt; text-align: right">
+                                        <img src="" alt="条形码" style="display: inline-block;width: 60px;height: 60px" id="qcCodeImageDom"/>
+                                    </td>
+                                    <td style="width: 100pt; text-align: right">
+                                        <div>
+                                            <span style="font-size: 18px;" id="relationQuantityLableDom">库存板：</span>
+                                            <span style="font-size: 18px;" id="relationQuantityDom"></span>
+                                        </div>
+                                        <div>
+                                            <!-- <span style="font-size: 18px;" id="sliceTypeDom">正片</span> -->
+                                        </div>
+                                        <div>
+                                            <span style="font-size: 18px;" id="complexityDom">简单</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr id="miShow">
+                                    <td>
+                                    </td>
+                                    <td style="width: 250pt; text-align: center">
+                                        <span style="font-size: 25px;" id="customerCodeDom2"></span>
+                                    </td>
+                                    <td>
+                                    </td>
+                                    <td>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table style="border-collapse: collapse; border: none;width:100%;">
+                            <tbody style=" font-weight: bold;">
+                                <tr>
+                                    <td style="width: 250pt; text-align: left; font-weight: bold">
+                                        <span style="font-size: 22px;" id="comCodeDom"></span>
+                                    </td>
+                                    <td style="width: 175pt; text-align: center" id="miHide">
+                                        <span style="font-size: 16px;">生产编号：</span><span style="font-size: 16px;" id="productionCardNoDom"></span>
+                                    </td>
+                                    <td style="width: 175pt; text-align: right">
+                                        <span style="font-size: 16px;">MI单号：</span><span style="font-size: 16px;" id="productionPlanNoDom"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--工艺单信息-->
+                    <div style="width: 100%; box-sizing: border-box; page-break-after: auto">
+                        <table style="border-collapse: collapse; border: none;width:100%;" class="page-td-bold">
+                            <tbody style="font-weight: bold">
+                                <tr>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt;"><span
+                                            style="font-size: 15px;">公司料号：</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 100pt;"><span style="font-size: 15px;" id="commodityCodeDom1"></span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt"><span
+                                            style="font-size: 15px;">板材要求：</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt;"><span
+                                            style="font-size: 15px;" id="materialQualityDom"></span></td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt"><span
+                                            style="font-size: 15px;">开料尺寸：</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 70pt" id="cardPnlLengthParentDom"><span
+                                            style="font-size: 15px;" id="cardPnlLengthDom"></span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt" id="miNone"><span
+                                            style="font-size: 15px;">PNL数量：</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt;" id="miNone"><span
+                                            style="font-size: 15px;" id="bundlePnlQuantityDom1"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt;"><span
+                                            style="font-size: 15px;">客户代码：</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 100pt;"><span style="font-size: 15px;" id="customerCodeDom"></span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt"><span
+                                            style="font-size: 15px;">产品板厚：</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt;"><span
+                                            style="font-size: 15px;" id="commodityThicknessDom"></span></td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt"><span
+                                            style="font-size: 15px;">SET尺寸：</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 70pt;"><span
+                                            style="font-size: 15px;" id="seTSizeDom"></span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt"><span
+                                            style="font-size: 15px;">取库存：</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt;"><span
+                                            style="font-size: 15px;"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black; text-align: left; width: 160pt" colspan="2"><span
+                                            style="font-size: 15px;"></span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt"><span
+                                            style="font-size: 15px;">成品铜箔：</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt;"><span
+                                            style="font-size: 15px;" id="copperThicknessDom"></span></td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt"><span
+                                            style="font-size: 15px;">PCS尺寸：</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 70pt;"><span
+                                            style="font-size: 15px;" id="pcSSizeDom"></span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt" id="miHide"><span
+                                            style="font-size: 15px;">投料数量：</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt;" id="miHide"><span
+                                            style="font-size: 15px;" id="feedQuantityAllDom"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt;"><span
+                                            style="font-size: 15px;">交货日期：</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 100pt;"><span
+                                            style="font-size: 15px;" id="dispatchTimeDom"></span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt"><span
+                                            style="font-size: 15px;">阻焊：</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt;"><span
+                                            style="font-size: 15px;" id="commoditySolderDom"></span></td>
+                                    <td style="border: 1px solid black; text-align: left; width: 130pt" colspan="2"><span
+                                            style="font-size: 15px;" id="pnlStrDom"></span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt"><span
+                                            style="font-size: 15px;">PCS数量：</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt;"><span
+                                            style="font-size: 15px;" id="quantityAllDom"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black; text-align: center; width: 220pt;" colspan="3">
+                                        <span style="font-size: 25px;" id="surfaceFinishedDom"></span>
+                                        <span style="font-size: 25px;" id="sliceTypeDom1">（正片）</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt"><span
+                                            style="font-size: 15px;" id="orderRateDom"></span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt"><span
+                                            style="font-size: 15px;">订单面积(㎡)</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 70pt;"><span
+                                            style="font-size: 15px;" id="areaAllDom"></span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt" id="miHide"><span
+                                            style="font-size: 15px;">投料面积(㎡)</span>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: left; width: 60pt;" id="miHide"><span
+                                            style="font-size: 15px;" id="setAreaDom"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table style="border-collapse: collapse; border: none;width:100%; margin-top: 5px" class="page-td-bold">
+                            <tbody id="productionDetailsListDom">
+                            </tbody>
+                        </table>
+                        <!-- 订单数据 -->
+                        <table style="border-collapse: collapse; border: none;width:100%; margin-top: 5px" class="page-td-bold">
+                            <tbody id="orderDataDom">
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--钻孔信息-->
+                    <div style="width: 100%; box-sizing: border-box; page-break-after: auto" id="drillInfoDom">
+                    </div>
+                    <!--开料信息-->
+                    <div style="width: 100%; box-sizing: border-box; page-break-after: auto">
+                        <div style="width: 100%;" id="schemeInfoDom"></div>
+                    </div>
+                    <!--压合信息-->
+                    <div style="width: 100%; box-sizing: border-box;" id="laminateInfoShowDom">
+                        <div style="width: 100%;">
+                            <div style="font-size: 20px; font-weight: bold">压合信息</div>
+                            <div style="width: 100%;">
+                                <table style="border-collapse: collapse; border: none; width: 100%; font-size: 15px" class="page-td-bold">
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 200pt; border: 1px solid black;"><span id="craftNameDom"></span>
+                                            </td>
+                                            <td style="width: 200pt; border: 1px solid black;"><span id="pressedThicknessDom"></span>
+                                            </td>
+                                            <td style="width: 200pt; border: 1px solid black;"><span id="pressedToleranceDom"></span></td>
+                                            <td style="width: 200pt; border: 1px solid black;">
+                                                <span id="pressedLayeredStatusDom"></span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width: 600pt; border: 1px solid black;" colspan="4">
+                                                <span id="remarkDom"></span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <table style="border-collapse: collapse; border: none; width: 100%; font-size: 15px" id="laminateInfoDom" class="page-td-bold">
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- 外形图 -->
+                <div style="width: 100%;" id="outSideImagesDom"></div>
+                
+    
+                <!-- 底部文字，工艺单信息 -->
+                <div style="text-align: center; width: 100%; box-sizing: border-box" id="miOrderInfoButtomDom">
+                    <table style="border-collapse: collapse; border: none;width:100%; margin-top: 5px">
+                        <tbody>
+                            <tr>
+                                <td style="width: 250pt; text-align: left"><span style="font-size: 13px">MI制作：</span><span
+                                        style="font-size: 13px" id="miMakerDom1"></span></td>
+                                <td style="width: 250pt; text-align: center"><span style="font-size: 13px">MI审核：</span><span
+                                        style="font-size: 13px" id="miAuditDom1"></span></td>
+                                <td style="width: 250pt; text-align: center"><span style="font-size: 13px">打印人员：</span><span
+                                        style="font-size: 13px" id="personnelDom"></span></td>
+                                <td style="width: 250pt; text-align: right"><span style="font-size: 13px">打印时间：</span><span
+                                        style="font-size: 13px" id="printTimeDom"></span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+    
+                <!-- 子卡 -->
+                <div style="width: 100%;" id="childCardDom"></div>
+            </div>
+        </div>
+    </div>
+    <div class="btn-fixed">
+        <button onClick="printHtmlV2(null, () => {})" id="printBtnDom">打印</button>
+        <!-- <button onClick="scaleHandle()" id="xcxMiprintBtn"></el-button> -->
+    </div>
+
+    <script>
+        let printType = "noOutsideImages";
+        let code = "";
+        let cl = '';
+        let br = '';
+        let isMi = '';
+        let orderId = '';
+        let isXcx = false;
+        let requestUrl = '';
+        let currentCardIsChild = false;
+        let productionDetails = [];
+        let allData = '';
+        let commodityInfos = [];
+        let publicCommodityInfo = [];
+        let drillHeaders = [];
+        let drillInfos = [];
+        let drillTitles = [];
+        let n_drillInfos = [];
+        let n_drillHeaders = [];
+        let n_drillTitles = [];
+        let qcCodeImage = [];
+        let drillData = [];
+        let schemeImages = [];
+        let laminateImages = [];
+        //存压合工艺参数
+        let laminateInfo = '';
+        let outsideImages = [];
+        let scrapped = [1, 2, 3, 4, 5];
+        let cardRefPrint = '';
+        // 子卡列表
+        let childCardList = [];
+
+        let props = {
+            resInfo: {},
+            printType: {}
+        }
+
+
+        let startPrint = false
+        let currentPdfList = []
+        let currentNode = '';
+
+        console.log(window)
+        var pdfjsLib = window['pdfjs-dist/build/pdf'];
+        // pdfjsLib.GlobalWorkerOptions.workerSrc = "./pdf.worker.min.js";
+        // console.log(pdfjsLib)
+        const loadFile = (url) => {
+            let pdfDoc = null; // 保存加载的pdf文件流
+            let pdfPages = 0; // pdf文件的页数
+            let pdfScale = 3.0; // 缩放比例  pdf转图片,缩放改为3,清晰度较合适
+            let pdfImgList = [];
+                // let pdfjsLib = require('~/build/pdf.mjs')
+            return new Promise((resolve,reject) => {
+                try {
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://pcb-prod.oss-cn-shenzhen.aliyuncs.com/H5/js/pdf.worker.min.js";
+                    console.log(pdfjsLib)
+                    // pdfjsLib.GlobalWorkerOptions.workerSrc = 
+                    //     // workerSrc;
+                    //     // "../../node_modules/pdfjs-dist/build/pdf.worker.min.js";
+                    //     "/js/pdf.worker.min.js";
+                    //     // "/build/pdf.worker.mjs";
+                    //     // "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.9.179/pdf.worker.min.js";
+                    const loadingTask = pdfjsLib.getDocument(url);
+                    loadingTask.promise.then(async (pdf) => {
+                        pdfImgList=[]
+                        // console.log('pdf--', pdf);
+                        pdfDoc = pdf;
+                        pdfPages = pdf.numPages;
+                        for (let i = 1; i <= pdfPages; i++) {
+                        await renderPage(i, {pdfDoc,pdfScale,pdfImgList});
+                        }
+                        resolve(pdfImgList.sort((a,b)=>a.sort-b.sort).map((v) => v.url))
+                    }).catch((err) => {
+                    // console.log('err111', err)
+                    // reject(err)
+                    });
+                } catch(err) {
+                    reject(err)
+                }
+            })
+            };
+        //渲染pdf文件
+        const renderPage = (num, {pdfDoc,pdfScale,pdfImgList}) => {
+            return new Promise((resolve, reject) => {
+                pdfDoc.getPage(num).then(async (page) => {
+                    try {
+                    // const canvasId = "pdf-canvas-" + num;
+                    // const canvas = document.getElementById(canvasId);
+                    const canvas = document.createElement('canvas')
+                    const ctx = canvas.getContext("2d");
+                    const dpr = window.devicePixelRatio || 1;
+                    const bsr =
+                        ctx.webkitBackingStorePixelRatio ||
+                        ctx.mozBackingStorePixelRatio ||
+                        ctx.msBackingStorePixelRatio ||
+                        ctx.oBackingStorePixelRatio ||
+                        ctx.backingStorePixelRatio ||
+                        1;
+                    const ratio = dpr / bsr;
+                    const viewport = page.getViewport({ scale: pdfScale });
+                    // console.log('viewport---', viewport)
+                    let resW = viewport.width
+                    let resH = viewport.height
+                    canvas.width = resW * ratio;
+                    canvas.height = resH * ratio;
+                    canvas.style.width = resW + 'px';
+                    canvas.style.height = resH + 'px';
+                    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+                    const renderContext = {
+                        canvasContext: ctx,
+                        viewport: viewport,
+                    };
+                    await page.render(renderContext).promise;
+                    
+                    // setTimeout(()=> {
+                        // 手动在pdf.mjs中加了一个回调函数,3225行
+                        pdfImgList.push({sort: num,url:canvas.toDataURL('image/png')})
+                        // console.log('pdfImgList---------',pdfImgList)
+                        resolve(pdfImgList)
+                    // }, 10)
+                    // if (num < pdfPages) {
+                    //   await renderPage(num + 1);
+                    // }
+                    } catch(err) {
+                        reject(err)
+                    }
+                }).catch((err) => {
+                    reject(err)
+                });
+            })
+        };
+
+        let _logn="https://pcb-out-demo.oss-cn-shenzhen.aliyuncs.com/resources/nothing.png";
+        const replaceParamValue = (value) => {
+            if (typeof value === 'string') {
+                if (value && value.startsWith('备注')) {
+                    return value.replace('备注', '【备注】');
+                }
+            } else if (value instanceof Array) {
+            }
+            return value;
+        }
+        function parseTime(time, pattern) {
+            if (arguments.length === 0 || !time) {
+                return null;
+            }
+            const format = pattern || '{y}-{m}-{d} {h}:{i}:{s}';
+            let date;
+            if (typeof time === 'object') {
+                date = time;
+            } else {
+                if (typeof time === 'string' && /^[0-9]+$/.test(time)) {
+                time = parseInt(time);
+                } else if (typeof time === 'string') {
+                time = time
+                    .replace(new RegExp(/-/gm), '/')
+                    .replace('T', ' ')
+                    .replace(new RegExp(/\.[\d]{3}/gm), '');
+                }
+                if (typeof time === 'number' && time.toString().length === 10) {
+                time = time * 1000;
+                }
+                date = new Date(time);
+            }
+            const formatObj = {
+                y: date.getFullYear(),
+                m: date.getMonth() + 1,
+                d: date.getDate(),
+                h: date.getHours(),
+                i: date.getMinutes(),
+                s: date.getSeconds(),
+                a: date.getDay()
+            };
+            return format.replace(/{(y|m|d|h|i|s|a)+}/g, (result, key) => {
+                let value = formatObj[key];
+                // Note: getDay() returns 0 on Sunday
+                if (key === 'a') {
+                return ['日', '一', '二', '三', '四', '五', '六'][value];
+                }
+                if (result.length > 0 && value < 10) {
+                value = '0' + value;
+                }
+                return value || 0;
+            });
+        }
+        const replaceParamName = (name) => {
+            //&&name.endsWith('：')
+            if (typeof name === 'string') {
+                return '【' + name.replace('：', '') + '】：';
+            } else {
+                return name;
+            }
+        }
+
+        const buildProductionInfos = async (result) => {
+            let inx = 0;
+            let nodeList;
+            if (result.productionCardNodeList && result.productionCardNodeList.length > 0) {
+                nodeList = result.productionCardNodeList;
+            } else {
+                nodeList = result.miNodeInfoVoList;
+            }
+            let productionDetailsObj = nodeList.map((item) => {
+                if (item.craftName == "压合") {
+                    laminateInfo = item;
+                    laminateInfo.remark = laminateInfo.remark ? laminateInfo.remark.public : '';
+                    if (item.requirement && item.requirement.length > 0) {
+                        item.requirement.forEach((element) => {
+
+                            let unit = element.unit ? element.unit : '';
+                            //压合板厚
+                            if (element.code == "Pressed_Thickness" && element.defaultValue) {
+                                laminateInfo.pressedThickness = element.defaultValue + unit;
+                            }
+                            //公差
+                            if (element.code == "Pressed_Tolerance" && element.defaultValue) {
+                                laminateInfo.pressedTolerance = element.defaultValue + unit;
+                            }
+
+                        });
+                    }
+                    //层叠状态
+                    laminateInfo.pressedLayeredStatus = item.extension ? item.extension.cascadingState : '';
+                }
+                inx++;
+                let isOver = item.isCount == 1 ? "*" : "";
+                let detail = {
+                    index: isOver + inx,
+                    productionCraft: item.craftName,
+                    params: [],
+                };
+                item.requirement.forEach((req) => {
+                    let unit = req.unit ? req.unit : '';
+                    let _name = req.name ? req.name : '';
+                    if (req.differPNL && req.differPNL.length > 0) {
+
+                        req.differPNL.forEach((diff) => {
+                            let pnlName = (req.differPNL.length > 1 && diff.pnlName) ? (diff.pnlName + ":") : '';
+                            let val = diff.defaultValue;
+                            let showVal = pnlName + val + unit;
+                            if (val == null || val == undefined || val == 'null') {
+                                showVal = '';
+                            }
+                            detail.params.push({
+                                name: _name,
+                                para: showVal,
+                            })
+                        });
+
+                    } else {
+                        let val = req.defaultValue;
+                        let showVal = val + unit;
+                        if (val == null || val == undefined || val == 'null') {
+                            showVal = '';
+                        }
+                        detail.params.push({
+                            name: _name,
+                            para: showVal,
+                        })
+                    }
+                });
+                let remark = item.remark ? item.remark.public : '';
+                if (item.remark && item.remark.differPNL && item.remark.differPNL.length > 0) {
+                    item.remark.differPNL.forEach((remarkDiffPNL) => {
+                        let pnlName = remarkDiffPNL.pnlName ? remarkDiffPNL.pnlName : '';
+                        let pnlRemark = remarkDiffPNL.remark ? remarkDiffPNL.remark : '';
+                        if (pnlRemark != '') {
+                            remark += '    ' + pnlName + '备注：' + pnlRemark;
+                        }
+                    });
+                }
+                if (remark && remark != '') {
+                    remark = '【备注】：' + remark;
+                }
+                detail.params.push({
+                    name: '备注',
+                    para: remark,
+                })
+                return detail;
+            })
+            // 在前面使用 sortRequirment 排过序了，这里不需要了
+            //   //sort
+            // productionDetailsObj.forEach((pd)=>{
+            //   pd.params=pd.params.sort((a, b) => {
+            //     let nameA = a.name.toUpperCase(); // 转换为大写以忽略大小写
+            //     let nameB = b.name.toUpperCase();
+            //     return nameA.localeCompare(nameB);
+            //   });
+            // });
+            console.log('productionDetails', productionDetailsObj);
+            console.log('laminateInfo', laminateInfo);
+            productionDetails = productionDetailsObj;
+        }
+
+        const buildDrillData = async (result) => {
+            //非金属的钻孔数据
+            if (result.ndrillInfos && result.ndrillInfos.length > 0) {
+                n_drillInfos = [];
+                n_drillHeaders = [];
+                n_drillTitles = [];
+
+                let rebuildDrillInfo = [];
+                let sumRow = ['', '合计'];
+                let _drillInfo = [];
+                //let totalQuantity = 0;
+                let pnlSet = new Set(result.ndrillInfos.map(_item => _item.pnlId));
+                result.ndrillInfos?.length && result.ndrillInfos.forEach((item) => {
+                    let _quantity = item.quantity ? item.quantity : 0;
+                    //totalQuantity += _quantity;
+                    let detail = [item.code, item.diameter];// item.quantity, 'Y', item.remark
+                    if (pnlSet.size > 1) {
+                        result.ndrillInfos?.filter((rp) => rp.code == item.code).forEach((hole) => {
+                            detail.push(hole.quantity)
+                        })
+                    } else {
+                        detail.push(item.quantity);
+                    }
+                    detail.push('Y');
+                    detail.push(item['remark']);
+
+                    _drillInfo.push(detail);
+                });
+                //去重
+                _drillInfo = _drillInfo.filter((v, i, a) => a.findIndex(t => JSON.stringify(t) === JSON.stringify(v)) === i);
+
+                result.pnlInfos.forEach((hole) => {
+                    const hasTitle = result.ndrillInfos?.filter((rp) => rp.code == result.ndrillInfos[0].code);
+                    //如果存在pnlid一样才push这个titel
+                    if (hasTitle?.length && hasTitle.some((rp) => rp.pnlId == hole.id)) {
+                        sumRow.push(hole.drillQuantity);
+                    }
+                })
+                sumRow.push('');
+                sumRow.push('');
+
+                _drillInfo.push(sumRow);
+                rebuildDrillInfo.push(_drillInfo);
+                n_drillInfos = rebuildDrillInfo;
+                let n_drillHeaders2 = result.ndrillInfos?.length && result.ndrillInfos.map((o) => {
+                    let drillHeaderBefore = ['序号', '孔径'];
+                    let drillHeaderAfter = ['Y/N', '备注'];
+                    let drillHeaderMiddle = [];
+                    //drillHeaderMiddle.push(result.pnlInfos[0].name + '板孔数')//
+                    result.pnlInfos.forEach((hole) => {
+                        //drillHeaderMiddle.push(hole.name + '板孔数');
+                        const hasTitle = result.ndrillInfos?.filter((rp) => rp.code == result.ndrillInfos[0].code);
+                        //如果存在pnlid一样才push这个titel
+                        if (hasTitle?.length && hasTitle.some((rp) => rp.pnlId == hole.id)) {
+                            drillHeaderMiddle.push(hole.name + '板孔数');
+                        }
+                    })
+
+                    return drillHeaderBefore.concat(drillHeaderMiddle).concat(drillHeaderAfter);
+                })
+                n_drillHeaders = n_drillHeaders2;
+                n_drillTitles.push(result.drill);
+                console.log("n_drillInfos", n_drillInfos)
+            }
+            if (result.drillInfos && result.drillInfos.length > 0) {
+
+                drillInfos = [];
+                drillHeaders = [];
+                drillTitles = [];
+
+                let rebuildDrillInfo = [];
+                let sumRow = ['', '合计'];
+                let _drillInfo = [];
+                //let totalQuantity = 0;
+                let pnlSet = new Set(result.drillInfos.map(_item => _item.pnlId));
+                result.drillInfos.forEach((item) => {
+                    let _quantity = item.quantity ? item.quantity : 0;
+                    //totalQuantity += _quantity;
+                    let detail = [item.code, item.diameter];// item.quantity, 'Y', item.remark
+                    if (pnlSet.size > 1) {
+                        result.drillInfos.filter((rp) => rp.code == item.code).forEach((hole) => {
+                            detail.push(hole.quantity)
+                        })
+                    } else {
+                        detail.push(item.quantity);
+                    }
+                    detail.push('Y');
+                    detail.push(item['remark']);
+                    _drillInfo.push(detail);
+                });
+
+                //去重
+                _drillInfo = _drillInfo.filter((v, i, a) => a.findIndex(t => JSON.stringify(t) === JSON.stringify(v)) === i);
+
+                result.pnlInfos.forEach((hole) => {
+                    const hasTitle = result.drillInfos.filter((rp) => rp.code == result.drillInfos[0].code);
+                    //如果存在pnlid一样才push这个titel
+                    if (hasTitle.some((rp) => rp.pnlId == hole.id)) {
+                        sumRow.push(hole.drillQuantity);
+                    }
+                })
+                sumRow.push('');
+                sumRow.push('');
+
+                _drillInfo.push(sumRow);
+                rebuildDrillInfo.push(_drillInfo);
+                drillInfos = rebuildDrillInfo;
+                let n_drillHeaders2 = result.drillInfos.map((o) => {
+                    let drillHeaderBefore = ['序号', '孔径'];
+                    let drillHeaderAfter = ['Y/N', '备注'];
+                    let drillHeaderMiddle = [];
+
+                    //drillHeaderMiddle.push(result.pnlInfos[0].name + '板孔数')//
+                    result.pnlInfos.forEach((hole) => {
+                        const hasTitle = result.drillInfos.filter((rp) => rp.code == result.drillInfos[0].code);
+                        //如果存在pnlid一样才push这个titel
+                        if (hasTitle.some((rp) => rp.pnlId == hole.id)) {
+                            drillHeaderMiddle.push(hole.name + '板孔数');
+                        }
+                    })
+
+                    return drillHeaderBefore.concat(drillHeaderMiddle).concat(drillHeaderAfter);
+                })
+                drillHeaders = n_drillHeaders2;
+                drillTitles.push(result.drill);
+                console.log("drillInfos", drillInfos)
+            }
+        }
+
+        const buildDrillDataNew = async (result) => {
+            //非金属的钻孔数据
+            if (result.drillInfoMap) {
+                drillData = [];
+                Object.keys(result.drillInfoMap).forEach((key) => {
+                    const value = result.drillInfoMap[key];
+                    let rebuildDrillInfo = [];
+                    let sumRow = ['', '合计'];
+                    let _drillInfo = [];
+                    let totalQuantity = 0;
+                    let pnlSet = new Set(value.map(_item => _item.pnlId));
+                    value?.length && value.forEach((item) => {
+                        let _quantity = item.quantity ? item.quantity : 0;
+                        totalQuantity += _quantity;
+                        let detail = [item.code, item.diameter];// item.quantity, 'Y', item.remark
+                        if (pnlSet.size > 1) {
+                            value?.filter((rp) => rp.code == item.code).forEach((hole) => {
+                                detail.push(hole.quantity)
+                            })
+                        } else {
+                            detail.push(item.quantity);
+                        }
+                        detail.push('Y');
+                        detail.push(item['remark']);
+
+                        _drillInfo.push(detail);
+                    });
+                    //去重
+                    _drillInfo = _drillInfo.filter((v, i, a) => a.findIndex(t => JSON.stringify(t) === JSON.stringify(v)) === i);
+
+                    let sumQuantity = 0;
+                    result.pnlInfos.forEach((hole) => {
+                        const hasTitle = value?.filter((rp) => rp.code == value[0].code);
+                        //如果存在pnlid一样才push这个titel
+                        if (hasTitle.some((rp) => rp.pnlId == hole.id)) {
+
+                            let drillQuantity = undefined;
+                            for (const key2 of Object.keys(hole.drillQuantityMap)) {
+                                if (key.includes(key2)) {
+                                    drillQuantity = hole.drillQuantityMap[key2];
+                                }
+                            }
+                            sumRow.push(drillQuantity);
+                        }
+                    })
+                    // sumRow.push(totalQuantity);
+                    sumRow.push('');
+                    sumRow.push('');
+
+                    _drillInfo.push(sumRow);
+                    rebuildDrillInfo.push(_drillInfo);
+                    // n_drillInfos = rebuildDrillInfo;
+                    let n_drillHeaders2 = value?.length && value?.map((o) => {
+                        let drillHeaderBefore = ['序号', '孔径'];
+                        let drillHeaderAfter = ['Y/N', '备注'];
+                        let drillHeaderMiddle = [];
+                        //drillHeaderMiddle.push(result.pnlInfos[0].name + '板孔数')//
+                        result.pnlInfos.forEach((hole) => {
+                            const hasTitle = value?.filter((rp) => rp.code == value[0].code);
+                            //如果存在pnlid一样才push这个titel
+                            if (hasTitle.some((rp) => rp.pnlId == hole.id)) {
+                                drillHeaderMiddle.push(hole.name + '板孔数');
+                            }
+                        })
+                        return drillHeaderBefore.concat(drillHeaderMiddle).concat(drillHeaderAfter);
+                    })
+                    // n_drillHeaders = n_drillHeaders2;
+                    // n_drillTitles.push(result.drill);
+                    // console.log("n_drillInfos", n_drillInfos)
+
+                    key = (key||''+'').includes('_') ? key.split('_')[0] : key
+                    drillData.push({ drillTitles: key, drillHeaders: n_drillHeaders2 && n_drillHeaders2[0], drillInfos: rebuildDrillInfo[0] });
+                })
+            }
+        }
+
+        const getMedianCommaPosition = (str) => {
+            const commaCount = (str.match(/\//g) || []).length;
+            const halfCount = Math.floor(commaCount / 2) + 1;
+            const medianIndex = commaCount % 2 === 0 ? halfCount : halfCount + 1;
+            const commaIndices = str.split('/').map((_, index) => index + 1); // 逗号位置从1开始计数
+            return commaIndices[medianIndex - 1]; // 中值位置从0开始计数
+        }
+        const insertStringAtPosition = (str, position, insertStr) => {
+            let beforePart = str.slice(0, position);
+            let afterPart = str.slice(position);
+            const _startsWith = beforePart.startsWith('/');
+            const _endsWith = beforePart.endsWith('/');
+            const _startsWith2 = afterPart.startsWith('/');
+            const _endsWith2 = afterPart.endsWith('/');
+            //拼接尾部去除前后斜杠
+            if (_startsWith2) {
+                afterPart = afterPart.slice(1);
+            }
+            if (_endsWith2) {
+                afterPart = afterPart.slice(0, -1);
+            }
+            //拼接前部 end添加斜杠
+            if (!_endsWith) {
+                beforePart = beforePart + '/';
+            }
+            console.log('beforePart ', beforePart, _startsWith, _endsWith);
+            console.log('afterPart ', afterPart, _startsWith2, _endsWith2);
+            console.log('insertStr', insertStr);
+            if (!afterPart) {
+                return beforePart + insertStr;
+            }
+            return beforePart + insertStr + '/' + afterPart;
+        }
+        const buildPublicCommodityInfo = async (result) => {
+            if (Array.isArray(result.commodityInfos) && result.commodityInfos.length != 0) {
+                //成品铜厚
+                let _materialCopperInside = result.commodityInfos[0].materialCopperInside ? result.commodityInfos[0].materialCopperInside : '';
+                let _materialCopperOutside = result.commodityInfos[0].materialCopperOutside ? result.commodityInfos[0].materialCopperOutside : '';
+                let _copperThickness = _materialCopperInside + _materialCopperOutside;
+                if (_materialCopperOutside && _materialCopperOutside != '' && _materialCopperInside && _materialCopperInside != '') {
+                    let arr = _materialCopperOutside.split('/');
+                    let al = Math.floor(arr.length / 2);
+                    console.log("length", al)
+                    if (al > 0) {
+                        arr.splice(al, 0, _materialCopperInside);
+                        _copperThickness = arr.join("/");
+                    } else {
+                        _copperThickness = _materialCopperOutside + '/' + _materialCopperInside;
+                    }
+                    const _endsWith2 = _copperThickness.endsWith('/');
+                    if (_endsWith2) {
+                        _copperThickness = _copperThickness.slice(0, -1);
+                    }
+                    console.log('_copperThicknes adds', _copperThickness);
+                }
+                publicCommodityInfo = {
+                    commodityCode: result.commodityInfos[0].commodityCode,
+                    customerPO: result.commodityInfos[0].customerPO,
+                    commodityName: result.commodityInfos[0].commodityName,
+                    orderQuantity: result.commodityInfos[0].orderQuantity,
+                    materialCode: result.commodityInfos[0].materialCode,
+                    deliveryTime: result.commodityInfos[0].deliveryTime,
+                    dispatchTime: result.commodityInfos[0].dispatchTime,
+                    pcS_Size: result.commodityInfos[0].singleLength + '*' + result.commodityInfos[0].singleWidth,
+                    seT_Size: result.commodityInfos[0].unitedLength + '*' + result.commodityInfos[0].unitedWidth,
+                    commodityForm: result.commodityInfos[0].commodityForm,
+                    characterColor: result.commodityInfos[0].characterColor,
+                    commoditySolder: result.commodityInfos[0].commoditySolder,
+                    commodityThickness: result.commodityInfos[0].commodityThickness,
+                    copperThickness: _copperThickness,
+                    productionQuantity: result.commodityInfos[0].productionQuantity,
+                    unitedWay: result.commodityInfos[0].unitedWayLength + '*' + result.commodityInfos[0].unitedWayWidth,
+                    commodityTestWay: result.commodityInfos[0].commodityTestWay,
+                    cardArea: result.commodityInfos[0].cardArea,
+                    cardQuantity: result.commodityInfos[0].cardQuantity,
+                    productionArea: result.commodityInfos[0].productionArea,
+                    area: result.commodityInfos[0].area,
+                    placeOrderTime: result.commodityInfos[0].placeOrderTime,
+                    materialNumber: result.commodityInfos[0].materialNumber,
+                };
+            }
+        }
+        // 对工序中的工艺参数进行排序
+        // 注意点：点编辑时，工序展示会排序，但是如果不保存，就会只是展示，数据的顺序不会改变
+        const sortRequirment = (item) => {
+            if (!item) return item;
+            item.map((m, mI) => {
+                m.sort = ((m?.sort+'') == undefined || (m?.sort+'') == null || (m?.sort+'') == '') ? defaultSort : m?.sort
+            })
+            return item.sort((a, b) => {
+                return a.sort - b.sort
+                // return b?.name.localeCompare(a?.name, 'zh-CN')
+            })
+        }
+
+        const commonSetValue = (id, value) => {
+            document.getElementById(id).innerText = value || ''
+        }
+        const commonSetSrc = (id, value) => {
+            document.getElementById(id).src = value
+        }
+        const commonSetStyle = (id, arr) => {
+            arr.map((item) => {
+                document.getElementById(id).style[item.label] = item.value
+            })
+        }
+
+        // 生产工序表格
+        const prodCraftTable = () => {
+            document.getElementById('productionDetailsListDom').innerHTML = `
+                <tr>
+                    <td style="border: 1px solid black; text-align: left; font-weight: bold; width: 600pt"
+                        colspan="10"><span style="font-size: 20px">工程备注：</span><span style="font-size: 20px" id="engineeringNoteDom">${allData?.engineeringNote || ''}</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid black; text-align: center; width: 90pt" colspan="2"><span
+                            style="font-size: 15px; font-weight: bold">生产工序</span></td>
+                    <td style="border: 1px solid black; text-align: center; width: 310pt"><span
+                            style="font-size: 15px; font-weight: bold">工艺参数</span></td>
+                    ${!isMi ? `
+                        <td style="border: 1px solid black; text-align: center; width: 25pt"><span
+                            style="font-size: 15px; font-weight: bold">数量</span></td>
+                        <td style="border: 1px solid black; text-align: center; width: 30pt"><span
+                                style="font-size: 15px; font-weight: bold">日期</span></td>
+                        <td style="border: 1px solid black; text-align: center; width: 30pt"><span
+                                style="font-size: 15px; font-weight: bold">操作员</span></td>
+                    ` : ''}
+                </tr>
+            `
+            // 生产工序、工艺参数、数量、日期、操作员
+            productionDetails?.length && productionDetails.map((detail) => {
+                let trDom = document.createElement('tr')
+                let spanTxt = ``
+                detail?.params?.length && detail?.params.map((para) => {
+                    spanTxt += `
+                        <span style="font-size: 15px; line-height: 1.2">
+                            ${(para.name !== '备注' && para.para !== null && para.para !== '') ? (`<span style="font-size: 15px; line-height: 1.2;">${replaceParamName(para.name) || ''}</span>`) : (para.name !== '备注' && (para.para == null || para.para === '')) ? (`<span style="font-size: 15px; line-height: 1.2; font-weight: bold">${replaceParamName(para.name) || ''}</span>`) : ``}
+                            <span style="font-size: 15px; line-height: 1.2; font-weight: bold">${replaceParamValue(para.para) || ''}</span>
+                            <span style="font-size: 15px; line-height: 1.2">&nbsp;</span>
+                        </span>
+                    `
+                })
+                trDom.innerHTML = `
+                    <td style="border: 1px solid black; text-align: center; width: 20pt"><span
+                            style="font-size: 15px; line-height: 1.2; font-weight: bold">${detail?.index || ''}</span></td>
+                    <td style="border: 1px solid black; text-align: center; width: 70pt"><span
+                            style="font-size: 15px; line-height: 1.2; font-weight: bold">${detail?.productionCraft || ''}</span></td>
+                    <td style="border: 1px solid black; text-align: left; width: 310pt">
+                        ${spanTxt}
+                    </td>
+                    ${!isMi ? `
+                        <td style="border: 1px solid black; text-align: left; width: 25pt"></td>
+                        <td style="border: 1px solid black; text-align: left; width: 30pt"></td>
+                        <td style="border: 1px solid black; text-align: left; width: 30pt"></td>
+                    ` : ''}
+                `
+                document.getElementById('productionDetailsListDom').appendChild(trDom)
+            })
+        }
+        // 订单信息表格
+        const orderDataTable = (commodityInfosTemp, needHeader = true) => {
+            let tbodyTxt = ``
+            // 开料
+            commodityInfosTemp?.length && commodityInfosTemp.map((commodity, index) => {
+                let spanTxt = ``
+                commodity.otherRequirement?.length && commodity.otherRequirement.map((item, index) => {
+                    spanTxt += `
+                        <span style="font-size: 14px"> ${index > 0 ? `<span>，</span>` : ''}${item}</span>
+                    `
+                })
+                tbodyTxt += `
+                    <tr>
+                        <!-- 序号 -->
+                        <td
+                            style="border: 1px solid black; text-align: center; max-width: 30pt; white-space: normal; word-wrap: break-word">
+                            <span style="font-size: 15px; font-weight: bold">${ commodity?.commmodityIndex || (index + 1) }</span>
+                        </td>
+                        <!-- 订单号 -->
+                        <td
+                            style="border: 1px solid black; text-align: center; max-width: 90pt; white-space: normal; word-wrap: break-word">
+                            <span style="font-size: 15px; font-weight: bold">${ commodity.commodityCode  || ''}</span>
+                        </td>
+                        <!-- 客户型号 -->
+                        <td
+                            style="border: 1px solid black; text-align: center; max-width: 90pt; white-space: normal; word-wrap: break-word">
+                            <span style="font-size: 15px; font-weight: bold">${ commodity.commodityName  || ''}</span>
+                        </td>
+                        <!-- 客户编号 -->
+                        <td
+                            style="border: 1px solid black; text-align: center; max-width: 25pt; white-space: normal; word-wrap: break-word">
+                            <span style="font-size: 15px; font-weight: bold">${ commodity.customerCode  || ''}</span>
+                        </td>
+                        <!-- PNL数量 -->
+                        ${!isMi ? `
+                            <td
+                                style="border: 1px solid black; text-align: center; max-width: 25pt; white-space: normal; word-wrap: break-word">
+                                <span style="font-size: 15px; font-weight: bold">${ allData?.bundlePnlQuantity || '' }</span>
+                            </td>
+                        ` : ''}
+                        <!-- 数量（PCS） -->
+                        <td
+                            style="border: 1px solid black; text-align: center; max-width: 30pt; white-space: normal; word-wrap: break-word">
+                            <span style="font-size: 15px; font-weight: bold">${commodity.quantity || ''}</span>
+                        </td>
+                        <!-- 数量（SET） -->
+                        <td
+                            style="border: 1px solid black; text-align: center; max-width: 30pt; white-space: normal; word-wrap: break-word">
+                            <span style="font-size: 15px; font-weight: bold">${commodity.quantityPcs || ''}</span>
+                        </td>
+                        <!-- 系数 -->
+                        <td
+                            style="border: 1px solid black; text-align: center; max-width: 20pt; white-space: normal; word-wrap: break-word">
+                            <span style="font-size: 15px; font-weight: bold">${(!isMi ? commodity?.pnlSetQty : commodity?.pnlSetQtyStr) || ''}</span>
+                        </td>
+                        ${!isMi ? `
+                            <!-- 投料数（PCS） -->
+                            <td
+                                style="border: 1px solid black; text-align: center; max-width: 30pt; white-space: normal; word-wrap: break-word">
+                                <span style="font-size: 15px; font-weight: bold">${commodity.feedQuantity || ''}</span>
+                            </td>
+                            <!-- 库存 -->
+                            <td
+                                style="border: 1px solid black; text-align: center; max-width: 30pt; white-space: normal; word-wrap: break-word">
+                                <span style="font-size: 15px; font-weight: bold">${ commodity.useQuantity || '' }</span>
+                            </td>
+                        ` : ''}
+                        <!-- 阻焊/字符 -->
+                        <td
+                            style="border: 1px solid black; text-align: center; max-width: 35pt; white-space: normal; word-wrap: break-word">
+                            <span
+                                style="font-size: 15px; font-weight: bold">${commodity.commoditySolder || ''}/${commodity.characterColor || ''}</span>
+                        </td>
+                        <!-- 加急类型 -->
+                        <td
+                            style="border: 1px solid black; text-align: center; max-width: 20pt; white-space: normal; word-wrap: break-word">
+                            <span style="font-size: 15px; font-weight: bold">${ commodity.urgent || '' }</span>
+                        </td>
+                        <!-- 拼板方式 -->
+                        <td
+                            style="border: 1px solid black; text-align: center; max-width: 20pt; white-space: normal; word-wrap: break-word">
+                            <span style="font-size: 15px; font-weight: bold">${ (commodity.unitedWayLength || '')+"*"+(commodity.unitedWayWidth || '') }</span>
+                        </td>
+                        <!-- 板厚（mm） -->
+                        <td
+                            style="border: 1px solid black; text-align: center; max-width: 30pt; white-space: normal; word-wrap: break-word">
+                            <span style="font-size: 15px; font-weight: bold">${ commodity.commodityThickness || ''}</span>
+                        </td>
+                        <!-- 长*宽（mm） -->
+                        <td
+                            style="border: 1px solid black; text-align: center; max-width: 35pt; white-space: normal; word-wrap: break-word">
+                            <span style="font-size: 15px; font-weight: bold">${ Number(commodity.unitedLength).toString().replace(/\.0+$/, '') }*${ Number(commodity.unitedWidth).toString().replace(/\.0+$/, '') }</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid black; text-align: left; white-space: normal; word-wrap: break-word; color: #666" colspan="15"><br />
+                            <div style="font-weight: bold">
+                                <span style="font-size: 14px">订单确认时间：${parseTime(commodity.firstAuditTime, '{y}/{m}/{d} {h}:{i}:{s}')}</span>
+                            </div>
+                            <div style="font-weight: bold">
+                                <span style="font-size: 14px">其他要求：<br />
+                                    <span style="font-size: 14px">${ commodity.specialRequirement.replaceAll('\n', '<br>') }</span>
+                                </span>
+                            </div><br />
+                            <div style="font-weight: bold">
+                                <span style="font-size: 14px">表面处理：${allData?.surfaceFinished || ''} ${allData?.goldenThickness || ''}&nbsp;&nbsp;</span>
+                                <span
+                                    style="font-size: 14px">阻焊覆盖：${commodity.holeRequirement || ''}&nbsp;&nbsp;</span>
+                                <span style="font-size: 14px">订单面积：${commodity.area || ''} ㎡&nbsp;&nbsp;</span>
+                                <span style="font-size: 14px">取库存：&nbsp;&nbsp;</span>
+                                ${commodity.oldQuantity ? `<span style="font-size: 14px">
+                                    <br />
+                                    <span>*** 当前订单已拆分， 订单总数：${commodity.oldQuantity || ''}***</span>
+                                    <br />
+                                </span>` : ''}
+                                <span style="font-size: 14px">PCS尺寸：${ Number(commodity.singleLength).toString().replace(/\.0+$/, '') + "*" + Number(commodity.singleWidth).toString().replace(/\.0+$/, '')}</span>
+                            </div>
+                            <div style="font-weight: bold">
+                                <span style="font-size: 14px">出货备注：<br />
+                                    <span style="font-size: 14px">${ commodity.commodityRemark.replaceAll('\n', '<br>') }</span>&nbsp;&nbsp;
+                                </span>
+                            </div>
+                            <div style="font-weight: bold">
+                                <span
+                                    style="font-size: 14px">客户型号：${commodity.commodityName || ''}&nbsp;&nbsp;</span>
+                                <span
+                                    style="font-size: 14px">出货方式：${props.allData?.shippingMethod || ''}&nbsp;&nbsp;</span>
+                                <span
+                                    style="font-size: 14px">是否接受打叉板：${commodity.crossBoard || ''}&nbsp;&nbsp;</span>
+                                <span
+                                    style="font-size: 14px">下单类型：${commodity.orderTypeDesc || ''}&nbsp;&nbsp;</span>
+                                <span style="font-size: 14px">PO.NO：${commodity.customerPo || ''}&nbsp;&nbsp;</span>
+                                <span
+                                    style="font-size: 14px">客户物料编号：${commodity.materialNumber || ''}&nbsp;&nbsp;</span>
+                                <span style="font-size: 14px">周期：${commodity.cycle || ''}&nbsp;&nbsp;</span>
+                                <span style="font-size: 14px">包装附件：</span>
+                                ${commodity.packRequirement ? `<span style="font-size: 14px">${commodity.packRequirement || ''}</span>` : ''}
+                                ${commodity.packRequirement && commodity.otherRequirement ? `<span style="font-size: 14px">，</span>` : ''}
+                                ${spanTxt}
+                            </div><br /><br />
+                        </td>
+                    </tr>
+                `
+            })
+
+            let orderTxt = `
+                ${needHeader ? `
+                    <tr>
+                        <td style="border: 1px solid black; text-align: center; max-width: 120pt; white-space: normal"
+                            colspan="2"><span style="font-size: 15px; font-weight: bold">制表：</span></td>
+                        <td
+                            style="border: 1px solid black; text-align: center; max-width: 90pt; white-space: normal">
+                            <span style="font-size: 15px; font-weight: bold">${allData?.miMaker || ''}</span>
+                        </td>
+                        <td style="border: 1px solid black; text-align: center; max-width: 80pt; white-space: normal"
+                            colspan="${!isMi?'3':'2'}"><span style="font-size: 15px; font-weight: bold">工程审核：</span></td>
+                        <td style="border: 1px solid black; text-align: center; max-width: 80pt; white-space: normal"
+                            colspan="${!isMi?'3':'2'}"><span
+                                style="font-size: 15px; font-weight: bold">${allData?.miAudit || ''}</span>
+                        </td>
+                        <td style="border: 1px solid black; text-align: center; max-width: 90pt; white-space: normal"
+                            colspan="${!isMi?'3':'2'}">
+                            ${!isMi ? `
+                                <span style="font-size: 15px; font-weight: bold">计划审核：</span>
+                            ` : ''}
+                        </td>
+                        <td style="border: 1px solid black; text-align: center; max-width: 80pt; white-space: normal"
+                            colspan="3">
+                            ${!isMi ? `
+                                <span style="font-size: 15px; font-weight: bold">${allData?.productionAudit || ''}</span>
+                            ` : ''}
+                        </td>
+                    </tr>
+                ` : ''}
+                <tr>
+                    <td
+                        style="border: 1px solid black; text-align: center; max-width: 30pt; white-space: normal">
+                        <span style="font-size: 15px; font-weight: bold">序号</span>
+                    </td>
+                    <td
+                        style="border: 1px solid black; text-align: center; max-width: 90pt; white-space: normal">
+                        <span style="font-size: 15px; font-weight: bold">订单号</span>
+                    </td>
+                    <td
+                        style="border: 1px solid black; text-align: center; max-width: 90pt; white-space: normal">
+                        <span style="font-size: 15px; font-weight: bold">客户型号</span>
+                    </td>
+                    <td
+                        style="border: 1px solid black; text-align: center; max-width: 25pt; white-space: normal">
+                        <span style="font-size: 15px; font-weight: bold">客户编码</span>
+                    </td>
+                    ${!isMi ? `
+                        <td
+                            style="border: 1px solid black; text-align: center; max-width: 25pt; white-space: normal">
+                            <span style="font-size: 15px; font-weight: bold">PNL数量</span>
+                        </td>
+                    ` : ''}
+                    <td
+                        style="border: 1px solid black; text-align: center; max-width: 30pt; white-space: normal">
+                        <span style="font-size: 15px; font-weight: bold">数量（PCS）</span>
+                    </td>
+                    <td
+                        style="border: 1px solid black; text-align: center; max-width: 30pt; white-space: normal">
+                        <span style="font-size: 15px; font-weight: bold">数量（SET）</span>
+                    </td>
+                    <td
+                        style="border: 1px solid black; text-align: center; max-width: 20pt; white-space: normal">
+                        <span style="font-size: 15px; font-weight: bold">系数</span>
+                    </td>
+                    ${!isMi ? `
+                        <td
+                            style="border: 1px solid black; text-align: center; max-width: 30pt; white-space: normal">
+                            <span style="font-size: 15px; font-weight: bold">投料数（PCS）</span>
+                        </td>
+                        <td
+                            style="border: 1px solid black; text-align: center; max-width: 30pt; white-space: normal">
+                            <span style="font-size: 15px; font-weight: bold">库存</span>
+                        </td>
+                    ` : ''}
+                    <td
+                        style="border: 1px solid black; text-align: center; max-width: 35pt; white-space: normal">
+                        <span style="font-size: 15px; font-weight: bold">阻焊/字符</span>
+                    </td>
+                    <td
+                        style="border: 1px solid black; text-align: center; max-width: 25pt; white-space: normal">
+                        <span style="font-size: 15px; font-weight: bold">加急类型</span>
+                    </td>
+                    <td
+                        style="border: 1px solid black; text-align: center; max-width: 20pt; white-space: normal">
+                        <span style="font-size: 15px; font-weight: bold">拼板方式</span>
+                    </td>
+                    <td
+                        style="border: 1px solid black; text-align: center; max-width: 25pt; white-space: normal">
+                        <span style="font-size: 15px; font-weight: bold">板厚（mm）</span>
+                    </td>
+                    <td
+                        style="border: 1px solid black; text-align: center; max-width: 35pt; white-space: normal">
+                        <span style="font-size: 15px; font-weight: bold">长*宽（mm）</span>
+                    </td>
+                </tr>
+                ${tbodyTxt}
+            `
+            return orderTxt
+        }
+        // 钻孔信息表格
+        const drillInfoTable = () => {
+            let divTxt = ``
+            drillData?.length && drillData.map((item, index) => {
+                let headerTxt = ``
+                let drillInfosTxt = ``
+                item.drillHeaders?.length && item.drillHeaders.map((header) => {
+                    headerTxt += `
+                        <div style="display: inline-block; border: 1px solid black; flex: 1">
+                            ${ header }
+                        </div>
+                    `
+                })
+                item.drillInfos?.length && item.drillInfos.map((info) => {
+                    let infoTxt = ``
+                    info?.length && info.map((val) => {
+                        infoTxt += `
+                            <div style="display: inline-block; border: 1px solid black; flex: 1">
+                                ${ val }
+                            </div>
+                        `
+                    })
+                    drillInfosTxt += `
+                        <div style="width: 100%; text-align: center; display: flex">
+                            ${infoTxt}
+                        </div>
+                    `
+                })
+                divTxt += `<div>
+                    <div style="width: 100%; font-size: 15px">
+                        <div style="width: 100%; text-align: left">
+                            ${item.drillTitles || ''}
+                        </div>
+                        <div style="width: 100%; text-align: center; display: flex">
+                            ${headerTxt}
+                        </div>
+                        ${drillInfosTxt}
+                    </div>
+                </div>`
+            })
+            document.getElementById('drillInfoDom').innerHTML = divTxt
+        }
+        // 开料信息表格
+        const schemeInfoTable = () => {
+            let divTxt = ``
+            allData?.schemeInfos?.length && allData?.schemeInfos.map((schema, index) => {
+                let trTxt = ``
+                if (allData?.pnlInfos.length>0) {
+                    allData?.pnlInfos.map((plItem, index2) => {
+                        trTxt += `
+                            <tr>
+                                <td style="width: 180pt; border: 1px solid black;">
+                                    <span>${ plItem.name + " " + plItem.pnlLength + '*' + plItem.pnlWidth + 'mm' }</span>
+                                </td>
+                                <td style="width: 120pt; border: 1px solid black;">
+                                    <span>${ '开料件数' + allData?.pnlInfos[index2].name + ":" + allData?.pnlInfos[index2].feedQuantity }</span>
+                                </td>
+                                <td style="width: 180pt; border: 1px solid black;">
+                                    <span></span>
+                                </td>
+                                <td style="width: 120pt; border: 1px solid black;">
+                                    <span></span>
+                                </td>
+                            </tr>
+                        `
+                    })
+                }
+                divTxt += `
+                    <div style="width: 100%;">
+                        <table style="border-collapse: collapse; border: none; width: 100%; font-size: 15px" class="page-td-bold">
+                            <tbody>
+                                ${trTxt}
+                                <tr>
+                                    <td style="width: 300pt; border: 1px solid black;" colspan="2">
+                                        <span>${ '方案名称：' + schema.name }</span>
+                                    </td>
+                                    <td style="width: 180pt; border: 1px solid black;"><span>${ '开料率' + schema.cuttingRate }</span></td>
+                                    <td style="width: 120pt; border: 1px solid black;"><span>${ !isMi ? ('投料数' + (schema.feedQuantity?schema.feedQuantity:0)) : '' }</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 180pt; border: 1px solid black;"><span>${ '每张大料总PCS数：' }</span></td>
+                                    <td style="width: 320pt; border: 1px solid black;" colspan="3">
+                                        <span>${ schema.schemeCommodityInfo }</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table style="border-collapse: collapse; border: none; width: 100%; font-size: 15px" class="page-td-bold">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 300pt; height: 200pt; border: 1px solid black;">
+                                        <div style="width: 100%; height: 100%">
+                                            ${schema.schemeFileList&&schema.schemeFileList[0] ? `<img src="${schema.schemeFileList[0].url}" alt="开料图" style="width: 100%; height: 100%" />` : ''}
+                                        </div>
+                                    </td>
+                                    <td style="width: 300pt; height: 200pt; border: 1px solid black;">
+                                        <div style="width: 100%; height: 100%">
+                                            ${schema.schemeFileList&&schema.schemeFileList[1] ? `<img src="${schema.schemeFileList[1].url}" alt="开料图" style="width: 100%; height: 100%" />` : ''}
+                                        </div>
+                                    </td>
+                                </tr>
+                                ${schema.schemeFileList&&schema.schemeFileList[2] ? `
+                                    <tr>
+                                        <td style="width: 300pt; height: 200pt; border: 1px solid black;">
+                                            <div style="width: 100%; height: 100%">
+                                                ${schema.schemeFileList[2] ? `<img src="${schema.schemeFileList[2].url}" alt="开料图" style="width: 100%; height: 100%" />` : ''}
+                                            </div>
+                                        </td>
+                                        <td style="width: 300pt; height: 200pt; border: 1px solid black;">
+                                            <div style="width: 100%; height: 100%">
+                                                ${schema.schemeFileList[3] ? `<img src="${schema.schemeFileList[3].url}" alt="开料图" style="width: 100%; height: 100%" />` : ''}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ` : ''}
+                            </tbody>
+                        </table>
+                    </div>
+                `
+            })
+            document.getElementById('schemeInfoDom').innerHTML = `
+                <div style="font-size: 20px; font-weight: bold">开料</div>
+                ${divTxt}
+            `
+        }
+        // 压合信息表格
+        const laminateInfoTable = () => {
+            let divTxt = ``
+            allData?.laminatedStructureVoList?.length && allData?.laminatedStructureVoList.map((detail, detailIndex) => {
+                divTxt += `
+                    <tr>
+                        <td style="width: 60pt; border: 1px solid black; text-align: center"><span>${ detail?.layerIndex || '' }</span>
+                        </td>
+                        <td style="width: 180pt; border: 1px solid black; text-align: center">
+                            <div style="width: 100%; height: 14px">
+                                ${detail?.url ? `<img src="${detail?.url}" alt="压合图" style="width: 100%; height: 100%"/>` : ''}
+                            </div>
+                        </td>
+                        <td style="width: 50pt; border: 1px solid black; text-align: center"><span>${ detail?.rawMaterialType || '' }</span></td>
+                        <td style="width: 50pt; border: 1px solid black; text-align: center">
+                            <span>${ detail?.boardThickness || '' }</span>
+                        </td>
+                        <td style="width: 60pt; border: 1px solid black; text-align: center"><span>${ detail?.pp || '' }</span></td>
+                        <td style="width: 200pt; border: 1px solid black; text-align: left">
+                            <span>
+                                ${
+                                (detail.material ? '材质:' + detail.material + '；' : '') +
+                                (detail.linkCopper ? '连铜:' + (detail.linkCopper === '1' ? '是' : '否') +
+                                '；' : '') +
+                                (detail.copperThickness ? '铜厚:' + detail.copperThickness + '。 ' : '') +
+                                (detail.remark ? detail.remark : '')
+                                }
+                            </span>
+                        </td>
+                    </tr>
+                `
+            })
+            document.getElementById('laminateInfoDom').innerHTML = `
+                <tbody>
+                    <tr>
+                        <td style="width: 60pt; border: 1px solid black; text-align: center"><span
+                                style="font-weight: bold;">层号</span></td>
+                        <td style="width: 180pt; border: 1px solid black; text-align: center"><span
+                                style="font-weight: bold;">图示</span>
+                        </td>
+                        <td style="width: 50pt; border: 1px solid black; text-align: center"><span
+                                style="font-weight: bold;">类型</span></td>
+                        <td style="width: 50pt; border: 1px solid black; text-align: center"><span
+                                style="font-weight: bold;">板层参数</span>
+                        </td>
+                        <td style="width: 60pt; border: 1px solid black; text-align: center"><span
+                                style="font-weight: bold;">PP片</span>
+                        </td>
+                        <td style="width: 200pt; border: 1px solid black; text-align: center"><span
+                                style="font-weight: bold;">备注</span>
+                        </td>
+                    </tr>
+                    ${divTxt}
+                </tbody>
+            `
+        }
+        // 外形图
+        const outsideImagesPage = () => {
+            let divTxt = ``
+            currentPdfList?.length && currentPdfList.map((outside) => {
+                // console.log('outside---', outside, orderId, currentCardIsChild, (orderId == outside.bizId), (printType === 'all' || printType === 'outsideImages'))
+                if ((!isMi && currentCardIsChild) ? (orderId == outside.bizId) : (printType === 'all' || printType === 'outsideImages')) {
+                    // 如果是子卡，只展示当前订单的外形图，不是子卡则按后面的判断走
+                    divTxt += `
+                        <div style="width: 100%; position: relative; page-break-before: always; box-sizing: border-box">
+                            ${printType === 'outsideImages' ? `
+                                <div style="text-align: center; width: 100%; box-sizing: border-box">
+                                    <table style="border-collapse: collapse; border: none;width:100%;">
+                                        <tbody style=" font-weight: bold;">
+                                            <tr>
+                                                <td style="width: 80pt; text-align: left">
+                                                    <div style="font-size: 18px;">${ allData?.isRemediation == '1'? '补料' : '' }
+                                                    </div>
+                                                    <div style="font-size: 18px;">${ allData?.orderTypeDesc || '' }</div>
+                                                    <div style="font-size: 18px;">${ allData?.model || '' }</div>
+                                                </td>
+                                                <td style="width: 80pt">
+                                                    <img src="${_logn}" alt="logo" style="width: 60px; height: 60px" />
+                                                </td>
+                                                <td style="text-align: center">
+                                                    <span style="font-size: 25px;">${ allData?.enterpriseName || '' }</span>
+                                                </td>
+                                                <td style="width: 80pt; text-align: left">
+                                                    <div>
+                                                        <span style="font-size: 18px;">本卡：</span><span style="font-size: 18px;">${ allData?.bundlePnlQuantity || '' }</span>
+                                                    </div>
+                                                    <div>
+                                                        <span style="font-size: 18px;">扎号：</span><span style="font-size: 18px;">${ allData?.no || '' }</span>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 80pt; text-align: right">
+                                                    <span style="font-size: 30px; font-weight: 1000">${ (allData?.timeSpanDays ?allData?.timeSpanDays:'')}</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <table style="border-collapse: collapse; border: none;width:100%;">
+                                        <tbody style=" font-weight: bold;">
+                                            <tr>
+                                                <td style="width: 200pt; text-align: left">
+                                                    <div>
+                                                        <span style="font-size: 18px;">总数：</span><span style="font-size: 18px;">${ (allData?.totalNum  || '')+'块'}</span>
+                                                        <span>&nbsp;&nbsp;</span>
+                                                        <span style="font-size: 18px;">${ (allData?.pnlInfos && allData?.pnlInfos[0].name)+": " + (allData?.pnlTotal?Number(allData?.pnlTotal).toFixed(0):'') }
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <span style="font-size: 18px;">投料日期：</span><span style="font-size: 18px;">
+                                                            ${ parseTime(allData?.feedTime, '{y}-{m}-{d} {h}:{i}:{s}') }</span>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 200pt; text-align: center">
+                                                    <span style="font-size: 25px;">${ allData?.miName || '' }</span>
+                                                </td>
+                                                <td style="width: 200pt; text-align: center">
+                                                    ${qcCodeImage ? `<img src="${qcCodeImage}" alt="条形码" style="display: inline-block;width: 60px;height: 60px" />` : ''}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <table style="border-collapse: collapse; border: none;width:100%;">
+                                        <tbody style=" font-weight: bold;">
+                                            <tr>
+                                                <td style="width: 250pt; text-align: left; font-weight: bold">
+                                                    <span style="font-size: 22px;">产品编号：</span><span style="font-size: 22px;">
+                                                        ${ outside?.commodityCode || '' }</span>
+                                                </td>
+                                                <td style="width: 175pt; text-align: center">
+                                                    <span style="font-size: 16px;">生产编号：</span><span style="font-size: 16px;">
+                                                        ${ allData?.productionCardNo || '' }</span>
+                                                </td>
+                                                <td style="width: 175pt; text-align: right">
+                                                    <span style="font-size: 16px;">MI单号：</span><span style="font-size: 16px;">
+                                                        ${ allData?.productionPlanNo || '' }</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                ` : ''}
+                            <!--外形图信息-->
+                            <div style="width: 100%; box-sizing: border-box; min-height: 715pt;">
+                                <div style="${`width: 100%; height: ${printType === 'outsideImages' ? '650pt' : '840pt'};padding:1px;overflow: hidden;${printType === 'outsideImages' && 'border: 2px solid black;'}`}"
+                                    class="global-flex">
+                                    ${outside.url ? `<img src="${outside.url}" alt="外形图" style="width: 100%;height: 100%;object-fit: contain;" />` : ''}
+                                </div>
+                            </div>
+                            ${printType === 'outsideImages' ? `
+                                <div style="text-align: center; width: 100%; box-sizing: border-box">
+                                    <table style="border-collapse: collapse; border: none;width:100%; margin-top: 5px">
+                                        <tbody>
+                                            <tr>
+                                                <td style="width: 250pt; text-align: left">
+                                                    <span style="font-size: 13px">MI制作：</span>
+                                                    <span style="font-size: 13px">${ allData?.miMaker || '' }</span>
+                                                </td>
+                                                <td style="width: 250pt; text-align: center">
+                                                    <span style="font-size: 13px">MI审核：</span>
+                                                    <span style="font-size: 13px">${ allData?.miAudit || '' }</span>
+                                                </td>
+                                                <td style="width: 250pt; text-align: center">
+                                                    <span style="font-size: 13px">打印人员：</span>
+                                                    <span style="font-size: 13px">${ allData?.personnel || '' }</span>
+                                                </td>
+                                                <td style="width: 250pt; text-align: right">
+                                                    <span style="font-size: 13px">打印时间：</span>
+                                                    <span style="font-size: 13px">${ allData?.printTime || '' }</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                ` : ''}
+                        </div>`
+                }
+            })
+            console.log('divTxt', divTxt)
+            document.getElementById('outSideImagesDom').innerHTML = divTxt || (['outsideImages'].includes(printType) ? `<div style="text-align: center;color: #f56c6c;font-size: ${isXcx ? '50px' : '16px'};">该订单暂未未上传外形图，请直接联系工程人员</div>` : '')
+        }
+        // 子卡
+        const childCardPage = (commodityInfos) => {
+            let divTxt = ``
+            console.log('childCardList', childCardList)
+            childCardList?.length && childCardList.map((outside, index) => {
+                if (printType === 'all' || printType === 'noOutsideImages') {
+                    // 由于当前子卡展示数据与主卡中制表表格信息一模一样，所以数据直接取commodityInfos，但是防止后续新增不同的展示信息，需要保留childCardList
+                    let crtCommodityInfos = commodityInfos.filter((f) => outside.saleOrderVoList?.length ? (f.id == outside.saleOrderVoList[0].id) : false)
+                    if (!crtCommodityInfos?.length) {
+                        crtCommodityInfos = [commodityInfos[index]]
+                    }
+                    crtCommodityInfos.map((item) => {
+                        item.commmodityIndex = (index + 1)
+                    })
+                    let orderTxt = orderDataTable(crtCommodityInfos, false)
+                    // allData?.planType=='2' ? '合拼料号：'+allData?.comCode : allData?.planType=='1' ? '料号：'+allData?.comCode : ''
+                    divTxt += `
+                        <div style="width: 100%; position: relative; page-break-before: always; box-sizing: border-box">
+                            <div style=" text-align: center; width: 100%; box-sizing: border-box">
+                                <table style="border-collapse: collapse; border: none;width:100%;">
+                                    <tbody style=" font-weight: bold;">
+                                        <tr>
+                                            <td style="width: 200pt; text-align: left">
+                                                <div>
+                                                    <span style="font-size: 18px;">${allData?.planType=='2' ? '合拼料号：' : '料号：'}</span><span style="font-size: 18px;" >${ outside.comCode || '' }</span>
+                                                </div>
+                                            </td>
+                                            <td style="width: 100pt; text-align: right">
+                                                ${qcCodeImage ? `<img src="${qcCodeImage}" alt="条形码" style="width: 60px;height: 60px"/>` : ''}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!--工艺单信息-->
+                            <div style="width: 100%; box-sizing: border-box; page-break-after: auto">
+                                <!-- 订单数据 -->
+                                <table style="border-collapse: collapse; border: none;width:100%; margin-top: 5px" class="page-td-bold">
+                                    <tbody id="orderDataDom">
+                                        ${orderTxt}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `
+                }
+            })
+            document.getElementById('childCardDom').innerHTML = divTxt
+        }
+
+        // 预览mi，需要隐藏的dom
+        const isMiHideDom = () => {
+            const showDomList = document.querySelectorAll('#miShow')
+            for(let i = 0; i < showDomList.length; i++) {
+                showDomList[i].style.visibility = 'show';
+            }
+            const hideDomList = document.querySelectorAll('#miHide')
+            for(let i = 0; i < hideDomList.length; i++) {
+                hideDomList[i].style.visibility = 'hidden';
+            }
+            const noneDomList = document.querySelectorAll('#miNone')
+            for(let i = 0; i < noneDomList.length; i++) {
+                noneDomList[i].style.display = 'none';
+            }
+            commonSetStyle('qcCodeImageDom', [{label: 'display', value: 'none'}]);
+            commonSetStyle('feedQuantityAllDom', [{label: 'display', value: 'none'}]);
+            commonSetStyle('orderRateDom', [{label: 'display', value: 'none'}]);
+        }
+
+        // 数据赋值
+        const domSetValue = () => {
+            if (isMi) {
+                isMiHideDom();
+            } else {
+                const showDomList = document.querySelectorAll('#miShow')
+                for(let i = 0; i < showDomList.length; i++) {
+                    showDomList[i].style.display = 'none';
+                }
+            }
+            
+            commonSetStyle('miOrderInfoDom', [{label: 'display', value: (printType === 'all' || printType === 'noOutsideImages') ? 'block' : 'none'}]);
+            commonSetStyle('miOrderInfoButtomDom', [{label: 'display', value: (printType === 'all' || printType === 'noOutsideImages') ? 'block' : 'none'}]);
+            if (['all', 'noOutsideImages'].includes(printType) && currentCardIsChild) {
+                commonSetStyle('miOrderInfoDom', [{label: 'display', value: 'none'}]);
+                commonSetStyle('outSideImagesDom', [{label: 'display', value: 'none'}]);
+                commonSetStyle('miOrderInfoButtomDom', [{label: 'display', value: 'none'}]);
+            }
+
+            commonSetValue('isRemediationDom', allData?.isRemediation == '1' || allData?.isFeed == '1' ? '补料' : '')
+            commonSetValue('orderTypeDescDom', allData?.orderTypeDesc || '')
+            commonSetValue('modelDom', allData?.model || '')
+            commonSetSrc('logoDom', _logn || '')
+            commonSetSrc('qcCodeImageDom', qcCodeImage || '')
+            commonSetValue('enterpriseNameDom', allData?.enterpriseName) || ''
+            commonSetValue('bundlePnlQuantityDom', allData?.bundlePnlQuantity || '')
+            commonSetValue('noDom', allData?.no || '')
+            commonSetValue('timeSpanDaysDom', (allData?.timeSpanDays?allData?.timeSpanDays:'') || '')
+            commonSetValue('totalNumDom', (allData?.totalNum?Number(allData?.totalNum).toFixed(0):'')+"块")
+            commonSetValue('cardPnlNameDom', (allData?.cardPnlName?allData?.cardPnlName:'') +": "+ (allData?.pnlTotal?Number(allData?.pnlTotal).toFixed(0):''))
+            commonSetValue('productionStartTimeDom', parseTime(allData?.productionStartTime, '{y}-{m}-{d} {h}:{i}:{s}'))
+            commonSetValue('miNameDom', allData?.miName || '')
+            commonSetStyle('relationQuantityLableDom', [{label: 'display', value: allData?.relationQuantity ? 'block' : 'none'}]);
+            commonSetStyle('relationQuantityDom', [{label: 'display', value: allData?.relationQuantity ? 'block' : 'none'}]);
+            commonSetValue('relationQuantityDom', allData?.relationQuantity || '')
+            // commonSetValue('sliceTypeDom', allData?.sliceType=='1' ? '正片' : allData?.sliceType=='2' ? '负片' : '')
+            commonSetValue('complexityDom', allData?.complexity=='1' ? '简单' : allData?.complexity=='2' ? '复杂' : '')
+            commonSetValue('comCodeDom', allData?.planType=='2' ? '合拼料号：'+allData?.comCode : allData?.planType=='1' ? '料号：'+allData?.comCode : '')
+            commonSetValue('productionCardNoDom', allData?.productionCardNo || '')
+            commonSetValue('productionPlanNoDom', allData?.productionPlanNo || '')
+
+            if (allData?.planType!='1') commonSetStyle('commodityCodeDom1', [{label: 'display', value: 'none'}]);
+            commonSetValue('commodityCodeDom1', allData?.commodityCode || '')
+            commonSetValue('customerCodeDom2', allData?.customerCode || '')
+
+            commonSetValue('materialQualityDom', allData?.materialQuality || '')
+            commonSetValue('cardPnlLengthDom', !isMi ? (allData?.cardPnlLength || '') + '*' + (allData?.cardPnlWidth || '') : allData?.pnlSize)
+            // commonSetStyle('cardPnlLengthParentDom', [{label: 'colspan', value: !isMi ? 1 : 3}]);
+            if (isMi) document.getElementById('cardPnlLengthParentDom').setAttribute('colspan', '3');
+
+            commonSetValue('bundlePnlQuantityDom1', allData?.bundlePnlQuantity || '')
+            if (allData?.planType!='1') commonSetStyle('customerCodeDom', [{label: 'display', value: 'none'}]);
+            commonSetValue('customerCodeDom', allData?.customerCode || '')
+
+            commonSetValue('commodityThicknessDom', publicCommodityInfo?.commodityThickness || '')
+            commonSetStyle('seTSizeDom', [{label: 'display', value: (allData?.planType=='1') ? 'block' : 'none'}]);
+            commonSetValue('seTSizeDom', `${publicCommodityInfo?.seT_Size}/(${publicCommodityInfo?.unitedWay})`)
+            commonSetValue('copperThicknessDom', allData?.copperThicknessMax || '')
+            commonSetStyle('pcSSizeDom', [{label: 'display', value: (allData?.planType=='1') ? 'block' : 'none'}]);
+            commonSetValue('pcSSizeDom', publicCommodityInfo?.pcS_Size || '')
+            commonSetValue('feedQuantityAllDom', (allData?.feedQuantityAll || '') + ' pcs')
+            commonSetValue('dispatchTimeDom', parseTime(allData?.dispatchTime, '{y}-{m}-{d}'))
+            commonSetValue('commoditySolderDom', allData?.commoditySolderDistinct || '')
+            if (!isMi) {
+                commonSetValue('pnlStrDom', allData?.pnlStr || '')
+            } else if (allData?.pnlInfos?.length) {
+                let txt = ``
+                allData?.pnlInfos.map((item) => {
+                    txt += `
+                    <span style="font-size: 14px;">${ item.unitedNumber }</span>
+                    `
+                })
+                document.getElementById('pnlStrDom').innerHTML = txt
+            }
+            commonSetValue('quantityAllDom', allData?.quantityAll || '')
+            commonSetValue('sliceTypeDom1', allData?.sliceType=='1' ? '（正片）' : allData?.sliceType=='2' ? '（负片）' : '')
+            commonSetValue('surfaceFinishedDom', allData?.surfaceFinished || '')
+            commonSetValue('orderRateDom', `利用率%：${Number(allData?.orderRate).toString().replace(/\.0+$/,'')}/${Number(allData?.setRate).toString().replace(/\.0+$/, '')}`)
+            commonSetValue('areaAllDom', allData?.areaAll || '')
+            commonSetValue('setAreaDom', `${allData?.setArea || ''}/${allData?.pnlArea || ''}`)
+
+            prodCraftTable()
+            const orderTxt = orderDataTable(commodityInfos)
+            document.getElementById('orderDataDom').innerHTML = orderTxt
+            drillInfoTable()
+            schemeInfoTable()
+            laminateInfoTable()
+            outsideImagesPage()
+            // mi不显示子卡  合拼订单显示子卡  单品是子卡并且料号和产品编码相同时显示子卡（单品主卡不显示子卡）
+            if (!isMi ? (allData.planType == '2' ? true : (currentCardIsChild && allData.comCode == allData.commodityCode)) : false) childCardPage(commodityInfos);
+
+            commonSetStyle('laminateInfoShowDom', [{label: 'display', value: (allData?.laminatedStructureVoList && allData?.laminatedStructureVoList.length > 0) ? 'block' : 'none'}]);
+
+            commonSetValue('craftNameDom', '工序名称：' + (laminateInfo?.craftName || ''))
+            commonSetValue('pressedThicknessDom', '压合板厚：' + (laminateInfo?.pressedThickness?laminateInfo?.pressedThickness:''))
+            commonSetValue('pressedToleranceDom', '公差：' + (laminateInfo?.pressedTolerance?laminateInfo?.pressedTolerance:''))
+            commonSetValue('pressedLayeredStatusDom', '层叠状态：' + (laminateInfo?.pressedLayeredStatus?laminateInfo?.pressedLayeredStatus:''))
+            commonSetValue('remarkDom', '层压备注：' + (laminateInfo?.remark?laminateInfo?.remark:''))
+
+            commonSetValue('miMakerDom1', allData?.miMaker || '')
+            commonSetValue('miAuditDom1', allData?.miAudit || '')
+            commonSetValue('personnelDom', allData?.personnel || '')
+            commonSetValue('printTimeDom', allData?.printTime || '')
+        }
+        // 获取子卡列表
+        const getListCard = (id) => {
+            return new Promise((resolve, reject) => {
+                // let clientId = 'e5cd7e4891bf95d1d19206ce24a7b32e'
+                // let token = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjo2Mzg5Iiwicm5TdHIiOiI3T3RqMHFYUTFkWGp6TUJBOFJXekhiUFQ0YWxISzVFYSIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6NjM4OSwiYWNjb3VudElkIjo3MjYxNzU0NTAxNDExOTAyMTQ2LCJkZXB0SWQiOjEwMiwib3duZXJJZCI6MTAyfQ.Y-RwlfkRTViFnqFo6d-2GCiWkR2HVY-AK2gpAI0wWYs'
+                // // let id = '1910224833658064897'
+                fetch(`${requestUrl || 'http://47.106.113.32:9000/prod-api'}/production/production/getCardList?parentId=${id}&isSelectAll=1`, {
+                    method: 'GET',
+                    headers: {
+                        clientid: cl,
+                        authorization: br,
+                    },
+                }).then(response => response.json())
+                    .then(data => resolve(data))
+                    .catch(err => reject(err))
+            })
+        }
+        // 调用接口 获取流转卡信息
+        const getOrderAPI = (id) => {
+            return new Promise((resolve, reject) => {
+                // let clientId = 'e5cd7e4891bf95d1d19206ce24a7b32e'
+                // let token = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjo2Mzg5Iiwicm5TdHIiOiI3T3RqMHFYUTFkWGp6TUJBOFJXekhiUFQ0YWxISzVFYSIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6NjM4OSwiYWNjb3VudElkIjo3MjYxNzU0NTAxNDExOTAyMTQ2LCJkZXB0SWQiOjEwMiwib3duZXJJZCI6MTAyfQ.Y-RwlfkRTViFnqFo6d-2GCiWkR2HVY-AK2gpAI0wWYs'
+                // // let id = '1910224833658064897'
+                fetch(`${requestUrl || 'http://47.106.113.32:9000/prod-api'}${!isMi ? '/production/card/getOrderInfoNew/' : '/production/production/getPrintInfo/'}${id}`, {
+                    method: 'GET',
+                    headers: {
+                        clientid: cl,
+                        authorization: br,
+                    }
+                }).then(response => response.json())
+                    .then(data => resolve(data))
+                    .catch(err => reject(err))
+            })
+        }
+        const doPrint = (data, type, fn) => {
+            console.log('data', data)
+            return new Promise(async (resolve, reject) => {
+                startPrint = false
+                printType = type
+                // code = data.productionNo; 没有作用
+                resetAllData();
+                
+                // 创建loading
+                const loadingDiv = document.createElement('div')
+                loadingDiv.className = 'loading-mask'
+                loadingDiv.innerHTML = `
+                    <div id="loader-wrapper">
+                        <div id="loader"></div>
+                        <div class="loader-section section-left"></div>
+                        <div class="loader-section section-right"></div>
+                        <div class="load_title">正在加载系统资源，请耐心等待</div>
+                    </div>
+                `
+                // `
+                //     <div class="loading-font">
+                //         <span style="--i: 1">加</span>
+                //         <span style="--i: 2">载</span>
+                //         <span style="--i: 3">中</span>
+                //         <span style="--i: 4">.</span>
+                //         <span style="--i: 5">.</span>
+                //         <span style="--i: 6">.</span>
+                //     </div>
+                // `
+
+                try {
+                    console.log('loadingDiv', loadingDiv)
+                    document.body.appendChild(loadingDiv)
+
+                    // let res = await getPrintOrder(data.id);
+                    let res = await getOrderAPI(data.id);
+                    if (res.code && res.code != 200) {
+                        throw new Error(res.msg)
+                    }
+                    
+                    // 子卡列表  ----start----
+                    if (!isMi) {
+                        let res1 = await getListCard(data.id)
+                        let printList = res1.rows?.filter((vo) => vo.parentId == data.id && vo.pnlSetId != null).sort((a, b) => a.id - b.id);
+                        if(printList.length <= 0){
+                            currentCardIsChild = true
+                            printList = [res];
+                        } else {
+                            const orderMap = new Map(
+                                res.commodityInfos.map((item, index) => [item.commodityCode, index])
+                            )
+                            printList.sort((a, b) => {
+                                return orderMap.get(a.commodityCode) - orderMap.get(b.commodityCode)
+                            })
+                        }
+                        childCardList = printList
+                        console.log('childCardList', childCardList, currentCardIsChild)
+                    }
+                    // 子卡列表  ----end----
+
+                    let result = res;
+                    (result?.productionCardNodeList || []).map((item) => {
+                        sortRequirment(item?.requirement)
+                    })
+                    console.log('allData', result);
+                    allData = result;
+                    commodityInfos = result.commodityInfos;
+                    //构建钻孔数据
+                    // await buildDrillData(result);
+                    await buildDrillDataNew(result);
+                    //构建公共部分数据
+                    await buildPublicCommodityInfo(result);
+                    //构建工艺数据
+                    await buildProductionInfos(result);
+
+                    if (["outsideImages", 'all'].includes(printType)) {
+                        let _outsideImages = result.outsideImages;
+                        if (_outsideImages && _outsideImages.length > 0) {
+                            let pdfUrls = [];
+                            for (let obj of _outsideImages) {
+                                // console.log(obj)
+                                // pdfUrls.push(obj.url);
+                                // let _pdflocalFile = encodeURIComponent(obj.url);
+                                // obj.pdfUrl = _pdflocalFile;
+                                if (obj.type && obj?.type.toLocaleLowerCase().includes('pdf')) {
+                                    const tempUrl = obj?.url.includes('http:') ? obj.url.replace('http:', 'https:') : obj.url
+                                    const resIm = await loadFile(tempUrl)
+                                    resIm.forEach((url) => {
+                                        currentPdfList.push({url, commodityCode: obj.commodityCode, bizId: obj.bizId})
+                                    })
+                                } else {
+                                    currentPdfList.push({url: obj.url, commodityCode: obj.commodityCode, bizId: obj.bizId})
+                                }
+                            }
+                        }
+
+                        if (type == 'outsideImages' && !currentPdfList.length) {
+                            throw new Error(`该订单没有外形图！`)
+                            return
+                        }
+                        outsideImages = _outsideImages;
+                        // console.log('currentPdfList', currentPdfList)
+                    }
+
+                    if (["noOutsideImages", 'all'].includes(printType)) {
+                        let schemeInfos = result.schemeInfos;
+                        if (schemeInfos && schemeInfos.length > 0) {
+                            let pdfUrls = [];
+                            for (let obj of schemeInfos) {
+                                if (obj.schemeFileList && obj.schemeFileList.length > 0) {
+                                    for (let file of obj.schemeFileList) {
+                                        if (file.url.includes('.pdf')) {
+                                            const resIm = await loadFile(file.url)
+                                            resIm.forEach((url) => {
+                                                obj.schemeFileList.push({ url: url })
+                                            })
+
+                                        }
+                                    }
+                                    obj.schemeFileList = obj.schemeFileList.filter((v) => !v.url.includes('.pdf'));
+                                }
+                            }
+                        }
+                    }
+
+                    let returnQty = allData.returnQty;
+                    if (returnQty) {
+                        allData.commodityCode = allData.commodityCode + '-' + returnQty
+                    }
+                    //开料率
+                    if (allData.schemeInfos && allData.schemeInfos.length > 0) {
+                        allData.schemeInfos.forEach(element => {
+                            let s_cuttingRate = element.cuttingRate;
+                            if (s_cuttingRate) {
+                                element.cuttingRate = Number(s_cuttingRate).toFixed(2) + "%";
+                            }
+                        });
+                    }
+                    // // .toDataURL(_productionCardId, { errorCorrectionLevel: 'H' }, (err, url) => {
+                    // //     if (err) {
+                    // //         console.log('Error: ' + err);
+                    // //     } else {
+                    // //         qcCodeImage = url;
+                    // //     }
+                    // // });
+
+                    startPrint = true
+
+                    if (!isMi) {
+                        // 二维码内容
+                        let _productionCardId = allData.productionCardId.toString();
+                        // 生成二维码
+                        let qrcodeDom = new QRCode(document.querySelector('#canvasToImgDom'), {
+                            text: _productionCardId+'',
+                            width: 60,
+                            height: 60,
+                            correctLevel: QRCode.CorrectLevel.H
+                        })
+                        if (qrcodeDom?._oDrawing?._elCanvas) {
+                            qcCodeImage = qrcodeDom._oDrawing._elCanvas.toDataURL('image/png', 1)
+                        }
+                    }
+
+                    // 操作dom赋值
+                    domSetValue()
+                    // setTimeout(() => {
+                    //   printHtmlV2(null, fn);
+                    // }, 800)
+                    resolve(true)
+                } catch (err) {
+                    let errTxt = err+''
+                    errTxt = errTxt.replace('Error:','')
+                    errTxt = errTxt.replace('该订单没有外形图！','该订单暂未未上传外形图，请直接联系工程人员')
+                    commonSetValue('app', errTxt)
+                    commonSetStyle('app', [{label: 'text-align',value: 'center'}, {label: 'color', value: '#f56c6c'}, {label: 'font-size', value: isXcx ? '50px' : '16px'}])
+                    console.log(err)
+                    reject(err)
+                } finally {
+                    document.body.removeChild(loadingDiv)
+                }
+            })
+        }
+
+        const resetAllData = () => {
+            allData = undefined;
+            commodityInfos = [];
+            publicCommodityInfo = [];
+            productionDetails = [];
+            qcCodeImage = undefined;
+            drillInfos = [];
+            drillHeaders = [];
+            drillTitles = [];
+            n_drillInfos = [];
+            n_drillHeaders = [];
+            n_drillTitles = [];
+            currentPdfList = []
+        }
+
+        const printHtmlV2 = (Id, fn) => {
+            // let printNode = cardRefPrint.cardRef;
+            let printNode = document.getElementById('app');
+            // console.log(printNode);
+            const newDoc = document.implementation.createHTMLDocument('Print Document');
+            const pageStyle = newDoc.createElement("style");
+            pageStyle.innerHTML = `@page { margin: 0.5cm; }
+                @media print {
+                    @font-face {
+                        font-family: 'TNR';
+                        src: local(times new roman);
+                        unicode-range: U+0020-007E, U+00A0-00FF; /* 含了标点符号等常见英文字符,https://wenku.baidu.com/view/7a646208463610661ed9ad51f01dc281e53a563d.html?_wkts_=1735032135151&bdQuery=unicode+%E8%8B%B1%E6%96%87%E5%AD%97%E7%AC%A6 */
+                        font-display: swap;
+                    }
+                    .print-content {
+                        font-family: 'TNR', '仿宋';
+                    }
+                }
+            `; // 0.5厘米边距
+            newDoc.head.appendChild(pageStyle);
+            newDoc.body.style.margin = "0px";
+            let newContent = printNode.cloneNode(true);
+            newContent.style.display = 'block';
+            newDoc.body.appendChild(newContent);
+            // newDoc.documentElement.innerHTML;
+            // 创建一个新的 Blob 对象
+            const blob = new Blob([newDoc.documentElement.innerHTML], { type: 'text/html' });
+            // 创建一个 Blob URL
+            const blobUrl = URL.createObjectURL(blob);
+            // 创建一个 iframe 用于打印
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = blobUrl;
+            // 将 iframe 添加到页面并触发打印
+            document.body.appendChild(iframe);
+            iframe?.contentWindow.print();
+
+            // 调用打印时，发送消息给父页面
+            if (window?.parent) {
+                let originHref = ''
+                if (window.parent?.length && window.parent[0].location.origin) {
+                    // 如果带端口的，需要去除端口，取域名
+                    let firstIndex = window.parent[0].location.origin.indexOf(':')
+                    let lasIndex = window.parent[0].location.origin.lastIndexOf(':')
+                    if (firstIndex != lasIndex) {
+                        originHref = window.parent[0].location.origin.slice(0, lasIndex)
+                    } else {
+                        originHref = window.parent[0].location.origin
+                    }
+                }
+                console.log('originHref', originHref)
+                window.parent.postMessage({isPrint: true}, originHref)
+            }
+            // 清理 Blob URL 和 iframe
+            setTimeout(() => {
+                URL.revokeObjectURL(blobUrl);
+                document.body.removeChild(iframe);
+                fn && fn();
+            }, 3000); // 等待 1 秒后清理
+        }
+
+
+        function parseSpecialParams(url) {
+            const params = {};
+            // 提取问号后的查询字符串
+            const queryString = url.split('?')[1] || '';
+            
+            // 用特殊分隔符 @@ 分割参数
+            const pairs = queryString.split('@@');
+            
+            pairs.forEach(pair => {
+                // 处理包含多个等号的情况（如 JWT token）
+                const eqIndex = pair.indexOf('=');
+                if (eqIndex === -1) return; // 忽略无效参数
+                
+                const key = pair.substring(0, eqIndex);
+                const value = pair.substring(eqIndex + 1);
+                
+                // URL 解码并存储
+                params[decodeURIComponent(key)] = decodeURIComponent(value);
+            });
+
+            return params;
+        }
+
+        let scaleNum = 1
+        let scaleFix = 1
+        // const scaleHandle = () => {
+        //     if (scaleNum == 1) {
+        //         scaleNum = scaleFix
+        //     } else {
+        //         scaleNum = 1
+        //     }
+        //     const appDom = document.querySelector('#app')
+        //     appDom.style.transform = `scale(${scaleNum})`
+        //     appDom.style.transformOrigin = `left top`
+        //     commonSetValue('xcxMiprintBtn', scaleNum == 1 ? '还原' : (scaleFix < 1 ? '放大' : '缩小'))
+        // }
+
+        if (window?.location?.search) {
+            let params = {}
+            let type = 'all'
+            if (window?.location?.search.indexOf('?url=') == 0) {
+                isXcx = true
+                // 小程序进入页面
+                let obj = {}
+                params = parseSpecialParams(window?.location?.search.replace('?url=', ''))
+                for (let key in params) {
+                    obj[key] = params[key]
+                }
+                cl = params.clientId;
+                br = 'Bearer ' + params.token;
+                requestUrl = params.requestUrl;
+                isMi = params?.isMi || false;
+                type = params.type || 'all'
+                orderId = params?.orderId;
+                console.log('params', params, obj)
+
+                // 小程序
+                setTimeout(() => {
+                    // const appOverDom = document.querySelector('.app-overflow')
+                    // appOverDom.style.padding = '0 20px';
+                    const appDom = document.querySelector('#app')
+                    appDom.style.padding = `0 20px`
+                    const domW = document.querySelector('#app')?.clientWidth
+                    const windW = document.querySelector('body')?.clientWidth
+                    console.log(domW, windW)
+                    const ratio = windW / domW // 屏幕宽度-9，是减少pc端垂直方向的滚动条导致宽度不够从而出现横向滚动条
+                    scaleNum = ratio
+                    scaleFix = ratio
+                    appDom.style.transform = `scale(${ratio})`
+                    appDom.style.transformOrigin = `left top`
+                    appDom.style.position = `absolute`
+                    appDom.style.top = `0px`
+                    appDom.style.left = `0px`
+                    commonSetStyle('printBtnDom', [{label: 'display', value: 'none'}])
+                    // commonSetStyle('xcxMiprintBtn', [{label: 'display', value: 'inline-block'}])
+                    // commonSetValue('xcxMiprintBtn', scaleNum == 1 ? '还原' : (scaleFix < 1 ? '放大' : '缩小'))
+                }, 0)
+            } else {
+                isXcx = false
+                // erp进入页面
+                let pArr = window?.location?.search.split('p=')
+                console.log(window?.location?.search, pArr)
+                if (pArr?.length > 1) {
+                    params = decodeURIComponent(escape(atob(pArr[1])))
+                    params = params ? JSON.parse(params) : {}
+                    console.log('params', params)
+                    cl = params.cl;
+                    br = params.br;
+                    isMi = params?.isMi || false;
+                    orderId = params?.orderId;
+                    requestUrl = params.requestUrl;
+                    type = params.ty || 'all'
+                }
+                // commonSetStyle('xcxMiprintBtn', [{label: 'display', value: 'none'}])
+                commonSetStyle('printBtnDom', [{label: 'display', value: 'inline-block'}])
+            }
+            if (params.id) {
+                doPrint({id: params.id}, type)
+            }
+        }
+        // window.addEventListener('message', (event) => {
+        //     console.log('event', event)
+        // })
+    </script>
+</body>
+
+</html>
